@@ -1,0 +1,21 @@
+# Chang Tee Website — Supabase project (dedicated)
+# Project: wp-enterprise | Ref: pfwygxzwlteqjnnwiwmb
+# Dashboard: https://supabase.com/dashboard/project/pfwygxzwlteqjnnwiwmb
+
+project_id = "pfwygxzwlteqjnnwiwmb"
+
+[api]
+enabled = true
+# Expose changtee_web to PostgREST (also enable in Dashboard → Settings → API → Exposed schemas)
+schemas = ["public", "changtee_web", "graphql_public"]
+extra_search_path = ["public", "extensions"]
+max_rows = 1000
+
+[db]
+major_version = 17
+
+[db.migrations]
+schema_paths = []
+
+[studio]
+enabled = true

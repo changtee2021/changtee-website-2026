@@ -1,0 +1,78 @@
+"use client";
+
+import Script from "next/script";
+import { useEffect, useState } from "react";
+import {
+  COOKIE_CONSENT_EVENT,
+  type CookieConsentState,
+  readConsent,
+} from "@/lib/cookie-consent";
+
+/** Loads GA4 / GTM / Meta Pixel only after analytics/marketing consent */
+export function ConsentAwareScripts() {
+  const [consent, setConsent] = useState<CookieConsentState | null>(null);
+
+  useEffect(() => {
+    setConsent(readConsent());
+    function onChange() {
+      setConsent(readConsent());
+    }
+    window.addEventListener(COOKIE_CONSENT_EVENT, onChange);
+    window.addEventListener("storage", onChange);
+    return () => {
+      window.removeEventListener(COOKIE_CONSENT_EVENT, onChange);
+      window.removeEventListener("storage", onChange);
+    };
+  }, []);
+
+  const gtmId = process.env.NEXT_PUBLIC_GTM_ID?.trim();
+  const ga4Id = process.env.NEXT_PUBLIC_GA4_ID?.trim();
+  const pixelId = process.env.NEXT_PUBLIC_META_PIXEL_ID?.trim();
+
+  const allowAnalytics = Boolean(consent?.analytics);
+  const allowMarketing = Boolean(consent?.marketing);
+
+  return (
+    <>
+      {allowAnalytics && gtmId ? (
+        <Script id="gtm" strategy="afterInteractive">{`
+          (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+          new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+          j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+          'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+          })(window,document,'script','dataLayer','${gtmId}');
+        `}</Script>
+      ) : null}
+
+      {allowAnalytics && ga4Id ? (
+        <>
+          <Script
+            src={`https://www.googletagmanager.com/gtag/js?id=${ga4Id}`}
+            strategy="afterInteractive"
+          />
+          <Script id="ga4" strategy="afterInteractive">{`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', '${ga4Id}', { anonymize_ip: true });
+          `}</Script>
+        </>
+      ) : null}
+
+      {allowMarketing && pixelId ? (
+        <Script id="meta-pixel" strategy="afterInteractive">{`
+          !function(f,b,e,v,n,t,s)
+          {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+          n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+          if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+          n.queue=[];t=b.createElement(e);t.async=!0;
+          t.src=v;s=b.getElementsByTagName(e)[0];
+          s.parentNode.insertBefore(t,s)}(window, document,'script',
+          'https://connect.facebook.net/en_US/fbevents.js');
+          fbq('init', '${pixelId}');
+          fbq('track', 'PageView');
+        `}</Script>
+      ) : null}
+    </>
+  );
+}

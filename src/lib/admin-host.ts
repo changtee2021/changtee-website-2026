@@ -1,0 +1,86 @@
+/** Admin host helpers — subdomain vs path-based `/admin`. */
+
+export const PRODUCTION_SITE_HOST = "changtee-curtain.com";
+export const PRODUCTION_ADMIN_HOST = "admin.changtee-curtain.com";
+
+export function getSiteUrl(): string {
+  return (process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000").replace(
+    /\/$/,
+    "",
+  );
+}
+
+/** Explicit admin origin; null = path mode (`/admin` on the same host). */
+export function getAdminUrl(): string | null {
+  const explicit = process.env.NEXT_PUBLIC_ADMIN_URL?.trim();
+  if (explicit) return explicit.replace(/\/$/, "");
+  return null;
+}
+
+export function hostnameFromUrl(url: string | null | undefined): string | null {
+  if (!url) return null;
+  try {
+    return new URL(url).hostname.toLowerCase();
+  } catch {
+    return null;
+  }
+}
+
+export function normalizeHost(hostHeader: string): string {
+  return hostHeader.split(":")[0]?.toLowerCase() || "";
+}
+
+export function isAdminHostname(hostHeader: string): boolean {
+  const host = normalizeHost(hostHeader);
+  const configured = hostnameFromUrl(getAdminUrl());
+  if (configured && host === configured) return true;
+  return host === PRODUCTION_ADMIN_HOST || host === "admin.localhost";
+}
+
+/** Where to send `/admin` traffic from the public site (subdomain mode). */
+export function resolveAdminRedirectBase(hostHeader: string): string | null {
+  const configured = getAdminUrl();
+  if (configured) return configured;
+
+  const host = normalizeHost(hostHeader);
+  if (host === PRODUCTION_SITE_HOST || host === `www.${PRODUCTION_SITE_HOST}`) {
+    return `https://${PRODUCTION_ADMIN_HOST}`;
+  }
+  return null;
+}
+
+export function stripAdminPrefix(pathname: string): string {
+  if (pathname === "/admin") return "/";
+  if (pathname.startsWith("/admin/")) {
+    const rest = pathname.slice("/admin".length);
+    return rest || "/";
+  }
+  return pathname;
+}
+
+export function toInternalAdminPath(pathname: string): string {
+  if (pathname === "/" || pathname === "") return "/admin";
+  if (pathname === "/admin" || pathname.startsWith("/admin/")) return pathname;
+  return `/admin${pathname.startsWith("/") ? pathname : `/${pathname}`}`;
+}
+
+const MARKETING_PREFIXES = [
+  "/products",
+  "/portfolio",
+  "/blog",
+  "/estimate",
+  "/quote",
+  "/about",
+  "/contact",
+  "/privacy",
+  "/cookies",
+  "/terms",
+  "/sale-gallery",
+  "/thank-you",
+] as const;
+
+export function isMarketingPath(pathname: string): boolean {
+  return MARKETING_PREFIXES.some(
+    (p) => pathname === p || pathname.startsWith(`${p}/`),
+  );
+}

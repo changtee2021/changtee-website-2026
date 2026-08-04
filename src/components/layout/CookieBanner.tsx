@@ -1,0 +1,140 @@
+"use client";
+
+import Link from "next/link";
+import { useEffect, useState } from "react";
+import { hasAnsweredConsent, writeConsent } from "@/lib/cookie-consent";
+
+type View = "banner" | "settings" | "hidden";
+
+export function CookieBanner() {
+  const [view, setView] = useState<View>("hidden");
+  const [analytics, setAnalytics] = useState(false);
+  const [marketing, setMarketing] = useState(false);
+
+  useEffect(() => {
+    setView(hasAnsweredConsent() ? "hidden" : "banner");
+
+    function onOpenSettings() {
+      setView("settings");
+    }
+    window.addEventListener("ctc-open-cookie-settings", onOpenSettings);
+    return () => window.removeEventListener("ctc-open-cookie-settings", onOpenSettings);
+  }, []);
+
+  function save(next: { analytics: boolean; marketing: boolean }) {
+    writeConsent(next);
+    setView("hidden");
+  }
+
+  if (view === "hidden") return null;
+
+  return (
+    <div className="pointer-events-none fixed inset-x-0 bottom-20 z-50 flex justify-start p-3 sm:bottom-5 sm:left-5 sm:right-auto sm:p-0">
+      <div className="pointer-events-auto w-full max-w-md rounded-2xl border border-line bg-white p-4 shadow-lg sm:w-[24rem]">
+        {view === "banner" ? (
+          <>
+            <p className="text-sm font-semibold text-navy">คุกกี้และความเป็นส่วนตัว</p>
+            <p className="mt-2 text-sm leading-relaxed text-muted">
+              เราใช้คุกกี้ที่จำเป็นเพื่อให้เว็บไซต์ทำงาน และขอความยินยอมสำหรับคุกกี้วิเคราะห์/การตลาด
+              อ่านเพิ่มที่{" "}
+              <Link href="/cookies" className="font-medium text-navy underline underline-offset-2">
+                นโยบายคุกกี้
+              </Link>{" "}
+              และ{" "}
+              <Link href="/privacy" className="font-medium text-navy underline underline-offset-2">
+                นโยบายความเป็นส่วนตัว
+              </Link>
+            </p>
+            <div className="mt-4 flex flex-wrap justify-end gap-2">
+              <button
+                type="button"
+                className="rounded-full border border-line px-3 py-2 text-xs font-medium text-muted hover:bg-paper"
+                onClick={() => setView("settings")}
+              >
+                ตั้งค่า
+              </button>
+              <button
+                type="button"
+                className="rounded-full border border-navy px-3 py-2 text-xs font-semibold text-navy hover:bg-paper"
+                onClick={() => save({ analytics: false, marketing: false })}
+              >
+                ใช้เท่าที่จำเป็น
+              </button>
+              <button
+                type="button"
+                className="rounded-full bg-navy px-3 py-2 text-xs font-semibold text-white hover:bg-navy-deep"
+                onClick={() => save({ analytics: true, marketing: true })}
+              >
+                ยอมรับทั้งหมด
+              </button>
+            </div>
+          </>
+        ) : (
+          <>
+            <p className="text-sm font-semibold text-navy">ตั้งค่าคุกกี้</p>
+            <p className="mt-1 text-xs text-muted">
+              คุกกี้ที่จำเป็นเปิดเสมอ — เลือกประเภทอื่นได้ตามต้องการ
+            </p>
+            <div className="mt-4 space-y-3 text-sm">
+              <label className="flex items-start justify-between gap-3 rounded-lg border border-line bg-paper px-3 py-2">
+                <span>
+                  <span className="font-medium text-navy">จำเป็น</span>
+                  <span className="mt-0.5 block text-xs text-muted">
+                    ความปลอดภัย และการจำการตั้งค่าความยินยอม
+                  </span>
+                </span>
+                <input type="checkbox" checked disabled className="mt-1" />
+              </label>
+              <label className="flex items-start justify-between gap-3 rounded-lg border border-line px-3 py-2">
+                <span>
+                  <span className="font-medium text-navy">วิเคราะห์</span>
+                  <span className="mt-0.5 block text-xs text-muted">
+                    สถิติการเข้าชม เช่น GA4 / GTM
+                  </span>
+                </span>
+                <input
+                  type="checkbox"
+                  checked={analytics}
+                  onChange={(e) => setAnalytics(e.target.checked)}
+                  className="mt-1"
+                />
+              </label>
+              <label className="flex items-start justify-between gap-3 rounded-lg border border-line px-3 py-2">
+                <span>
+                  <span className="font-medium text-navy">การตลาด</span>
+                  <span className="mt-0.5 block text-xs text-muted">
+                    วัดผลโฆษณา เช่น Meta Pixel
+                  </span>
+                </span>
+                <input
+                  type="checkbox"
+                  checked={marketing}
+                  onChange={(e) => setMarketing(e.target.checked)}
+                  className="mt-1"
+                />
+              </label>
+            </div>
+            <div className="mt-4 flex flex-wrap justify-end gap-2">
+              <button
+                type="button"
+                className="rounded-full border border-line px-3 py-2 text-xs font-medium text-muted hover:bg-paper"
+                onClick={() =>
+                  setView(hasAnsweredConsent() ? "hidden" : "banner")
+                }
+              >
+                ยกเลิก
+              </button>
+              <button
+                type="button"
+                className="rounded-full bg-navy px-3 py-2 text-xs font-semibold text-white hover:bg-navy-deep"
+                onClick={() => save({ analytics, marketing })}
+              >
+                บันทึกการตั้งค่า
+              </button>
+            </div>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
