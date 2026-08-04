@@ -8,6 +8,7 @@
     "start": "next start",
     "lint": "eslint",
     "seed": "node scripts/seed-demo.mjs",
+    "compress:pdfs": "node scripts/compress-pdfs.mjs",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {

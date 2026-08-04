@@ -1,12 +1,11 @@
-# Local build / deps (should be default, keep explicit)
+# Local build / deps
 .next
 node_modules
 .data
+.tools
 
-# Oversized binaries — serve via Storage/CDN later
-public/catalog/*.pdf
-public/brochure/*.pdf
-**/*.pdf
+# Full-resolution PDF masters (local only)
+public/_pdf-originals
 
 # Env / secrets
 .env*

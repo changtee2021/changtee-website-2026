@@ -39,13 +39,13 @@ yarn-error.log*
 .env*
 !.env.example
 
-# large binaries (use Supabase Storage / CDN later — too big for git/Vercel)
-/public/catalog/*.pdf
-/public/brochure/*.pdf
+# Keep optimized web PDFs in repo; ignore local full-res masters only
+/public/_pdf-originals/
 
 # supabase / temp
 supabase/.temp/
 .tmp-mig*.json
+.tools/
 
 # vercel
 .vercel
