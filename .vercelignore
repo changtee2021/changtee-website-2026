@@ -1,0 +1,13 @@
+# Local build / deps (should be default, keep explicit)
+.next
+node_modules
+.data
+
+# Oversized binaries — serve via Storage/CDN later
+public/catalog/*.pdf
+public/brochure/*.pdf
+**/*.pdf
+
+# Env / secrets
+.env*
+!.env.example
