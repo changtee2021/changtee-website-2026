@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useSyncExternalStore } from "react";
 import { usePathname } from "next/navigation";
 import { Menu, PanelLeftOpen, X } from "lucide-react";
 import { AdminSidebar } from "@/components/admin/AdminSidebar";
@@ -9,6 +9,24 @@ import { resolveAdminPageTitle } from "@/lib/admin-nav";
 import { cn } from "@/lib/utils";
 
 const SIDEBAR_COLLAPSED_KEY = "ctc-admin-sidebar-collapsed";
+const SIDEBAR_COLLAPSE_EVENT = "ctc-admin-sidebar-collapsed-change";
+
+function subscribeSidebarCollapsed(onStoreChange: () => void) {
+  window.addEventListener(SIDEBAR_COLLAPSE_EVENT, onStoreChange);
+  window.addEventListener("storage", onStoreChange);
+  return () => {
+    window.removeEventListener(SIDEBAR_COLLAPSE_EVENT, onStoreChange);
+    window.removeEventListener("storage", onStoreChange);
+  };
+}
+
+function readSidebarCollapsed(): boolean {
+  try {
+    return window.localStorage.getItem(SIDEBAR_COLLAPSED_KEY) === "1";
+  } catch {
+    return false;
+  }
+}
 
 type AdminShellProps = {
   basePath: string;
@@ -23,17 +41,11 @@ export function AdminShell({ basePath, siteUrl, children }: AdminShellProps) {
   const mobileOpen = openForPath === pathname;
   const title = resolveAdminPageTitle(pathname, basePath);
   const isLogin = isAdminLoginPath(pathname, basePath);
-  const [desktopCollapsed, setDesktopCollapsed] = useState(false);
-
-  useEffect(() => {
-    try {
-      setDesktopCollapsed(
-        window.localStorage.getItem(SIDEBAR_COLLAPSED_KEY) === "1",
-      );
-    } catch {
-      /* ignore */
-    }
-  }, []);
+  const desktopCollapsed = useSyncExternalStore(
+    subscribeSidebarCollapsed,
+    readSidebarCollapsed,
+    () => false,
+  );
 
   useEffect(() => {
     if (!mobileOpen) return;
@@ -45,15 +57,13 @@ export function AdminShell({ basePath, siteUrl, children }: AdminShellProps) {
   }, [mobileOpen]);
 
   function toggleDesktopSidebar() {
-    setDesktopCollapsed((prev) => {
-      const next = !prev;
-      try {
-        window.localStorage.setItem(SIDEBAR_COLLAPSED_KEY, next ? "1" : "0");
-      } catch {
-        /* ignore */
-      }
-      return next;
-    });
+    const next = !readSidebarCollapsed();
+    try {
+      window.localStorage.setItem(SIDEBAR_COLLAPSED_KEY, next ? "1" : "0");
+    } catch {
+      /* ignore */
+    }
+    window.dispatchEvent(new Event(SIDEBAR_COLLAPSE_EVENT));
   }
 
   if (isLogin) {

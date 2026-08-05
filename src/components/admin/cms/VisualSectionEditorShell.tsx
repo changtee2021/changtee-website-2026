@@ -10,7 +10,7 @@ import {
 } from "lucide-react";
 import { CmsImageUpload } from "@/components/admin/cms/CmsImageUpload";
 import { CmsLinkPicker } from "@/components/admin/cms/CmsLinkPicker";
-import { DemoBadge } from "@/components/admin/cms/DemoBadge";
+import { DemoBadge } from "@/components/admin/cms/CmsShared";
 import { useSectionDraft } from "@/components/admin/cms/section-draft-context";
 import { cn } from "@/lib/utils";
 
@@ -41,8 +41,26 @@ export function VisualSectionEditorShell({
     revertField,
   } = useSectionDraft();
 
-  /** Default open on sections pages; user can collapse */
-  const [rightOpen, setRightOpen] = useState(true);
+  const selectedKey = selected
+    ? `${selected.sectionId}:${selected.field.key}`
+    : null;
+  /** When user collapses while a field is selected, stay closed until selection changes */
+  const [closedSelectedKey, setClosedSelectedKey] = useState<string | null>(
+    null,
+  );
+  const [idleClosed, setIdleClosed] = useState(false);
+  const rightOpen = selectedKey
+    ? closedSelectedKey !== selectedKey
+    : !idleClosed;
+
+  function openPanel() {
+    setClosedSelectedKey(null);
+    setIdleClosed(false);
+  }
+  function closePanel() {
+    if (selectedKey) setClosedSelectedKey(selectedKey);
+    else setIdleClosed(true);
+  }
 
   const values = selected
     ? getValues(selected.sectionId)
@@ -95,7 +113,7 @@ export function VisualSectionEditorShell({
             </button>
             <button
               type="button"
-              onClick={() => setRightOpen((v) => !v)}
+              onClick={() => (rightOpen ? closePanel() : openPanel())}
               className="inline-flex items-center gap-1.5 rounded-full border border-line px-3 py-2 text-sm font-semibold text-navy hover:bg-paper lg:hidden"
               aria-label={rightOpen ? "หุบแผงแก้ไข" : "เปิดแผงแก้ไข"}
             >
@@ -137,7 +155,7 @@ export function VisualSectionEditorShell({
             {!rightOpen ? (
               <button
                 type="button"
-                onClick={() => setRightOpen(true)}
+                onClick={openPanel}
                 className="hidden shrink-0 items-center gap-1 rounded-lg border border-line px-2 py-1 text-xs font-semibold text-navy hover:bg-paper lg:inline-flex"
                 aria-label="เปิดแผงแก้ไข"
                 title="เปิดแผงแก้ไข"
@@ -155,9 +173,7 @@ export function VisualSectionEditorShell({
         <aside
           className={cn(
             "shrink-0 transition-[width,max-height] duration-200 ease-out",
-            rightOpen
-              ? "w-full lg:w-[min(20rem,32vw)] lg:max-w-xs"
-              : "hidden lg:flex lg:w-10",
+            rightOpen ? "w-full lg:w-80" : "hidden lg:flex lg:w-10",
             !rightOpen && "lg:flex-col",
           )}
         >
@@ -169,7 +185,7 @@ export function VisualSectionEditorShell({
                 </p>
                 <button
                   type="button"
-                  onClick={() => setRightOpen(false)}
+                  onClick={closePanel}
                   className="rounded-lg p-1.5 text-muted hover:bg-paper hover:text-navy"
                   aria-label="หุบแผงแก้ไข"
                   title="หุบแผงแก้ไข"
@@ -306,7 +322,7 @@ export function VisualSectionEditorShell({
           ) : (
             <button
               type="button"
-              onClick={() => setRightOpen(true)}
+              onClick={openPanel}
               className="flex h-full w-full flex-col items-center gap-3 rounded-2xl border border-line bg-white py-4 text-muted shadow-sm hover:bg-paper hover:text-navy lg:rounded-l-none lg:rounded-r-2xl"
               aria-label="เปิดแผงแก้ไข"
               title="เปิดแผงแก้ไข"
