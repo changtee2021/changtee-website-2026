@@ -1,29 +1,78 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
-import { hasAnsweredConsent, writeConsent } from "@/lib/cookie-consent";
+import { useState, useSyncExternalStore } from "react";
+import {
+  COOKIE_CONSENT_EVENT,
+  hasAnsweredConsent,
+  writeConsent,
+} from "@/lib/cookie-consent";
 
 type View = "banner" | "settings" | "hidden";
 
+function subscribeConsent(onStoreChange: () => void) {
+  window.addEventListener(COOKIE_CONSENT_EVENT, onStoreChange);
+  window.addEventListener("storage", onStoreChange);
+  return () => {
+    window.removeEventListener(COOKIE_CONSENT_EVENT, onStoreChange);
+    window.removeEventListener("storage", onStoreChange);
+  };
+}
+
+let settingsOpenEpoch = 0;
+const settingsListeners = new Set<() => void>();
+
+function subscribeSettings(onStoreChange: () => void) {
+  settingsListeners.add(onStoreChange);
+  const onEvent = () => {
+    settingsOpenEpoch += 1;
+    settingsListeners.forEach((l) => l());
+  };
+  window.addEventListener("ctc-open-cookie-settings", onEvent);
+  return () => {
+    settingsListeners.delete(onStoreChange);
+    window.removeEventListener("ctc-open-cookie-settings", onEvent);
+  };
+}
+
+function getSettingsEpoch() {
+  return settingsOpenEpoch;
+}
+
 export function CookieBanner() {
-  const [view, setView] = useState<View>("hidden");
+  const answered = useSyncExternalStore(
+    subscribeConsent,
+    hasAnsweredConsent,
+    () => true,
+  );
+  const settingsEpoch = useSyncExternalStore(
+    subscribeSettings,
+    getSettingsEpoch,
+    () => 0,
+  );
+  const [forceSettings, setForceSettings] = useState(false);
+  const [closedSettingsEpoch, setClosedSettingsEpoch] = useState(0);
   const [analytics, setAnalytics] = useState(false);
   const [marketing, setMarketing] = useState(false);
 
-  useEffect(() => {
-    setView(hasAnsweredConsent() ? "hidden" : "banner");
+  const settingsRequested =
+    forceSettings || settingsEpoch > closedSettingsEpoch;
 
-    function onOpenSettings() {
-      setView("settings");
-    }
-    window.addEventListener("ctc-open-cookie-settings", onOpenSettings);
-    return () => window.removeEventListener("ctc-open-cookie-settings", onOpenSettings);
-  }, []);
+  const view: View = settingsRequested
+    ? "settings"
+    : answered
+      ? "hidden"
+      : "banner";
 
   function save(next: { analytics: boolean; marketing: boolean }) {
     writeConsent(next);
-    setView("hidden");
+    setForceSettings(false);
+    setClosedSettingsEpoch(settingsEpoch);
+  }
+
+  function closeSettings() {
+    setForceSettings(false);
+    setClosedSettingsEpoch(settingsEpoch);
   }
 
   if (view === "hidden") return null;
@@ -49,7 +98,7 @@ export function CookieBanner() {
               <button
                 type="button"
                 className="rounded-full border border-line px-3 py-2 text-xs font-medium text-muted hover:bg-paper"
-                onClick={() => setView("settings")}
+                onClick={() => setForceSettings(true)}
               >
                 ตั้งค่า
               </button>
@@ -118,9 +167,7 @@ export function CookieBanner() {
               <button
                 type="button"
                 className="rounded-full border border-line px-3 py-2 text-xs font-medium text-muted hover:bg-paper"
-                onClick={() =>
-                  setView(hasAnsweredConsent() ? "hidden" : "banner")
-                }
+                onClick={closeSettings}
               >
                 ยกเลิก
               </button>

@@ -52,19 +52,49 @@ export function buildAdminSummaryHtml(lead: QuoteLead) {
         ${fieldRow("ชื่อผู้ติดต่อ", lead.contactName)}
         ${fieldRow("ตำแหน่งงาน", lead.jobTitle)}
         ${fieldRow("เบอร์โทรศัพท์", lead.phone)}
+        ${fieldRow("LINE ID", lead.lineId)}
         ${fieldRow("ประเภทผู้ติดต่อ", lead.contactType)}
         ${fieldRow("ชื่อธุรกิจ", lead.businessName)}
         ${fieldRow("ที่อยู่ สำหรับ ส่งของ หรือ ติดตั้ง", lead.installAddress)}
         ${fieldRow("เลขผู้เสียภาษี", lead.taxId)}
         ${fieldRow("E-mail", lead.email)}
-        ${fieldRow("ที่อยู่ สำหรับ ทำใบเสนอราคา", lead.billingAddress)}
+        ${fieldRow("ที่อยู่ สำหรับ ออกใบเสนอราคา", lead.billingAddress)}
         ${fieldRow("ประเภทสินค้า", lead.productType)}
         ${fieldRow("ขนาดที่ต้องการ (กว้างxสูง)", lead.requestedSize)}
-        ${fieldRow("แนบภาพหน้างาน", lead.siteImageName || (lead.siteImageUrl ? "มีไฟล์แนบ" : "No File Upload"))}
-        ${fieldRow("วันที่สะดวกให้ติดต่อกลับ", lead.callbackDate)}
+        ${fieldRow(
+          "แนบภาพหน้างาน",
+          lead.siteImageName ||
+            (lead.siteImageUrls?.length
+              ? `${lead.siteImageUrls.length} ไฟล์`
+              : lead.siteImageUrl
+                ? "มีไฟล์แนบ"
+                : "No File Upload"),
+        )}
+        ${fieldRow("วันที่อยากติดตั้ง", lead.callbackDate)}
         ${fieldRow("หาเราเจอจากที่ไหน", lead.referralSource)}
         ${fieldRow("หมายเหตุ", lead.note)}
       </table>
+      ${
+        (lead.siteImageUrls?.length
+          ? lead.siteImageUrls
+          : lead.siteImageUrl
+            ? [lead.siteImageUrl]
+            : []
+        ).length
+          ? `<div style="margin-top:12px">${(
+              lead.siteImageUrls?.length
+                ? lead.siteImageUrls
+                : lead.siteImageUrl
+                  ? [lead.siteImageUrl]
+                  : []
+            )
+              .map(
+                (url, i) =>
+                  `<a href="${escapeHtml(url)}" style="display:inline-block;margin:0 8px 8px 0;font-size:13px;color:#c8102e">รูปที่ ${i + 1}</a>`,
+              )
+              .join("")}</div>`
+          : ""
+      }
       <p style="margin-top:16px;font-size:12px;color:#888">Lead ID: ${lead.id}</p>
     </div>
   </div>

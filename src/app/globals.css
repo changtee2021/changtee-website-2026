@@ -11,6 +11,8 @@
   --line: #d7dee8;
   --background: #ffffff;
   --foreground: var(--ink);
+  --shell: #eceff4;
+  --panel: #ffffff;
 }
 
 @theme inline {
@@ -24,6 +26,9 @@
   --color-ink: var(--ink);
   --color-muted: var(--muted);
   --color-line: var(--line);
+  --color-shell: var(--shell);
+  --color-panel: var(--panel);
+  --radius-panel: 1.75rem;
   --font-sans: var(--font-body), "Sarabun", sans-serif;
   --font-display: var(--font-display-family), var(--font-body), "Sarabun", sans-serif;
 }
@@ -36,4 +41,34 @@ body {
 
 ::selection {
   background: color-mix(in oklab, var(--red) 25%, white);
+}
+
+@keyframes home-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-home-fade-up {
+  animation: home-fade-up 0.7s ease-out both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-home-fade-up {
+    animation: none;
+  }
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
 }

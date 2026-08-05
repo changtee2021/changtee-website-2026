@@ -28,6 +28,8 @@
 .data/
 /public/uploads/leads/*
 !/public/uploads/leads/.gitkeep
+/public/uploads/hero/*
+!/public/uploads/hero/.gitkeep
 
 # debug
 npm-debug.log*

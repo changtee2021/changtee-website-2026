@@ -64,6 +64,27 @@ export const PRODUCT_TYPES = [
   "อื่นๆ",
 ] as const;
 
+/** 4:3 category photos shown beside product-type select on /quote */
+export const PRODUCT_TYPE_THUMBS: Record<(typeof PRODUCT_TYPES)[number], string> = {
+  ผ้าม่าน: "/images/products/quote/curtain.webp",
+  ม่านม้วน: "/images/products/quote/roller-blind.webp",
+  มู่ลี่: "/images/products/quote/wooden-venetian.webp",
+  ม่านปรับแสง: "/images/products/quote/vertical-blind.webp",
+  ฉากกั้นห้อง: "/images/products/quote/pvc-folding-door.webp",
+  ม่านไฟฟ้า: "/images/products/quote/motorized.webp",
+  วอลเปเปอร์: "/images/products/quote/wallpaper.webp",
+  ฟิล์มอาคาร: "/images/products/quote/window-film.webp",
+  "ม่านภายนอก/อุตสาหกรรม": "/images/products/quote/outdoor-blind.webp",
+  อื่นๆ: "/images/products/quote/other.webp",
+};
+
+export function productTypeThumb(productType: string): string | null {
+  if ((PRODUCT_TYPES as readonly string[]).includes(productType)) {
+    return PRODUCT_TYPE_THUMBS[productType as (typeof PRODUCT_TYPES)[number]];
+  }
+  return null;
+}
+
 export const REFERRAL_SOURCES = [
   "Google",
   "Facebook",
@@ -91,6 +112,8 @@ export type QuoteLead = {
   requestedSize?: string | null;
   siteImageName?: string | null;
   siteImageUrl?: string | null;
+  /** Extra site photos (first is also in siteImageUrl) */
+  siteImageUrls?: string[] | null;
   callbackDate?: string | null;
   referralSource: string;
   note?: string | null;

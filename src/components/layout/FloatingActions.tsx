@@ -2,8 +2,23 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { MessageCircle, Phone, FileText, Plus, X } from "lucide-react";
+import { MessageCircle, Phone, FileText, X } from "lucide-react";
 import { siteConfig } from "@/lib/site-config";
+
+function DualChatIcon({ className }: { className?: string }) {
+  return (
+    <span className={`relative inline-block ${className ?? "h-5 w-5"}`} aria-hidden>
+      <MessageCircle
+        className="absolute left-0 top-0 h-[72%] w-[72%] opacity-80"
+        strokeWidth={2.25}
+      />
+      <MessageCircle
+        className="absolute bottom-0 right-0 h-[78%] w-[78%]"
+        strokeWidth={2.25}
+      />
+    </span>
+  );
+}
 
 export function FloatingActions() {
   const [open, setOpen] = useState(false);
@@ -44,13 +59,9 @@ export function FloatingActions() {
         aria-expanded={open}
         aria-label={open ? "ปิดเมนูด่วน" : "เปิดเมนูด่วน"}
         onClick={() => setOpen((v) => !v)}
-        className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-[#2f6fed] text-white shadow-lg sm:h-14 sm:w-14"
+        className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-[#2563eb] text-white shadow-lg sm:h-11 sm:w-11"
       >
-        {open ? (
-          <X className="h-5 w-5" />
-        ) : (
-          <MessageCircle className="h-6 w-6" aria-hidden />
-        )}
+        {open ? <X className="h-4 w-4" /> : <DualChatIcon className="h-5 w-5" />}
       </button>
     </div>
   );

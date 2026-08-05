@@ -13,7 +13,7 @@ export default function SiteLayout({
     <div className="flex min-h-full flex-col">
       <ConsentAwareScripts />
       <SiteHeader />
-      <main className="flex-1">{children}</main>
+      <main className="flex-1 overflow-x-clip">{children}</main>
       <SiteFooter />
       <FloatingActions />
       <CookieBanner />

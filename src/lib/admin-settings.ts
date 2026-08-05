@@ -2,7 +2,6 @@ import type { LucideIcon } from "lucide-react";
 import {
   Bell,
   Building2,
-  Gauge,
   Link2,
   Plug,
   ScrollText,
@@ -46,13 +45,6 @@ export const SETTINGS_SECTIONS: SettingsSection[] = [
     icon: Users,
     status: "soon",
     adminOnly: true,
-  },
-  {
-    path: "/settings/estimator",
-    title: "อัตราประเมินราคา",
-    description: "เรทเครื่องคิดราคาบนเว็บ",
-    icon: Gauge,
-    status: "demo",
   },
   {
     path: "/settings/users",
@@ -134,7 +126,7 @@ export const DEMO_ACTIVITY_LOGS: DemoLogRow[] = [
     at: hoursAgo(3),
     actor: "แอดมินช่างตี๋ (000000)",
     action: "มอบหมายเซลล์",
-    detail: "demo-lead-03 → เชลล์โล",
+    detail: "demo-lead-03 → เซลล์โส",
     level: "success",
   },
   {
@@ -167,7 +159,7 @@ export const DEMO_LEAD_EVENT_LOGS: DemoLogRow[] = [
   {
     id: "le-1",
     at: hoursAgo(2),
-    actor: "เชลล์โล",
+    actor: "เซลล์โส",
     action: "new → contacted",
     detail: "คุณสมชาย ใจดี · ผ้าม่าน",
     level: "info",
@@ -191,7 +183,7 @@ export const DEMO_LEAD_EVENT_LOGS: DemoLogRow[] = [
   {
     id: "le-4",
     at: hoursAgo(30),
-    actor: "เชลล์โล",
+    actor: "เซลล์โส",
     action: "new → cancelled",
     detail: "เหตุผล: ลูกค้าเลื่อนโปรเจกต์",
     level: "warn",

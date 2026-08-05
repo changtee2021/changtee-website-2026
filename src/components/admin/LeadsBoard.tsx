@@ -148,7 +148,10 @@ export function LeadsBoard() {
   }
 
   useEffect(() => {
-    void load();
+    const id = window.setTimeout(() => {
+      void load();
+    }, 0);
+    return () => window.clearTimeout(id);
   }, []);
 
   const dateScoped = useMemo(
@@ -182,6 +185,7 @@ export function LeadsBoard() {
       return (
         l.contactName.toLowerCase().includes(q) ||
         l.phone.toLowerCase().includes(q) ||
+        (l.lineId || "").toLowerCase().includes(q) ||
         l.email.toLowerCase().includes(q) ||
         (l.businessName || "").toLowerCase().includes(q)
       );
@@ -887,12 +891,13 @@ export function LeadsBoard() {
               <Item label="ชื่อผู้ติดต่อ" value={selected.contactName} />
               <Item label="ตำแหน่งงาน" value={selected.jobTitle} />
               <Item label="เบอร์โทรศัพท์" value={selected.phone} />
+              <Item label="LINE ID" value={selected.lineId} />
               <Item label="ประเภทผู้ติดต่อ" value={selected.contactType} />
               <Item label="ชื่อธุรกิจ" value={selected.businessName} />
               <Item label="E-mail" value={selected.email} />
               <Item label="เลขผู้เสียภาษี" value={selected.taxId} />
               <Item label="ประเภทสินค้า" value={selected.productType} />
-              <Item label="วันที่สะดวกติดต่อ" value={selected.callbackDate} />
+              <Item label="วันที่อยากติดตั้ง" value={selected.callbackDate} />
               <Item label="หาเราเจอจาก" value={selected.referralSource} />
               <Item
                 label="เซลล์ผู้ดูแล"
@@ -912,28 +917,50 @@ export function LeadsBoard() {
                 </dd>
               </div>
               <Item label="ที่อยู่ติดตั้ง" value={selected.installAddress} wide />
-              <Item label="ที่อยู่ใบเสนอราคา" value={selected.billingAddress} wide />
+              <Item label="ที่อยู่สำหรับออกใบเสนอราคา" value={selected.billingAddress} wide />
               <Item label="ขนาดที่ต้องการ" value={selected.requestedSize} wide />
               <Item label="หมายเหตุ" value={selected.note} wide />
               <Item
                 label="แนบภาพหน้างาน"
                 value={
-                  selected.siteImageUrl
-                    ? selected.siteImageName || selected.siteImageUrl
+                  selected.siteImageUrls?.length || selected.siteImageUrl
+                    ? selected.siteImageName ||
+                      `${selected.siteImageUrls?.length || 1} ไฟล์`
                     : "No File Upload"
                 }
                 wide
               />
             </dl>
-            {selected.siteImageUrl ? (
-              <a
-                href={selected.siteImageUrl}
-                target="_blank"
-                rel="noreferrer"
-                className="mt-4 inline-block text-sm font-medium text-brand-red underline"
-              >
-                เปิดไฟล์แนบ
-              </a>
+            {(selected.siteImageUrls?.length
+              ? selected.siteImageUrls
+              : selected.siteImageUrl
+                ? [selected.siteImageUrl]
+                : []
+            ).length > 0 ? (
+              <div className="mt-4 flex flex-wrap gap-2">
+                {(selected.siteImageUrls?.length
+                  ? selected.siteImageUrls
+                  : selected.siteImageUrl
+                    ? [selected.siteImageUrl]
+                    : []
+                ).map((url, i) => (
+                  <a
+                    key={`${url}-${i}`}
+                    href={url}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="relative block size-20 overflow-hidden rounded-lg border border-line bg-paper"
+                    title={`รูปที่ ${i + 1}`}
+                  >
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={url}
+                      alt={`แนบ ${i + 1}`}
+                      className="size-full object-cover"
+                    />
+                  </a>
+                ))}
+              </div>
             ) : null}
 
             {selected.status === "cancelled" ? (

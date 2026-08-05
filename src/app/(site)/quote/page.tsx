@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import type { Metadata } from "next";
 import { QuoteForm } from "@/components/forms/QuoteForm";
 
@@ -19,7 +20,13 @@ export default function QuotePage() {
           </p>
         </div>
         <div className="mt-6">
-          <QuoteForm />
+          <Suspense
+            fallback={
+              <p className="text-sm text-muted">กำลังโหลดแบบฟอร์ม…</p>
+            }
+          >
+            <QuoteForm />
+          </Suspense>
         </div>
       </div>
     </div>

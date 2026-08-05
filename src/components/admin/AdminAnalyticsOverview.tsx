@@ -696,13 +696,17 @@ export function AdminAnalyticsOverview({ basePath }: Props) {
           <div className="mt-4 space-y-2">
             {[
               { href: "/leads", label: "คำขอใบเสนอราคา", ready: true },
-              { href: "/settings", label: "ตั้งค่าระบบ", ready: true },
-              { href: "/settings/logs", label: "Logs / ประวัติ", ready: true },
-              { href: "/settings/users", label: "ผู้ใช้ / บทบาท", ready: true },
+              { href: "/cms/home", label: "หน้าแรก (sections)", ready: true },
+              {
+                href: "/cms/product-pages",
+                label: "หน้าสินค้า (sections)",
+                ready: true,
+              },
+              { href: "/cms/hero-slides", label: "สไลด์หน้าแรก", ready: true },
               { href: "/cms/portfolio", label: "ผลงาน", ready: true },
               { href: "/cms/blog", label: "บทความ", ready: true },
               { href: "/cms/reviews", label: "รีวิว", ready: true },
-              { href: "/settings/estimator", label: "อัตราประเมินราคา", ready: true },
+              { href: "/settings", label: "ตั้งค่าระบบ", ready: true },
             ].map((item) =>
               item.ready ? (
                 <Link
@@ -723,6 +727,80 @@ export function AdminAnalyticsOverview({ basePath }: Props) {
                 </div>
               ),
             )}
+          </div>
+        </div>
+      </section>
+
+      {/* Website build status — keep in sync with public site */}
+      <section className="rounded-2xl border border-line bg-white p-5 shadow-sm sm:p-6">
+        <div className="flex flex-wrap items-end justify-between gap-3">
+          <div>
+            <h3 className="font-display text-base font-semibold text-navy">
+              สถานะเว็บไซต์ (อัปเดตล่าสุด)
+            </h3>
+            <p className="mt-1 text-xs text-muted">
+              สิ่งที่ออนไลน์บนหน้าเว็บแล้ว และส่วนที่แก้จากแอดมินได้
+            </p>
+          </div>
+          <span className="rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-800">
+            Visual CMS + ยืนยันการเปลี่ยน
+          </span>
+        </div>
+
+        <div className="mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+          <div className="rounded-xl border border-line bg-paper/40 p-4">
+            <p className="text-xs font-semibold uppercase tracking-wider text-muted">
+              หน้าสาธารณะ
+            </p>
+            <ul className="mt-3 space-y-2 text-sm text-navy/90">
+              <li>· หน้าแรก — Hero, สินค้า, ผลงาน, ขั้นตอน, รีวิว, สถิติ, CTA</li>
+              <li>· แคตตาล็อกสินค้า 7 เสา + หน้ารายละเอียดรุ่น</li>
+              <li>
+                · หน้ารายละเอียด: จุดเด่น, สเปก, สไตล์ห้อง, คลิปติดตั้ง, ผลงาน,
+                รุ่นอื่น, ตารางเทียบ, FAQ, CTA
+              </li>
+              <li>· ผลงาน / บทความ / ขอใบเสนอราคา / เกี่ยวกับเรา</li>
+            </ul>
+          </div>
+          <div className="rounded-xl border border-line bg-paper/40 p-4">
+            <p className="text-xs font-semibold uppercase tracking-wider text-muted">
+              แก้ในแอดมินได้แล้ว
+            </p>
+            <ul className="mt-3 space-y-2 text-sm text-navy/90">
+              <li>
+                ·{" "}
+                <Link
+                  href={adminHref(basePath, "/cms/home")}
+                  className="font-medium text-brand-red hover:underline"
+                >
+                  หน้าแรก (sections)
+                </Link>{" "}
+                — พรีวิวคลิกแก้รูป/ข้อความ + ปุ่มยืนยัน
+              </li>
+              <li>
+                ·{" "}
+                <Link
+                  href={adminHref(basePath, "/cms/product-pages")}
+                  className="font-medium text-brand-red hover:underline"
+                >
+                  หน้าสินค้า (sections)
+                </Link>{" "}
+                — แก้ครั้งเดียวใช้ทุกหน้าสินค้า + ยืนยัน
+              </li>
+              <li>· สไลด์หน้าแรก / ผลงาน / บทความ / รีวิว</li>
+              <li>· Lead คำขอใบเสนอราคา + ตั้งค่าบริษัท</li>
+            </ul>
+          </div>
+          <div className="rounded-xl border border-line bg-paper/40 p-4">
+            <p className="text-xs font-semibold uppercase tracking-wider text-muted">
+              ยังล็อกในโค้ด / แผนถัดไป
+            </p>
+            <ul className="mt-3 space-y-2 text-sm text-navy/90">
+              <li>· เลย์เอาต์ทุก section (ไม่ให้ลากย้ายโครง)</li>
+              <li>· รูปสไตล์ห้อง / คลิปวิดีโอ / ตารางเทียบ / FAQ ต่อรุ่น</li>
+              <li>· บันทึกลง Supabase จริง (ตอนนี้ demo ในเบราว์เซอร์)</li>
+              <li>· Feature strip, Services, Catalog บนหน้าแรก</li>
+            </ul>
           </div>
         </div>
       </section>

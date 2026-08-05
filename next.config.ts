@@ -11,6 +11,32 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  async redirects() {
+    return [
+      { source: "/estimate", destination: "/quote", permanent: true },
+      { source: "/estimate/:path*", destination: "/quote", permanent: true },
+      {
+        source: "/admin/settings/estimator",
+        destination: "/admin/settings",
+        permanent: true,
+      },
+      {
+        source: "/admin/settings/estimator/:path*",
+        destination: "/admin/settings",
+        permanent: true,
+      },
+      {
+        source: "/products/venetian-blinds/panel",
+        destination: "/products/venetian-blinds",
+        permanent: true,
+      },
+      {
+        source: "/sale-gallery",
+        destination: "/",
+        permanent: false,
+      },
+    ];
+  },
 };
 
 export default nextConfig;

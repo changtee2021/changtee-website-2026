@@ -8,9 +8,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     "",
     "/products",
     "/portfolio",
-    "/sale-gallery",
     "/blog",
-    "/estimate",
     "/quote",
     "/about",
     "/contact",
@@ -28,6 +26,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
     url: `${base}${path}`,
     lastModified: new Date(),
     changeFrequency: path.startsWith("/products") ? "weekly" : "monthly",
-    priority: path === "" ? 1 : path === "/quote" || path === "/estimate" ? 0.9 : 0.7,
+    priority: path === "" ? 1 : path === "/quote" ? 0.9 : 0.7,
   }));
 }

@@ -37,8 +37,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="th" className={`${sans.variable} ${display.variable} h-full overflow-x-clip`}>
-      <body className="min-h-full overflow-x-clip bg-white text-ink antialiased">
+    <html lang="th" className={`${sans.variable} ${display.variable} h-full`}>
+      <body className="min-h-full bg-white text-ink antialiased">
         {children}
       </body>
     </html>

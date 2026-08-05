@@ -1,29 +1,29 @@
 "use client";
 
 import Script from "next/script";
-import { useEffect, useState } from "react";
+import { useSyncExternalStore } from "react";
 import {
   COOKIE_CONSENT_EVENT,
   type CookieConsentState,
   readConsent,
 } from "@/lib/cookie-consent";
 
+function subscribeConsent(onStoreChange: () => void) {
+  window.addEventListener(COOKIE_CONSENT_EVENT, onStoreChange);
+  window.addEventListener("storage", onStoreChange);
+  return () => {
+    window.removeEventListener(COOKIE_CONSENT_EVENT, onStoreChange);
+    window.removeEventListener("storage", onStoreChange);
+  };
+}
+
 /** Loads GA4 / GTM / Meta Pixel only after analytics/marketing consent */
 export function ConsentAwareScripts() {
-  const [consent, setConsent] = useState<CookieConsentState | null>(null);
-
-  useEffect(() => {
-    setConsent(readConsent());
-    function onChange() {
-      setConsent(readConsent());
-    }
-    window.addEventListener(COOKIE_CONSENT_EVENT, onChange);
-    window.addEventListener("storage", onChange);
-    return () => {
-      window.removeEventListener(COOKIE_CONSENT_EVENT, onChange);
-      window.removeEventListener("storage", onChange);
-    };
-  }, []);
+  const consent = useSyncExternalStore(
+    subscribeConsent,
+    readConsent,
+    () => null as CookieConsentState | null,
+  );
 
   const gtmId = process.env.NEXT_PUBLIC_GTM_ID?.trim();
   const ga4Id = process.env.NEXT_PUBLIC_GA4_ID?.trim();

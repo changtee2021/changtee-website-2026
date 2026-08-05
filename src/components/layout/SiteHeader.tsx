@@ -2,30 +2,59 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ChevronDown, Home, Menu, X } from "lucide-react";
 import { siteConfig } from "@/lib/site-config";
-import { productCatalog } from "@/lib/product-catalog";
 import { SocialLinks } from "@/components/layout/SocialLinks";
+import {
+  ProductsMegaPanel,
+  ProductsMobileLinks,
+} from "@/components/products/ProductsMegaMenu";
 
 const mainNav = [
   { href: "/", label: "หน้าแรก", home: true },
   { href: "/products", label: "สินค้า/บริการ", mega: true },
   { href: "/portfolio", label: "ผลงาน" },
   { href: "/blog", label: "บทความ" },
-  { href: "/sale-gallery", label: "Sale Gallery" },
   { href: "/about", label: "เกี่ยวกับเรา" },
 ] as const;
 
 export function SiteHeader() {
   const [open, setOpen] = useState(false);
   const [productsOpen, setProductsOpen] = useState(false);
+  const [stuck, setStuck] = useState(false);
+  const [navHeight, setNavHeight] = useState(0);
+  const sentinelRef = useRef<HTMLDivElement>(null);
+  const navRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const sentinel = sentinelRef.current;
+    if (!sentinel) return;
+
+    const io = new IntersectionObserver(
+      ([entry]) => setStuck(!entry.isIntersecting),
+      { threshold: 0 },
+    );
+    io.observe(sentinel);
+    return () => io.disconnect();
+  }, []);
+
+  useEffect(() => {
+    const nav = navRef.current;
+    if (!nav) return;
+
+    const update = () => setNavHeight(nav.offsetHeight);
+    update();
+    const ro = new ResizeObserver(update);
+    ro.observe(nav);
+    return () => ro.disconnect();
+  }, [open]);
 
   return (
-    <header className="overflow-x-clip">
+    <header>
       {/* Top utility row — scrolls away */}
       <div className="border-b border-line bg-white">
-        <div className="mx-auto flex max-w-6xl items-center justify-between gap-2 px-4 py-2 sm:py-3">
+        <div className="mx-auto flex max-w-6xl items-center justify-between gap-2 px-4 py-1.5 sm:py-2">
           <SocialLinks className="hidden sm:flex" size={28} />
 
           <Link
@@ -37,7 +66,7 @@ export function SiteHeader() {
               alt={`${siteConfig.name} ออกแบบ-ติดตั้ง ผ้าม่าน`}
               width={200}
               height={200}
-              className="h-14 w-14 object-contain sm:h-20 sm:w-20 md:h-28 md:w-28"
+              className="h-12 w-12 object-contain sm:h-16 sm:w-16 md:h-20 md:w-20"
               priority
             />
           </Link>
@@ -58,8 +87,19 @@ export function SiteHeader() {
         </div>
       </div>
 
-      {/* Navy main nav */}
-      <div className="bg-navy text-white">
+      {/* Sentinel: when this leaves the viewport, pin the navy bar */}
+      <div ref={sentinelRef} className="h-0 w-full" aria-hidden />
+
+      {/* Spacer keeps layout from jumping when nav becomes fixed */}
+      {stuck ? <div style={{ height: navHeight }} aria-hidden /> : null}
+
+      {/* Navy main nav — fixed to top after scrolling past logo */}
+      <div
+        ref={navRef}
+        className={`z-50 bg-navy text-white shadow-md shadow-navy/25 ${
+          stuck ? "fixed inset-x-0 top-0" : "relative"
+        }`}
+      >
         <nav className="mx-auto hidden max-w-6xl items-center gap-1 px-4 lg:flex">
           {mainNav.map((item) =>
             "mega" in item && item.mega ? (
@@ -71,19 +111,8 @@ export function SiteHeader() {
                   {item.label}
                   <ChevronDown className="h-3.5 w-3.5 opacity-80" />
                 </Link>
-                <div className="invisible absolute left-0 top-full z-50 w-[min(42rem,calc(100vw-2rem))] border border-line bg-white p-4 text-ink opacity-0 shadow-sm transition group-hover:visible group-hover:opacity-100">
-                  <div className="grid grid-cols-2 gap-2">
-                    {productCatalog.map((cat) => (
-                      <Link
-                        key={cat.slug}
-                        href={`/products/${cat.slug}`}
-                        className="rounded-md px-3 py-2 hover:bg-paper"
-                      >
-                        <div className="text-sm font-semibold text-navy">{cat.name}</div>
-                        <div className="text-xs text-muted line-clamp-1">{cat.summary}</div>
-                      </Link>
-                    ))}
-                  </div>
+                <div className="invisible absolute left-0 top-full z-50 w-[min(40rem,calc(100vw-2rem))] border border-line bg-white p-4 text-ink opacity-0 shadow-lg transition group-hover:visible group-hover:opacity-100">
+                  <ProductsMegaPanel />
                 </div>
               </div>
             ) : (
@@ -99,12 +128,6 @@ export function SiteHeader() {
           )}
           <div className="ml-auto flex items-center gap-2 py-2">
             <Link
-              href="/estimate"
-              className="rounded-md border border-white/30 px-3 py-1.5 text-sm hover:bg-white/10"
-            >
-              ประเมินราคา
-            </Link>
-            <Link
               href="/quote"
               className="rounded-md bg-brand-red px-3 py-1.5 text-sm font-semibold hover:bg-brand-red-soft"
             >
@@ -113,7 +136,6 @@ export function SiteHeader() {
           </div>
         </nav>
 
-        {/* Mobile sticky bar */}
         <div className="mx-auto flex max-w-6xl items-center justify-between gap-2 px-3 py-2 sm:px-4 lg:hidden">
           <button
             type="button"
@@ -125,12 +147,6 @@ export function SiteHeader() {
             {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
           </button>
           <div className="flex min-w-0 flex-1 items-center justify-end gap-1.5 sm:gap-2">
-            <Link
-              href="/estimate"
-              className="truncate rounded-md border border-white/30 px-2.5 py-1.5 text-[11px] hover:bg-white/10 sm:px-3 sm:text-xs"
-            >
-              ประเมิน
-            </Link>
             <Link
               href="/quote"
               className="truncate rounded-md bg-brand-red px-2.5 py-1.5 text-[11px] font-semibold hover:bg-brand-red-soft sm:px-3 sm:text-xs"
@@ -158,25 +174,7 @@ export function SiteHeader() {
                       />
                     </button>
                     {productsOpen ? (
-                      <div className="space-y-1 pb-3 pl-2">
-                        <Link
-                          href={item.href}
-                          className="block rounded-md px-2 py-2 text-sm text-white/90 hover:bg-white/10"
-                          onClick={() => setOpen(false)}
-                        >
-                          ดูทั้งหมด
-                        </Link>
-                        {productCatalog.map((cat) => (
-                          <Link
-                            key={cat.slug}
-                            href={`/products/${cat.slug}`}
-                            className="block rounded-md px-2 py-2 text-sm text-white/80 hover:bg-white/10"
-                            onClick={() => setOpen(false)}
-                          >
-                            {cat.name}
-                          </Link>
-                        ))}
-                      </div>
+                      <ProductsMobileLinks onNavigate={() => setOpen(false)} />
                     ) : null}
                   </div>
                 ) : (
@@ -196,13 +194,6 @@ export function SiteHeader() {
                 onClick={() => setOpen(false)}
               >
                 ติดต่อเรา
-              </Link>
-              <Link
-                href="/estimate"
-                className="border-b border-white/10 py-3 text-sm text-white"
-                onClick={() => setOpen(false)}
-              >
-                ประเมินราคา
               </Link>
               <Link
                 href="/quote"

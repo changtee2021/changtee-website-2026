@@ -118,7 +118,6 @@ export const demoTopPages: NamedCount[] = [
   { name: "/products/curtain", value: 682, meta: "ผ้าม่าน" },
   { name: "/products/roller-blinds", value: 514, meta: "ม่านม้วน" },
   { name: "/quote", value: 398, meta: "ขอใบเสนอราคา" },
-  { name: "/estimate", value: 356, meta: "ประเมินราคา" },
   { name: "/products/venetian-blinds", value: 301, meta: "มู่ลี่" },
   { name: "/portfolio", value: 244, meta: "ผลงาน" },
   { name: "/catalog/wooden-blinds.pdf", value: 128, meta: "แคตตาล็อก" },
@@ -126,7 +125,6 @@ export const demoTopPages: NamedCount[] = [
 
 export const demoClicks: NamedCount[] = [
   { name: "ขอใบเสนอราคา", value: 186 },
-  { name: "ประเมินราคา", value: 142 },
   { name: "LINE OA", value: 98 },
   { name: "โทรหาเซลล์", value: 74 },
   { name: "ดาวน์โหลดแคตตาล็อก", value: 61 },
@@ -144,7 +142,7 @@ export const demoSources: NamedCount[] = [
 export const demoFunnel = [
   { step: "เข้าเว็บ", value: 1645 },
   { step: "ดูสินค้า", value: 892 },
-  { step: "ประเมิน / แคตตาล็อก", value: 410 },
+  { step: "ดูแคตตาล็อก / ผลงาน", value: 410 },
   { step: "หน้าใบเสนอราคา", value: 198 },
   { step: "ส่ง Lead สำเร็จ", value: 39 },
 ];
@@ -153,7 +151,7 @@ export const demoLiveSeed: LiveViewer[] = [
   { path: "/products/curtain", device: "mobile", city: "กรุงเทพฯ", secondsAgo: 8 },
   { path: "/quote", device: "desktop", city: "นนทบุรี", secondsAgo: 14 },
   { path: "/", device: "mobile", city: "ชลบุรี", secondsAgo: 21 },
-  { path: "/estimate", device: "mobile", city: "ปทุมธานี", secondsAgo: 33 },
+  { path: "/blog", device: "mobile", city: "ปทุมธานี", secondsAgo: 33 },
   { path: "/products/venetian-blinds/wood", device: "tablet", city: "กรุงเทพฯ", secondsAgo: 41 },
   { path: "/portfolio", device: "desktop", city: "สมุทรปราการ", secondsAgo: 55 },
 ];

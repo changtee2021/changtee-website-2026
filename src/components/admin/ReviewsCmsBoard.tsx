@@ -4,8 +4,11 @@ import { useMemo, useState } from "react";
 import { Check, Plus, Star } from "lucide-react";
 import {
   DEMO_REVIEWS,
+  REVIEW_PRODUCT_OPTIONS,
   REVIEW_SOURCE_LABELS,
   emptyReview,
+  normalizeReview,
+  reviewProductLabel,
   type ReviewItem,
   type ReviewSource,
 } from "@/lib/cms/reviews-demo";
@@ -24,7 +27,9 @@ import {
 type StatusFilter = ReviewItem["status"] | "all";
 
 export function ReviewsCmsBoard() {
-  const [items, setItems] = useState<ReviewItem[]>(DEMO_REVIEWS);
+  const [items, setItems] = useState<ReviewItem[]>(() =>
+    DEMO_REVIEWS.map(normalizeReview),
+  );
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
   const [editing, setEditing] = useState<ReviewItem | null>(null);
   const [creating, setCreating] = useState(false);
@@ -184,11 +189,15 @@ export function ReviewsCmsBoard() {
                   <span className="rounded bg-paper px-2 py-0.5 text-navy">
                     {REVIEW_SOURCE_LABELS[item.source]}
                   </span>
-                  {item.productHint ? (
+                  {item.productSlug || item.productHint ? (
                     <span className="rounded bg-paper px-2 py-0.5">
-                      {item.productHint}
+                      {reviewProductLabel(item.productSlug) ||
+                        item.productHint ||
+                        "ทั่วไป"}
                     </span>
-                  ) : null}
+                  ) : (
+                    <span className="rounded bg-paper px-2 py-0.5">ทั่วไป</span>
+                  )}
                   {item.pinned ? (
                     <span className="rounded bg-brand-red/10 px-2 py-0.5 text-brand-red">
                       หน้าแรก
@@ -221,7 +230,7 @@ export function ReviewsCmsBoard() {
                     className="text-sm font-medium text-brand-red hover:underline"
                     onClick={() => {
                       setCreating(false);
-                      setEditing(item);
+                      setEditing(normalizeReview(item));
                     }}
                   >
                     แก้ไข
@@ -277,11 +286,13 @@ function ReviewFormModal({
       alert("กรอกชื่อแสดงและข้อความรีวิวให้ครบ");
       return;
     }
+    const productSlug = form.productSlug || "";
     onSave({
       ...form,
       displayName: form.displayName.trim(),
       body: form.body.trim(),
-      productHint: form.productHint.trim(),
+      productSlug,
+      productHint: reviewProductLabel(productSlug),
       sourceUrl: form.sourceUrl.trim(),
       rating: Math.min(5, Math.max(1, Number(form.rating) || 5)),
     });
@@ -333,11 +344,17 @@ function ReviewFormModal({
           rows={4}
         />
         <div className="grid gap-3 sm:grid-cols-2">
-          <Field
-            label="ประเภทงาน (ออปชัน)"
-            value={form.productHint}
-            onChange={(v) => set("productHint", v)}
-            placeholder="ผ้าม่าน / ม่านม้วน"
+          <SelectField
+            label="ประเภทสินค้า *"
+            value={form.productSlug}
+            onChange={(v) => {
+              set("productSlug", v);
+              set("productHint", reviewProductLabel(v));
+            }}
+            options={REVIEW_PRODUCT_OPTIONS.map((o) => ({
+              value: o.value,
+              label: o.label,
+            }))}
           />
           <SelectField
             label="แหล่งที่มา"

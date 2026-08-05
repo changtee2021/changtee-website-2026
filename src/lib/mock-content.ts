@@ -1,62 +1,13 @@
 import { DEMO_BLOG } from "@/lib/cms/blog-demo";
 import { DEMO_PORTFOLIO } from "@/lib/cms/portfolio-demo";
+import {
+  DEMO_HERO_SLIDES,
+  publishedHeroSlides,
+} from "@/lib/cms/hero-slides-demo";
+import { publishedBlog, publishedPortfolio } from "@/lib/cms/public-content";
 
-export const heroSlides = [
-  {
-    src: "/images/banners/hero-1.png",
-    alt: "ม่านม้วน ช่างตี๋ — เริ่มต้น 550฿ ตร.เมตร",
-    title: "ROLLER BLIND",
-    subtitle: "ม่านม้วน",
-    price: "เริ่มต้น 550฿ ตร.เมตร",
-    badge: "บริการ วัดหน้างาน ฟรี!!",
-    href: "/products/roller-blinds",
-  },
-  {
-    src: "/images/banners/hero-2.png",
-    alt: "มู่ลี่ไม้ ช่างตี๋ — เริ่มต้น 1,690฿ ตร.เมตร",
-    title: "WOODEN VENETIAN BLIND",
-    subtitle: "มู่ลี่ไม้",
-    price: "เริ่มต้น 1,690฿ ตร.เมตร",
-    badge: "บริการ วัดหน้างาน ฟรี!!",
-    href: "/products/venetian-blinds",
-  },
-  {
-    src: "/images/banners/hero-3.png",
-    alt: "มู่ลี่อลูมิเนียม ช่างตี๋ — เริ่มต้น 550฿ ตร.เมตร",
-    title: "ALUMINUM VENETIAN BLIND",
-    subtitle: "มู่ลี่อลูมิเนียม",
-    price: "เริ่มต้น 550฿ ตร.เมตร",
-    badge: "บริการ วัดหน้างาน ฟรี!!",
-    href: "/products/venetian-blinds",
-  },
-  {
-    src: "/images/banners/hero-4.png",
-    alt: "ม่านปรับแสง ช่างตี๋ — เริ่มต้น 550฿ ตร.เมตร",
-    title: "VERTICAL BLIND",
-    subtitle: "ม่านปรับแสง",
-    price: "เริ่มต้น 550฿ ตร.เมตร",
-    badge: "บริการ วัดหน้างาน ฟรี!!",
-    href: "/products/vertical-blinds",
-  },
-  {
-    src: "/images/banners/hero-5.png",
-    alt: "ผ้าม่าน ช่างตี๋ — เริ่มต้น 1,500฿ ตร.เมตร",
-    title: "CURTAIN",
-    subtitle: "ผ้าม่าน",
-    price: "เริ่มต้น 1,500฿ ตร.เมตร",
-    badge: "บริการ วัดหน้างาน ฟรี!!",
-    href: "/products/curtain",
-  },
-  {
-    src: "/images/banners/hero-6.png",
-    alt: "ฉากกั้นห้อง PVC ช่างตี๋ — เริ่มต้น 790฿ ตร.เมตร",
-    title: "PVC FOLDING DOOR",
-    subtitle: "ฉากกั้นห้อง กั้นแอร์",
-    price: "เริ่มต้น 790฿ ตร.เมตร",
-    badge: "บริการ วัดหน้างาน ฟรี!!",
-    href: "/products/pvc-partition",
-  },
-];
+/** @deprecated Prefer useHeroSlides() / publishedHeroSlides — kept for static imports */
+export const heroSlides = publishedHeroSlides(DEMO_HERO_SLIDES);
 
 export const homeProductTiles = [
   { name: "ผ้าม่าน", href: "/products/curtain", image: "/images/products/p1.png" },
@@ -71,36 +22,82 @@ export const homeProductTiles = [
 
 export const whyItems = [
   {
-    title: "ฟรี",
-    desc: "เข้าวัดหน้างานฟรี ให้คำปรึกษาและออกแบบฟังก์ชัน",
+    title: "วัดหน้างานฟรี",
+    desc: "นัดวันสะดวก เราไปวัดให้ถึงที่ ไม่มีค่าใช้จ่าย",
     image: "/images/why/free.png",
   },
   {
-    title: "ทันใจ",
-    desc: "มีโรงงานและทีมติดตั้งเอง ทำงานไว ควบคุมคุณภาพได้",
+    title: "ผลิตเอง ส่งไว",
+    desc: "มีโรงงานและทีมช่างของเราเอง งานเลยไม่ต้องรอนาน",
     image: "/images/why/fast.png",
   },
   {
-    title: "มั่นใจ",
-    desc: "รับประกันงานติดตั้ง 1 ปีเต็ม พร้อมบริการหลังการขาย",
+    title: "รับประกัน 1 ปี",
+    desc: "ติดตั้งเสร็จแล้วยังดูแลต่อ มีอะไรทักมาได้เลย",
     image: "/images/why/trust.png",
   },
 ];
 
-export const portfolioMock = DEMO_PORTFOLIO.filter(
-  (item) => item.status === "published",
-).map(({ title, place, summary, image, tags }) => ({
-  title,
-  place,
-  summary,
-  image,
-  tags,
+export const homeSteps = [
+  {
+    title: "คุยแล้วออกแบบให้",
+    desc: "บอกห้องที่อยากติดและสไตล์ที่ชอบ เราช่วยเลือกผ้ากับแบบม่านให้เหมาะกับการใช้งานจริง",
+  },
+  {
+    title: "เข้าวัดหน้างานฟรี",
+    desc: "ทีมเข้าไปวัดพื้นที่จริงอย่างละเอียด สรุปราคาให้ชัดก่อนตัดสินใจ ไม่มีค่าใช้จ่าย",
+  },
+  {
+    title: "ส่งและติดตั้งให้จบ",
+    desc: "ผลิตที่โรงงานเราเอง ส่งตรงเวลา ช่างติดตั้งเก็บงานเรียบร้อย พร้อมรับประกัน 1 ปี",
+  },
+];
+
+export const homeServices = [
+  {
+    title: "เลือกแบบผ้าม่าน",
+    desc: "ไม่รู้จะเริ่มตรงไหน บอกสไตล์บ้านมา เราช่วยจับคู่ผ้าและโทนสีให้",
+    href: "/products/curtain",
+  },
+  {
+    title: "ติดตั้งครบวงจร",
+    desc: "วัด ผลิต ติดตั้ง จบในทีมเดียว นัดวันได้ ไม่ต้องประสานหลายเจ้า",
+    href: "/quote",
+  },
+  {
+    title: "งานคัสตอมพิเศษ",
+    desc: "ม่านม้วน มู่ลี่ ฉากกั้นห้อง หรือขนาดพิเศษ สั่งทำตามหน้างานได้",
+    href: "/products",
+  },
+];
+
+export const homeStats = [
+  { value: "1,000+", label: "ลูกค้าที่ไว้ใจให้เราดูแล ตั้งแต่บ้านหลังเล็กจนถึงโปรเจกต์องค์กร" },
+  { value: "10,000+", label: "งานติดตั้งที่ผ่านมือทีมช่างของเราเอง ทุกผืนตรวจก่อนส่งมอบ" },
+  { value: "77", label: "จังหวัดที่เราพร้อมเดินทางไปติดตั้งให้ถึงหน้างาน" },
+];
+
+export const storyBlurb = {
+  title: "จากโรงงานคลองสามวา ถึงหน้าต่างบ้านคุณ",
+  paragraphs: [
+    "เราเริ่มจากร้านผ้าม่านเล็กๆ ที่รับงานเองทุกขั้นตอน วันนี้ยังทำแบบเดิม คือวัดเอง เย็บเอง ติดตั้งเอง เพราะอยากรู้ว่างานที่ส่งถึงลูกค้าเป็นยังไง",
+    "แวะมาที่โชว์รูมได้ มีตัวอย่างผ้าให้จับของจริง เทียบสีกับแสงในห้อง แล้วค่อยตัดสินใจ ไม่ต้องรีบ",
+  ],
+};
+
+export const portfolioMock = publishedPortfolio(DEMO_PORTFOLIO).map((item) => ({
+  title: item.title,
+  place: item.place,
+  summary: item.summary,
+  image: item.image,
+  tags: item.tags,
+  slug: item.slug,
 }));
 
-export const blogMock = DEMO_BLOG.filter((post) => post.status === "published").map(
-  ({ title, excerpt, cover }) => ({
-    title,
-    excerpt,
-    image: cover,
-  }),
-);
+export const blogMock = publishedBlog(DEMO_BLOG).map((post) => ({
+  title: post.title,
+  excerpt: post.excerpt,
+  image: post.cover,
+  slug: post.slug,
+  category: post.category,
+}));

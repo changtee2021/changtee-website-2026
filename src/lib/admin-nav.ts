@@ -2,10 +2,12 @@ import type { LucideIcon } from "lucide-react";
 import {
   ClipboardList,
   FileText,
-  Gauge,
+  Home,
   Images,
   LayoutDashboard,
   MessageSquareQuote,
+  Package,
+  PanelsTopLeft,
   ScrollText,
   Settings2,
   Users,
@@ -37,6 +39,9 @@ export const adminNavGroups: AdminNavGroup[] = [
   {
     label: "เนื้อหา",
     items: [
+      { path: "/cms/hero-slides", label: "สไลด์หน้าแรก", icon: PanelsTopLeft },
+      { path: "/cms/home", label: "หน้าแรก (sections)", icon: Home },
+      { path: "/cms/product-pages", label: "หน้าสินค้า (sections)", icon: Package },
       { path: "/cms/portfolio", label: "ผลงาน", icon: Images },
       { path: "/cms/blog", label: "บทความ", icon: FileText },
       { path: "/cms/reviews", label: "รีวิว", icon: MessageSquareQuote },
@@ -48,7 +53,6 @@ export const adminNavGroups: AdminNavGroup[] = [
       { path: "/settings", label: "ตั้งค่าระบบ", icon: Settings2, exact: true },
       { path: "/settings/logs", label: "Logs / ประวัติ", icon: ScrollText },
       { path: "/settings/users", label: "ผู้ใช้ / บทบาท", icon: Users },
-      { path: "/settings/estimator", label: "อัตราประเมินราคา", icon: Gauge },
     ],
   },
 ];
@@ -56,6 +60,11 @@ export const adminNavGroups: AdminNavGroup[] = [
 export function adminHref(basePath: string, path: string): string {
   if (!path || path === "/") return basePath || "/";
   return `${basePath}${path}`;
+}
+
+/** Derive admin base from pathname (`/admin` or `` for subdomain). */
+export function adminBaseFromPathname(pathname: string): string {
+  return pathname === "/admin" || pathname.startsWith("/admin/") ? "/admin" : "";
 }
 
 export function resolveAdminPageTitle(pathname: string, basePath: string): string {

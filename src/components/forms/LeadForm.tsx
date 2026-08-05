@@ -5,16 +5,14 @@ import { useRouter } from "next/navigation";
 import { PdpaConsentField } from "@/components/forms/PdpaConsentField";
 
 type Props = {
-  source?: "quote" | "estimate" | "contact" | "fab";
+  source?: "quote" | "contact" | "fab";
   productInterest?: string;
-  estimatePayload?: Record<string, unknown>;
   submitLabel?: string;
 };
 
 export function LeadForm({
   source = "quote",
   productInterest,
-  estimatePayload,
   submitLabel = "ส่งข้อมูล",
 }: Props) {
   const router = useRouter();
@@ -34,7 +32,6 @@ export function LeadForm({
       message: String(formData.get("message") || ""),
       productInterest: productInterest || String(formData.get("productInterest") || ""),
       pdpaAccepted: formData.get("pdpaAccepted") === "on",
-      estimatePayload,
     };
 
     try {

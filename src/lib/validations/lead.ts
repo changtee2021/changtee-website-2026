@@ -1,11 +1,6 @@
 import { z } from "zod";
 
-export const leadSourceSchema = z.enum([
-  "quote",
-  "estimate",
-  "contact",
-  "fab",
-]);
+export const leadSourceSchema = z.enum(["quote", "contact", "fab"]);
 
 /** Full quotation form (legacy site parity) */
 export const quoteLeadSchema = z.object({
@@ -18,6 +13,7 @@ export const quoteLeadSchema = z.object({
     .min(9, "กรุณากรอกเบอร์โทรศัพท์")
     .max(20)
     .regex(/^[0-9+\-\s()]+$/, "รูปแบบเบอร์ไม่ถูกต้อง"),
+  lineId: z.string().trim().max(80).optional().or(z.literal("")),
   contactType: z.string().trim().min(1, "กรุณาเลือกประเภทผู้ติดต่อ"),
   businessName: z.string().trim().max(200).optional().or(z.literal("")),
   installAddress: z.string().trim().min(5, "กรุณากรอกที่อยู่ติดตั้ง/ส่งของ"),
@@ -38,7 +34,7 @@ export const quoteLeadSchema = z.object({
 
 export type QuoteLeadInput = z.infer<typeof quoteLeadSchema>;
 
-/** Compact lead (estimate / contact / fab) */
+/** Compact lead (contact / fab) — optional company fields for B2B inquiries */
 export const leadSchema = z
   .object({
     source: leadSourceSchema.default("contact"),
@@ -58,9 +54,11 @@ export const leadSchema = z
       .or(z.literal("")),
     message: z.string().trim().max(2000).optional().or(z.literal("")),
     productInterest: z.string().trim().max(200).optional().or(z.literal("")),
+    companyName: z.string().trim().max(200).optional().or(z.literal("")),
+    jobTitle: z.string().trim().max(120).optional().or(z.literal("")),
+    inquiryType: z.string().trim().max(200).optional().or(z.literal("")),
     pdpaAccepted: z.boolean(),
     turnstileToken: z.string().optional(),
-    estimatePayload: z.record(z.string(), z.unknown()).optional(),
   })
   .refine((data) => data.pdpaAccepted === true, {
     message: "กรุณายอมรับนโยบายความเป็นส่วนตัว",

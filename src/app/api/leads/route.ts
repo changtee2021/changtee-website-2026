@@ -79,14 +79,32 @@ export async function POST(request: Request) {
 
     if (contentType.includes("multipart/form-data")) {
       const form = await request.formData();
-      const siteImage = form.get("siteImage");
-      const upload = await saveUpload(siteImage instanceof File ? siteImage : null);
+      const siteFiles = form
+        .getAll("siteImage")
+        .filter((f): f is File => f instanceof File && f.size > 0)
+        .slice(0, 10);
+      const uploads: Array<{ name: string; url: string }> = [];
+      for (const file of siteFiles) {
+        const upload = await saveUpload(file);
+        if (upload.name && upload.url) {
+          uploads.push({ name: upload.name, url: upload.url });
+        }
+      }
+      const siteImageName =
+        uploads.length === 0
+          ? ""
+          : uploads.length === 1
+            ? uploads[0].name
+            : uploads.map((u) => u.name).join(" · ");
+      const siteImageUrl = uploads[0]?.url ?? null;
+      const siteImageUrls = uploads.map((u) => u.url);
 
       const parsed = quoteLeadSchema.safeParse({
         source: "quote",
         contactName: String(form.get("contactName") || ""),
         jobTitle: String(form.get("jobTitle") || ""),
         phone: String(form.get("phone") || ""),
+        lineId: String(form.get("lineId") || ""),
         contactType: String(form.get("contactType") || ""),
         businessName: String(form.get("businessName") || ""),
         installAddress: String(form.get("installAddress") || ""),
@@ -99,7 +117,7 @@ export async function POST(request: Request) {
         referralSource: String(form.get("referralSource") || ""),
         note: String(form.get("note") || ""),
         pdpaAccepted: form.get("pdpaAccepted") === "on" || form.get("pdpaAccepted") === "true",
-        siteImageName: upload.name || "",
+        siteImageName,
       });
 
       if (!parsed.success) {
@@ -115,6 +133,7 @@ export async function POST(request: Request) {
         contactName: data.contactName,
         jobTitle: data.jobTitle || null,
         phone: data.phone,
+        lineId: data.lineId || null,
         contactType: data.contactType,
         businessName: data.businessName || null,
         installAddress: data.installAddress,
@@ -123,8 +142,9 @@ export async function POST(request: Request) {
         email: data.email,
         productType: data.productType,
         requestedSize: data.requestedSize || null,
-        siteImageName: upload.name,
-        siteImageUrl: upload.url,
+        siteImageName: siteImageName || null,
+        siteImageUrl,
+        siteImageUrls: siteImageUrls.length ? siteImageUrls : null,
         callbackDate: data.callbackDate || null,
         referralSource: data.referralSource,
         note: data.note || null,
@@ -146,7 +166,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ ok: true, id: lead.id, notify });
     }
 
-    // Compact JSON leads (estimate / contact / fab)
+    // Compact JSON leads (contact / fab)
     const body = await request.json();
     const parsed = leadSchema.safeParse(body);
     if (!parsed.success) {
@@ -157,20 +177,25 @@ export async function POST(request: Request) {
     }
 
     const data = parsed.data;
+    const noteParts = [
+      data.inquiryType ? `เรื่องที่ติดต่อ: ${data.inquiryType}` : null,
+      data.message || null,
+    ].filter(Boolean);
+
     const lead = await createLead({
       source: data.source,
       contactName: data.fullName,
       phone: data.phone,
-      contactType: "ไม่ระบุ",
+      contactType: data.companyName?.trim() ? "นิติบุคคล" : "ไม่ระบุ",
       installAddress: "-",
       email: data.email || "no-email@changtee.local",
-      productType: data.productInterest || "อื่นๆ",
+      productType: data.productInterest || data.inquiryType || "อื่นๆ",
       referralSource: "เว็บไซต์",
-      note: data.message || null,
+      note: noteParts.length ? noteParts.join("\n\n") : null,
       lineId: data.lineId || null,
-      estimatePayload: data.estimatePayload ?? null,
-      jobTitle: null,
-      businessName: null,
+      estimatePayload: null,
+      jobTitle: data.jobTitle || null,
+      businessName: data.companyName || null,
       billingAddress: null,
       taxId: null,
       requestedSize: null,

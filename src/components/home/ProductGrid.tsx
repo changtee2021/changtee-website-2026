@@ -1,41 +1,58 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
-import { homeProductTiles } from "@/lib/mock-content";
+import { HomePanel } from "@/components/home/HomePanel";
+import { Reveal } from "@/components/home/Reveal";
+import { useSectionValues } from "@/lib/cms/demo-store";
+import { HOME_SECTION_DEFAULTS } from "@/lib/cms/page-sections";
 
 export function ProductGrid() {
+  const { values, enabled } = useSectionValues(
+    "home",
+    "products",
+    HOME_SECTION_DEFAULTS.products,
+  );
+  if (!enabled) return null;
+
+  const tiles = [1, 2, 3, 4, 5, 6, 7, 8].map((n) => ({
+    name: values[`tile${n}Name`] ?? "",
+    href: values[`tile${n}Href`] ?? "/products",
+    image: values[`tile${n}Image`] ?? HOME_SECTION_DEFAULTS.products[`tile${n}Image`],
+  }));
+
   return (
-    <section className="bg-white py-12 md:py-16">
-      <div className="mx-auto max-w-6xl px-4">
-        <h2 className="text-center font-display text-2xl font-bold text-navy md:text-3xl">
-          สินค้าและบริการช่างตี๋
-        </h2>
-        <div className="mx-auto mt-2 h-1 w-16 bg-brand-red" />
-        <div className="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-4">
-          {homeProductTiles.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              className="group block overflow-hidden transition hover:opacity-90"
-              aria-label={item.name}
-            >
-              <div className="relative aspect-[3/4] w-full">
+    <HomePanel tone="clear">
+      <div className="px-1 py-4 sm:px-2 sm:py-6 md:py-8">
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-4 sm:gap-3">
+          {tiles.map((item, i) => (
+            <Reveal key={`${item.href}-${i}`} delayStep={i}>
+              <Link
+                href={item.href}
+                className="group relative block aspect-[3/4] overflow-hidden rounded-xl"
+                aria-label={item.name}
+              >
                 <Image
                   src={item.image}
                   alt={item.name}
                   fill
-                  className="object-contain transition group-hover:scale-[1.02]"
-                  sizes="(max-width: 640px) 50vw, 220px"
+                  className="object-cover transition-transform duration-300 group-hover:scale-[1.03]"
+                  sizes="(max-width: 640px) 45vw, 220px"
                 />
-              </div>
-            </Link>
+              </Link>
+            </Reveal>
           ))}
         </div>
-        <div className="mt-8 text-center">
-          <Link href="/products" className="text-sm font-semibold text-brand-red hover:underline">
-            ดูสินค้าทั้งหมด
+
+        <div className="mt-6 flex justify-center">
+          <Link
+            href="/products"
+            className="text-sm font-semibold text-brand-red hover:underline"
+          >
+            {values.allLinkLabel}
           </Link>
         </div>
       </div>
-    </section>
+    </HomePanel>
   );
 }

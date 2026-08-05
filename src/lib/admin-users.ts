@@ -92,7 +92,7 @@ export const DEMO_STAFF: StaffUser[] = [
   {
     id: "staff-sales-01",
     employeeCode: "000101",
-    fullName: "เชลล์โล",
+    fullName: "เซลล์โส",
     email: "sale.lo@changtee-curtain.com",
     phone: "092-887-4288",
     role: "sales",

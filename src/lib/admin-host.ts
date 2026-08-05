@@ -68,14 +68,12 @@ const MARKETING_PREFIXES = [
   "/products",
   "/portfolio",
   "/blog",
-  "/estimate",
   "/quote",
   "/about",
   "/contact",
   "/privacy",
   "/cookies",
   "/terms",
-  "/sale-gallery",
   "/thank-you",
 ] as const;
 
