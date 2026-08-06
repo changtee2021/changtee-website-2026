@@ -154,6 +154,10 @@ export function findStaffByEmployeeCode(
   return users.find((u) => u.employeeCode === normalized) ?? null;
 }
 
+export function getBootstrapAdmin(users: StaffUser[] = DEMO_STAFF): StaffUser {
+  return findStaffByEmployeeCode(BOOTSTRAP_ADMIN_CODE, users) ?? users[0];
+}
+
 export function roleHasPermission(role: AppRole, permission: PermissionKey) {
   return ROLE_PERMISSIONS[role].includes(permission);
 }

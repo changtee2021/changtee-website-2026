@@ -4,11 +4,13 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   ExternalLink,
-  LogIn,
+  LogOut,
   PanelLeftClose,
   PanelLeftOpen,
 } from "lucide-react";
-import { ADMIN_AUTH_ENFORCED, getBootstrapAdmin } from "@/lib/admin-auth";
+import { useRouter } from "next/navigation";
+import { ADMIN_AUTH_ENFORCED } from "@/lib/admin-auth-edge";
+import { getBootstrapAdmin } from "@/lib/admin-users";
 import {
   adminHref,
   adminNavGroups,
@@ -19,6 +21,7 @@ import { cn } from "@/lib/utils";
 type AdminSidebarProps = {
   basePath: string;
   siteUrl: string;
+  sessionLabel?: { fullName: string; employeeCode: string; roleLabel: string };
   onNavigate?: () => void;
   headerAction?: React.ReactNode;
   /** Desktop icon-rail mode */
@@ -29,13 +32,27 @@ type AdminSidebarProps = {
 export function AdminSidebar({
   basePath,
   siteUrl,
+  sessionLabel,
   onNavigate,
   headerAction,
   collapsed = false,
   onToggleCollapse,
 }: AdminSidebarProps) {
+  const router = useRouter();
   const pathname = usePathname() || basePath || "/";
   const bootstrapAdmin = getBootstrapAdmin();
+  const user = sessionLabel ?? {
+    fullName: bootstrapAdmin.fullName,
+    employeeCode: bootstrapAdmin.employeeCode,
+    roleLabel: "แอดมิน",
+  };
+
+  async function logout() {
+    await fetch("/api/admin/session", { method: "DELETE" });
+    onNavigate?.();
+    router.replace(adminHref(basePath, "/login"));
+    router.refresh();
+  }
 
   return (
     <aside className="flex h-full w-full flex-col bg-navy-deep text-white">
@@ -158,28 +175,26 @@ export function AdminSidebar({
         {!collapsed ? (
           <div className="mb-2 rounded-lg bg-white/5 px-3 py-2.5">
             <div className="truncate text-xs font-medium text-white/90">
-              {bootstrapAdmin.fullName}
+              {user.fullName}
             </div>
             <div className="mt-0.5 text-[11px] text-white/45">
-              รหัส {bootstrapAdmin.employeeCode} · แอดมิน
-              {!ADMIN_AUTH_ENFORCED ? " · ยังไม่บังคับ login" : null}
+              รหัส {user.employeeCode} · {user.roleLabel}
+              {!ADMIN_AUTH_ENFORCED ? " · auth ปิดอยู่" : null}
             </div>
           </div>
         ) : null}
-        <Link
-          href={adminHref(basePath, "/login")}
-          onClick={onNavigate}
-          title="หน้า Login (เตรียมระบบ)"
+        <button
+          type="button"
+          onClick={() => void logout()}
+          title="ออกจากระบบ"
           className={cn(
-            "mb-1 flex items-center rounded-lg text-sm text-white/65 transition-colors hover:bg-white/10 hover:text-white",
+            "mb-1 flex w-full items-center rounded-lg text-sm text-white/65 transition-colors hover:bg-white/10 hover:text-white",
             collapsed ? "justify-center px-2 py-2.5" : "gap-2 px-3 py-2.5",
           )}
         >
-          <LogIn className="size-4 shrink-0" />
-          {!collapsed ? (
-            <span className="truncate">หน้า Login (เตรียมระบบ)</span>
-          ) : null}
-        </Link>
+          <LogOut className="size-4 shrink-0" />
+          {!collapsed ? <span className="truncate">ออกจากระบบ</span> : null}
+        </button>
         <a
           href={siteUrl}
           target="_blank"

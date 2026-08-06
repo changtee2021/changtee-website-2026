@@ -1,25 +1,35 @@
 /**
- * Admin auth scaffold — prepared for tomorrow's real login wiring.
- *
- * When `ADMIN_AUTH_ENFORCED` is false (default):
- * - Admin pages stay open without login
- * - `/admin/login` is a preview UI only
- *
- * Tomorrow: set `ADMIN_AUTH_ENFORCED = true`, wire Supabase Auth
- * (employee_code + password), protect `/admin/*` in middleware.
+ * Admin auth — cookie session gate (employee_code + password via demo staff).
+ * Set `ADMIN_AUTH_ENFORCED=false` only for emergency local open access.
  */
 
+import { cookies } from "next/headers";
 import {
   APP_ROLE_LABELS,
-  BOOTSTRAP_ADMIN_CODE,
   DEMO_STAFF,
   findStaffByEmployeeCode,
+  getBootstrapAdmin,
   type AppRole,
   type StaffUser,
 } from "@/lib/admin-users";
+import {
+  ADMIN_AUTH_ENFORCED,
+  getAuthRedirectIfNeeded,
+  isAdminLoginPath,
+} from "@/lib/admin-auth-edge";
+import {
+  ADMIN_SESSION_COOKIE,
+  ADMIN_SESSION_USER_COOKIE,
+  isValidAdminSessionValue,
+  resolveStaffFromEmployeeCode,
+} from "@/lib/admin-session";
 
-/** Flip to true when ready to require login on /admin */
-export const ADMIN_AUTH_ENFORCED = false;
+export {
+  ADMIN_AUTH_ENFORCED,
+  getAuthRedirectIfNeeded,
+  getBootstrapAdmin,
+  isAdminLoginPath,
+};
 
 export type AdminSessionUser = {
   employeeCode: string;
@@ -43,16 +53,6 @@ export function toSessionUser(staff: StaffUser): AdminSessionUser {
   };
 }
 
-export function getBootstrapAdmin(): StaffUser {
-  return (
-    findStaffByEmployeeCode(BOOTSTRAP_ADMIN_CODE, DEMO_STAFF) ?? DEMO_STAFF[0]
-  );
-}
-
-/**
- * Preview credential check against demo staff (local only).
- * Not used for route protection until ADMIN_AUTH_ENFORCED is true.
- */
 export function previewLogin(
   employeeCode: string,
   password: string,
@@ -74,35 +74,14 @@ export function previewLogin(
   return { ok: true, user: toSessionUser(staff) };
 }
 
-/**
- * Placeholder for tomorrow's session reader (cookie / Supabase).
- * Returns null while auth is not enforced — admin stays open.
- */
+/** Read admin session from httpOnly cookies (server components / route handlers). */
 export async function getAdminSession(): Promise<AdminSessionUser | null> {
-  if (!ADMIN_AUTH_ENFORCED) return null;
-  // TODO(tomorrow):
-  // 1) supabase.auth.getUser()
-  // 2) load changtee_web.profiles.employee_code + user_roles.role
-  // 3) return toSessionUser(...)
-  return null;
-}
-
-/**
- * Call from middleware tomorrow when ADMIN_AUTH_ENFORCED is true.
- * Returns redirect path to login, or null if allowed.
- */
-export function getAuthRedirectIfNeeded(
-  pathname: string,
-  basePath: string,
-  hasSession: boolean,
-): string | null {
-  if (!ADMIN_AUTH_ENFORCED) return null;
-  if (isAdminLoginPath(pathname, basePath)) return null;
-  if (hasSession) return null;
-  return `${basePath}/login`.replace(/\/+/g, "/") || "/login";
-}
-
-export function isAdminLoginPath(pathname: string, basePath: string): boolean {
-  const loginPath = `${basePath}/login`.replace(/\/+/g, "/") || "/login";
-  return pathname === loginPath || pathname.endsWith("/login");
+  const jar = await cookies();
+  if (!isValidAdminSessionValue(jar.get(ADMIN_SESSION_COOKIE)?.value)) {
+    return null;
+  }
+  const staff =
+    resolveStaffFromEmployeeCode(jar.get(ADMIN_SESSION_USER_COOKIE)?.value) ??
+    getBootstrapAdmin();
+  return toSessionUser(staff);
 }

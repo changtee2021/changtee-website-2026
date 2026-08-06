@@ -4,7 +4,7 @@ import { useEffect, useState, useSyncExternalStore } from "react";
 import { usePathname } from "next/navigation";
 import { Menu, PanelLeftOpen, X } from "lucide-react";
 import { AdminSidebar } from "@/components/admin/AdminSidebar";
-import { isAdminLoginPath } from "@/lib/admin-auth";
+import { isAdminLoginPath } from "@/lib/admin-auth-edge";
 import { resolveAdminPageTitle } from "@/lib/admin-nav";
 import { cn } from "@/lib/utils";
 
@@ -31,10 +31,16 @@ function readSidebarCollapsed(): boolean {
 type AdminShellProps = {
   basePath: string;
   siteUrl: string;
+  sessionLabel?: { fullName: string; employeeCode: string; roleLabel: string };
   children: React.ReactNode;
 };
 
-export function AdminShell({ basePath, siteUrl, children }: AdminShellProps) {
+export function AdminShell({
+  basePath,
+  siteUrl,
+  sessionLabel,
+  children,
+}: AdminShellProps) {
   const pathname = usePathname() || basePath || "/";
   /** Open only while path matches — auto-closes on navigation */
   const [openForPath, setOpenForPath] = useState<string | null>(null);
@@ -82,6 +88,7 @@ export function AdminShell({ basePath, siteUrl, children }: AdminShellProps) {
         <AdminSidebar
           basePath={basePath}
           siteUrl={siteUrl}
+          sessionLabel={sessionLabel}
           collapsed={desktopCollapsed}
           onToggleCollapse={toggleDesktopSidebar}
         />
@@ -112,6 +119,7 @@ export function AdminShell({ basePath, siteUrl, children }: AdminShellProps) {
           <AdminSidebar
             basePath={basePath}
             siteUrl={siteUrl}
+            sessionLabel={sessionLabel}
             onNavigate={() => setOpenForPath(null)}
             headerAction={
               <button

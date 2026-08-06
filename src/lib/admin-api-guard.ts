@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
-
-const DEMO_SESSION_VALUE = "1";
+import {
+  ADMIN_SESSION_COOKIE,
+  isValidAdminSessionValue,
+} from "@/lib/admin-session";
 
 export function assertAdminApiAccess(request: Request): NextResponse | null {
   if (process.env.ALLOW_OPEN_ADMIN_API === "true") return null;
@@ -9,12 +11,10 @@ export function assertAdminApiAccess(request: Request): NextResponse | null {
     .get("cookie")
     ?.split(";")
     .map((value) => value.trim())
-    .find((value) => value.startsWith("changtee_admin="))
-    ?.slice("changtee_admin=".length);
-  const sessionSecret = process.env.ADMIN_SESSION_SECRET;
-  const hasValidSession =
-    (process.env.NODE_ENV !== "production" && session === DEMO_SESSION_VALUE) ||
-    (Boolean(sessionSecret) && session === sessionSecret);
+    .find((value) => value.startsWith(`${ADMIN_SESSION_COOKIE}=`))
+    ?.slice(`${ADMIN_SESSION_COOKIE}=`.length);
+
+  const hasValidSession = isValidAdminSessionValue(session);
   const hasValidDevKey =
     Boolean(process.env.ADMIN_DEV_API_KEY) &&
     request.headers.get("x-admin-dev-key") === process.env.ADMIN_DEV_API_KEY;

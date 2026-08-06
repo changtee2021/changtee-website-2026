@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { LockKeyhole, UserRound } from "lucide-react";
 import { BOOTSTRAP_ADMIN_CODE } from "@/lib/admin-users";
 import { adminHref } from "@/lib/admin-nav";
@@ -11,16 +11,15 @@ type AdminLoginFormProps = {
 };
 
 export function AdminLoginForm({ basePath }: AdminLoginFormProps) {
+  const router = useRouter();
   const [employeeCode, setEmployeeCode] = useState(BOOTSTRAP_ADMIN_CODE);
   const [password, setPassword] = useState("");
-  const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
-    setMessage(null);
     setIsSubmitting(true);
 
     try {
@@ -40,7 +39,8 @@ export function AdminLoginForm({ basePath }: AdminLoginFormProps) {
         return;
       }
 
-      setMessage(`เข้าสู่ระบบแล้ว: ${result.user.fullName} (${result.user.roleLabel})`);
+      router.replace(adminHref(basePath, ""));
+      router.refresh();
     } catch {
       setError("ไม่สามารถเชื่อมต่อระบบเข้าสู่ระบบได้");
     } finally {
@@ -63,8 +63,8 @@ export function AdminLoginForm({ basePath }: AdminLoginFormProps) {
           </div>
         </div>
 
-        <div className="mt-4 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2.5 text-xs text-amber-900">
-          การเข้าสู่ระบบนี้ใช้สำหรับป้องกัน Admin API ระหว่างเชื่อมระบบ Auth เต็มรูปแบบ
+        <div className="mt-4 rounded-xl border border-line bg-paper px-3 py-2.5 text-xs text-muted">
+          ต้องเข้าสู่ระบบก่อนเข้าใช้งานหลังบ้าน
         </div>
 
         <form onSubmit={onSubmit} className="mt-6 space-y-4">
@@ -91,6 +91,7 @@ export function AdminLoginForm({ basePath }: AdminLoginFormProps) {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 autoComplete="current-password"
+                required
                 className="w-full rounded-xl border border-line bg-paper py-2.5 pl-10 pr-3 text-sm text-navy outline-none focus:border-navy"
               />
             </div>
@@ -101,37 +102,35 @@ export function AdminLoginForm({ basePath }: AdminLoginFormProps) {
               {error}
             </p>
           ) : null}
-          {message ? (
-            <p className="rounded-lg bg-emerald-50 px-3 py-2 text-sm text-emerald-800">
-              {message}
-            </p>
-          ) : null}
 
           <button
             type="submit"
             disabled={isSubmitting}
-            className="w-full rounded-xl bg-navy py-2.5 text-sm font-medium text-white hover:bg-navy-deep"
+            className="w-full rounded-xl bg-navy py-2.5 text-sm font-medium text-white hover:bg-navy-deep disabled:opacity-60"
           >
             {isSubmitting ? "กำลังเข้าสู่ระบบ…" : "เข้าสู่ระบบ Admin"}
           </button>
         </form>
 
         <div className="mt-5 rounded-xl border border-line bg-paper px-3 py-3 text-xs text-muted">
-          <div className="font-medium text-navy">บัญชี bootstrap (local demo)</div>
+          <div className="font-medium text-navy">บัญชี bootstrap</div>
           <div className="mt-1">
-            รหัสพนักงาน: <span className="font-mono text-navy">{BOOTSTRAP_ADMIN_CODE}</span>
+            รหัสพนักงาน:{" "}
+            <span className="font-mono text-navy">{BOOTSTRAP_ADMIN_CODE}</span>
             {" · "}
             บทบาท: แอดมิน
           </div>
-          <div>กำหนด `DEMO_ADMIN_PASSWORD` สำหรับ local development</div>
+          <div className="mt-1">
+            Local: รหัสผ่านเริ่มต้นใน{" "}
+            <span className="font-mono">DEMO_ADMIN_PASSWORD</span> (หรือ{" "}
+            <span className="font-mono">changtee000000</span>)
+          </div>
+          <div>
+            Production: ต้องตั้ง{" "}
+            <span className="font-mono">DEMO_ADMIN_PASSWORD</span> และ{" "}
+            <span className="font-mono">ADMIN_SESSION_SECRET</span>
+          </div>
         </div>
-
-        <Link
-          href={adminHref(basePath, "")}
-          className="mt-5 block text-center text-sm font-medium text-brand-red hover:underline"
-        >
-          กลับเข้า Admin
-        </Link>
       </div>
     </div>
   );

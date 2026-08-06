@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Bai_Jamjuree, IBM_Plex_Sans_Thai } from "next/font/google";
 import { siteConfig } from "@/lib/site-config";
 import "./globals.css";
@@ -22,6 +22,7 @@ export const metadata: Metadata = {
     template: `%s | ${siteConfig.name}`,
   },
   description: siteConfig.description,
+  applicationName: siteConfig.name,
   openGraph: {
     title: siteConfig.name,
     description: siteConfig.description,
@@ -29,6 +30,21 @@ export const metadata: Metadata = {
     type: "website",
     siteName: siteConfig.name,
   },
+  twitter: {
+    card: "summary_large_image",
+    title: siteConfig.name,
+    description: siteConfig.description,
+  },
+  icons: {
+    icon: [{ url: "/images/brand/logo-mark.png", type: "image/png" }],
+    apple: [{ url: "/images/brand/logo-mark.png" }],
+  },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#0b1220",
+  width: "device-width",
+  initialScale: 1,
 };
 
 export default function RootLayout({
