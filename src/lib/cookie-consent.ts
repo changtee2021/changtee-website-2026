@@ -46,12 +46,21 @@ export function parseConsent(raw: string | null): CookieConsentState | null {
   }
 }
 
+/** Cached so useSyncExternalStore getSnapshot stays referentially stable. */
+let consentCacheKey: string | undefined;
+let consentSnapshot: CookieConsentState | null = null;
+
 export function readConsent(): CookieConsentState | null {
   if (typeof window === "undefined") return null;
-  const current = parseConsent(window.localStorage.getItem(COOKIE_CONSENT_KEY));
-  if (current) return current;
-  // Legacy key from older banner (accept-all)
-  return parseConsent(window.localStorage.getItem("ctc-cookie-consent"));
+  const rawV2 = window.localStorage.getItem(COOKIE_CONSENT_KEY);
+  const rawLegacy = window.localStorage.getItem("ctc-cookie-consent");
+  const key = `${rawV2 ?? ""}\0${rawLegacy ?? ""}`;
+  if (consentCacheKey === key) return consentSnapshot;
+
+  consentCacheKey = key;
+  const current = parseConsent(rawV2);
+  consentSnapshot = current ?? parseConsent(rawLegacy);
+  return consentSnapshot;
 }
 
 export function writeConsent(
@@ -67,9 +76,12 @@ export function writeConsent(
     marketing: next.marketing,
     updatedAt: new Date().toISOString(),
   };
-  window.localStorage.setItem(COOKIE_CONSENT_KEY, JSON.stringify(state));
+  const serialized = JSON.stringify(state);
+  window.localStorage.setItem(COOKIE_CONSENT_KEY, serialized);
   // migrate away from legacy key
   window.localStorage.removeItem("ctc-cookie-consent");
+  consentCacheKey = `${serialized}\0`;
+  consentSnapshot = state;
   window.dispatchEvent(new CustomEvent(COOKIE_CONSENT_EVENT, { detail: state }));
   window.dispatchEvent(new Event("storage"));
   return state;

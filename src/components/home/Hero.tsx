@@ -94,35 +94,16 @@ export function Hero() {
             className="relative"
           >
             <div className="relative aspect-[4/3] overflow-hidden rounded-[1.5rem] bg-white/10 md:-mr-4 md:-my-2 lg:-mr-8">
-              {len === 0 ? (
-                <Image
-                  src={FALLBACK.src}
-                  alt={FALLBACK.alt}
-                  fill
-                  priority
-                  className="object-cover"
-                  sizes="(max-width: 768px) 100vw, 560px"
-                />
-              ) : (
-                slides.map((slide, i) => (
-                  <div
-                    key={slide.id}
-                    className={`absolute inset-0 transition-opacity duration-700 ${
-                      i === safeIndex ? "opacity-100" : "opacity-0"
-                    }`}
-                    aria-hidden={i !== safeIndex}
-                  >
-                    <Image
-                      src={slide.src}
-                      alt={slide.alt || slide.subtitle}
-                      fill
-                      priority={i === 0}
-                      className="object-cover"
-                      sizes="(max-width: 768px) 100vw, 560px"
-                    />
-                  </div>
-                ))
-              )}
+              {/* One image at a time — stacking every slide was crashing light browsers */}
+              <Image
+                key={active?.id ?? "fallback"}
+                src={active?.src ?? FALLBACK.src}
+                alt={active?.alt || active?.subtitle || FALLBACK.alt}
+                fill
+                priority
+                className="object-cover"
+                sizes="(max-width: 768px) 100vw, 560px"
+              />
             </div>
 
             {active ? (

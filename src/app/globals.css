@@ -29,8 +29,8 @@
   --color-shell: var(--shell);
   --color-panel: var(--panel);
   --radius-panel: 1.75rem;
-  --font-sans: var(--font-body), "Sarabun", sans-serif;
-  --font-display: var(--font-display-family), var(--font-body), "Sarabun", sans-serif;
+  --font-sans: var(--font-body), "IBM Plex Sans Thai", sans-serif;
+  --font-display: var(--font-display-family), var(--font-body), "Bai Jamjuree", "IBM Plex Sans Thai", sans-serif;
 }
 
 body {

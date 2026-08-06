@@ -17,12 +17,14 @@ function subscribeConsent(onStoreChange: () => void) {
   };
 }
 
+const serverConsentSnapshot: CookieConsentState | null = null;
+
 /** Loads GA4 / GTM / Meta Pixel only after analytics/marketing consent */
 export function ConsentAwareScripts() {
   const consent = useSyncExternalStore(
     subscribeConsent,
     readConsent,
-    () => null as CookieConsentState | null,
+    () => serverConsentSnapshot,
   );
 
   const gtmId = process.env.NEXT_PUBLIC_GTM_ID?.trim();
