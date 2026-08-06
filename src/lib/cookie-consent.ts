@@ -82,14 +82,13 @@ export function writeConsent(
   window.localStorage.removeItem("ctc-cookie-consent");
   consentCacheKey = `${serialized}\0`;
   consentSnapshot = state;
+  // Same-tab listeners only — do not fake a `storage` event (native storage
+  // is cross-tab only; faking it can re-enter every consent subscriber).
   window.dispatchEvent(new CustomEvent(COOKIE_CONSENT_EVENT, { detail: state }));
-  window.dispatchEvent(new Event("storage"));
   return state;
 }
 
 export function hasAnsweredConsent(): boolean {
   if (typeof window === "undefined") return true;
-  const legacy = window.localStorage.getItem("ctc-cookie-consent");
-  if (legacy === "accepted") return true;
-  return parseConsent(window.localStorage.getItem(COOKIE_CONSENT_KEY)) !== null;
+  return readConsent() !== null;
 }

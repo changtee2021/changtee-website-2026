@@ -21,17 +21,22 @@ function subscribeConsent(onStoreChange: () => void) {
 
 let settingsOpenEpoch = 0;
 const settingsListeners = new Set<() => void>();
+let settingsWindowBound = false;
 
-function subscribeSettings(onStoreChange: () => void) {
-  settingsListeners.add(onStoreChange);
-  const onEvent = () => {
+function ensureSettingsWindowListener() {
+  if (typeof window === "undefined" || settingsWindowBound) return;
+  settingsWindowBound = true;
+  window.addEventListener("ctc-open-cookie-settings", () => {
     settingsOpenEpoch += 1;
     settingsListeners.forEach((l) => l());
-  };
-  window.addEventListener("ctc-open-cookie-settings", onEvent);
+  });
+}
+
+function subscribeSettings(onStoreChange: () => void) {
+  ensureSettingsWindowListener();
+  settingsListeners.add(onStoreChange);
   return () => {
     settingsListeners.delete(onStoreChange);
-    window.removeEventListener("ctc-open-cookie-settings", onEvent);
   };
 }
 

@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { siteConfig } from "@/lib/site-config";
+import { LazyMapsEmbed } from "@/components/layout/LazyMapsEmbed";
 import { SocialLinks } from "@/components/layout/SocialLinks";
 import { CookieSettingsButton } from "@/components/legal/CookieSettingsButton";
 
@@ -119,13 +120,10 @@ export function SiteFooter() {
             </h3>
             <div className="mt-1 h-0.5 w-10 bg-brand-red" />
             <div className="mt-4 overflow-hidden rounded-xl border border-line bg-paper">
-              <iframe
+              <LazyMapsEmbed
                 title="แผนที่โชว์รูมช่างตี๋ ผ้าม่าน"
                 src={siteConfig.mapsEmbedUrl}
-                className="aspect-[4/3] w-full border-0 lg:aspect-square"
-                loading="lazy"
-                referrerPolicy="no-referrer-when-downgrade"
-                allowFullScreen
+                className="aspect-[4/3] w-full lg:aspect-square"
               />
             </div>
             <a

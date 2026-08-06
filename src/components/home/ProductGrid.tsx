@@ -3,7 +3,6 @@
 import Image from "next/image";
 import Link from "next/link";
 import { HomePanel } from "@/components/home/HomePanel";
-import { Reveal } from "@/components/home/Reveal";
 import { useSectionValues } from "@/lib/cms/demo-store";
 import { HOME_SECTION_DEFAULTS } from "@/lib/cms/page-sections";
 
@@ -26,22 +25,21 @@ export function ProductGrid() {
       <div className="px-1 py-4 sm:px-2 sm:py-6 md:py-8">
         <div className="grid grid-cols-2 gap-2 sm:grid-cols-4 sm:gap-3">
           {tiles.map((item, i) => (
-            <Reveal key={`${item.href}-${i}`} delayStep={i}>
-              <Link
-                href={item.href}
-                className="group relative block aspect-[3/4] overflow-hidden rounded-xl"
-                aria-label={item.name}
-              >
-                <Image
-                  src={item.image}
-                  alt={item.name}
-                  fill
-                  loading={i < 4 ? "eager" : "lazy"}
-                  className="object-cover transition-transform duration-300 group-hover:scale-[1.03]"
-                  sizes="(max-width: 640px) 45vw, 220px"
-                />
-              </Link>
-            </Reveal>
+            <Link
+              key={`${item.href}-${i}`}
+              href={item.href}
+              className="group relative block aspect-[3/4] overflow-hidden rounded-xl"
+              aria-label={item.name}
+            >
+              <Image
+                src={item.image}
+                alt={item.name}
+                fill
+                loading={i < 4 ? "eager" : "lazy"}
+                className="object-cover transition-transform duration-300 group-hover:scale-[1.03]"
+                sizes="(max-width: 640px) 45vw, 220px"
+              />
+            </Link>
           ))}
         </div>
 
