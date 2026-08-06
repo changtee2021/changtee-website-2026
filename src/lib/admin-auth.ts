@@ -1,6 +1,6 @@
 /**
- * Admin auth — cookie session gate (employee_code + password via demo staff).
- * Set `ADMIN_AUTH_ENFORCED=false` only for emergency local open access.
+ * Admin auth — HMAC-signed cookie session.
+ * Production always requires login (see isAdminAuthEnforced).
  */
 
 import { cookies } from "next/headers";
@@ -13,23 +13,25 @@ import {
   type StaffUser,
 } from "@/lib/admin-users";
 import {
-  ADMIN_AUTH_ENFORCED,
   getAuthRedirectIfNeeded,
+  isAdminAuthEnforced,
   isAdminLoginPath,
 } from "@/lib/admin-auth-edge";
 import {
   ADMIN_SESSION_COOKIE,
-  ADMIN_SESSION_USER_COOKIE,
-  isValidAdminSessionValue,
   resolveStaffFromEmployeeCode,
+  verifyAdminSessionToken,
 } from "@/lib/admin-session";
 
 export {
-  ADMIN_AUTH_ENFORCED,
   getAuthRedirectIfNeeded,
   getBootstrapAdmin,
+  isAdminAuthEnforced,
   isAdminLoginPath,
 };
+
+/** Prefer isAdminAuthEnforced() — constant kept for UI that expects a boolean at build time. */
+export const ADMIN_AUTH_ENFORCED = true;
 
 export type AdminSessionUser = {
   employeeCode: string;
@@ -53,6 +55,15 @@ export function toSessionUser(staff: StaffUser): AdminSessionUser {
   };
 }
 
+function timingSafeStringEqual(a: string, b: string): boolean {
+  const max = Math.max(a.length, b.length);
+  let out = a.length === b.length ? 0 : 1;
+  for (let i = 0; i < max; i += 1) {
+    out |= (a.charCodeAt(i) || 0) ^ (b.charCodeAt(i) || 0);
+  }
+  return out === 0;
+}
+
 export function previewLogin(
   employeeCode: string,
   password: string,
@@ -65,23 +76,23 @@ export function previewLogin(
   if (!staff.tempPassword) {
     return {
       ok: false,
-      error: "บัญชียังไม่มีรหัสผ่าน — ให้แอดมินตั้งรหัสผ่านเริ่มต้นก่อน",
+      error:
+        "บัญชียังไม่มีรหัสผ่าน — ตั้ง DEMO_ADMIN_PASSWORD บน Vercel (Production)",
     };
   }
-  if (staff.tempPassword !== password) {
+  if (!timingSafeStringEqual(staff.tempPassword, password)) {
     return { ok: false, error: "รหัสผ่านไม่ถูกต้อง" };
   }
   return { ok: true, user: toSessionUser(staff) };
 }
 
-/** Read admin session from httpOnly cookies (server components / route handlers). */
 export async function getAdminSession(): Promise<AdminSessionUser | null> {
   const jar = await cookies();
-  if (!isValidAdminSessionValue(jar.get(ADMIN_SESSION_COOKIE)?.value)) {
-    return null;
-  }
+  const verified = await verifyAdminSessionToken(
+    jar.get(ADMIN_SESSION_COOKIE)?.value,
+  );
+  if (!verified) return null;
   const staff =
-    resolveStaffFromEmployeeCode(jar.get(ADMIN_SESSION_USER_COOKIE)?.value) ??
-    getBootstrapAdmin();
+    resolveStaffFromEmployeeCode(verified.employeeCode) ?? getBootstrapAdmin();
   return toSessionUser(staff);
 }

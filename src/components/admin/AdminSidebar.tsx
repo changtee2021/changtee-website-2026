@@ -9,7 +9,7 @@ import {
   PanelLeftOpen,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { ADMIN_AUTH_ENFORCED } from "@/lib/admin-auth-edge";
+import { isAdminAuthEnforced } from "@/lib/admin-auth-edge";
 import { getBootstrapAdmin } from "@/lib/admin-users";
 import {
   adminHref,
@@ -179,7 +179,7 @@ export function AdminSidebar({
             </div>
             <div className="mt-0.5 text-[11px] text-white/45">
               รหัส {user.employeeCode} · {user.roleLabel}
-              {!ADMIN_AUTH_ENFORCED ? " · auth ปิดอยู่" : null}
+              {!isAdminAuthEnforced() ? " · auth ปิดอยู่" : null}
             </div>
           </div>
         ) : null}

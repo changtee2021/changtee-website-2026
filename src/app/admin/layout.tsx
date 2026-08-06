@@ -1,7 +1,12 @@
 import type { Metadata } from "next";
 import { headers } from "next/headers";
+import { redirect } from "next/navigation";
 import { AdminShell } from "@/components/admin/AdminShell";
-import { getAdminSession } from "@/lib/admin-auth";
+import {
+  getAdminSession,
+  isAdminAuthEnforced,
+  isAdminLoginPath,
+} from "@/lib/admin-auth";
 import { getSiteUrl } from "@/lib/admin-host";
 
 export const metadata: Metadata = {
@@ -20,7 +25,16 @@ export default async function AdminLayout({
   const headerStore = await headers();
   const onAdminHost = headerStore.get("x-changtee-admin-host") === "1";
   const basePath = onAdminHost ? "" : "/admin";
+  const pathname = headerStore.get("x-changtee-pathname") || `${basePath}/`;
   const session = await getAdminSession();
+
+  if (
+    isAdminAuthEnforced() &&
+    !session &&
+    !isAdminLoginPath(pathname, basePath)
+  ) {
+    redirect(`${basePath}/login`.replace(/\/+/g, "/") || "/login");
+  }
 
   return (
     <AdminShell

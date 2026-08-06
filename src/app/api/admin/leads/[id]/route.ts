@@ -13,7 +13,7 @@ const bodySchema = z.object({
 type Props = { params: Promise<{ id: string }> };
 
 export async function PATCH(request: Request, { params }: Props) {
-  const unauthorized = assertAdminApiAccess(request);
+  const unauthorized = await assertAdminApiAccess(request);
   if (unauthorized) return unauthorized;
 
   try {

@@ -1,11 +1,19 @@
 import { NextResponse } from "next/server";
 import {
   ADMIN_SESSION_COOKIE,
-  isValidAdminSessionValue,
+  verifyAdminSessionToken,
 } from "@/lib/admin-session";
 
-export function assertAdminApiAccess(request: Request): NextResponse | null {
-  if (process.env.ALLOW_OPEN_ADMIN_API === "true") return null;
+function allowOpenAdminApi(): boolean {
+  // Never open admin APIs on Vercel / production
+  if (process.env.VERCEL || process.env.NODE_ENV === "production") return false;
+  return process.env.ALLOW_OPEN_ADMIN_API === "true";
+}
+
+export async function assertAdminApiAccess(
+  request: Request,
+): Promise<NextResponse | null> {
+  if (allowOpenAdminApi()) return null;
 
   const session = request.headers
     .get("cookie")
@@ -14,12 +22,17 @@ export function assertAdminApiAccess(request: Request): NextResponse | null {
     .find((value) => value.startsWith(`${ADMIN_SESSION_COOKIE}=`))
     ?.slice(`${ADMIN_SESSION_COOKIE}=`.length);
 
-  const hasValidSession = isValidAdminSessionValue(session);
+  const verified = await verifyAdminSessionToken(
+    session ? decodeURIComponent(session) : null,
+  );
+
   const hasValidDevKey =
+    !process.env.VERCEL &&
+    process.env.NODE_ENV !== "production" &&
     Boolean(process.env.ADMIN_DEV_API_KEY) &&
     request.headers.get("x-admin-dev-key") === process.env.ADMIN_DEV_API_KEY;
 
-  if (hasValidSession || hasValidDevKey) return null;
+  if (verified || hasValidDevKey) return null;
 
   return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 }

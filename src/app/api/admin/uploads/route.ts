@@ -14,7 +14,7 @@ const ALLOWED: Record<string, ".jpg" | ".png" | ".webp" | ".gif"> = {
 };
 
 export async function POST(request: Request) {
-  const unauthorized = assertAdminApiAccess(request);
+  const unauthorized = await assertAdminApiAccess(request);
   if (unauthorized) return unauthorized;
 
   try {
