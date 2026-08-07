@@ -12,19 +12,29 @@ import {
   type PageSectionRecord,
   sectionStoreKey,
 } from "@/lib/cms/page-sections";
+import type { CmsCollection } from "@/lib/cms/cms-collections";
 
 type Listener = () => void;
 
-function createDemoStore<T>(key: string, seed: T[]) {
+function createDemoStore<T>(
+  localKey: string,
+  seed: T[],
+  collection: CmsCollection,
+) {
   let memory = seed;
   let hydrated = false;
+  let remoteStarted = false;
   const listeners = new Set<Listener>();
 
-  function hydrate() {
+  function notify() {
+    listeners.forEach((l) => l());
+  }
+
+  function hydrateLocal() {
     if (typeof window === "undefined" || hydrated) return;
     hydrated = true;
     try {
-      const raw = window.localStorage.getItem(key);
+      const raw = window.localStorage.getItem(localKey);
       if (!raw) return;
       const parsed = JSON.parse(raw) as T[];
       if (Array.isArray(parsed) && parsed.length > 0) {
@@ -35,8 +45,41 @@ function createDemoStore<T>(key: string, seed: T[]) {
     }
   }
 
+  function pullRemote() {
+    if (typeof window === "undefined" || remoteStarted) return;
+    remoteStarted = true;
+    void fetch(`/api/public/cms/${collection}`, { cache: "no-store" })
+      .then((res) => res.json())
+      .then((json: { items?: T[] | null }) => {
+        if (!Array.isArray(json.items) || json.items.length === 0) return;
+        memory = json.items;
+        hydrated = true;
+        try {
+          window.localStorage.setItem(localKey, JSON.stringify(json.items));
+        } catch {
+          /* ignore quota */
+        }
+        notify();
+      })
+      .catch(() => {
+        /* keep local/seed */
+      });
+  }
+
+  function pushRemote(next: T[]) {
+    if (typeof window === "undefined") return;
+    void fetch(`/api/admin/cms/${collection}`, {
+      method: "PUT",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ items: next }),
+    }).catch(() => {
+      /* offline / not logged in — local still updated */
+    });
+  }
+
   function getSnapshot(): T[] {
-    hydrate();
+    hydrateLocal();
+    pullRemote();
     return memory;
   }
 
@@ -48,9 +91,14 @@ function createDemoStore<T>(key: string, seed: T[]) {
     memory = next;
     hydrated = true;
     if (typeof window !== "undefined") {
-      window.localStorage.setItem(key, JSON.stringify(next));
+      try {
+        window.localStorage.setItem(localKey, JSON.stringify(next));
+      } catch {
+        /* ignore */
+      }
+      pushRemote(next);
     }
-    listeners.forEach((l) => l());
+    notify();
   }
 
   function subscribe(listener: Listener) {
@@ -59,7 +107,7 @@ function createDemoStore<T>(key: string, seed: T[]) {
   }
 
   function read(): T[] {
-    hydrate();
+    hydrateLocal();
     return memory;
   }
 
@@ -69,11 +117,17 @@ function createDemoStore<T>(key: string, seed: T[]) {
 const portfolioStore = createDemoStore<PortfolioItem>(
   "changtee.cms.portfolio.v1",
   DEMO_PORTFOLIO,
+  "portfolio",
 );
-const blogStore = createDemoStore<BlogPost>("changtee.cms.blog.v1", DEMO_BLOG);
+const blogStore = createDemoStore<BlogPost>(
+  "changtee.cms.blog.v1",
+  DEMO_BLOG,
+  "blog",
+);
 const heroSlideStore = createDemoStore<HeroSlide>(
   "changtee.cms.hero-slides.v1",
   DEMO_HERO_SLIDES,
+  "hero-slides",
 );
 
 export function usePortfolioItems(): PortfolioItem[] {
@@ -164,6 +218,7 @@ export function removeHeroSlide(id: string) {
 const pageSectionStore = createDemoStore<PageSectionRecord>(
   "changtee.cms.page-sections.v1",
   seedHomeSectionRecords(),
+  "page-sections",
 );
 
 export function usePageSections(): PageSectionRecord[] {

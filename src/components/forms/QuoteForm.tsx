@@ -1,10 +1,14 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Check, Eye, ImageIcon, MapPin, Trash2, X } from "lucide-react";
 import { PdpaConsentField } from "@/components/forms/PdpaConsentField";
+import {
+  isTurnstileEnabled,
+  TurnstileField,
+} from "@/components/forms/TurnstileField";
 import {
   CONTACT_TYPES,
   PRODUCT_TYPES,
@@ -106,6 +110,10 @@ export function QuoteForm() {
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [sheetOpen, setSheetOpen] = useState(false);
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
+  const onTurnstile = useCallback((token: string | null) => {
+    setTurnstileToken(token);
+  }, []);
   const [siteImages, setSiteImages] = useState<SiteImageItem[]>([]);
   const [preview, setPreview] = useState<PreviewState>(() => {
     const product = resolveProductType(searchParams.get("product"));
@@ -182,6 +190,14 @@ export function QuoteForm() {
   async function onSubmit(formData: FormData) {
     setPending(true);
     setError(null);
+
+    if (isTurnstileEnabled() && !turnstileToken) {
+      setError("กรุณายืนยันว่าคุณไม่ใช่บอท");
+      setPending(false);
+      setSheetOpen(false);
+      return;
+    }
+    if (turnstileToken) formData.set("turnstileToken", turnstileToken);
 
     const mapUrl = normalizeMapsUrl(preview.installMapUrl);
     if (mapUrl && !looksLikeMapsUrl(mapUrl)) {
@@ -533,6 +549,7 @@ export function QuoteForm() {
 
             <div className="md:col-span-2 xl:col-span-3">
               <PdpaConsentField />
+              <TurnstileField onToken={onTurnstile} />
             </div>
 
             {error ? (

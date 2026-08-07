@@ -1,18 +1,32 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { useRouter } from "next/navigation";
 import { PdpaConsentField } from "@/components/forms/PdpaConsentField";
+import {
+  isTurnstileEnabled,
+  TurnstileField,
+} from "@/components/forms/TurnstileField";
 import { companyInquiryTypes } from "@/lib/about-content";
 
 export function CompanyContactForm() {
   const router = useRouter();
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
+  const onTurnstile = useCallback((token: string | null) => {
+    setTurnstileToken(token);
+  }, []);
 
   async function onSubmit(formData: FormData) {
     setPending(true);
     setError(null);
+
+    if (isTurnstileEnabled() && !turnstileToken) {
+      setError("กรุณายืนยันว่าคุณไม่ใช่บอท");
+      setPending(false);
+      return;
+    }
 
     const payload = {
       source: "contact" as const,
@@ -25,6 +39,7 @@ export function CompanyContactForm() {
       inquiryType: String(formData.get("inquiryType") || ""),
       message: String(formData.get("message") || ""),
       pdpaAccepted: formData.get("pdpaAccepted") === "on",
+      turnstileToken: turnstileToken || undefined,
     };
 
     try {
@@ -82,6 +97,7 @@ export function CompanyContactForm() {
         />
       </label>
       <PdpaConsentField />
+      <TurnstileField onToken={onTurnstile} />
       {error ? <p className="text-sm text-brand-red">{error}</p> : null}
       <button
         type="submit"

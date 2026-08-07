@@ -5,6 +5,11 @@ import { quoteLeadSchema, leadSchema } from "@/lib/validations/lead";
 import { createLead } from "@/lib/leads/store";
 import { sendQuoteEmails } from "@/lib/email/mailer";
 import type { QuoteLead } from "@/lib/leads/types";
+import { verifyTurnstileToken } from "@/lib/security/turnstile";
+import {
+  canUseSupabaseStorage,
+  uploadPublicFile,
+} from "@/lib/storage/upload";
 
 export const runtime = "nodejs";
 
@@ -50,15 +55,31 @@ async function saveUpload(file: File | null) {
     throw new Error("UPLOAD_TYPE_NOT_ALLOWED");
   }
 
-  const uploadsDir = path.join(process.cwd(), "public", "uploads", "leads");
-  await fs.mkdir(uploadsDir, { recursive: true });
   const baseName =
     file.name
       .replace(/\.[^.]+$/, "")
       .replace(/[^\w\-ก-๙]+/g, "_")
       .replace(/^_+|_+$/g, "") || "upload";
-  const safeName = `${Date.now()}-${baseName}${extension}`;
   const buffer = Buffer.from(await file.arrayBuffer());
+
+  if (canUseSupabaseStorage()) {
+    const uploaded = await uploadPublicFile({
+      folder: "leads",
+      fileName: `${baseName}${extension}`,
+      bytes: buffer,
+      contentType: file.type,
+    });
+    return { name: file.name, url: uploaded.url };
+  }
+
+  // Local filesystem only (dev). Production must use Supabase Storage.
+  if (process.env.NODE_ENV === "production" || process.env.VERCEL) {
+    throw new Error("STORAGE_NOT_CONFIGURED");
+  }
+
+  const uploadsDir = path.join(process.cwd(), "public", "uploads", "leads");
+  await fs.mkdir(uploadsDir, { recursive: true });
+  const safeName = `${Date.now()}-${baseName}${extension}`;
   await fs.writeFile(path.join(uploadsDir, safeName), buffer);
   return {
     name: file.name,
@@ -76,9 +97,17 @@ export async function POST(request: Request) {
 
   try {
     const contentType = request.headers.get("content-type") || "";
+    const ip = getRequestIp(request);
 
     if (contentType.includes("multipart/form-data")) {
       const form = await request.formData();
+      const turnstile = await verifyTurnstileToken(
+        String(form.get("turnstileToken") || ""),
+        ip,
+      );
+      if (!turnstile.ok) {
+        return NextResponse.json({ error: turnstile.error }, { status: 400 });
+      }
       const siteFiles = form
         .getAll("siteImage")
         .filter((f): f is File => f instanceof File && f.size > 0)
@@ -168,6 +197,13 @@ export async function POST(request: Request) {
 
     // Compact JSON leads (contact / fab)
     const body = await request.json();
+    const turnstile = await verifyTurnstileToken(
+      typeof body?.turnstileToken === "string" ? body.turnstileToken : "",
+      ip,
+    );
+    if (!turnstile.ok) {
+      return NextResponse.json({ error: turnstile.error }, { status: 400 });
+    }
     const parsed = leadSchema.safeParse(body);
     if (!parsed.success) {
       return NextResponse.json(
@@ -237,6 +273,12 @@ export async function POST(request: Request) {
       return NextResponse.json(
         { error: "รองรับเฉพาะไฟล์รูป JPG, PNG หรือ WebP" },
         { status: 400 },
+      );
+    }
+    if (err instanceof Error && err.message === "STORAGE_NOT_CONFIGURED") {
+      return NextResponse.json(
+        { error: "ระบบอัปโหลดรูปยังไม่พร้อม กรุณาลองใหม่หรือส่งโดยไม่แนบรูป" },
+        { status: 503 },
       );
     }
     const error =

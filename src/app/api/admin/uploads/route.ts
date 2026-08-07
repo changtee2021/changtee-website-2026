@@ -1,7 +1,9 @@
 import { NextResponse } from "next/server";
-import { promises as fs } from "fs";
-import path from "path";
 import { assertAdminApiAccess } from "@/lib/admin-api-guard";
+import {
+  canUseSupabaseStorage,
+  uploadPublicFile,
+} from "@/lib/storage/upload";
 
 export const runtime = "nodejs";
 
@@ -18,6 +20,16 @@ export async function POST(request: Request) {
   if (unauthorized) return unauthorized;
 
   try {
+    if (!canUseSupabaseStorage()) {
+      return NextResponse.json(
+        {
+          error:
+            "ยังไม่ได้ตั้ง Supabase Storage (SUPABASE_SERVICE_ROLE_KEY) — อัปโหลดบน production ใช้ไม่ได้",
+        },
+        { status: 503 },
+      );
+    }
+
     const form = await request.formData();
     const file = form.get("file");
     const folderRaw = String(form.get("folder") || "misc");
@@ -40,19 +52,20 @@ export async function POST(request: Request) {
       );
     }
 
-    const uploadsDir = path.join(process.cwd(), "public", "uploads", folder);
-    await fs.mkdir(uploadsDir, { recursive: true });
+    const buffer = Buffer.from(await file.arrayBuffer());
     const baseName =
       file.name
         .replace(/\.[^.]+$/, "")
         .replace(/[^\w\-ก-๙]+/g, "_")
         .replace(/^_+|_+$/g, "") || "upload";
-    const safeName = `${Date.now()}-${baseName}${extension}`;
-    const buffer = Buffer.from(await file.arrayBuffer());
-    await fs.writeFile(path.join(uploadsDir, safeName), buffer);
+    const uploaded = await uploadPublicFile({
+      folder,
+      fileName: `${baseName}${extension}`,
+      bytes: buffer,
+      contentType: file.type,
+    });
 
-    const url = `/uploads/${folder}/${safeName}`;
-    return NextResponse.json({ url, name: file.name });
+    return NextResponse.json({ url: uploaded.url, name: file.name });
   } catch (error) {
     console.error("admin upload failed", error);
     return NextResponse.json({ error: "อัปโหลดไม่สำเร็จ" }, { status: 500 });

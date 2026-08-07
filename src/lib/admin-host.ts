@@ -75,6 +75,10 @@ const MARKETING_PREFIXES = [
   "/cookies",
   "/terms",
   "/thank-you",
+  "/400",
+  "/500",
+  "/503",
+  "/505",
 ] as const;
 
 export function isMarketingPath(pathname: string): boolean {
