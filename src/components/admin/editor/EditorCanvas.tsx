@@ -75,21 +75,41 @@ export function EditorCanvas({
     };
   }, [requestKey, pageKey]);
 
+  /** Prefer current origin when SITE_URL is missing/localhost on a real host. */
+  const resolvedSiteUrl = useMemo(() => {
+    const fallback =
+      typeof window !== "undefined" ? window.location.origin : siteUrl;
+    try {
+      const configured = new URL(siteUrl);
+      if (
+        typeof window !== "undefined" &&
+        (configured.hostname === "localhost" || configured.hostname === "127.0.0.1") &&
+        window.location.hostname !== "localhost" &&
+        window.location.hostname !== "127.0.0.1"
+      ) {
+        return window.location.origin;
+      }
+      return configured.origin;
+    } catch {
+      return fallback;
+    }
+  }, [siteUrl]);
+
   const iframeSrc = useMemo(() => {
     if (!token) return null;
     const path = livePath.startsWith("/") ? livePath : `/${livePath}`;
-    const url = new URL(path === "/" ? "/" : path, siteUrl);
+    const url = new URL(path === "/" ? "/" : path, resolvedSiteUrl);
     url.searchParams.set(PREVIEW_QUERY, token);
     return url.toString();
-  }, [token, livePath, siteUrl]);
+  }, [token, livePath, resolvedSiteUrl]);
 
   const targetOrigin = useMemo(() => {
     try {
-      return new URL(siteUrl).origin;
+      return new URL(resolvedSiteUrl).origin;
     } catch {
-      return siteUrl;
+      return resolvedSiteUrl;
     }
-  }, [siteUrl]);
+  }, [resolvedSiteUrl]);
 
   useEffect(() => {
     if (!ready || !iframeRef.current?.contentWindow) return;
@@ -123,8 +143,9 @@ export function EditorCanvas({
       <div className="flex h-full min-h-[320px] flex-col items-center justify-center gap-2 p-6 text-center text-sm text-muted">
         <p className="font-medium text-navy">โหลดพรีวิวไม่ได้</p>
         <p>{tokenError}</p>
-        <p className="text-xs">
-          ตรวจว่า ADMIN_SESSION_SECRET ตั้งค่าแล้ว และล็อกอินอยู่
+        <p className="max-w-sm text-xs">
+          ถ้าขึ้น Unauthorized / SECRET — ตั้ง ADMIN_SESSION_SECRET บน Vercel
+          แล้ว redeploy (โหมดเปิดแอดมินไม่ต้องล็อกอิน)
         </p>
       </div>
     );

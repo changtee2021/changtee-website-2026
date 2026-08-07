@@ -24,7 +24,16 @@ function TreeNode({
   dirtyPageKeys: Set<string>;
 }) {
   const hasChildren = Boolean(node.children?.length);
-  const [open, setOpen] = useState(depth < 1 || node.children?.some((c) => c.id === activeId || c.children?.some((g) => g.id === activeId)));
+  const [open, setOpen] = useState(
+    depth < 1 ||
+      Boolean(
+        node.children?.some(
+          (c) =>
+            c.id === activeId ||
+            c.children?.some((g) => g.id === activeId),
+        ),
+      ),
+  );
   const isActive = node.id === activeId;
   const dirty = node.pageKey ? dirtyPageKeys.has(node.pageKey) : false;
 
@@ -35,40 +44,26 @@ function TreeNode({
         ? adminHref(basePath, `/editor/${node.id.replace(/\./g, "/")}`)
         : null;
 
-  const row = (
-    <div
-      className={cn(
-        "flex w-full items-center gap-1 rounded-lg px-2 py-1.5 text-left text-sm transition",
-        isActive
-          ? "bg-navy text-white"
-          : "text-navy/90 hover:bg-paper",
-        node.status === "locked" || node.status === "soon"
-          ? "opacity-60"
-          : "",
-      )}
-      style={{ paddingLeft: 8 + depth * 12 }}
-    >
-      {hasChildren ? (
-        <button
-          type="button"
-          className="shrink-0 rounded p-0.5 hover:bg-black/5"
-          onClick={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            setOpen((v) => !v);
-          }}
-          aria-label={open ? "หุบ" : "ขยาย"}
-        >
-          {open ? (
-            <ChevronDown className="size-3.5" />
-          ) : (
-            <ChevronRight className="size-3.5" />
-          )}
-        </button>
-      ) : (
-        <span className="inline-block w-4" />
-      )}
+  const toggle = () => setOpen((v) => !v);
 
+  const chevronIcon = hasChildren ? (
+    open ? (
+      <ChevronDown className="size-3.5 shrink-0 opacity-70" aria-hidden />
+    ) : (
+      <ChevronRight className="size-3.5 shrink-0 opacity-70" aria-hidden />
+    )
+  ) : (
+    <span className="inline-block w-3.5 shrink-0" />
+  );
+
+  const rowClass = cn(
+    "flex w-full items-center gap-1 rounded-lg px-2 py-1.5 text-left text-sm transition",
+    isActive ? "bg-navy text-white" : "text-navy/90 hover:bg-paper",
+    node.status === "locked" || node.status === "soon" ? "opacity-60" : "",
+  );
+
+  const meta = (
+    <>
       <span className="min-w-0 flex-1 truncate font-medium">
         {node.label}
         {node.kind === "template" && node.status !== "locked" ? (
@@ -87,7 +82,9 @@ function TreeNode({
       ) : null}
 
       {node.status === "soon" ? (
-        <span className="shrink-0 text-[10px] font-medium opacity-70">เร็วๆ นี้</span>
+        <span className="shrink-0 text-[10px] font-medium opacity-70">
+          เร็วๆ นี้
+        </span>
       ) : null}
       {node.status === "locked" && !hasChildren ? (
         <Lock className="size-3 shrink-0 opacity-50" />
@@ -95,22 +92,59 @@ function TreeNode({
       {node.status === "external" ? (
         <ExternalLink className="size-3 shrink-0 opacity-60" />
       ) : null}
-    </div>
+    </>
   );
+
+  let body: React.ReactNode;
+  if (href && (node.status === "editable" || node.status === "external")) {
+    body = (
+      <div className={rowClass} style={{ paddingLeft: 8 + depth * 12 }}>
+        {hasChildren ? (
+          <button
+            type="button"
+            className="shrink-0 rounded p-0.5 hover:bg-black/5"
+            onClick={toggle}
+            aria-label={open ? "หุบ" : "ขยาย"}
+          >
+            {chevronIcon}
+          </button>
+        ) : (
+          chevronIcon
+        )}
+        <Link href={href} className="flex min-w-0 flex-1 items-center gap-1">
+          {meta}
+        </Link>
+      </div>
+    );
+  } else if (hasChildren) {
+    body = (
+      <button
+        type="button"
+        className={cn(rowClass, "w-full")}
+        style={{ paddingLeft: 8 + depth * 12 }}
+        onClick={toggle}
+        aria-expanded={open}
+      >
+        {chevronIcon}
+        {meta}
+      </button>
+    );
+  } else {
+    body = (
+      <div
+        className={rowClass}
+        style={{ paddingLeft: 8 + depth * 12 }}
+        title={node.status === "soon" ? "ยังไม่มี section defs" : undefined}
+      >
+        {chevronIcon}
+        {meta}
+      </div>
+    );
+  }
 
   return (
     <div>
-      {href && (node.status === "editable" || node.status === "external") ? (
-        <Link href={href}>{row}</Link>
-      ) : hasChildren ? (
-        <button type="button" className="w-full" onClick={() => setOpen((v) => !v)}>
-          {row}
-        </button>
-      ) : (
-        <div title={node.status === "soon" ? "ยังไม่มี section defs" : undefined}>
-          {row}
-        </div>
-      )}
+      {body}
       {hasChildren && open
         ? node.children!.map((child) => (
             <TreeNode
