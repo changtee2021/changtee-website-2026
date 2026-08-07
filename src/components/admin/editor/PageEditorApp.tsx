@@ -1,9 +1,11 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { SectionDraftProvider } from "@/components/admin/cms/section-draft-context";
 import { EditorCanvas } from "@/components/admin/editor/EditorCanvas";
 import { PageEditorShell } from "@/components/admin/editor/PageEditorShell";
+import { DEMO_BLOG } from "@/lib/cms/blog-demo";
+import { DEMO_PORTFOLIO } from "@/lib/cms/portfolio-demo";
 import { PRODUCT_PAGE_KEY } from "@/lib/cms/page-sections";
 import type { DeviceKey } from "@/lib/editor/protocol";
 import type { EditorPageNode } from "@/lib/editor/page-registry";
@@ -17,6 +19,44 @@ const allProducts = productCatalog.flatMap((c) =>
   })),
 );
 
+const publishedBlogSlugs = DEMO_BLOG.filter(
+  (p) => p.status === "published" && p.slug,
+).map((p) => ({ slug: p.slug, title: p.title }));
+
+const publishedPortfolioSlugs = DEMO_PORTFOLIO.filter(
+  (p) => p.status === "published" && p.slug,
+).map((p) => ({ slug: p.slug, title: p.title }));
+
+function PreviewSelect({
+  label,
+  value,
+  onChange,
+  options,
+}: {
+  label: string;
+  value: string;
+  onChange: (next: string) => void;
+  options: { value: string; label: string }[];
+}) {
+  if (options.length === 0) return null;
+  return (
+    <label className="hidden max-w-full items-center gap-2 text-sm md:flex">
+      <span className="shrink-0 text-muted">{label}</span>
+      <select
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className="max-w-[220px] truncate rounded-full border border-line bg-white px-3 py-1.5 text-sm font-medium text-navy outline-none focus:border-navy/40"
+      >
+        {options.map((opt) => (
+          <option key={opt.value} value={opt.value}>
+            {opt.label}
+          </option>
+        ))}
+      </select>
+    </label>
+  );
+}
+
 export function PageEditorApp({
   page,
   basePath,
@@ -26,11 +66,17 @@ export function PageEditorApp({
   basePath: string;
   siteUrl: string;
 }) {
-  const [previewKey, setPreviewKey] = useState(
+  const [productKey, setProductKey] = useState(
     () =>
       allProducts[0]
         ? `${allProducts[0].category.slug}/${allProducts[0].product.slug}`
         : "",
+  );
+  const [blogSlug, setBlogSlug] = useState(
+    () => publishedBlogSlugs[0]?.slug ?? "",
+  );
+  const [portfolioSlug, setPortfolioSlug] = useState(
+    () => publishedPortfolioSlugs[0]?.slug ?? "",
   );
   const [device, setDevice] = useState<DeviceKey>("desktop");
 
@@ -39,11 +85,26 @@ export function PageEditorApp({
   }, [page.pageKey]);
 
   const livePath = useMemo(() => {
-    if (page.pageKey === PRODUCT_PAGE_KEY) {
-      return `/products/${previewKey}`;
+    if (page.pageKey === PRODUCT_PAGE_KEY && productKey) {
+      return `/products/${productKey}`;
     }
-    return page.livePath.includes("[") ? "/" : page.livePath;
-  }, [page.pageKey, page.livePath, previewKey]);
+    if (page.pageKey === "blogPost" && blogSlug) {
+      return `/blog/${blogSlug}`;
+    }
+    if (page.pageKey === "portfolioItem" && portfolioSlug) {
+      return `/portfolio/${portfolioSlug}`;
+    }
+    if (page.livePath.includes("[")) {
+      return "/";
+    }
+    return page.livePath;
+  }, [
+    page.pageKey,
+    page.livePath,
+    productKey,
+    blogSlug,
+    portfolioSlug,
+  ]);
 
   if (page.status !== "editable" || !page.pageKey || !page.defs || !page.defaults) {
     return (
@@ -68,26 +129,44 @@ export function PageEditorApp({
     );
   }
 
-  const productToolbar =
-    page.pageKey === PRODUCT_PAGE_KEY ? (
-      <label className="hidden max-w-full items-center gap-2 text-sm md:flex">
-        <span className="shrink-0 text-muted">พรีวิวด้วย</span>
-        <select
-          value={previewKey}
-          onChange={(e) => setPreviewKey(e.target.value)}
-          className="max-w-[200px] truncate rounded-full border border-line bg-white px-3 py-1.5 text-sm font-medium text-navy outline-none focus:border-navy/40"
-        >
-          {allProducts.map((p) => (
-            <option
-              key={`${p.category.slug}/${p.product.slug}`}
-              value={`${p.category.slug}/${p.product.slug}`}
-            >
-              {p.category.name} · {p.product.name}
-            </option>
-          ))}
-        </select>
-      </label>
-    ) : null;
+  let toolbar: ReactNode = null;
+  if (page.pageKey === PRODUCT_PAGE_KEY) {
+    toolbar = (
+      <PreviewSelect
+        label="พรีวิวด้วย"
+        value={productKey}
+        onChange={setProductKey}
+        options={allProducts.map((p) => ({
+          value: `${p.category.slug}/${p.product.slug}`,
+          label: `${p.category.name} · ${p.product.name}`,
+        }))}
+      />
+    );
+  } else if (page.pageKey === "blogPost") {
+    toolbar = (
+      <PreviewSelect
+        label="พรีวิวด้วย"
+        value={blogSlug}
+        onChange={setBlogSlug}
+        options={publishedBlogSlugs.map((p) => ({
+          value: p.slug,
+          label: p.title,
+        }))}
+      />
+    );
+  } else if (page.pageKey === "portfolioItem") {
+    toolbar = (
+      <PreviewSelect
+        label="พรีวิวด้วย"
+        value={portfolioSlug}
+        onChange={setPortfolioSlug}
+        options={publishedPortfolioSlugs.map((p) => ({
+          value: p.slug,
+          label: p.title,
+        }))}
+      />
+    );
+  }
 
   return (
     <SectionDraftProvider
@@ -100,7 +179,7 @@ export function PageEditorApp({
         page={page}
         basePath={basePath}
         siteUrl={siteUrl}
-        toolbar={productToolbar}
+        toolbar={toolbar}
         device={device}
         onDeviceChange={setDevice}
       >

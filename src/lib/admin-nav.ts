@@ -2,11 +2,9 @@ import type { LucideIcon } from "lucide-react";
 import {
   ClipboardList,
   FileText,
-  Home,
   Images,
   LayoutDashboard,
   MessageSquareQuote,
-  Package,
   PanelsTopLeft,
   PencilRuler,
   ScrollText,
@@ -51,8 +49,6 @@ export const adminNavGroups: AdminNavGroup[] = [
           ]
         : []),
       { path: "/cms/hero-slides", label: "สไลด์หน้าแรก", icon: PanelsTopLeft },
-      { path: "/cms/home", label: "หน้าแรก (sections)", icon: Home },
-      { path: "/cms/product-pages", label: "หน้าสินค้า (sections)", icon: Package },
       { path: "/cms/portfolio", label: "ผลงาน", icon: Images },
       { path: "/cms/blog", label: "บทความ", icon: FileText },
       { path: "/cms/reviews", label: "รีวิว", icon: MessageSquareQuote },

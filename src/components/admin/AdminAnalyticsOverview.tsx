@@ -696,12 +696,7 @@ export function AdminAnalyticsOverview({ basePath }: Props) {
           <div className="mt-4 space-y-2">
             {[
               { href: "/leads", label: "คำขอใบเสนอราคา", ready: true },
-              { href: "/cms/home", label: "หน้าแรก (sections)", ready: true },
-              {
-                href: "/cms/product-pages",
-                label: "หน้าสินค้า (sections)",
-                ready: true,
-              },
+              { href: "/editor/home", label: "Page Editor", ready: true },
               { href: "/cms/hero-slides", label: "สไลด์หน้าแรก", ready: true },
               { href: "/cms/portfolio", label: "ผลงาน", ready: true },
               { href: "/cms/blog", label: "บทความ", ready: true },
@@ -770,24 +765,14 @@ export function AdminAnalyticsOverview({ basePath }: Props) {
               <li>
                 ·{" "}
                 <Link
-                  href={adminHref(basePath, "/cms/home")}
+                  href={adminHref(basePath, "/editor/home")}
                   className="font-medium text-brand-red hover:underline"
                 >
-                  หน้าแรก (sections)
+                  Page Editor
                 </Link>{" "}
-                — พรีวิวคลิกแก้รูป/ข้อความ + ปุ่มยืนยัน
+                — หน้าแรก / เกี่ยวกับเรา / ติดต่อ / เทมเพลตสินค้า·บทความ·ผลงาน
               </li>
-              <li>
-                ·{" "}
-                <Link
-                  href={adminHref(basePath, "/cms/product-pages")}
-                  className="font-medium text-brand-red hover:underline"
-                >
-                  หน้าสินค้า (sections)
-                </Link>{" "}
-                — แก้ครั้งเดียวใช้ทุกหน้าสินค้า + ยืนยัน
-              </li>
-              <li>· สไลด์หน้าแรก / ผลงาน / บทความ / รีวิว</li>
+              <li>· สไลด์หน้าแรก / ผลงาน / บทความ / รีวิว (รายการ)</li>
               <li>· Lead คำขอใบเสนอราคา + ตั้งค่าบริษัท</li>
             </ul>
           </div>
@@ -798,7 +783,6 @@ export function AdminAnalyticsOverview({ basePath }: Props) {
             <ul className="mt-3 space-y-2 text-sm text-navy/90">
               <li>· เลย์เอาต์ทุก section (ไม่ให้ลากย้ายโครง)</li>
               <li>· รูปสไตล์ห้อง / คลิปวิดีโอ / ตารางเทียบ / FAQ ต่อรุ่น</li>
-              <li>· บันทึกลง Supabase จริง (ตอนนี้ demo ในเบราว์เซอร์)</li>
               <li>· Feature strip, Services, Catalog บนหน้าแรก</li>
             </ul>
           </div>

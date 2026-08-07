@@ -57,8 +57,18 @@ function previewFrameAncestors(): string {
       /* ignore */
     }
   }
+  const site = getSiteUrl();
+  if (site) {
+    try {
+      origins.add(new URL(site).origin);
+    } catch {
+      /* ignore */
+    }
+  }
   origins.add("https://admin.changtee-curtain.com");
+  origins.add("https://changtee-website-2026.vercel.app");
   origins.add("http://admin.localhost:3000");
+  origins.add("http://localhost:3000");
   return [...origins].join(" ");
 }
 

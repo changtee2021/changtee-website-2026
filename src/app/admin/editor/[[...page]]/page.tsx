@@ -11,8 +11,13 @@ import {
 type Props = { params: Promise<{ page?: string[] }> };
 
 export default async function AdminPageEditorPage({ params }: Props) {
+  const headerStore = await headers();
+  const onAdminHost = headerStore.get("x-changtee-admin-host") === "1";
+  const basePath = onAdminHost ? "" : "/admin";
+  const root = basePath || "/";
+
   if (!isPageEditorEnabled()) {
-    redirect("/admin");
+    redirect(root);
   }
 
   const { page: segments } = await params;
@@ -25,13 +30,10 @@ export default async function AdminPageEditorPage({ params }: Props) {
     const first =
       page.children.find((c) => c.status === "editable") || page.children[0];
     if (first) {
-      redirect(`/admin/editor/${first.id.replace(/\./g, "/")}`);
+      const dest = `${basePath}/editor/${first.id.replace(/\./g, "/")}`;
+      redirect(dest.startsWith("//") ? dest.slice(1) : dest || "/editor/home");
     }
   }
-
-  const headerStore = await headers();
-  const onAdminHost = headerStore.get("x-changtee-admin-host") === "1";
-  const basePath = onAdminHost ? "" : "/admin";
 
   return (
     <PageEditorApp page={page} basePath={basePath} siteUrl={getSiteUrl()} />
