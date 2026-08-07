@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import type { Metadata } from "next";
+import { ContactHeaderCms } from "@/components/contact/ContactHeaderCms";
 import { LeadForm } from "@/components/forms/LeadForm";
 import { siteConfig } from "@/lib/site-config";
 
@@ -13,10 +14,7 @@ export const metadata: Metadata = {
 export default function ContactPage() {
   return (
     <div className="mx-auto max-w-6xl px-4 py-12">
-      <h1 className="font-display text-3xl font-semibold text-navy">ติดต่อเรา</h1>
-      <p className="mt-2 text-muted">
-        หน้าร้านจริง มีโชว์รูมให้เลือกแบบ ครบ จบ ในที่เดียว
-      </p>
+      <ContactHeaderCms />
 
       <div className="mt-8 grid gap-10 lg:grid-cols-2">
         <div className="space-y-6">

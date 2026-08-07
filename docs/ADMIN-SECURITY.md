@@ -29,9 +29,11 @@ node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
 4. HMAC-signed session cookie (8h expiry, httpOnly, Secure on Vercel)
 5. Login rate limit (8 fails → 15 min block per IP isolate)
 6. Timing-safe password compare
-7. Security headers (CSP, frame deny, COOP, Permissions-Policy)
+7. Security headers (CSP `frame-ancestors`, COOP, Permissions-Policy)
 8. `security.txt` at `/.well-known/security.txt`
 9. Admin `noindex` + `Cache-Control: no-store`
+10. CMS public allowlist — draft/history collections are not exposed on `/api/public/cms/*`
+11. Page-editor preview token (`POST /api/admin/cms/preview-token`) — HMAC, 30 min, bound to employee code; preview CSP allows admin host to iframe only with a valid token
 
 ## Bootstrap login
 

@@ -1,18 +1,22 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { PortfolioDetail } from "@/components/portfolio/PortfolioDetail";
-import { DEMO_PORTFOLIO } from "@/lib/cms/portfolio-demo";
-import { getPortfolioBySlug, publishedPortfolio } from "@/lib/cms/public-content";
+import {
+  loadPortfolioItems,
+  loadPublishedPortfolioSlugs,
+} from "@/lib/cms/cms-public-load";
+import { getPortfolioBySlug } from "@/lib/cms/public-content";
 
 type Props = { params: Promise<{ slug: string }> };
 
-export function generateStaticParams() {
-  return publishedPortfolio(DEMO_PORTFOLIO).map((i) => ({ slug: i.slug }));
+export async function generateStaticParams() {
+  return loadPublishedPortfolioSlugs();
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
-  const item = getPortfolioBySlug(slug, DEMO_PORTFOLIO);
+  const items = await loadPortfolioItems();
+  const item = getPortfolioBySlug(slug, items);
   if (!item) return { title: "ผลงาน" };
   return {
     title: item.title,

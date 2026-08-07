@@ -1,7 +1,8 @@
 import { createServiceSupabase } from "@/lib/supabase/server";
 import {
   cmsSettingsKey,
-  type CmsCollection,
+  type AdminCmsCollection,
+  type PublicCmsCollection,
 } from "@/lib/cms/cms-collections";
 
 export function canUseCmsServer(): boolean {
@@ -11,8 +12,15 @@ export function canUseCmsServer(): boolean {
   );
 }
 
+type CmsKey = AdminCmsCollection | PublicCmsCollection;
+
+/**
+ * Read collection items.
+ * - `null` = never set / unavailable (use seed fallback)
+ * - `[]` = intentionally empty
+ */
 export async function readCmsCollection<T>(
-  collection: CmsCollection,
+  collection: CmsKey,
 ): Promise<T[] | null> {
   if (!canUseCmsServer()) return null;
   try {
@@ -23,7 +31,7 @@ export async function readCmsCollection<T>(
       .eq("key", cmsSettingsKey(collection))
       .maybeSingle();
     if (error || !data) return null;
-    const value = data.value as { items?: T[] } | T[] | null;
+    const value = data.value as { items?: T[]; updatedAt?: string } | T[] | null;
     if (Array.isArray(value)) return value;
     if (value && Array.isArray(value.items)) return value.items;
     return null;
@@ -32,22 +40,56 @@ export async function readCmsCollection<T>(
   }
 }
 
+/** Read items + envelope metadata (updatedAt) for optimistic locking */
+export async function readCmsCollectionMeta<T>(
+  collection: CmsKey,
+): Promise<{ items: T[]; updatedAt: string | null } | null> {
+  if (!canUseCmsServer()) return null;
+  try {
+    const supabase = createServiceSupabase();
+    const { data, error } = await supabase
+      .from("site_settings")
+      .select("value, updated_at")
+      .eq("key", cmsSettingsKey(collection))
+      .maybeSingle();
+    if (error || !data) return null;
+    const value = data.value as { items?: T[]; updatedAt?: string } | T[] | null;
+    let items: T[] | null = null;
+    let envelopeUpdatedAt: string | null = null;
+    if (Array.isArray(value)) {
+      items = value;
+    } else if (value && Array.isArray(value.items)) {
+      items = value.items;
+      envelopeUpdatedAt =
+        typeof value.updatedAt === "string" ? value.updatedAt : null;
+    }
+    if (!items) return null;
+    return {
+      items,
+      updatedAt: envelopeUpdatedAt || data.updated_at || null,
+    };
+  } catch {
+    return null;
+  }
+}
+
 export async function writeCmsCollection<T>(
-  collection: CmsCollection,
+  collection: CmsKey,
   items: T[],
-): Promise<{ ok: true } | { ok: false; error: string }> {
+): Promise<{ ok: true; updatedAt: string } | { ok: false; error: string }> {
   if (!canUseCmsServer()) {
     return { ok: false, error: "Supabase service role is not configured" };
   }
   try {
     const supabase = createServiceSupabase();
+    const updatedAt = new Date().toISOString();
     const { error } = await supabase.from("site_settings").upsert({
       key: cmsSettingsKey(collection),
-      value: { items, updatedAt: new Date().toISOString() },
-      updated_at: new Date().toISOString(),
+      value: { items, updatedAt },
+      updated_at: updatedAt,
     });
     if (error) return { ok: false, error: error.message };
-    return { ok: true };
+    return { ok: true, updatedAt };
   } catch (err) {
     return {
       ok: false,

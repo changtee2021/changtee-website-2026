@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { assertAdminApiAccess } from "@/lib/admin-api-guard";
-import { isCmsCollection } from "@/lib/cms/cms-collections";
+import { isAdminCmsCollection } from "@/lib/cms/cms-collections";
 import { readCmsCollection, writeCmsCollection } from "@/lib/cms/cms-server";
 
 export const runtime = "nodejs";
@@ -12,7 +12,7 @@ export async function GET(request: Request, { params }: Props) {
   if (unauthorized) return unauthorized;
 
   const { collection } = await params;
-  if (!isCmsCollection(collection)) {
+  if (!isAdminCmsCollection(collection)) {
     return NextResponse.json({ error: "Unknown collection" }, { status: 404 });
   }
 
@@ -28,7 +28,7 @@ export async function PUT(request: Request, { params }: Props) {
   if (unauthorized) return unauthorized;
 
   const { collection } = await params;
-  if (!isCmsCollection(collection)) {
+  if (!isAdminCmsCollection(collection)) {
     return NextResponse.json({ error: "Unknown collection" }, { status: 404 });
   }
 
@@ -42,5 +42,5 @@ export async function PUT(request: Request, { params }: Props) {
   if (!result.ok) {
     return NextResponse.json({ error: result.error }, { status: 503 });
   }
-  return NextResponse.json({ ok: true });
+  return NextResponse.json({ ok: true, updatedAt: result.updatedAt });
 }

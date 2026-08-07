@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { isCmsCollection } from "@/lib/cms/cms-collections";
+import { isPublicCmsCollection } from "@/lib/cms/cms-collections";
 import { readCmsCollection } from "@/lib/cms/cms-server";
 
 export const runtime = "nodejs";
@@ -8,7 +8,8 @@ type Props = { params: Promise<{ collection: string }> };
 
 export async function GET(_request: Request, { params }: Props) {
   const { collection } = await params;
-  if (!isCmsCollection(collection)) {
+  // Draft / history must never be public — allowlist only
+  if (!isPublicCmsCollection(collection)) {
     return NextResponse.json({ error: "Unknown collection" }, { status: 404 });
   }
 

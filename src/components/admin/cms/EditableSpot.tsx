@@ -4,6 +4,7 @@ import type { ReactNode } from "react";
 import { useSectionDraftOptional } from "@/components/admin/cms/section-draft-context";
 import { cn } from "@/lib/utils";
 
+/** Admin in-canvas hotspot (SectionDraftProvider). */
 export function EditableSpot({
   sectionId,
   fieldKey,
@@ -15,7 +16,6 @@ export function EditableSpot({
   fieldKey: string;
   children: ReactNode;
   className?: string;
-  /** Shown on hover badge */
   label?: string;
 }) {
   const draft = useSectionDraftOptional();
@@ -53,12 +53,12 @@ export function EditableSpot({
       {children}
       <span
         className={cn(
-          "pointer-events-none absolute left-2 top-2 z-10 rounded-full px-2 py-0.5 text-[10px] font-semibold shadow-sm",
+          "pointer-events-none absolute top-2 left-2 z-10 rounded-full px-2 py-0.5 text-[10px] font-semibold shadow-sm",
           active
             ? "bg-brand-red text-white"
             : lockedOut
               ? "bg-navy/70 text-white opacity-100"
-              : "bg-navy/90 text-white opacity-0 group-hover/spot:opacity-100",
+              : "bg-navy/90 text-white opacity-0 [@media(hover:hover)]:group-hover/spot:opacity-100 [@media(hover:none)]:opacity-70",
         )}
       >
         {active

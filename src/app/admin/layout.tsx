@@ -7,7 +7,7 @@ import {
   isAdminAuthEnforced,
   isAdminLoginPath,
 } from "@/lib/admin-auth";
-import { getSiteUrl } from "@/lib/admin-host";
+import { getSiteUrl, isEditorPath } from "@/lib/admin-host";
 
 export const metadata: Metadata = {
   title: {
@@ -34,6 +34,11 @@ export default async function AdminLayout({
     !isAdminLoginPath(pathname, basePath)
   ) {
     redirect(`${basePath}/login`.replace(/\/+/g, "/") || "/login");
+  }
+
+  // Page Editor is its own full-bleed shell (no AdminSidebar)
+  if (isEditorPath(pathname, basePath)) {
+    return children;
   }
 
   return (

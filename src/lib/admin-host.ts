@@ -64,6 +64,10 @@ export function toInternalAdminPath(pathname: string): string {
   return `/admin${pathname.startsWith("/") ? pathname : `/${pathname}`}`;
 }
 
+/**
+ * Public marketing paths (redirected off admin subdomain).
+ * Do NOT add `/editor` here — page editor lives under admin.
+ */
 const MARKETING_PREFIXES = [
   "/products",
   "/portfolio",
@@ -85,4 +89,11 @@ export function isMarketingPath(pathname: string): boolean {
   return MARKETING_PREFIXES.some(
     (p) => pathname === p || pathname.startsWith(`${p}/`),
   );
+}
+
+/** Page editor routes (path mode `/admin/editor` or subdomain `/editor`) */
+export function isEditorPath(pathname: string, basePath = "/admin"): boolean {
+  if (pathname === "/editor" || pathname.startsWith("/editor/")) return true;
+  const prefix = basePath ? `${basePath}/editor` : "/editor";
+  return pathname === prefix || pathname.startsWith(`${prefix}/`);
 }

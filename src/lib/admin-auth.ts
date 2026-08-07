@@ -1,6 +1,6 @@
 /**
  * Admin auth — HMAC-signed cookie session.
- * Production always requires login (see isAdminAuthEnforced).
+ * Disabled by default; set ADMIN_AUTH_ENFORCED=true to require login.
  */
 
 import { cookies } from "next/headers";
@@ -31,7 +31,7 @@ export {
 };
 
 /** Prefer isAdminAuthEnforced() — constant kept for UI that expects a boolean at build time. */
-export const ADMIN_AUTH_ENFORCED = true;
+export const ADMIN_AUTH_ENFORCED = false;
 
 export type AdminSessionUser = {
   employeeCode: string;

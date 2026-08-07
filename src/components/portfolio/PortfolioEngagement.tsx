@@ -2,11 +2,14 @@
 
 import { useEffect } from "react";
 import Link from "next/link";
+import { EditableSpot } from "@/components/preview/EditableSpot";
+import { PortfolioShareBar } from "@/components/portfolio/PortfolioShareBar";
+import { useSectionValues } from "@/lib/cms/demo-store";
 import {
   trackPortfolioQuoteClick,
   trackPortfolioView,
 } from "@/lib/cms/portfolio-analytics";
-import { PortfolioShareBar } from "@/components/portfolio/PortfolioShareBar";
+import { PORTFOLIO_ITEM_SECTION_DEFAULTS } from "@/lib/cms/page-sections/templates";
 
 /** Fire a view once when the public detail page mounts. */
 export function PortfolioViewTracker({
@@ -33,6 +36,12 @@ export function PortfolioQuoteCtas({
   title: string;
 }) {
   const q = `from=portfolio&slug=${encodeURIComponent(slug)}`;
+  const ctaCms = useSectionValues(
+    "portfolioItem",
+    "cta",
+    PORTFOLIO_ITEM_SECTION_DEFAULTS.cta,
+  );
+  if (!ctaCms.enabled) return null;
 
   return (
     <div className="mt-12 space-y-4">
@@ -42,13 +51,21 @@ export function PortfolioQuoteCtas({
         title={title}
       />
       <div className="flex flex-wrap gap-3 rounded-2xl border border-line bg-paper/60 p-5">
-        <Link
-          href={`/quote?${q}`}
-          onClick={() => trackPortfolioQuoteClick(portfolioId)}
-          className="rounded-xl bg-brand-red px-5 py-2.5 text-sm font-semibold text-white hover:opacity-90"
-        >
-          ขอใบเสนอราคา
-        </Link>
+        <EditableSpot sectionId="cta" fieldKey="quoteLabel" className="w-auto">
+          <Link
+            href={`/quote?${q}`}
+            onClick={(e) => {
+              if (typeof window !== "undefined" && window.parent !== window) {
+                e.preventDefault();
+                return;
+              }
+              trackPortfolioQuoteClick(portfolioId);
+            }}
+            className="inline-flex rounded-xl bg-brand-red px-5 py-2.5 text-sm font-semibold text-white hover:opacity-90"
+          >
+            {ctaCms.values.quoteLabel}
+          </Link>
+        </EditableSpot>
       </div>
     </div>
   );

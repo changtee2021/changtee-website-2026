@@ -13,9 +13,11 @@ import { CompanyContactForm } from "@/components/forms/CompanyContactForm";
 import { HomePanel, PanelHeading } from "@/components/home/HomePanel";
 import { Reveal } from "@/components/home/Reveal";
 import {
+  AboutHeroCms,
+  AboutOneStopCms,
+} from "@/components/about/AboutCmsBlocks";
+import {
   aboutClients,
-  aboutHero,
-  aboutOneStop,
   aboutSegments,
   aboutValues,
 } from "@/lib/about-content";
@@ -38,51 +40,7 @@ const segmentIcons = {
 export default function AboutPage() {
   return (
     <div className="bg-shell pb-3 sm:pb-4">
-      {/* Hero */}
-      <section className="px-3 pb-3 pt-3 sm:px-4 sm:pb-4 sm:pt-4">
-        <div className="mx-auto grid w-full max-w-6xl overflow-hidden rounded-[var(--radius-panel)] bg-navy text-white md:grid-cols-[1.05fr_0.95fr]">
-          <div className="flex flex-col justify-center p-7 sm:p-10 md:p-12">
-            <Reveal>
-              <p className="text-xs font-semibold tracking-[0.18em] text-white/55 uppercase">
-                {aboutHero.eyebrow} · {siteConfig.nameEn}
-              </p>
-              <h1 className="mt-4 font-display text-3xl font-semibold leading-tight sm:text-4xl lg:text-[2.75rem]">
-                {aboutHero.title}
-              </h1>
-              <p className="mt-5 max-w-lg text-sm leading-relaxed text-brand-red-soft sm:text-base">
-                {aboutHero.lead}
-              </p>
-              <p className="mt-4 max-w-lg text-sm leading-relaxed text-white/70">
-                {aboutHero.body}
-              </p>
-              <div className="mt-8 flex flex-wrap gap-3">
-                <a
-                  href="#company-contact"
-                  className="inline-flex rounded-full bg-white px-5 py-3 text-sm font-semibold text-navy transition hover:bg-white/90"
-                >
-                  ติดต่อสำหรับองค์กร
-                </a>
-                <Link
-                  href="/quote"
-                  className="inline-flex rounded-full border border-white/35 px-5 py-3 text-sm font-semibold text-white transition hover:bg-white/10"
-                >
-                  ขอใบเสนอราคา
-                </Link>
-              </div>
-            </Reveal>
-          </div>
-          <div className="relative min-h-[280px] md:min-h-full">
-            <Image
-              src={aboutHero.image}
-              alt={aboutHero.imageAlt}
-              fill
-              priority
-              className="object-cover object-top"
-              sizes="(max-width: 768px) 100vw, 45vw"
-            />
-          </div>
-        </div>
-      </section>
+      <AboutHeroCms />
 
       {/* Values */}
       <HomePanel>
@@ -109,45 +67,27 @@ export default function AboutPage() {
 
       {/* One stop + story image */}
       <HomePanel>
-        <div className="grid gap-8 p-7 sm:p-9 md:grid-cols-2 md:items-center md:gap-10 md:p-12">
-          <Reveal>
-            <p className="text-xs font-semibold tracking-[0.16em] text-brand-red uppercase">
-              {aboutOneStop.subtitle}
-            </p>
-            <h2 className="mt-2 font-display text-2xl font-semibold text-navy md:text-3xl">
-              {aboutOneStop.title}
-            </h2>
-            <p className="mt-4 text-sm leading-relaxed text-muted">{aboutOneStop.body}</p>
-            <ul className="mt-6 space-y-2 text-sm text-ink/90">
-              <li>· วัดหน้างานฟรี ทั้งบ้านและโปรเจกต์องค์กร</li>
-              <li>· มีโรงงานผลิตเอง ส่งงานไว คุมคุณภาพได้</li>
-              <li>· รับประกันงานติดตั้ง 1 ปีเต็ม</li>
-            </ul>
-            <div className="mt-7 flex flex-wrap gap-3">
-              <a
-                href={siteConfig.brochureUrl}
-                className="inline-flex rounded-full bg-navy px-5 py-2.5 text-sm font-semibold text-white hover:bg-navy/90"
-              >
-                {siteConfig.brochureLabel}
-              </a>
-              <Link
-                href="/portfolio"
-                className="inline-flex rounded-full border border-line px-5 py-2.5 text-sm font-semibold text-navy hover:bg-paper"
-              >
-                ดูผลงานติดตั้ง
-              </Link>
-            </div>
-          </Reveal>
-          <Reveal delayStep={1} className="relative aspect-[4/5] overflow-hidden rounded-2xl sm:aspect-[5/4] md:aspect-auto md:min-h-[360px]">
-            <Image
-              src={aboutOneStop.image}
-              alt="ช่างตี๋กำลังติดตั้งผ้าม่าน"
-              fill
-              className="object-cover"
-              sizes="(max-width: 768px) 100vw, 45vw"
-            />
-          </Reveal>
-        </div>
+        <AboutOneStopCms>
+          <ul className="mt-6 space-y-2 text-sm text-ink/90">
+            <li>· วัดหน้างานฟรี ทั้งบ้านและโปรเจกต์องค์กร</li>
+            <li>· มีโรงงานผลิตเอง ส่งงานไว คุมคุณภาพได้</li>
+            <li>· รับประกันงานติดตั้ง 1 ปีเต็ม</li>
+          </ul>
+          <div className="mt-7 flex flex-wrap gap-3">
+            <a
+              href={siteConfig.brochureUrl}
+              className="inline-flex rounded-full bg-navy px-5 py-2.5 text-sm font-semibold text-white hover:bg-navy/90"
+            >
+              {siteConfig.brochureLabel}
+            </a>
+            <Link
+              href="/portfolio"
+              className="inline-flex rounded-full border border-line px-5 py-2.5 text-sm font-semibold text-navy hover:bg-paper"
+            >
+              ดูผลงานติดตั้ง
+            </Link>
+          </div>
+        </AboutOneStopCms>
       </HomePanel>
 
       {/* Segments */}

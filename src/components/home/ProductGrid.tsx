@@ -3,6 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { HomePanel } from "@/components/home/HomePanel";
+import { EditableSpot } from "@/components/preview/EditableSpot";
 import { useSectionValues } from "@/lib/cms/demo-store";
 import { HOME_SECTION_DEFAULTS } from "@/lib/cms/page-sections";
 
@@ -15,9 +16,12 @@ export function ProductGrid() {
   if (!enabled) return null;
 
   const tiles = [1, 2, 3, 4, 5, 6, 7, 8].map((n) => ({
+    n,
     name: values[`tile${n}Name`] ?? "",
     href: values[`tile${n}Href`] ?? "/products",
-    image: values[`tile${n}Image`] ?? HOME_SECTION_DEFAULTS.products[`tile${n}Image`],
+    image:
+      values[`tile${n}Image`] ??
+      HOME_SECTION_DEFAULTS.products[`tile${n}Image`],
   }));
 
   return (
@@ -25,31 +29,68 @@ export function ProductGrid() {
       <div className="px-1 py-4 sm:px-2 sm:py-6 md:py-8">
         <div className="grid grid-cols-2 gap-2 sm:grid-cols-4 sm:gap-3">
           {tiles.map((item, i) => (
-            <Link
-              key={`${item.href}-${i}`}
-              href={item.href}
-              className="group relative block aspect-[3/4] overflow-hidden rounded-xl"
-              aria-label={item.name}
-            >
-              <Image
-                src={item.image}
-                alt={item.name}
-                fill
-                loading={i < 4 ? "eager" : "lazy"}
-                className="object-cover transition-transform duration-300 group-hover:scale-[1.03]"
-                sizes="(max-width: 640px) 45vw, 220px"
-              />
-            </Link>
+            <div key={`tile-${item.n}`} className="space-y-1">
+              <EditableSpot
+                sectionId="products"
+                fieldKey={`tile${item.n}Image`}
+                label="รูป"
+              >
+                <Link
+                  href={item.href}
+                  className="group relative block aspect-[3/4] overflow-hidden rounded-xl"
+                  aria-label={item.name}
+                  onClick={(e) => {
+                    // In preview, let EditableSpot handle clicks
+                    if (
+                      typeof window !== "undefined" &&
+                      window.parent !== window
+                    ) {
+                      e.preventDefault();
+                    }
+                  }}
+                >
+                  <Image
+                    src={item.image}
+                    alt={item.name}
+                    fill
+                    loading={i < 4 ? "eager" : "lazy"}
+                    className="object-cover transition-transform duration-300 group-hover:scale-[1.03]"
+                    sizes="(max-width: 640px) 45vw, 220px"
+                  />
+                </Link>
+              </EditableSpot>
+              <EditableSpot
+                sectionId="products"
+                fieldKey={`tile${item.n}Name`}
+                label="ชื่อ"
+              >
+                <p className="truncate px-0.5 text-center text-xs font-medium text-navy sm:text-sm">
+                  {item.name}
+                </p>
+              </EditableSpot>
+            </div>
           ))}
         </div>
 
         <div className="mt-6 flex justify-center">
-          <Link
-            href="/products"
-            className="text-sm font-semibold text-brand-red hover:underline"
+          <EditableSpot
+            sectionId="products"
+            fieldKey="allLinkLabel"
+            label="ลิงก์ดูทั้งหมด"
+            className="w-auto"
           >
-            {values.allLinkLabel}
-          </Link>
+            <Link
+              href="/products"
+              className="text-sm font-semibold text-brand-red hover:underline"
+              onClick={(e) => {
+                if (typeof window !== "undefined" && window.parent !== window) {
+                  e.preventDefault();
+                }
+              }}
+            >
+              {values.allLinkLabel}
+            </Link>
+          </EditableSpot>
         </div>
       </div>
     </HomePanel>

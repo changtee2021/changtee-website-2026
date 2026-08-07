@@ -2,11 +2,14 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { EditableSpot } from "@/components/preview/EditableSpot";
 import {
   SPACE_TYPE_LABELS,
   productLabel,
   type PortfolioItem,
 } from "@/lib/cms/portfolio-demo";
+import { useSectionValues } from "@/lib/cms/demo-store";
+import { PORTFOLIO_ITEM_SECTION_DEFAULTS } from "@/lib/cms/page-sections/templates";
 import { bodyParagraphs } from "@/lib/cms/public-content";
 import {
   PortfolioQuoteCtas,
@@ -24,6 +27,17 @@ export function PortfolioDetailView({
   /** Softer link behavior / placeholder copy in admin preview */
   preview?: boolean;
 }) {
+  const ctaCms = useSectionValues(
+    "portfolioItem",
+    "cta",
+    PORTFOLIO_ITEM_SECTION_DEFAULTS.cta,
+  );
+  const relatedCms = useSectionValues(
+    "portfolioItem",
+    "related",
+    PORTFOLIO_ITEM_SECTION_DEFAULTS.related,
+  );
+
   const gallery = Array.from(
     new Set(
       (item.gallery.length ? item.gallery : [item.image]).filter(Boolean),
@@ -131,9 +145,15 @@ export function PortfolioDetailView({
               title={title}
             />
             <div className="flex flex-wrap gap-3 rounded-2xl border border-line bg-paper/60 p-5">
-              <span className="rounded-xl bg-brand-red px-5 py-2.5 text-sm font-semibold text-white">
-                ขอใบเสนอราคา
-              </span>
+              <EditableSpot
+                sectionId="cta"
+                fieldKey="quoteLabel"
+                className="w-auto"
+              >
+                <span className="inline-flex rounded-xl bg-brand-red px-5 py-2.5 text-sm font-semibold text-white">
+                  {ctaCms.values.quoteLabel}
+                </span>
+              </EditableSpot>
             </div>
           </div>
         ) : (
@@ -144,11 +164,13 @@ export function PortfolioDetailView({
           />
         )}
 
-        {related.length > 0 ? (
+        {related.length > 0 && relatedCms.enabled ? (
           <section className="mt-14">
-            <h2 className="font-display text-xl font-semibold text-navy">
-              ผลงานใกล้เคียง
-            </h2>
+            <EditableSpot sectionId="related" fieldKey="heading">
+              <h2 className="font-display text-xl font-semibold text-navy">
+                {relatedCms.values.heading}
+              </h2>
+            </EditableSpot>
             <div className="mt-4 grid gap-4 sm:grid-cols-3">
               {related.map((r) => (
                 <Link

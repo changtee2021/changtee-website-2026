@@ -13,6 +13,10 @@ export type SectionFieldDef = {
   aspectClassName?: string;
   /** Hint under the field */
   hint?: string;
+  /** template = shared chrome; instance = per-content (not edited here) */
+  scope?: "template" | "instance";
+  /** Shown only when condition holds (e.g. related posts exist) */
+  conditional?: string;
 };
 
 export type SectionDef = {

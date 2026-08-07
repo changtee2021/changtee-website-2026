@@ -3,7 +3,7 @@
 import { notFound } from "next/navigation";
 import {
   getBlogBySlug,
-  publishedPortfolio,
+  portfolioForBlog,
   relatedBlog,
 } from "@/lib/cms/public-content";
 import { useBlogPosts, usePortfolioItems } from "@/lib/cms/demo-store";
@@ -20,8 +20,8 @@ export function BlogDetail({ slug }: { slug: string }) {
   return (
     <BlogDetailView
       post={post}
-      related={relatedBlog(post, posts)}
-      relatedWorks={publishedPortfolio(works).slice(0, 2)}
+      related={relatedBlog(post, posts, 3)}
+      relatedWorks={portfolioForBlog(post, works, 3)}
     />
   );
 }

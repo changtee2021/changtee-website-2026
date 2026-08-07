@@ -1,11 +1,5 @@
-import type { Metadata } from "next";
-import { HomeSectionsCmsBoard } from "@/components/admin/HomeSectionsCmsBoard";
-
-export const metadata: Metadata = {
-  title: "หน้าแรก — sections",
-  robots: { index: false, follow: false },
-};
+import { redirect } from "next/navigation";
 
 export default function AdminHomeSectionsPage() {
-  return <HomeSectionsCmsBoard />;
+  redirect("/admin/editor/home");
 }

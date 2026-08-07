@@ -109,7 +109,7 @@ export function VisualSectionEditorShell({
               )}
             >
               <Check className="size-3.5" />
-              ยืนยันการเปลี่ยนแปลง
+              รับร่างนี้
             </button>
             <button
               type="button"

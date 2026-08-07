@@ -101,6 +101,16 @@ function createDemoStore<T>(
     notify();
   }
 
+  /**
+   * Preview-only write: updates in-memory snapshot and notifies subscribers.
+   * Does NOT touch localStorage or push to Supabase (prevents draft leaking live).
+   */
+  function applyPreview(next: T[]) {
+    memory = next;
+    hydrated = true;
+    notify();
+  }
+
   function subscribe(listener: Listener) {
     listeners.add(listener);
     return () => listeners.delete(listener);
@@ -111,7 +121,14 @@ function createDemoStore<T>(
     return memory;
   }
 
-  return { subscribe, getSnapshot, getServerSnapshot, write, read };
+  return {
+    subscribe,
+    getSnapshot,
+    getServerSnapshot,
+    write,
+    applyPreview,
+    read,
+  };
 }
 
 const portfolioStore = createDemoStore<PortfolioItem>(
@@ -245,6 +262,30 @@ export function upsertPageSection(record: PageSectionRecord) {
     copy[idx] = record;
     setPageSections(copy);
   }
+}
+
+/**
+ * Apply page-section drafts in the preview iframe only.
+ * Never persists to localStorage or Supabase.
+ */
+export function applyPreviewPageSections(records: PageSectionRecord[]) {
+  const prev = pageSectionStore.read();
+  const map = new Map(
+    prev.map((r) => [sectionStoreKey(r.pageKey, r.sectionId), r]),
+  );
+  const now = new Date().toISOString();
+  for (const rec of records) {
+    const k = sectionStoreKey(rec.pageKey, rec.sectionId);
+    const existing = map.get(k);
+    map.set(k, {
+      pageKey: rec.pageKey,
+      sectionId: rec.sectionId,
+      enabled: rec.enabled ?? existing?.enabled ?? true,
+      values: rec.values,
+      updatedAt: now,
+    });
+  }
+  pageSectionStore.applyPreview([...map.values()]);
 }
 
 export function getPageSection(

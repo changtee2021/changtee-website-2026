@@ -36,8 +36,13 @@ type SectionDraftContextValue = {
   confirmField: () => void;
   /** Discard this spot’s edit and close the panel */
   revertField: () => void;
-  /** Save all accepted drafts to the live demo store */
+  /**
+   * Accept current drafts as the editor baseline (does not publish).
+   * Use commitToStore() after a successful publish to sync the live store.
+   */
   confirm: () => void;
+  /** Write accepted drafts into the client page-sections store (post-publish). */
+  commitToStore: () => void;
   discard: () => void;
 };
 
@@ -187,10 +192,17 @@ export function SectionDraftProvider({
   const confirm = useCallback(() => {
     if (fieldDirty) {
       setLockHint(
-        "กรุณายืนยันจุดที่กำลังแก้ก่อน แล้วค่อยกดยืนยันการเปลี่ยนแปลงทั้งหน้า",
+        "กรุณายืนยันจุดที่กำลังแก้ก่อน แล้วค่อยบันทึกร่างหรือเผยแพร่",
       );
       return;
     }
+    setBaseline(cloneMap(drafts));
+    setSelected(null);
+    setOpenValue(null);
+    setLockHint(null);
+  }, [drafts, fieldDirty]);
+
+  const commitToStore = useCallback(() => {
     const now = new Date().toISOString();
     for (const def of defs) {
       const values = drafts[def.id] ?? defaults[def.id] ?? {};
@@ -209,7 +221,7 @@ export function SectionDraftProvider({
     setSelected(null);
     setOpenValue(null);
     setLockHint(null);
-  }, [defs, drafts, defaults, pageKey, stored, fieldDirty]);
+  }, [defs, drafts, defaults, pageKey, stored]);
 
   const discard = useCallback(() => {
     setDrafts(cloneMap(baseline));
@@ -235,6 +247,7 @@ export function SectionDraftProvider({
       confirmField,
       revertField,
       confirm,
+      commitToStore,
       discard,
     }),
     [
@@ -253,6 +266,7 @@ export function SectionDraftProvider({
       confirmField,
       revertField,
       confirm,
+      commitToStore,
       discard,
     ],
   );

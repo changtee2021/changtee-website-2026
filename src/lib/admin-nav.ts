@@ -8,10 +8,12 @@ import {
   MessageSquareQuote,
   Package,
   PanelsTopLeft,
+  PencilRuler,
   ScrollText,
   Settings2,
   Users,
 } from "lucide-react";
+import { isPageEditorEnabled } from "@/lib/editor/page-registry";
 
 export type AdminNavItem = {
   /** Path under admin base, e.g. "" or "/leads" */
@@ -39,6 +41,15 @@ export const adminNavGroups: AdminNavGroup[] = [
   {
     label: "เนื้อหา",
     items: [
+      ...(isPageEditorEnabled()
+        ? [
+            {
+              path: "/editor/home",
+              label: "Page Editor",
+              icon: PencilRuler,
+            } satisfies AdminNavItem,
+          ]
+        : []),
       { path: "/cms/hero-slides", label: "สไลด์หน้าแรก", icon: PanelsTopLeft },
       { path: "/cms/home", label: "หน้าแรก (sections)", icon: Home },
       { path: "/cms/product-pages", label: "หน้าสินค้า (sections)", icon: Package },

@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useMemo, useRef, useState } from "react";
+import { useMemo, useRef, useState, type ReactNode } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { HomePanel } from "@/components/home/HomePanel";
@@ -23,8 +23,8 @@ export function PortfolioPreview({
   title,
   subtitle,
 }: {
-  title?: string;
-  subtitle?: string;
+  title?: ReactNode;
+  subtitle?: ReactNode;
 } = {}) {
   const stored = usePortfolioItems();
   const items = useMemo(() => publishedPortfolio(stored), [stored]);

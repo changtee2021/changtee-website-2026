@@ -1,19 +1,15 @@
 /** Edge-safe auth helpers (no next/headers) for middleware. */
 
 /**
- * Production / Vercel always enforce login.
- * Local can set ADMIN_AUTH_ENFORCED=false only for emergency open access.
+ * Admin login gate — disabled until auth is wired up for daily use.
+ * Set ADMIN_AUTH_ENFORCED=true to require login again.
  */
 export function isAdminAuthEnforced(): boolean {
-  if (process.env.VERCEL_ENV === "production" || process.env.VERCEL === "1") {
-    return true;
-  }
-  if (process.env.NODE_ENV === "production") return true;
-  return process.env.ADMIN_AUTH_ENFORCED !== "false";
+  return process.env.ADMIN_AUTH_ENFORCED === "true";
 }
 
 /** @deprecated use isAdminAuthEnforced() — kept for older imports */
-export const ADMIN_AUTH_ENFORCED = true;
+export const ADMIN_AUTH_ENFORCED = false;
 
 export function isAdminLoginPath(pathname: string, basePath: string): boolean {
   const loginPath = `${basePath}/login`.replace(/\/+/g, "/") || "/login";

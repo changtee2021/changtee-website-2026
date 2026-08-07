@@ -13,6 +13,7 @@
 
 - [Overview](architecture/overview.md)
 - [Data model](architecture/data-model.md)
+- [Page Editor](architecture/page-editor.md)
 
 ## Security / ความปลอดภัย
 
