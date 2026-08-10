@@ -7,8 +7,11 @@ import {
 
 export const runtime = "nodejs";
 
-const MAX_UPLOAD_BYTES = 8 * 1024 * 1024;
-const ALLOWED: Record<string, ".jpg" | ".png" | ".webp" | ".gif"> = {
+const MAX_IMAGE_BYTES = 8 * 1024 * 1024;
+const MAX_PDF_BYTES = 40 * 1024 * 1024;
+const MAX_JSON_BYTES = 2 * 1024 * 1024;
+
+const IMAGE_ALLOWED: Record<string, ".jpg" | ".png" | ".webp" | ".gif"> = {
   "image/jpeg": ".jpg",
   "image/png": ".png",
   "image/webp": ".webp",
@@ -33,21 +36,79 @@ export async function POST(request: Request) {
     const form = await request.formData();
     const file = form.get("file");
     const folderRaw = String(form.get("folder") || "misc");
-    const folder = folderRaw.replace(/[^a-z0-9_-]/gi, "") || "misc";
+    const folder =
+      folderRaw
+        .split("/")
+        .map((part) => part.replace(/[^a-z0-9_-]/gi, ""))
+        .filter(Boolean)
+        .join("/") || "misc";
 
     if (!(file instanceof File) || file.size === 0) {
       return NextResponse.json({ error: "ไม่พบไฟล์" }, { status: 400 });
     }
-    if (file.size > MAX_UPLOAD_BYTES) {
+
+    const lowerName = file.name.toLowerCase();
+    const isPdf =
+      file.type === "application/pdf" || lowerName.endsWith(".pdf");
+    const isJson =
+      file.type === "application/json" ||
+      file.type === "text/json" ||
+      lowerName.endsWith(".json");
+
+    if (isPdf) {
+      if (file.size > MAX_PDF_BYTES) {
+        return NextResponse.json(
+          { error: "PDF ใหญ่เกิน 40MB" },
+          { status: 400 },
+        );
+      }
+      const buffer = Buffer.from(await file.arrayBuffer());
+      const baseName =
+        file.name
+          .replace(/\.[^.]+$/, "")
+          .replace(/[^\w\-ก-๙]+/g, "_")
+          .replace(/^_+|_+$/g, "") || "catalog";
+      const uploaded = await uploadPublicFile({
+        folder,
+        fileName: `${baseName}.pdf`,
+        bytes: buffer,
+        contentType: "application/pdf",
+      });
+      return NextResponse.json({ url: uploaded.url, name: file.name, path: uploaded.path });
+    }
+
+    if (isJson) {
+      if (file.size > MAX_JSON_BYTES) {
+        return NextResponse.json(
+          { error: "JSON ใหญ่เกิน 2MB" },
+          { status: 400 },
+        );
+      }
+      const buffer = Buffer.from(await file.arrayBuffer());
+      const baseName =
+        file.name
+          .replace(/\.[^.]+$/, "")
+          .replace(/[^\w\-ก-๙]+/g, "_")
+          .replace(/^_+|_+$/g, "") || "manifest";
+      const uploaded = await uploadPublicFile({
+        folder,
+        fileName: `${baseName}.json`,
+        bytes: buffer,
+        contentType: "application/json",
+      });
+      return NextResponse.json({ url: uploaded.url, name: file.name, path: uploaded.path });
+    }
+
+    if (file.size > MAX_IMAGE_BYTES) {
       return NextResponse.json(
         { error: "ไฟล์ใหญ่เกิน 8MB" },
         { status: 400 },
       );
     }
-    const extension = ALLOWED[file.type];
+    const extension = IMAGE_ALLOWED[file.type];
     if (!extension) {
       return NextResponse.json(
-        { error: "รองรับเฉพาะ JPG, PNG, WEBP, GIF" },
+        { error: "รองรับเฉพาะ JPG, PNG, WEBP, GIF, PDF หรือ JSON" },
         { status: 400 },
       );
     }
@@ -65,7 +126,7 @@ export async function POST(request: Request) {
       contentType: file.type,
     });
 
-    return NextResponse.json({ url: uploaded.url, name: file.name });
+    return NextResponse.json({ url: uploaded.url, name: file.name, path: uploaded.path });
   } catch (error) {
     console.error("admin upload failed", error);
     return NextResponse.json({ error: "อัปโหลดไม่สำเร็จ" }, { status: 500 });

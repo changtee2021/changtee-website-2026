@@ -20,7 +20,11 @@ export async function uploadPublicFile(opts: {
     throw new Error("STORAGE_NOT_CONFIGURED");
   }
 
-  const folder = opts.folder.replace(/[^a-z0-9_-]/gi, "") || "misc";
+  const folder = opts.folder
+    .split("/")
+    .map((part) => part.replace(/[^a-z0-9_-]/gi, ""))
+    .filter(Boolean)
+    .join("/") || "misc";
   const safeBase =
     opts.fileName
       .replace(/\.[^.]+$/, "")

@@ -1,6 +1,6 @@
-import Image from "next/image";
 import Link from "next/link";
 import { Reveal } from "@/components/home/Reveal";
+import { InstallVideosSection } from "@/components/media/InstallVideosSection";
 import type { ReviewItem } from "@/lib/cms/reviews-demo";
 import {
   REVIEW_SOURCE_LABELS,
@@ -11,10 +11,7 @@ import type {
   InstallVideoClip,
   PrepGuide,
 } from "@/lib/product-decision-aids";
-import {
-  GOOGLE_REVIEWS_URL,
-  YOUTUBE_CHANNEL_URL,
-} from "@/lib/product-decision-aids";
+import { GOOGLE_REVIEWS_URL } from "@/lib/product-decision-aids";
 import type { ReactNode } from "react";
 
 function SectionLabel({ children }: { children: ReactNode }) {
@@ -250,69 +247,10 @@ export function ProductInstallVideosSection({
 
   return (
     <Reveal className="mt-16 sm:mt-20">
-      <section>
-        <div className="flex flex-wrap items-end justify-between gap-3">
-          <div>
-            <SectionLabel>Install videos</SectionLabel>
-            <h2 className="mt-2 font-display text-2xl font-semibold text-navy sm:text-3xl">
-              คลิปสั้นติดตั้ง{categoryName}
-            </h2>
-          </div>
-          <a
-            href={YOUTUBE_CHANNEL_URL}
-            target="_blank"
-            rel="noreferrer"
-            className="shrink-0 rounded-full border border-line bg-white px-4 py-2 text-sm font-semibold text-navy hover:bg-paper"
-          >
-            ดูบน YouTube →
-          </a>
-        </div>
-
-        <div className="mt-6 grid gap-4 sm:grid-cols-3">
-          {clips.slice(0, 3).map((clip) => {
-            const href = clip.videoUrl?.trim() || YOUTUBE_CHANNEL_URL;
-            return (
-              <a
-                key={clip.id}
-                href={href}
-                target="_blank"
-                rel="noreferrer"
-                className="group overflow-hidden rounded-2xl border border-line transition hover:border-navy/25"
-              >
-                <div className="relative aspect-video bg-paper">
-                  <Image
-                    src={clip.thumbnail}
-                    alt={clip.title}
-                    fill
-                    className="object-cover transition duration-500 group-hover:scale-[1.02]"
-                    sizes="(max-width: 640px) 100vw, 33vw"
-                  />
-                  <div className="absolute inset-0 bg-navy/15 transition group-hover:bg-navy/25" />
-                  <span className="absolute inset-0 flex items-center justify-center">
-                    <span className="flex size-12 items-center justify-center rounded-full bg-white/95 text-brand-red shadow-md transition group-hover:scale-105 sm:size-14">
-                      <svg
-                        viewBox="0 0 24 24"
-                        className="ml-0.5 size-5 fill-current sm:size-6"
-                        aria-hidden
-                      >
-                        <path d="M8 5v14l11-7L8 5z" />
-                      </svg>
-                    </span>
-                  </span>
-                  <span className="absolute bottom-2 right-2 rounded bg-navy/85 px-2 py-0.5 text-[11px] font-semibold tabular-nums text-white">
-                    {clip.duration}
-                  </span>
-                </div>
-                <div className="px-3 py-3 sm:px-4">
-                  <p className="text-sm font-semibold text-navy group-hover:text-brand-red">
-                    {clip.title}
-                  </p>
-                </div>
-              </a>
-            );
-          })}
-        </div>
-      </section>
+      <InstallVideosSection
+        title={`คลิปสั้นติดตั้ง${categoryName}`}
+        clips={clips}
+      />
     </Reveal>
   );
 }

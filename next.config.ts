@@ -33,7 +33,7 @@ const securityHeaders = [
       "img-src 'self' data: blob: https:",
       "font-src 'self' data:",
       "connect-src 'self' https://*.supabase.co https://www.google-analytics.com https://www.googletagmanager.com https://connect.facebook.net https://www.facebook.com https://challenges.cloudflare.com",
-      "frame-src 'self' https://www.google.com https://maps.google.com https://www.googletagmanager.com https://challenges.cloudflare.com",
+      "frame-src 'self' https://www.google.com https://maps.google.com https://www.youtube.com https://www.youtube-nocookie.com https://www.googletagmanager.com https://challenges.cloudflare.com",
       "object-src 'none'",
       "base-uri 'self'",
       "form-action 'self'",
@@ -51,7 +51,7 @@ const editorFrameSrc = [
   "img-src 'self' data: blob: https:",
   "font-src 'self' data:",
   "connect-src 'self' https://*.supabase.co https://www.google-analytics.com https://www.googletagmanager.com https://connect.facebook.net https://www.facebook.com https://challenges.cloudflare.com",
-  `frame-src 'self'${frameSrcExtra} https://www.google.com https://maps.google.com https://www.googletagmanager.com https://challenges.cloudflare.com`,
+  `frame-src 'self'${frameSrcExtra} https://www.google.com https://maps.google.com https://www.youtube.com https://www.youtube-nocookie.com https://www.googletagmanager.com https://challenges.cloudflare.com`,
   "object-src 'none'",
   "base-uri 'self'",
   "form-action 'self'",
@@ -71,6 +71,10 @@ const nextConfig: NextConfig = {
       {
         protocol: "https",
         hostname: "pfwygxzwlteqjnnwiwmb.supabase.co",
+      },
+      {
+        protocol: "https",
+        hostname: "i.ytimg.com",
       },
     ],
   },

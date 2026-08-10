@@ -1415,8 +1415,10 @@ export function getProductJsonLd(
   const categoryUrl = `${base}/products/${category.slug}`;
   const image = presentation.assets.hero;
 
+  // Quote-only catalog: Product without Offer (incomplete Offer+no price is invalid for rich results).
+  // Also expose Service so local-service intent is clear.
   const productLd = {
-    "@type": "Product",
+    "@type": ["Product", "Service"],
     name: `${product.name} ${category.name}`,
     description: presentation.seoDescription,
     image: [`${base}${image}`],
@@ -1426,15 +1428,16 @@ export function getProductJsonLd(
     },
     url: productUrl,
     category: category.name,
-    offers: {
-      "@type": "Offer",
-      url: `${base}/quote`,
-      priceCurrency: "THB",
-      availability: "https://schema.org/InStock",
-      seller: {
-        "@type": "Organization",
-        name: siteConfig.legalName,
-      },
+    provider: {
+      "@type": "Organization",
+      name: siteConfig.legalName,
+      url: base,
+    },
+    areaServed: "TH",
+    potentialAction: {
+      "@type": "OrderAction",
+      target: `${base}/quote`,
+      name: "ขอใบเสนอราคา",
     },
   };
 

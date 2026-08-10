@@ -65,9 +65,9 @@ export const SETTINGS_SECTIONS: SettingsSection[] = [
   {
     path: "/settings/seo",
     title: "SEO / Redirect",
-    description: "redirect จาก path เก่า · meta เริ่มต้น",
+    description: "meta เริ่มต้น · OG image (redirect table รอบถัดไป)",
     icon: Link2,
-    status: "soon",
+    status: "ready",
     adminOnly: true,
   },
   {

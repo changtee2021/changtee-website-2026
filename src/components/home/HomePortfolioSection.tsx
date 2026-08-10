@@ -19,11 +19,6 @@ export function HomePortfolioSection() {
           <>{values.title}</>
         </EditableSpot>
       }
-      subtitle={
-        <EditableSpot sectionId="portfolio" fieldKey="subtitle" label="คำโปรย">
-          <>{values.subtitle}</>
-        </EditableSpot>
-      }
     />
   );
 }

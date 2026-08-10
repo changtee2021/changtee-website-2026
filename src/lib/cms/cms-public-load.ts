@@ -1,5 +1,9 @@
 import { DEMO_BLOG, type BlogPost } from "@/lib/cms/blog-demo";
-import { DEMO_PORTFOLIO, type PortfolioItem } from "@/lib/cms/portfolio-demo";
+import {
+  DEMO_PORTFOLIO,
+  normalizePortfolioItem,
+  type PortfolioItem,
+} from "@/lib/cms/portfolio-demo";
 import { readCmsCollection } from "@/lib/cms/cms-server";
 import { publishedBlog, publishedPortfolio } from "@/lib/cms/public-content";
 
@@ -12,7 +16,7 @@ export async function loadBlogPosts(): Promise<BlogPost[]> {
 
 export async function loadPortfolioItems(): Promise<PortfolioItem[]> {
   const items = await readCmsCollection<PortfolioItem>("portfolio");
-  if (items && items.length > 0) return items;
+  if (items && items.length > 0) return items.map(normalizePortfolioItem);
   return DEMO_PORTFOLIO;
 }
 

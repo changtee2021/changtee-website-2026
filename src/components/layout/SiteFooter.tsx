@@ -3,14 +3,15 @@ import Link from "next/link";
 import { siteConfig } from "@/lib/site-config";
 import { LazyMapsEmbed } from "@/components/layout/LazyMapsEmbed";
 import { SocialLinks } from "@/components/layout/SocialLinks";
+import { ThemeToggle } from "@/components/layout/ThemeToggle";
 import { CookieSettingsButton } from "@/components/legal/CookieSettingsButton";
 
 export function SiteFooter() {
   const year = new Date().getFullYear();
 
   return (
-    <footer className="mt-auto border-t border-line bg-white">
-      <div className="mx-auto max-w-6xl px-4 py-12">
+    <footer className="mt-auto border-t border-line bg-panel">
+      <div className="mx-auto max-w-5xl px-6 py-12 sm:px-10 lg:px-16">
         <div className="grid gap-10 md:grid-cols-2 lg:grid-cols-[1.1fr_1fr_1fr]">
           {/* Brand */}
           <div>
@@ -143,7 +144,7 @@ export function SiteFooter() {
       </div>
 
       <div className="bg-[#0b1220] text-white">
-        <div className="mx-auto flex max-w-6xl flex-col gap-3 px-4 py-4 text-xs text-white/70 md:flex-row md:items-center md:justify-between">
+        <div className="mx-auto flex max-w-5xl flex-col gap-3 px-6 py-4 text-xs text-white/70 sm:px-10 md:flex-row md:items-center md:justify-between lg:px-16">
           <nav className="flex flex-wrap items-center gap-x-3 gap-y-1">
             <Link href="/privacy" className="hover:text-white">
               Privacy Policy
@@ -162,9 +163,12 @@ export function SiteFooter() {
               className="text-left text-white/70 hover:text-white"
             />
           </nav>
-          <p>
-            © {year} {siteConfig.legalName}. All rights reserved.
-          </p>
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
+            <ThemeToggle />
+            <p>
+              © {year} {siteConfig.legalName}. All rights reserved.
+            </p>
+          </div>
         </div>
       </div>
     </footer>

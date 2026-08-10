@@ -4,7 +4,9 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { CatalogCard } from "@/components/catalog/CatalogCard";
 import { ProductCtaCard } from "@/components/products/ProductCtaCard";
-import { getCatalogsForCategory } from "@/lib/catalogs";
+import { JsonLd } from "@/components/seo/JsonLd";
+import { loadCatalogsForCategory } from "@/lib/catalogs-server";
+import { getCategoryJsonLd } from "@/lib/category-jsonld";
 import {
   childImage,
   getCategory,
@@ -13,6 +15,7 @@ import {
   quoteProductType,
 } from "@/lib/product-catalog";
 import { getCategoryHighlights } from "@/lib/product-content";
+import { pageMetadata } from "@/lib/seo/meta";
 
 type Props = { params: Promise<{ category: string }> };
 
@@ -24,7 +27,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { category } = await params;
   const cat = getCategory(category);
   if (!cat) return { title: "ไม่พบหมวดสินค้า" };
-  return { title: cat.name, description: cat.summary };
+  return pageMetadata({
+    title: cat.name,
+    description: cat.summary,
+    path: `/products/${cat.slug}`,
+    image: cat.children[0] ? childImage(cat, cat.children[0]) : undefined,
+  });
 }
 
 export default async function CategoryPage({ params }: Props) {
@@ -32,12 +40,13 @@ export default async function CategoryPage({ params }: Props) {
   const cat = getCategory(category);
   if (!cat) notFound();
 
-  const catalogs = getCatalogsForCategory(cat.slug);
+  const catalogs = await loadCatalogsForCategory(cat.slug);
   const pillar = getPillar(cat.pillar);
   const highlights = getCategoryHighlights(cat);
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-10 sm:py-12">
+    <div className="mx-auto max-w-5xl px-6 sm:px-10 lg:px-16 py-10 sm:py-12">
+      <JsonLd data={getCategoryJsonLd(cat)} />
       <p className="text-sm text-muted">
         <Link href="/products" className="hover:text-navy">
           สินค้า/บริการ

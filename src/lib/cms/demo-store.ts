@@ -2,11 +2,20 @@
 
 import { useSyncExternalStore } from "react";
 import { DEMO_BLOG, type BlogPost } from "@/lib/cms/blog-demo";
-import { DEMO_PORTFOLIO, type PortfolioItem } from "@/lib/cms/portfolio-demo";
+import {
+  DEMO_PORTFOLIO,
+  normalizePortfolioItem,
+  type PortfolioItem,
+} from "@/lib/cms/portfolio-demo";
 import {
   DEMO_HERO_SLIDES,
   type HeroSlide,
 } from "@/lib/cms/hero-slides-demo";
+import {
+  DEMO_CATALOGS,
+  normalizeCatalog,
+  type CatalogItem,
+} from "@/lib/cms/catalogs-demo";
 import {
   seedHomeSectionRecords,
   type PageSectionRecord,
@@ -147,25 +156,33 @@ const heroSlideStore = createDemoStore<HeroSlide>(
   "hero-slides",
 );
 
+const catalogStore = createDemoStore<CatalogItem>(
+  "changtee.cms.catalogs.v1",
+  DEMO_CATALOGS,
+  "catalogs",
+);
+
 export function usePortfolioItems(): PortfolioItem[] {
-  return useSyncExternalStore(
+  const raw = useSyncExternalStore(
     portfolioStore.subscribe,
     portfolioStore.getSnapshot,
     portfolioStore.getServerSnapshot,
   );
+  return raw.map((item) => normalizePortfolioItem(item));
 }
 
 export function setPortfolioItems(items: PortfolioItem[]) {
-  portfolioStore.write(items);
+  portfolioStore.write(items.map((item) => normalizePortfolioItem(item)));
 }
 
 export function upsertPortfolioItem(item: PortfolioItem) {
+  const next = normalizePortfolioItem(item);
   const prev = portfolioStore.read();
-  const idx = prev.findIndex((p) => p.id === item.id);
-  if (idx === -1) setPortfolioItems([item, ...prev]);
+  const idx = prev.findIndex((p) => p.id === next.id);
+  if (idx === -1) setPortfolioItems([next, ...prev]);
   else {
     const copy = [...prev];
-    copy[idx] = item;
+    copy[idx] = next;
     setPortfolioItems(copy);
   }
 }
@@ -232,8 +249,38 @@ export function removeHeroSlide(id: string) {
   setHeroSlides(heroSlideStore.read().filter((p) => p.id !== id));
 }
 
+export function useCatalogs(): CatalogItem[] {
+  const raw = useSyncExternalStore(
+    catalogStore.subscribe,
+    catalogStore.getSnapshot,
+    catalogStore.getServerSnapshot,
+  );
+  return raw.map((item) => normalizeCatalog(item));
+}
+
+export function setCatalogs(items: CatalogItem[]) {
+  catalogStore.write(items.map((item) => normalizeCatalog(item)));
+}
+
+export function upsertCatalog(item: CatalogItem) {
+  const next = normalizeCatalog(item);
+  const prev = catalogStore.read();
+  const idx = prev.findIndex((p) => p.id === next.id);
+  if (idx === -1) setCatalogs([next, ...prev]);
+  else {
+    const copy = [...prev];
+    copy[idx] = next;
+    setCatalogs(copy);
+  }
+}
+
+export function removeCatalog(id: string) {
+  setCatalogs(catalogStore.read().filter((p) => p.id !== id));
+}
+
 const pageSectionStore = createDemoStore<PageSectionRecord>(
-  "changtee.cms.page-sections.v1",
+  // v3: reset stale local seeds so home product tile art applies
+  "changtee.cms.page-sections.v3",
   seedHomeSectionRecords(),
   "page-sections",
 );

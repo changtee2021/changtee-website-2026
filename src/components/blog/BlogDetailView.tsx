@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { EditableSpot } from "@/components/preview/EditableSpot";
+import { InstallVideosSection } from "@/components/media/InstallVideosSection";
 import { BLOG_CATEGORY_LABELS, type BlogPost } from "@/lib/cms/blog-demo";
 import type { PortfolioItem } from "@/lib/cms/portfolio-demo";
 import { productLabel } from "@/lib/cms/portfolio-demo";
@@ -15,6 +16,7 @@ import {
   type MdBlock,
 } from "@/lib/cms/markdown";
 import { BLOG_POST_SECTION_DEFAULTS } from "@/lib/cms/page-sections/templates";
+import { installVideosForText } from "@/lib/product-decision-aids";
 
 const INLINE_RE = /\*\*([^*]+)\*\*|\[([^\]]+)\]\(([^)]+)\)/g;
 
@@ -214,6 +216,11 @@ export function BlogDetailView({
     BLOG_POST_SECTION_DEFAULTS.related,
   );
 
+  const installVideos = installVideosForText(
+    `${post.title} ${post.excerpt} ${post.tags.join(" ")} ${post.body}`,
+    3,
+  );
+
   const formatDate = (value: string) =>
     new Date(value).toLocaleDateString("th-TH", {
       year: "numeric",
@@ -375,7 +382,7 @@ export function BlogDetailView({
       ) : null}
 
       {related.length > 0 && relatedCms.enabled ? (
-        <section className="mx-auto mt-14 max-w-6xl px-4">
+        <section className="mx-auto mt-14 max-w-5xl px-6 sm:px-10 lg:px-16">
           <EditableSpot sectionId="related" fieldKey="postsHeading">
             <h2 className="font-display text-xl font-semibold text-navy">
               {relatedCms.values.postsHeading}
@@ -422,7 +429,7 @@ export function BlogDetailView({
       ) : null}
 
       {relatedWorks.length > 0 && relatedCms.enabled ? (
-        <section className="mx-auto mt-14 max-w-6xl px-4">
+        <section className="mx-auto mt-14 max-w-5xl px-6 sm:px-10 lg:px-16">
           <EditableSpot sectionId="related" fieldKey="worksHeading">
             <h2 className="font-display text-xl font-semibold text-navy">
               {relatedCms.values.worksHeading}
@@ -470,6 +477,26 @@ export function BlogDetailView({
             </Link>
           </div>
         </section>
+      ) : null}
+
+      {installVideos.length > 0 && relatedCms.enabled ? (
+        <div className="mx-auto mt-14 max-w-5xl px-6 sm:px-10 lg:px-16">
+          <InstallVideosSection
+            label="YouTube"
+            title={
+              <EditableSpot sectionId="related" fieldKey="videosHeading">
+                <>{relatedCms.values.videosHeading}</>
+              </EditableSpot>
+            }
+            intro={
+              <EditableSpot sectionId="related" fieldKey="videosIntro">
+                <>{relatedCms.values.videosIntro}</>
+              </EditableSpot>
+            }
+            clips={installVideos}
+            headingAs="h2"
+          />
+        </div>
       ) : null}
     </article>
   );

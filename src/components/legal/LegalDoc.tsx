@@ -21,7 +21,7 @@ type Props = {
 
 export function LegalDoc({ title, subtitle, sections, currentPath }: Props) {
   return (
-    <div className="mx-auto max-w-6xl px-4 py-12">
+    <div className="mx-auto max-w-5xl px-6 sm:px-10 lg:px-16 py-12">
       <div className="grid gap-10 lg:grid-cols-[220px_minmax(0,1fr)]">
         <aside className="lg:sticky lg:top-6 lg:self-start">
           <p className="text-xs font-semibold uppercase tracking-wide text-muted">

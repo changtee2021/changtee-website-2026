@@ -3,17 +3,19 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { ContactHeaderCms } from "@/components/contact/ContactHeaderCms";
 import { LeadForm } from "@/components/forms/LeadForm";
+import { pageMetadata } from "@/lib/seo/meta";
 import { siteConfig } from "@/lib/site-config";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata({
   title: "ติดต่อเรา",
   description:
     "ติดต่อโชว์รูมช่างตี๋ ผ้าม่าน แผนที่ร้าน SALE Tel และแอดไลน์ @chang-tee",
-};
+  path: "/contact",
+});
 
 export default function ContactPage() {
   return (
-    <div className="mx-auto max-w-6xl px-4 py-12">
+    <div className="mx-auto max-w-5xl px-6 sm:px-10 lg:px-16 py-12">
       <ContactHeaderCms />
 
       <div className="mt-8 grid gap-10 lg:grid-cols-2">

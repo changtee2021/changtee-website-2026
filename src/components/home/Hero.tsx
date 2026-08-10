@@ -40,8 +40,8 @@ export function Hero() {
   }
 
   return (
-    <section className="px-3 pb-3 pt-3 sm:px-4 sm:pb-4 sm:pt-4">
-      <div className="mx-auto w-full max-w-6xl rounded-[var(--radius-panel)] bg-navy text-white">
+    <section className="px-6 pb-3 pt-3 sm:px-10 sm:pb-4 sm:pt-4 lg:px-16">
+      <div className="mx-auto w-full max-w-5xl overflow-hidden rounded-[var(--radius-panel)] bg-navy text-white">
         <div className="grid gap-8 p-6 sm:p-8 md:grid-cols-[1fr_1fr] md:items-center md:gap-6 md:p-10 lg:p-12">
           <div className="md:pr-4">
             <motion.p
@@ -69,12 +69,6 @@ export function Hero() {
 
             <motion.div {...enter(3)} className="mt-8 flex flex-wrap gap-3">
               <Link
-                href="/quote"
-                className="inline-flex items-center justify-center rounded-full bg-white px-6 py-3 text-sm font-semibold text-navy transition hover:bg-white/90"
-              >
-                ขอใบเสนอราคาฟรี
-              </Link>
-              <Link
                 href="/portfolio"
                 className="inline-flex items-center justify-center rounded-full border border-white/35 px-6 py-3 text-sm font-semibold text-white transition hover:bg-white/10"
               >
@@ -94,7 +88,6 @@ export function Hero() {
             className="relative"
           >
             <div className="relative aspect-[4/3] overflow-hidden rounded-[1.5rem] bg-white/10 md:-mr-4 md:-my-2 lg:-mr-8">
-              {/* One image at a time — stacking every slide was crashing light browsers */}
               <Image
                 key={active?.id ?? "fallback"}
                 src={active?.src ?? FALLBACK.src}

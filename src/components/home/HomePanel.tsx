@@ -17,8 +17,8 @@ export function HomePanel({
         : "rounded-[var(--radius-panel)] bg-panel text-ink";
 
   return (
-    <section className="px-3 pb-3 sm:px-4 sm:pb-4">
-      <div className={`mx-auto w-full max-w-6xl ${toneClass} ${className}`}>
+    <section className="px-6 pb-3 sm:px-10 sm:pb-4 lg:px-16">
+      <div className={`mx-auto w-full max-w-5xl ${toneClass} ${className}`}>
         {children}
       </div>
     </section>

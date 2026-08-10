@@ -15,8 +15,8 @@ export function AboutHeroCms() {
   if (!enabled) return null;
 
   return (
-    <section className="px-3 pb-3 pt-3 sm:px-4 sm:pb-4 sm:pt-4">
-      <div className="mx-auto grid w-full max-w-6xl overflow-hidden rounded-[var(--radius-panel)] bg-navy text-white md:grid-cols-[1.05fr_0.95fr]">
+    <section className="px-6 pb-3 pt-3 sm:px-10 sm:pb-4 sm:pt-4 lg:px-16">
+      <div className="mx-auto grid w-full max-w-5xl overflow-hidden rounded-[var(--radius-panel)] bg-navy text-white md:grid-cols-[1.05fr_0.95fr]">
         <div className="flex flex-col justify-center p-7 sm:p-10 md:p-12">
           <EditableSpot sectionId="hero" fieldKey="eyebrow">
             <p className="text-xs font-semibold tracking-[0.18em] text-white/55 uppercase">

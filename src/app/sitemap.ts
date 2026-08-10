@@ -8,55 +8,89 @@ import { siteConfig } from "@/lib/site-config";
 import type { BlogPost } from "@/lib/cms/blog-demo";
 import type { PortfolioItem } from "@/lib/cms/portfolio-demo";
 
+type SitemapEntry = MetadataRoute.Sitemap[number];
+
+function entry(
+  base: string,
+  path: string,
+  opts: {
+    lastModified?: string | Date | null;
+    changeFrequency: SitemapEntry["changeFrequency"];
+    priority: number;
+  },
+): SitemapEntry {
+  const lastModified = opts.lastModified
+    ? new Date(opts.lastModified)
+    : undefined;
+  return {
+    url: `${base}${path}`,
+    ...(lastModified && !Number.isNaN(lastModified.getTime())
+      ? { lastModified }
+      : {}),
+    changeFrequency: opts.changeFrequency,
+    priority: opts.priority,
+  };
+}
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const base = siteConfig.url.replace(/\/$/, "");
-  const staticRoutes = [
-    "",
-    "/products",
-    "/portfolio",
-    "/blog",
-    "/quote",
-    "/about",
-    "/contact",
-    "/privacy",
-    "/cookies",
-    "/terms",
+
+  const staticRoutes: Array<{
+    path: string;
+    changeFrequency: SitemapEntry["changeFrequency"];
+    priority: number;
+  }> = [
+    { path: "", changeFrequency: "monthly", priority: 1 },
+    { path: "/products", changeFrequency: "weekly", priority: 0.8 },
+    { path: "/portfolio", changeFrequency: "weekly", priority: 0.8 },
+    { path: "/blog", changeFrequency: "weekly", priority: 0.8 },
+    { path: "/quote", changeFrequency: "monthly", priority: 0.9 },
+    { path: "/about", changeFrequency: "monthly", priority: 0.7 },
+    { path: "/contact", changeFrequency: "monthly", priority: 0.7 },
+    { path: "/privacy", changeFrequency: "yearly", priority: 0.3 },
+    { path: "/cookies", changeFrequency: "yearly", priority: 0.3 },
+    { path: "/terms", changeFrequency: "yearly", priority: 0.3 },
   ];
 
   const productRoutes = productCatalog.flatMap((cat) => [
-    `/products/${cat.slug}`,
-    ...cat.children.map((child) => `/products/${cat.slug}/${child.slug}`),
+    entry(base, `/products/${cat.slug}`, {
+      changeFrequency: "weekly",
+      priority: 0.8,
+    }),
+    ...cat.children.map((child) =>
+      entry(base, `/products/${cat.slug}/${child.slug}`, {
+        changeFrequency: "weekly",
+        priority: 0.8,
+      }),
+    ),
   ]);
 
   const remotePortfolio = await readCmsCollection<PortfolioItem>("portfolio");
   const remoteBlog = await readCmsCollection<BlogPost>("blog");
-  const portfolioRoutes = publishedPortfolio(
-    remotePortfolio ?? DEMO_PORTFOLIO,
-  ).map((item) => `/portfolio/${item.slug}`);
-  const blogRoutes = publishedBlog(remoteBlog ?? DEMO_BLOG).map(
-    (post) => `/blog/${post.slug}`,
-  );
+  const portfolioItems = publishedPortfolio(remotePortfolio ?? DEMO_PORTFOLIO);
+  const blogItems = publishedBlog(remoteBlog ?? DEMO_BLOG);
 
   return [
-    ...staticRoutes,
+    ...staticRoutes.map((r) =>
+      entry(base, r.path, {
+        changeFrequency: r.changeFrequency,
+        priority: r.priority,
+      }),
+    ),
     ...productRoutes,
-    ...portfolioRoutes,
-    ...blogRoutes,
-  ].map((path) => ({
-    url: `${base}${path}`,
-    lastModified: new Date(),
-    changeFrequency: path.startsWith("/products")
-      ? ("weekly" as const)
-      : path.startsWith("/blog") || path.startsWith("/portfolio")
-        ? ("weekly" as const)
-        : ("monthly" as const),
-    priority:
-      path === ""
-        ? 1
-        : path === "/quote"
-          ? 0.9
-          : path.startsWith("/products/")
-            ? 0.8
-            : 0.7,
-  }));
+    ...portfolioItems.map((item) =>
+      entry(base, `/portfolio/${item.slug}`, {
+        lastModified: item.updatedAt,
+        changeFrequency: "weekly",
+        priority: 0.7,
+      }),
+    ),
+    ...blogItems.map((post) =>
+      entry(base, `/blog/${post.slug}`, {
+        lastModified: post.updatedAt || post.publishedAt,
+        changeFrequency: "weekly",
+        priority: 0.7,
+      }),
+    ),
+  ];
 }

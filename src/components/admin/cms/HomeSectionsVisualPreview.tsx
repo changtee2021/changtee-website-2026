@@ -1,13 +1,14 @@
 "use client";
 
 import Image from "next/image";
+import { MessageCircle, Ruler, Truck } from "lucide-react";
 import { BlogPreview } from "@/components/home/BlogPreview";
 import { CatalogSection } from "@/components/home/CatalogSection";
 import { ClientsLogos } from "@/components/home/ClientsLogos";
 import { FeatureStrip } from "@/components/home/FeatureStrip";
 import { Hero } from "@/components/home/Hero";
+import { HomeInstallVideosSection } from "@/components/home/HomeInstallVideosSection";
 import { HomePanel } from "@/components/home/HomePanel";
-import { ServicesStrip } from "@/components/home/ServicesStrip";
 import { Testimonials } from "@/components/home/Testimonials";
 import { EditableSpot } from "@/components/admin/cms/EditableSpot";
 import { LockedSpot } from "@/components/admin/cms/LockedSpot";
@@ -17,6 +18,8 @@ import { publishedPortfolio } from "@/lib/cms/public-content";
 import { HOME_SECTION_DEFAULTS } from "@/lib/cms/page-sections";
 import { siteConfig } from "@/lib/site-config";
 import { useMemo } from "react";
+
+const HOW_STEP_ICONS = [MessageCircle, Ruler, Truck] as const;
 
 export function HomeSectionsVisualPreview() {
   const { getValues } = useSectionDraft();
@@ -57,7 +60,7 @@ export function HomeSectionsVisualPreview() {
             {tiles.map((t) => (
               <div key={t.imageKey} className="space-y-1">
                 <EditableSpot sectionId="products" fieldKey={t.imageKey} label="รูป">
-                  <div className="relative aspect-[3/4] overflow-hidden rounded-xl bg-paper">
+                  <div className="relative aspect-square overflow-hidden rounded-xl bg-paper">
                     {t.image ? (
                       <Image
                         src={t.image}
@@ -132,8 +135,73 @@ export function HomeSectionsVisualPreview() {
         </div>
       </HomePanel>
 
-      <LockedSpot reason="แก้ที่เมนูแคตตาล็อก">
-        <CatalogSection />
+      <LockedSpot reason="แก้ที่เมนู CMS หน้าแรก (คลิปติดตั้ง)">
+        <HomeInstallVideosSection />
+      </LockedSpot>
+
+      {/* Logos + stats/story — one panel (matches live StatsStory) */}
+      <HomePanel>
+        <LockedSpot reason="รูปโลโก้ลูกค้า">
+          <div className="overflow-hidden pt-5 sm:pt-7">
+            <ClientsLogos />
+          </div>
+        </LockedSpot>
+        <div className="grid gap-8 p-7 pt-4 sm:p-9 sm:pt-5 md:grid-cols-[0.85fr_0.9fr_1fr] md:items-center md:gap-8 md:p-12 md:pt-6">
+          <div className="space-y-7">
+            {[1, 2, 3].map((n) => (
+              <div key={n}>
+                <EditableSpot sectionId="stats" fieldKey={`stat${n}Value`}>
+                  <p className="font-display text-3xl font-semibold tracking-tight text-navy md:text-4xl">
+                    {stats[`stat${n}Value`]}
+                  </p>
+                </EditableSpot>
+                <EditableSpot
+                  sectionId="stats"
+                  fieldKey={`stat${n}Label`}
+                  className="mt-1.5"
+                >
+                  <p className="text-sm leading-relaxed text-muted">
+                    {stats[`stat${n}Label`]}
+                  </p>
+                </EditableSpot>
+              </div>
+            ))}
+          </div>
+          <EditableSpot sectionId="stats" fieldKey="image" label="รูปกลาง">
+            <div className="relative aspect-[4/5] overflow-hidden rounded-[1.5rem] bg-paper">
+              <Image
+                src={siteConfig.showroomImage}
+                alt="โชว์รูม"
+                fill
+                className="object-cover"
+                sizes="280px"
+              />
+            </div>
+          </EditableSpot>
+          <div>
+            <EditableSpot sectionId="stats" fieldKey="storyTitle">
+              <h2 className="font-display text-2xl font-semibold leading-snug text-navy md:text-3xl">
+                {stats.storyTitle}
+              </h2>
+            </EditableSpot>
+            <EditableSpot sectionId="stats" fieldKey="storyP1" className="mt-4">
+              <p className="text-sm leading-relaxed text-muted">{stats.storyP1}</p>
+            </EditableSpot>
+            <EditableSpot sectionId="stats" fieldKey="storyP2" className="mt-4">
+              <p className="text-sm leading-relaxed text-muted">{stats.storyP2}</p>
+            </EditableSpot>
+            <EditableSpot sectionId="stats" fieldKey="showroomLabel" className="mt-5">
+              <span className="inline-flex items-center gap-1 text-sm font-semibold text-brand-red">
+                {stats.showroomLabel || "โชว์รูม"}
+                <span aria-hidden>→</span>
+              </span>
+            </EditableSpot>
+          </div>
+        </div>
+      </HomePanel>
+
+      <LockedSpot reason="แก้ที่เมนูรีวิว">
+        <Testimonials />
       </LockedSpot>
 
       {/* How it works — live layout */}
@@ -160,104 +228,72 @@ export function HomeSectionsVisualPreview() {
               <p className="max-w-sm text-sm leading-relaxed text-muted">{how.intro}</p>
             </EditableSpot>
           </div>
-          <ol className="divide-y divide-line border-l border-line pl-6 md:pl-8">
-            {[1, 2, 3].map((n) => (
-              <li key={n} className="py-5 first:pt-0 last:pb-0">
-                <p className="font-display text-sm font-semibold text-brand-red">
-                  Step {n}
-                </p>
-                <EditableSpot sectionId="howItWorks" fieldKey={`step${n}Title`}>
-                  <h3 className="mt-1.5 font-semibold text-navy">
-                    {how[`step${n}Title`]}
-                  </h3>
-                </EditableSpot>
-                <EditableSpot
-                  sectionId="howItWorks"
-                  fieldKey={`step${n}Desc`}
-                  className="mt-1.5"
+          <ol className="relative">
+            <span
+              aria-hidden
+              className="absolute top-3 bottom-3 left-[11px] w-px bg-line md:left-[13px]"
+            />
+            {[1, 2, 3].map((n, i) => {
+              const Icon = HOW_STEP_ICONS[i] ?? MessageCircle;
+              const isLast = n === 3;
+              return (
+                <li
+                  key={n}
+                  className={`relative flex gap-4 ${isLast ? "pb-0" : "pb-6"}`}
                 >
-                  <p className="text-sm leading-relaxed text-muted">
-                    {how[`step${n}Desc`]}
-                  </p>
-                </EditableSpot>
-              </li>
-            ))}
+                  <span
+                    aria-hidden
+                    className="relative z-10 mt-1.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2 border-brand-red bg-paper md:mt-1 md:h-7 md:w-7"
+                  >
+                    <span className="h-1.5 w-1.5 rounded-full bg-brand-red md:h-2 md:w-2" />
+                  </span>
+                  <div
+                    className={`min-w-0 flex-1 ${isLast ? "" : "border-b border-line pb-6"}`}
+                  >
+                    <p className="font-display text-sm font-semibold text-brand-red">
+                      Step {n}
+                    </p>
+                    <div className="mt-1.5 flex items-start gap-2.5">
+                      <span
+                        aria-hidden
+                        className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-brand-red/10 text-brand-red"
+                      >
+                        <Icon className="h-4 w-4" strokeWidth={2} />
+                      </span>
+                      <div className="min-w-0">
+                        <EditableSpot
+                          sectionId="howItWorks"
+                          fieldKey={`step${n}Title`}
+                        >
+                          <h3 className="font-semibold text-navy">
+                            {how[`step${n}Title`]}
+                          </h3>
+                        </EditableSpot>
+                        <EditableSpot
+                          sectionId="howItWorks"
+                          fieldKey={`step${n}Desc`}
+                          className="mt-1.5"
+                        >
+                          <p className="text-sm leading-relaxed text-muted">
+                            {how[`step${n}Desc`]}
+                          </p>
+                        </EditableSpot>
+                      </div>
+                    </div>
+                  </div>
+                </li>
+              );
+            })}
           </ol>
         </div>
       </HomePanel>
 
-      <LockedSpot reason="แก้ที่เมนูรีวิว">
-        <Testimonials />
+      <LockedSpot reason="แก้ที่เมนูแคตตาล็อก">
+        <CatalogSection />
       </LockedSpot>
-
-      <LockedSpot reason="รูปโลโก้ลูกค้า">
-        <ClientsLogos />
-      </LockedSpot>
-
-      {/* Stats + story — live layout */}
-      <HomePanel>
-        <div className="grid gap-8 p-7 sm:p-9 md:grid-cols-[0.85fr_0.9fr_1fr] md:items-center md:gap-8 md:p-12">
-          <div className="space-y-7">
-            {[1, 2, 3].map((n) => (
-              <div key={n}>
-                <EditableSpot sectionId="stats" fieldKey={`stat${n}Value`}>
-                  <p className="font-display text-3xl font-semibold tracking-tight text-navy md:text-4xl">
-                    {stats[`stat${n}Value`]}
-                  </p>
-                </EditableSpot>
-                <EditableSpot
-                  sectionId="stats"
-                  fieldKey={`stat${n}Label`}
-                  className="mt-1.5"
-                >
-                  <p className="text-sm leading-relaxed text-muted">
-                    {stats[`stat${n}Label`]}
-                  </p>
-                </EditableSpot>
-              </div>
-            ))}
-          </div>
-          <EditableSpot sectionId="stats" fieldKey="image" label="รูปกลาง">
-            <div className="relative aspect-[4/5] overflow-hidden rounded-[1.5rem] bg-paper">
-              {stats.image ? (
-                <Image
-                  src={stats.image}
-                  alt="โชว์รูม"
-                  fill
-                  className="object-cover"
-                  sizes="280px"
-                />
-              ) : null}
-            </div>
-          </EditableSpot>
-          <div>
-            <EditableSpot sectionId="stats" fieldKey="storyTitle">
-              <h2 className="font-display text-2xl font-semibold leading-snug text-navy md:text-3xl">
-                {stats.storyTitle}
-              </h2>
-            </EditableSpot>
-            <EditableSpot sectionId="stats" fieldKey="storyP1" className="mt-4">
-              <p className="text-sm leading-relaxed text-muted">{stats.storyP1}</p>
-            </EditableSpot>
-            <EditableSpot sectionId="stats" fieldKey="storyP2" className="mt-4">
-              <p className="text-sm leading-relaxed text-muted">{stats.storyP2}</p>
-            </EditableSpot>
-            <EditableSpot sectionId="stats" fieldKey="showroomLabel" className="mt-5">
-              <span className="inline-flex items-center gap-1 text-sm font-semibold text-brand-red">
-                {stats.showroomLabel || "โชว์รูม"}
-                <span aria-hidden>→</span>
-              </span>
-            </EditableSpot>
-          </div>
-        </div>
-      </HomePanel>
 
       <LockedSpot reason="แก้ที่เมนูบทความ">
         <BlogPreview />
-      </LockedSpot>
-
-      <LockedSpot reason="เนื้อหาคงที่">
-        <ServicesStrip />
       </LockedSpot>
 
       {/* Contact CTA — live layout */}
@@ -309,15 +345,13 @@ export function HomeSectionsVisualPreview() {
           </div>
           <EditableSpot sectionId="contactCta" fieldKey="image" label="รูป">
             <div className="relative aspect-[4/3] overflow-hidden rounded-[1.5rem] bg-white/10">
-              {cta.image ? (
-                <Image
-                  src={cta.image}
-                  alt="โชว์รูม"
-                  fill
-                  className="object-cover"
-                  sizes="400px"
-                />
-              ) : null}
+              <Image
+                src={siteConfig.showroomImage}
+                alt="โชว์รูม"
+                fill
+                className="object-cover"
+                sizes="400px"
+              />
             </div>
           </EditableSpot>
         </div>

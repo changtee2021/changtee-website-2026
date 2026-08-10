@@ -100,6 +100,17 @@ export const BLOG_POST_SECTION_DEFS: SectionDef[] = [
         key: "worksIntro",
         label: "คำโปรยใต้หัวข้อผลงาน",
       },
+      {
+        type: "text",
+        key: "videosHeading",
+        label: "หัวข้อคลิปติดตั้ง",
+        maxLength: 60,
+      },
+      {
+        type: "textarea",
+        key: "videosIntro",
+        label: "คำโปรยใต้หัวข้อคลิป",
+      },
     ],
   },
 ];
@@ -173,6 +184,8 @@ export const BLOG_POST_SECTION_DEFAULTS: Record<
       "เลือกอ่านต่อจากเนื้อหาใกล้เคียง หรือหัวข้อที่ช่วยตัดสินใจได้มากขึ้น",
     worksHeading: "ผลงานติดตั้งที่เกี่ยวข้อง",
     worksIntro: "ดูตัวอย่างงานจริงที่ใกล้กับเนื้อหาบทความนี้",
+    videosHeading: "คลิปติดตั้งจริง",
+    videosIntro: "ดูงานหน้างานจาก YouTube — กดเล่นได้เลยในเว็บ",
   },
 };
 

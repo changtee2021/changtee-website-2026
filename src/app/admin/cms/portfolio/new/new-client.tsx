@@ -4,6 +4,7 @@ import { Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { PortfolioAiWizard } from "@/components/admin/PortfolioAiWizard";
 import { PortfolioEditor } from "@/components/admin/PortfolioEditor";
+import { PageLoader } from "@/components/ui/page-loader";
 
 function NewPortfolioMode() {
   const params = useSearchParams();
@@ -15,9 +16,7 @@ export function NewPortfolioClient() {
   return (
     <Suspense
       fallback={
-        <div className="mx-auto max-w-5xl p-6 text-sm text-muted">
-          กำลังโหลด…
-        </div>
+        <PageLoader label="กำลังโหลด…" className="min-h-[20vh] bg-transparent" />
       }
     >
       <NewPortfolioMode />

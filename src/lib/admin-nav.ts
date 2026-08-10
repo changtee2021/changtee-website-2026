@@ -9,6 +9,7 @@ import {
   PencilRuler,
   ScrollText,
   Settings2,
+  BookOpen,
   Users,
 } from "lucide-react";
 import { isPageEditorEnabled } from "@/lib/editor/page-registry";
@@ -51,6 +52,7 @@ export const adminNavGroups: AdminNavGroup[] = [
       { path: "/cms/hero-slides", label: "สไลด์หน้าแรก", icon: PanelsTopLeft },
       { path: "/cms/portfolio", label: "ผลงาน", icon: Images },
       { path: "/cms/blog", label: "บทความ", icon: FileText },
+      { path: "/cms/catalogs", label: "แคตตาล็อก", icon: BookOpen },
       { path: "/cms/reviews", label: "รีวิว", icon: MessageSquareQuote },
     ],
   },

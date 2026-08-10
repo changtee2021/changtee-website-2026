@@ -115,7 +115,7 @@ export function emptyJobFacts(): PortfolioJobFacts {
     installDate: new Date().toISOString().slice(0, 10),
     productSlug,
     variantSlug: variantOptions(productSlug)[0]?.value ?? "",
-    spaceType: "home",
+    spaceType: "home-condo",
     customerLabel: "",
     showCustomerName: false,
     approxSizeNote: "",
@@ -352,6 +352,7 @@ export function generatePortfolioDraft(
   const image = gallery[0] || "/images/mock/curtain-living.jpg";
   const tags = buildTags(facts);
 
+  const variant = variantName(facts.productSlug, facts.variantSlug);
   return {
     id: opts?.id ?? `pf-${Date.now()}`,
     title,
@@ -367,6 +368,24 @@ export function generatePortfolioDraft(
     status: opts?.status ?? "draft",
     pinned: opts?.pinned ?? false,
     sortOrder: 99,
+    seoTitle: "",
+    seoDescription: "",
+    customerName: facts.customerLabel?.trim() ?? "",
+    showCustomerName: facts.showCustomerName ?? false,
+    installLocation: facts.approxSizeNote?.trim() ?? "",
+    installDate: facts.installDate?.trim() ?? "",
+    lineItems: [
+      {
+        productName: variant || productName(facts.productSlug),
+        sku: facts.variantSlug || "",
+        serialOrCode: "",
+        material: "",
+        color: "",
+        quantity: "",
+        notes: "",
+      },
+    ],
+    internalNote: facts.notesFromStaff?.trim() ?? "",
     updatedAt: new Date().toISOString(),
   };
 }

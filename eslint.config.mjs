@@ -12,6 +12,8 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Vendored pdf.js worker (copied from pdfjs-dist at postinstall)
+    "public/pdf/**",
   ]),
   {
     files: ["src/components/admin/editor/**/*.{ts,tsx}"],

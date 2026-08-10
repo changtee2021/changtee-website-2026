@@ -1,5 +1,4 @@
 import Image from "next/image";
-import Link from "next/link";
 import { Quote, Star } from "lucide-react";
 import { HomePanel } from "@/components/home/HomePanel";
 import { Reveal } from "@/components/home/Reveal";
@@ -19,46 +18,37 @@ export function Testimonials() {
   return (
     <HomePanel tone="clear">
       <div className="px-1 py-4 sm:px-2 sm:py-6 md:py-8">
-        <div className="grid gap-8 md:grid-cols-2 md:items-start md:gap-10">
-          <Reveal className="relative pb-12 pr-12 md:sticky md:top-20 md:pb-16 md:pr-16">
-            <div className="relative aspect-[4/3] overflow-hidden rounded-[1.25rem]">
+        <div className="grid gap-8 md:grid-cols-2 md:items-stretch md:gap-10">
+          <Reveal className="relative flex min-h-[280px] flex-col pb-12 pr-12 md:min-h-0 md:pb-14 md:pr-14">
+            <div className="relative min-h-[220px] flex-1 overflow-hidden rounded-[1.25rem]">
               <Image
-                src="/images/generated/ct-review-1.webp"
-                alt="รายละเอียดผ้าม่านที่ติดตั้งจริง"
+                src="/images/home/review-install-main.png"
+                alt="ช่างตี๋ติดตั้งราวม่านหน้างาน"
                 fill
-                className="object-cover"
+                className="object-cover object-[center_20%]"
                 sizes="(max-width: 768px) 100vw, 460px"
               />
             </div>
-            <div className="absolute bottom-0 right-0 h-32 w-32 overflow-hidden rounded-[1.25rem] ring-8 ring-shell sm:h-40 sm:w-40 md:h-44 md:w-44">
+            <div className="absolute bottom-0 right-0 z-10 h-32 w-32 overflow-hidden rounded-[1.25rem] ring-8 ring-shell sm:h-40 sm:w-40 md:h-44 md:w-44">
               <Image
-                src="/images/generated/ct-review-2.webp"
-                alt="มุมห้องอาหารที่ติดผ้าม่านโปร่ง"
+                src="/images/home/review-install.png"
+                alt="ช่างตี๋ติดตั้งผ้าม่านหน้างาน"
                 fill
-                className="object-cover"
+                className="object-cover object-center"
                 sizes="180px"
               />
             </div>
-            <span className="absolute left-4 top-4 flex h-10 w-10 items-center justify-center rounded-full bg-white text-navy">
+            <span className="absolute left-4 top-4 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-white text-navy">
               <Quote className="h-4 w-4" aria-hidden />
             </span>
           </Reveal>
 
-          <div className="flex flex-col gap-4">
+          <div className="flex h-full flex-col gap-4">
             {featured.map((review, i) => (
               <Reveal key={review.id} delayStep={i}>
                 <ReviewCard review={review} />
               </Reveal>
             ))}
-
-            <Reveal delayStep={featured.length}>
-              <Link
-                href="/portfolio"
-                className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-navy px-6 py-3 text-sm font-semibold text-white transition hover:bg-navy-deep sm:w-auto"
-              >
-                ดูผลงานและรีวิวเพิ่มเติม →
-              </Link>
-            </Reveal>
           </div>
         </div>
       </div>
@@ -67,12 +57,26 @@ export function Testimonials() {
 }
 
 function ReviewCard({ review }: { review: ReviewItem }) {
+  const initial = review.displayName.slice(0, 1);
+
   return (
     <article className="rounded-[1.5rem] bg-paper p-6 md:p-7">
       <div className="flex items-center gap-3">
-        <span className="flex h-11 w-11 items-center justify-center rounded-full bg-navy font-display text-sm font-semibold text-white">
-          {review.displayName.slice(0, 1)}
-        </span>
+        {review.image ? (
+          <span className="relative h-11 w-11 shrink-0 overflow-hidden rounded-full ring-1 ring-line">
+            <Image
+              src={review.image}
+              alt={review.displayName}
+              fill
+              className="object-cover"
+              sizes="44px"
+            />
+          </span>
+        ) : (
+          <span className="flex h-11 w-11 items-center justify-center rounded-full bg-navy font-display text-sm font-semibold text-white">
+            {initial}
+          </span>
+        )}
         <span>
           <span className="block font-semibold text-navy">{review.displayName}</span>
           <span

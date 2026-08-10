@@ -99,7 +99,8 @@ export function ContactCta() {
           <EditableSpot sectionId="contactCta" fieldKey="image" label="รูป">
             <div className="relative aspect-[4/3] w-full overflow-hidden rounded-[1.5rem]">
               <Image
-                src={values.image || HOME_SECTION_DEFAULTS.contactCta.image}
+                key={siteConfig.showroomImage}
+                src={siteConfig.showroomImage}
                 alt="โชว์รูมช่างตี๋ ผ้าม่าน"
                 fill
                 className="object-cover"

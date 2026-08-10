@@ -107,9 +107,12 @@ export function QuoteForm() {
   const searchParams = useSearchParams();
   const formRef = useRef<HTMLFormElement>(null);
   const siteFileRef = useRef<HTMLInputElement>(null);
+  const allowSubmitRef = useRef(false);
+  const dragDepthRef = useRef(0);
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [sheetOpen, setSheetOpen] = useState(false);
+  const [dragActive, setDragActive] = useState(false);
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
   const onTurnstile = useCallback((token: string | null) => {
     setTurnstileToken(token);
@@ -159,15 +162,19 @@ export function QuoteForm() {
     setPreview((prev) => ({ ...prev, [key]: value }));
   }
 
-  function addSiteFiles(fileList: FileList | null) {
-    if (!fileList?.length) return;
+  function addSiteFiles(fileList: FileList | File[] | null) {
+    if (!fileList) return;
+    const files = Array.from(fileList);
+    if (!files.length) return;
+
     const room = MAX_SITE_IMAGES - siteImages.length;
     if (room <= 0) {
       setError(`แนบได้สูงสุด ${MAX_SITE_IMAGES} ภาพ`);
       return;
     }
+
     const next: SiteImageItem[] = [];
-    for (const file of Array.from(fileList).slice(0, room)) {
+    for (const file of files.slice(0, room)) {
       if (!/^image\/(jpeg|png|webp)$/.test(file.type)) continue;
       next.push({
         id: `site-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
@@ -175,8 +182,46 @@ export function QuoteForm() {
         previewUrl: URL.createObjectURL(file),
       });
     }
-    if (next.length) setSiteImages((prev) => [...prev, ...next]);
+    if (!next.length) {
+      setError("รองรับเฉพาะไฟล์ JPG, PNG หรือ WebP");
+      return;
+    }
+    setError(null);
+    setSiteImages((prev) => [...prev, ...next]);
     if (siteFileRef.current) siteFileRef.current.value = "";
+  }
+
+  function onSiteDragEnter(e: React.DragEvent) {
+    e.preventDefault();
+    e.stopPropagation();
+    dragDepthRef.current += 1;
+    if (Array.from(e.dataTransfer.types).includes("Files")) {
+      setDragActive(true);
+    }
+  }
+
+  function onSiteDragLeave(e: React.DragEvent) {
+    e.preventDefault();
+    e.stopPropagation();
+    dragDepthRef.current -= 1;
+    if (dragDepthRef.current <= 0) {
+      dragDepthRef.current = 0;
+      setDragActive(false);
+    }
+  }
+
+  function onSiteDragOver(e: React.DragEvent) {
+    e.preventDefault();
+    e.stopPropagation();
+    e.dataTransfer.dropEffect = "copy";
+  }
+
+  function onSiteDrop(e: React.DragEvent) {
+    e.preventDefault();
+    e.stopPropagation();
+    dragDepthRef.current = 0;
+    setDragActive(false);
+    addSiteFiles(e.dataTransfer.files);
   }
 
   function removeSiteImage(id: string) {
@@ -187,7 +232,19 @@ export function QuoteForm() {
     });
   }
 
+  function openPreview() {
+    setError(null);
+    setSheetOpen(true);
+  }
+
   async function onSubmit(formData: FormData) {
+    // Enter key / ส่งแบบฟอร์ม → open preview first unless user confirmed
+    if (!allowSubmitRef.current) {
+      openPreview();
+      return;
+    }
+    allowSubmitRef.current = false;
+
     setPending(true);
     setError(null);
 
@@ -249,6 +306,7 @@ export function QuoteForm() {
       window.setTimeout(() => form.reportValidity(), 80);
       return;
     }
+    allowSubmitRef.current = true;
     form.requestSubmit();
   }
 
@@ -268,8 +326,7 @@ export function QuoteForm() {
       <form ref={formRef} action={onSubmit} className="space-y-6">
         <input type="hidden" name="source" value="quote" />
 
-        <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_340px] lg:gap-8 xl:grid-cols-[minmax(0,1fr)_360px]">
-          <div className="grid min-w-0 gap-4 md:grid-cols-2 xl:grid-cols-3">
+        <div className="grid min-w-0 gap-4 md:grid-cols-2 xl:grid-cols-3">
             <p className="text-sm font-semibold text-navy md:col-span-2 xl:col-span-3">
               ข้อมูลลูกค้า / ผู้ติดต่อ
             </p>
@@ -356,7 +413,7 @@ export function QuoteForm() {
                   placeholder="https://maps.app.goo.gl/... หรือวางลิงก์จาก Google Maps"
                   value={preview.installMapUrl}
                   onChange={(e) => update("installMapUrl", e.target.value)}
-                  className="w-full rounded-lg border border-line bg-white px-3 py-2 outline-none focus:border-navy"
+                  className="w-full rounded-lg border border-line bg-field px-3 py-2 outline-none focus:border-navy"
                 />
                 <span className="mt-1 block text-xs text-muted">
                   เปิด Google Maps → แชร์ → คัดลอกลิงก์ แล้ววางที่นี่
@@ -366,6 +423,15 @@ export function QuoteForm() {
             <Field
               label="เลขผู้เสียภาษี"
               name="taxId"
+              required={
+                Boolean(preview.contactType) &&
+                preview.contactType !== "บุคคลธรรมดา"
+              }
+              placeholder={
+                preview.contactType === "บุคคลธรรมดา"
+                  ? "ไม่บังคับสำหรับบุคคลธรรมดา"
+                  : "เช่น 0105551234567"
+              }
               value={preview.taxId}
               onChange={(v) => update("taxId", v)}
             />
@@ -443,18 +509,22 @@ export function QuoteForm() {
             <div className="md:col-span-2 xl:col-span-2">
               <label className="block text-sm">
                 <span className="mb-1 flex flex-wrap items-center gap-x-2 gap-y-1 font-medium text-ink">
-                  <span>ขนาดที่ต้องการ (กว้างxสูง เซ็นติเมตร)</span>
+                  <span className="flex gap-1">
+                    ขนาดที่ต้องการ (กว้างxสูง เซ็นติเมตร)
+                    <span className="text-brand-red">*</span>
+                  </span>
                   <span className="rounded bg-paper px-2 py-0.5 text-[11px] font-normal text-brand-red">
                     1 ขนาด ต่อ 1 บรรทัด
                   </span>
                 </span>
                 <textarea
                   name="requestedSize"
+                  required
                   rows={5}
                   value={preview.requestedSize}
                   onChange={(e) => update("requestedSize", e.target.value)}
                   placeholder={"ตัวอย่าง\n150x200\n180x220\n300x250"}
-                  className="w-full rounded-lg border border-line bg-white px-3 py-2 outline-none focus:border-navy"
+                  className="w-full rounded-lg border border-line bg-field px-3 py-2 outline-none focus:border-navy"
                 />
               </label>
             </div>
@@ -486,41 +556,89 @@ export function QuoteForm() {
                 className="hidden"
                 onChange={(e) => addSiteFiles(e.target.files)}
               />
-              {siteImages.length === 0 ? (
-                <button
-                  type="button"
-                  onClick={() => siteFileRef.current?.click()}
-                  className="flex w-full flex-col items-center justify-center gap-1 rounded-xl border border-dashed border-line bg-paper/50 px-3 py-6 text-xs text-muted hover:border-navy/30"
-                >
-                  <ImageIcon className="size-5 opacity-60" />
-                  เลือกรูปหน้างาน (หลายรูปได้)
-                </button>
-              ) : (
-                <ul className="grid grid-cols-3 gap-2 sm:grid-cols-4">
-                  {siteImages.map((item) => (
-                    <li
-                      key={item.id}
-                      className="relative aspect-square overflow-hidden rounded-lg border border-line bg-paper"
-                    >
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img
-                        src={item.previewUrl}
-                        alt={item.file.name}
-                        className="size-full object-cover"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => removeSiteImage(item.id)}
-                        className="absolute right-1 top-1 rounded-md bg-black/60 p-1 text-white hover:bg-brand-red"
-                        aria-label={`ลบ ${item.file.name}`}
-                        title="ลบรูป"
-                      >
-                        <Trash2 className="size-3.5" />
-                      </button>
-                    </li>
-                  ))}
-                </ul>
-              )}
+              <div
+                onDragEnter={onSiteDragEnter}
+                onDragLeave={onSiteDragLeave}
+                onDragOver={onSiteDragOver}
+                onDrop={onSiteDrop}
+                className={`rounded-xl transition ${
+                  dragActive
+                    ? "bg-navy/5 ring-2 ring-navy ring-offset-2"
+                    : ""
+                }`}
+              >
+                {siteImages.length === 0 ? (
+                  <button
+                    type="button"
+                    onClick={() => siteFileRef.current?.click()}
+                    className={`flex w-full flex-col items-center justify-center gap-1 rounded-xl border border-dashed px-3 py-6 text-xs transition ${
+                      dragActive
+                        ? "border-navy bg-navy/5 text-navy"
+                        : "border-line bg-paper/50 text-muted hover:border-navy/30"
+                    }`}
+                  >
+                    <ImageIcon className="size-5 opacity-60" />
+                    <span>
+                      {dragActive
+                        ? "ปล่อยเพื่อแนบรูป"
+                        : "ลากรูปมาวาง หรือคลิกเลือก (หลายรูปได้)"}
+                    </span>
+                    <span className="text-[11px] opacity-70">
+                      JPG, PNG, WebP
+                    </span>
+                  </button>
+                ) : (
+                  <div
+                    className={`rounded-xl border border-dashed p-2 ${
+                      dragActive
+                        ? "border-navy bg-navy/5"
+                        : "border-transparent"
+                    }`}
+                  >
+                    <ul className="grid grid-cols-3 gap-2 sm:grid-cols-4">
+                      {siteImages.map((item) => (
+                        <li
+                          key={item.id}
+                          className="relative aspect-square overflow-hidden rounded-lg border border-line bg-paper"
+                        >
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img
+                            src={item.previewUrl}
+                            alt={item.file.name}
+                            className="size-full object-cover"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => removeSiteImage(item.id)}
+                            className="absolute right-1 top-1 rounded-md bg-black/60 p-1 text-white hover:bg-brand-red"
+                            aria-label={`ลบ ${item.file.name}`}
+                            title="ลบรูป"
+                          >
+                            <Trash2 className="size-3.5" />
+                          </button>
+                        </li>
+                      ))}
+                      {siteImages.length < MAX_SITE_IMAGES ? (
+                        <li>
+                          <button
+                            type="button"
+                            onClick={() => siteFileRef.current?.click()}
+                            className="flex aspect-square w-full flex-col items-center justify-center gap-0.5 rounded-lg border border-dashed border-line bg-paper/50 text-[10px] text-muted hover:border-navy/40 hover:text-navy"
+                          >
+                            <ImageIcon className="size-4 opacity-60" />
+                            เพิ่ม / ลากวาง
+                          </button>
+                        </li>
+                      ) : null}
+                    </ul>
+                    {dragActive ? (
+                      <p className="mt-2 text-center text-xs font-medium text-navy">
+                        ปล่อยเพื่อแนบรูปเพิ่ม
+                      </p>
+                    ) : null}
+                  </div>
+                )}
+              </div>
             </div>
             <Field
               label="วันที่อยากติดตั้ง"
@@ -552,70 +670,57 @@ export function QuoteForm() {
               <TurnstileField onToken={onTurnstile} />
             </div>
 
-            {error ? (
+            {error && !sheetOpen ? (
               <p className="text-sm text-brand-red md:col-span-2 xl:col-span-3">
                 {error}
               </p>
             ) : null}
 
-            {/* Mobile: preview first, then submit lives in sheet */}
-            <div className="flex flex-col gap-2 md:col-span-2 xl:col-span-3 lg:hidden">
+            <div className="flex flex-col gap-2 md:col-span-2 md:flex-row md:items-center xl:col-span-3">
               <button
                 type="button"
-                onClick={() => setSheetOpen(true)}
-                className="inline-flex w-full items-center justify-center gap-2 rounded-md border border-navy bg-white px-6 py-3 text-sm font-semibold text-navy hover:bg-paper"
+                onClick={openPreview}
+                className="inline-flex w-full items-center justify-center gap-2 rounded-md border border-navy bg-white px-6 py-3 text-sm font-semibold text-navy hover:bg-paper md:w-auto"
               >
                 <Eye className="h-4 w-4" />
-                พรีวิวตรวจสอบรายละเอียด
+                ดูพรีวิว
               </button>
-              <p className="text-center text-xs text-muted">
-                ตรวจทานสรุปคำขอก่อนส่งแบบฟอร์ม
-              </p>
-            </div>
-
-            {/* Desktop: submit on form */}
-            <div className="hidden md:col-span-2 xl:col-span-3 lg:block">
               <button
                 type="submit"
                 disabled={pending}
-                className="inline-flex items-center gap-2 rounded-md bg-brand-red px-8 py-3 text-sm font-semibold text-white hover:bg-brand-red-soft disabled:opacity-60"
+                className="inline-flex w-full items-center justify-center gap-2 rounded-md bg-brand-red px-8 py-3 text-sm font-semibold text-white hover:bg-brand-red-soft disabled:opacity-60 md:w-auto"
               >
                 <Check className="h-4 w-4" />
                 {pending ? "กำลังส่ง..." : "ส่งแบบฟอร์ม"}
               </button>
+              <p className="text-center text-xs text-muted md:text-left">
+                กดส่งแล้วจะขึ้นพรีวิวให้ตรวจก่อนยืนยัน
+              </p>
             </div>
-          </div>
-
-          {/* Desktop sticky preview */}
-          <aside className="hidden min-w-0 lg:sticky lg:top-6 lg:block lg:self-start">
-            <div className="overflow-hidden rounded-xl border border-line bg-white shadow-sm">
-              <div className="bg-brand-red px-4 py-3 text-sm font-semibold text-white">
-                พรีวิวสรุปคำขอใบเสนอราคา
-              </div>
-              <div className="max-h-[calc(100vh-8rem)] min-w-0 overflow-y-auto overflow-x-hidden p-4">
-                {summary}
-              </div>
-              <div className="border-t border-line bg-paper px-4 py-3 text-xs text-muted">
-                ตรวจทานข้อมูลก่อนกดส่ง — ทีมงานจะติดต่อกลับตามช่องทางที่ให้ไว้
-              </div>
-            </div>
-          </aside>
         </div>
       </form>
 
-      {/* Mobile preview sheet */}
+      {/* Preview confirm dialog (mobile sheet + desktop modal) */}
       {sheetOpen ? (
-        <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/45 lg:hidden">
+        <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/45 sm:items-center sm:p-4">
           <button
             type="button"
             className="absolute inset-0"
             aria-label="ปิดพรีวิว"
             onClick={() => setSheetOpen(false)}
           />
-          <div className="relative z-10 flex max-h-[88vh] w-full max-w-lg flex-col rounded-t-2xl bg-white shadow-xl">
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="quote-preview-title"
+            className="relative z-10 flex max-h-[88vh] w-full max-w-lg flex-col rounded-t-2xl bg-white shadow-xl sm:rounded-2xl"
+          >
             <div className="flex items-center justify-between border-b border-line px-4 py-3">
               <div>
-                <h3 className="font-display text-base font-semibold text-navy">
+                <h3
+                  id="quote-preview-title"
+                  className="font-display text-base font-semibold text-navy"
+                >
                   ตรวจสอบรายละเอียด
                 </h3>
                 <p className="text-xs text-muted">สรุปคำขอใบเสนอราคาก่อนส่ง</p>
@@ -638,12 +743,12 @@ export function QuoteForm() {
               <p className="px-4 pb-2 text-sm text-brand-red">{error}</p>
             ) : null}
 
-            <div className="sticky bottom-0 flex flex-col gap-2 border-t border-line bg-white px-4 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
+            <div className="sticky bottom-0 flex flex-col gap-2 border-t border-line bg-white px-4 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] sm:flex-row-reverse sm:pb-3">
               <button
                 type="button"
                 disabled={pending}
                 onClick={requestFormSubmit}
-                className="inline-flex w-full items-center justify-center gap-2 rounded-md bg-brand-red px-6 py-3 text-sm font-semibold text-white hover:bg-brand-red-soft disabled:opacity-60"
+                className="inline-flex w-full items-center justify-center gap-2 rounded-md bg-brand-red px-6 py-3 text-sm font-semibold text-white hover:bg-brand-red-soft disabled:opacity-60 sm:flex-1"
               >
                 <Check className="h-4 w-4" />
                 {pending ? "กำลังส่ง..." : "ยืนยันส่งแบบฟอร์ม"}
@@ -651,7 +756,7 @@ export function QuoteForm() {
               <button
                 type="button"
                 onClick={() => setSheetOpen(false)}
-                className="w-full rounded-md border border-line px-6 py-2.5 text-sm text-navy hover:bg-paper"
+                className="w-full rounded-md border border-line px-6 py-2.5 text-sm text-navy hover:bg-paper sm:flex-1"
               >
                 กลับไปแก้ไข
               </button>
@@ -860,7 +965,7 @@ function Field({
         placeholder={placeholder}
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="w-full rounded-lg border border-line bg-white px-3 py-2 outline-none focus:border-navy disabled:bg-paper"
+        className="w-full rounded-lg border border-line bg-field px-3 py-2 outline-none focus:border-navy disabled:text-muted"
       />
     </label>
   );
@@ -901,7 +1006,7 @@ function TextArea({
         disabled={disabled}
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="w-full rounded-lg border border-line bg-white px-3 py-2 outline-none focus:border-navy disabled:bg-paper"
+        className="w-full rounded-lg border border-line bg-field px-3 py-2 outline-none focus:border-navy disabled:text-muted"
       />
     </label>
   );
@@ -933,7 +1038,7 @@ function Select({
         required={required}
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="w-full rounded-lg border border-line bg-white px-3 py-2 outline-none focus:border-navy"
+        className="w-full rounded-lg border border-line bg-field px-3 py-2 outline-none focus:border-navy"
       >
         <option value="" disabled>
           กรุณาเลือก...

@@ -1,5 +1,7 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 :root {
   --navy: #0b1f3a;
   --navy-deep: #071526;
@@ -13,6 +15,25 @@
   --foreground: var(--ink);
   --shell: #eceff4;
   --panel: #ffffff;
+  --navy-solid: #0b1f3a;
+  color-scheme: light;
+}
+
+.dark {
+  --navy: #e2eaf5;
+  --navy-deep: #060d18;
+  --red: #e11d3a;
+  --red-soft: #f0435a;
+  --paper: #172033;
+  --ink: #e9eef5;
+  --muted: #9aabbf;
+  --line: #2c384c;
+  --background: #0b1220;
+  --foreground: #e9eef5;
+  --shell: #111927;
+  --panel: #162033;
+  --navy-solid: #0b1f3a;
+  color-scheme: dark;
 }
 
 @theme inline {
@@ -20,6 +41,7 @@
   --color-foreground: var(--foreground);
   --color-navy: var(--navy);
   --color-navy-deep: var(--navy-deep);
+  --color-navy-solid: var(--navy-solid);
   --color-brand-red: var(--red);
   --color-brand-red-soft: var(--red-soft);
   --color-paper: var(--paper);
@@ -58,8 +80,43 @@ body {
   animation: home-fade-up 0.7s ease-out both;
 }
 
+@keyframes logo-marquee-left {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+@keyframes logo-marquee-right {
+  from {
+    transform: translateX(-50%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+.animate-logo-marquee-left {
+  animation: logo-marquee-left 90s linear infinite;
+}
+
+.animate-logo-marquee-right {
+  animation: logo-marquee-right 105s linear infinite;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .animate-home-fade-up {
+    animation: none;
+  }
+
+  .animate-pulse {
+    animation: none;
+  }
+
+  .animate-logo-marquee-left,
+  .animate-logo-marquee-right {
     animation: none;
   }
 }
@@ -71,4 +128,73 @@ body {
 
 .no-scrollbar::-webkit-scrollbar {
   display: none;
+}
+
+@keyframes catalog-slide-next {
+  from {
+    opacity: 0.55;
+    transform: translateX(28px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes catalog-slide-prev {
+  from {
+    opacity: 0.55;
+    transform: translateX(-28px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.animate-catalog-slide-next {
+  animation: catalog-slide-next 320ms ease-out;
+}
+
+.animate-catalog-slide-prev {
+  animation: catalog-slide-prev 320ms ease-out;
+}
+
+/* Keep filled navy surfaces as brand navy (text-navy stays light for headings) */
+.dark :is(.bg-navy, .hover\:bg-navy:hover) {
+  background-color: var(--navy-solid);
+}
+
+/* Map common light surfaces so existing bg-white cards work in dark mode */
+.dark .bg-white {
+  background-color: var(--panel);
+}
+
+/* Quote / form field surface — softer than solid shell */
+.bg-field {
+  background-color: color-mix(in oklab, var(--shell) 72%, white);
+}
+
+.bg-field::placeholder {
+  font-size: 0.8125rem; /* 13px */
+  color: color-mix(in oklab, var(--muted) 55%, white);
+}
+
+.bg-field:disabled {
+  background-color: color-mix(in oklab, var(--shell) 55%, white);
+}
+
+/* Keep form fields shell-gray even when the browser autofills them white */
+input.bg-field:-webkit-autofill,
+input.bg-field:-webkit-autofill:hover,
+input.bg-field:-webkit-autofill:focus,
+textarea.bg-field:-webkit-autofill,
+textarea.bg-field:-webkit-autofill:hover,
+textarea.bg-field:-webkit-autofill:focus,
+select.bg-field:-webkit-autofill,
+select.bg-field:-webkit-autofill:hover,
+select.bg-field:-webkit-autofill:focus {
+  -webkit-text-fill-color: var(--ink);
+  box-shadow: 0 0 0 1000px color-mix(in oklab, var(--shell) 72%, white) inset;
+  transition: background-color 99999s ease-in-out 0s;
 }

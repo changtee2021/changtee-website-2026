@@ -10,14 +10,14 @@ import { publishedBlog, publishedPortfolio } from "@/lib/cms/public-content";
 export const heroSlides = publishedHeroSlides(DEMO_HERO_SLIDES);
 
 export const homeProductTiles = [
-  { name: "ผ้าม่าน", href: "/products/curtain", image: "/images/products/p1.png" },
-  { name: "ม่านม้วน", href: "/products/roller-blinds", image: "/images/products/p2.png" },
-  { name: "มู่ลี่", href: "/products/venetian-blinds", image: "/images/products/p3.png" },
-  { name: "ม่านปรับแสง", href: "/products/vertical-blinds", image: "/images/products/p4.png" },
-  { name: "ฉากกั้นห้อง", href: "/products/pvc-partition", image: "/images/products/p5.png" },
-  { name: "ม่านพิมพ์ลาย", href: "/products/curtain/print", image: "/images/products/print-curtain.png" },
-  { name: "วอลเปเปอร์/ฟิล์ม", href: "/products/surface", image: "/images/products/p7.png" },
-  { name: "มู่ลี่อลูมิเนียม", href: "/products/venetian-blinds/aluminium", image: "/images/products/venetian-aluminium.png" },
+  { name: "ผ้าม่าน", href: "/products/curtain", image: "/images/home/products/01-curtain.png" },
+  { name: "ม่านม้วน", href: "/products/roller-blinds", image: "/images/home/products/02-roller.png" },
+  { name: "มู่ลี่ไม้", href: "/products/venetian-blinds/wood", image: "/images/home/products/03-wood.png" },
+  { name: "มู่ลี่อลูมิเนียม", href: "/products/venetian-blinds/aluminium", image: "/images/home/products/08-aluminium.png" },
+  { name: "ม่านปรับแสง", href: "/products/vertical-blinds", image: "/images/home/products/04-vertical.png" },
+  { name: "ฉากกั้นห้อง", href: "/products/pvc-partition", image: "/images/home/products/05-folding.png" },
+  { name: "ม่านพิมพ์ลาย", href: "/products/print-fabric", image: "/images/home/products/06-noren.png" },
+  { name: "วอลเปเปอร์", href: "/products/surface", image: "/images/home/products/07-wallpaper.png" },
 ];
 
 export const whyItems = [
@@ -55,9 +55,9 @@ export const homeSteps = [
 
 export const homeServices = [
   {
-    title: "เลือกแบบผ้าม่าน",
-    desc: "ไม่รู้จะเริ่มตรงไหน บอกสไตล์บ้านมา เราช่วยจับคู่ผ้าและโทนสีให้",
-    href: "/products/curtain",
+    title: "เลือกแบบม่าน มู่ลี่",
+    desc: "มีทั้งม่านผ้า มู่ลี่ ม่านม้วน และอีกหลายแบบ บอกสไตล์บ้านมา เราช่วยจับคู่ให้",
+    href: "/products",
   },
   {
     title: "ติดตั้งครบวงจร",
@@ -67,7 +67,7 @@ export const homeServices = [
   {
     title: "งานคัสตอมพิเศษ",
     desc: "ม่านม้วน มู่ลี่ ฉากกั้นห้อง หรือขนาดพิเศษ สั่งทำตามหน้างานได้",
-    href: "/products",
+    href: "/products/print-fabric",
   },
 ];
 

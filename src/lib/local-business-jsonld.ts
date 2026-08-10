@@ -1,4 +1,4 @@
-import { siteConfig } from "@/lib/site-config";
+import { siteConfig, socialSameAsUrls } from "@/lib/site-config";
 
 /** LocalBusiness + Organization JSON-LD for homepage / root SEO. */
 export function getLocalBusinessJsonLd(): Record<string, unknown> {
@@ -6,6 +6,7 @@ export function getLocalBusinessJsonLd(): Record<string, unknown> {
   const telephone = siteConfig.saleContacts[0]?.phoneTel
     ? `+66${siteConfig.saleContacts[0].phoneTel.replace(/^0/, "")}`
     : undefined;
+  const sameAs = socialSameAsUrls();
 
   return {
     "@context": "https://schema.org",
@@ -19,7 +20,7 @@ export function getLocalBusinessJsonLd(): Record<string, unknown> {
         logo: `${base}/images/brand/logo-mark.png`,
         email: siteConfig.emailTo,
         telephone,
-        sameAs: siteConfig.social.map((s) => s.href).filter(Boolean),
+        ...(sameAs.length ? { sameAs } : {}),
       },
       {
         "@type": "HomeAndConstructionBusiness",

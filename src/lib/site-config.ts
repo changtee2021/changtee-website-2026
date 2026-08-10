@@ -1,3 +1,37 @@
+/** Prefer explicit SITE_URL; then Vercel production/preview host; last localhost. */
+function resolveSiteUrl(): string {
+  const fromEnv = process.env.NEXT_PUBLIC_SITE_URL?.trim().replace(/\/$/, "");
+  if (fromEnv) return fromEnv;
+  const prodHost = process.env.VERCEL_PROJECT_PRODUCTION_URL?.trim();
+  if (prodHost) return `https://${prodHost.replace(/^https?:\/\//, "")}`;
+  const previewHost = process.env.VERCEL_URL?.trim();
+  if (previewHost) return `https://${previewHost.replace(/^https?:\/\//, "")}`;
+  return "http://localhost:3000";
+}
+
+/** Platform homepages used as empty-env placeholders — never put in JSON-LD sameAs. */
+const PLACEHOLDER_SOCIAL_HOSTS = new Set([
+  "www.facebook.com",
+  "facebook.com",
+  "www.instagram.com",
+  "instagram.com",
+  "www.tiktok.com",
+  "tiktok.com",
+  "www.youtube.com",
+  "youtube.com",
+]);
+
+function isPlaceholderSocialUrl(href: string): boolean {
+  try {
+    const u = new URL(href);
+    if (!PLACEHOLDER_SOCIAL_HOSTS.has(u.hostname)) return false;
+    const path = u.pathname.replace(/\/+$/, "");
+    return path === "" || path === "/";
+  } catch {
+    return true;
+  }
+}
+
 export const siteConfig = {
   name: "ช่างตี๋ ผ้าม่าน",
   nameEn: "Chang Tee Curtain",
@@ -6,6 +40,10 @@ export const siteConfig = {
   usp: "ถูก เร็ว ดี",
   description:
     "ผู้เชี่ยวชาญด้านผ้าม่านแบบครบวงจร มีโรงงานผลิตเอง วัดหน้างานฟรี ติดตั้งทั่วประเทศไทย",
+  /** Default Open Graph / Twitter share image (1200-ish landscape preferred). */
+  ogImage: "/images/generated/ct-hero-living.webp",
+  /** Real showroom photo — use for all “ร้านเรา / โชว์รูม” placements. */
+  showroomImage: "/images/about/showroom-interior.webp",
   aboutHighlights: [
     {
       title: "ช่างม่านที่เข้าใจคุณ",
@@ -20,7 +58,7 @@ export const siteConfig = {
       body: "ดูแลทั้งบ้าน คอนโด ร้านค้า ออฟฟิศ หน่วยงานราชการ และสถานศึกษา พร้อมโชว์รูมให้เลือกแบบจริง",
     },
   ],
-  url: process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000",
+  url: resolveSiteUrl(),
   /** Admin origin (e.g. https://admin.changtee-curtain.com). Empty = path `/admin`. */
   adminUrl: process.env.NEXT_PUBLIC_ADMIN_URL || "",
   /** Primary display phone — first SALE contact */
@@ -70,12 +108,16 @@ export const siteConfig = {
   social: [
     {
       label: "Facebook",
-      href: process.env.NEXT_PUBLIC_FACEBOOK_URL || "https://www.facebook.com/",
+      href:
+        process.env.NEXT_PUBLIC_FACEBOOK_URL ||
+        "https://www.facebook.com/ChangTeeCurtain",
       icon: "/images/social/facebook.svg",
     },
     {
       label: "YouTube",
-      href: process.env.NEXT_PUBLIC_YOUTUBE_URL || "https://www.youtube.com/",
+      href:
+        process.env.NEXT_PUBLIC_YOUTUBE_URL ||
+        "https://www.youtube.com/@ช่างตี๋-ผ้าม่าน",
       icon: "/images/social/youtube.svg",
     },
     {
@@ -97,6 +139,15 @@ export const siteConfig = {
   brochureUrl: "/brochure/company-profile-2026.pdf",
   brochureLabel: "Download Brochure ช่างตี๋ 2026",
 } as const;
+
+/** Verified social profile URLs for schema.org sameAs (excludes bare platform homepages). */
+export function socialSameAsUrls(
+  social: readonly { href: string }[] = siteConfig.social,
+): string[] {
+  return social
+    .map((s) => s.href)
+    .filter((href) => href && !isPlaceholderSocialUrl(href));
+}
 
 export const navItems = [
   { href: "/", label: "หน้าแรก" },

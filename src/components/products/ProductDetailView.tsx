@@ -182,7 +182,7 @@ export function ProductDetailView({
   return (
     <ProductLightboxScope images={lightboxImages}>
       <article className="bg-white">
-        <div className="mx-auto max-w-6xl px-4 py-8 sm:py-12">
+        <div className="mx-auto max-w-5xl px-6 sm:px-10 lg:px-16 py-8 sm:py-12">
           <nav aria-label="breadcrumb" className="text-sm text-muted">
             <ol className="flex flex-wrap items-center gap-x-1.5 gap-y-1">
               <li>

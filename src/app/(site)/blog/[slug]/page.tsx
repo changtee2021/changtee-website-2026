@@ -8,6 +8,7 @@ import {
   loadPublishedBlogSlugs,
 } from "@/lib/cms/cms-public-load";
 import { getBlogBySlug } from "@/lib/cms/public-content";
+import { pageMetadata } from "@/lib/seo/meta";
 
 type Props = { params: Promise<{ slug: string }> };
 
@@ -20,15 +21,20 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const posts = await loadBlogPosts();
   const post = getBlogBySlug(slug, posts);
   if (!post) return { title: "บทความ" };
+  const title = post.seoTitle || post.title;
+  const description = post.seoDescription || post.excerpt;
+  const base = pageMetadata({
+    title,
+    description,
+    path: `/blog/${post.slug}`,
+    image: post.cover,
+    type: "article",
+  });
   return {
-    title: post.seoTitle || post.title,
-    description: post.seoDescription || post.excerpt,
-    alternates: { canonical: `/blog/${post.slug}` },
+    ...base,
     openGraph: {
+      ...base.openGraph,
       type: "article",
-      title: post.seoTitle || post.title,
-      description: post.seoDescription || post.excerpt,
-      images: [post.cover],
       publishedTime: post.publishedAt ?? undefined,
       modifiedTime: post.updatedAt || post.publishedAt || undefined,
     },

@@ -44,6 +44,8 @@ export type InstallVideoClip = {
   thumbnail: string;
   /** Real watch URL when ready; empty = mock → YouTube channel */
   videoUrl?: string;
+  /** Present when clip maps to a YouTube video — used for in-page embed */
+  youtubeId?: string;
 };
 
 const CTX = "/images/products/context";
@@ -550,191 +552,318 @@ export const YOUTUBE_CHANNEL_URL =
 
 const VID = "/images/products/videos";
 
+/** Official channel @ช่างตี๋-ผ้าม่าน — watch URLs for product install sections */
+export function ytWatch(id: string): string {
+  return `https://www.youtube.com/watch?v=${id}`;
+}
+
+export function ytThumb(id: string): string {
+  return `https://i.ytimg.com/vi/${id}/hqdefault.jpg`;
+}
+
+export function ytEmbed(id: string, autoplay = false): string {
+  const q = autoplay ? "?autoplay=1&rel=0" : "?rel=0";
+  return `https://www.youtube.com/embed/${id}${q}`;
+}
+
+export function youtubeIdFromUrl(url?: string | null): string | null {
+  if (!url?.trim()) return null;
+  try {
+    const u = new URL(url.trim());
+    if (u.hostname.includes("youtu.be")) {
+      const id = u.pathname.replace(/^\//, "").split("/")[0];
+      return id || null;
+    }
+    if (u.pathname.startsWith("/shorts/")) {
+      return u.pathname.split("/")[2] || null;
+    }
+    return u.searchParams.get("v");
+  } catch {
+    return null;
+  }
+}
+
+export function clipYoutubeId(clip: InstallVideoClip): string | null {
+  return clip.youtubeId ?? youtubeIdFromUrl(clip.videoUrl);
+}
+
 function clips(
   categorySlug: string,
-  items: Omit<InstallVideoClip, "thumbnail">[],
+  items: (Omit<InstallVideoClip, "thumbnail"> & { youtubeId?: string })[],
 ): InstallVideoClip[] {
-  return items.map((item) => ({
-    ...item,
-    thumbnail: `${VID}/${categorySlug}/${item.id}.png`,
-  }));
+  return items.map((item) => {
+    const youtubeId = item.youtubeId;
+    const videoUrl = item.videoUrl ?? (youtubeId ? ytWatch(youtubeId) : undefined);
+    return {
+      ...item,
+      youtubeId,
+      videoUrl,
+      thumbnail: youtubeId
+        ? ytThumb(youtubeId)
+        : `${VID}/${categorySlug}/${item.id}.png`,
+    };
+  });
 }
+
+/** Homepage featured strip — popular install clips (play in-page) */
+const FEATURED_INSTALL_VIDEOS: InstallVideoClip[] = clips("pvc-partition", [
+  {
+    id: "dual-open",
+    youtubeId: "CWqrHGLg1gg",
+    title: "ติดตั้งฉากกั้นห้องเปิด 2 ฝั่ง — เสร็จใน 1 ชม.ครึ่ง",
+    duration: "2:43",
+  },
+  {
+    id: "dual-two-hours",
+    youtubeId: "Wa_Mwy_8BfA",
+    title: "ฉากกั้นห้องเปิด 2 ด้าน — เสร็จงานภายใน 2 ชม.",
+    duration: "2:46",
+  },
+  {
+    id: "big-three",
+    youtubeId: "hNHpIwwKMjk",
+    title: "ฉากกั้นห้องงานใหญ่ 3 ชุด ในเวลา 2 ชม.",
+    duration: "1:16",
+  },
+  {
+    id: "door-size",
+    youtubeId: "_k3l3TtBgIo",
+    title: "ติดตั้งฉากกั้นห้องขนาดเท่าประตู — เสร็จใน 1 ชม.",
+    duration: "1:28",
+  },
+  {
+    id: "diy-guide",
+    youtubeId: "ECMg71YqBPo",
+    title: "วิธีการติดฉากกั้นห้องด้วยตัวเอง",
+    duration: "10:44",
+  },
+  {
+    id: "cpram",
+    youtubeId: "DeJcmZMPYQk",
+    title: "ติดตั้งฉากกั้นแอร์ PVC ที่ CPRAM",
+    duration: "6:26",
+  },
+  {
+    id: "rail-eyelet",
+    youtubeId: "9vMnFY3EBo8",
+    title: "ติดตั้งราวม่านและม่านตาไก่ง่ายๆ",
+    duration: "1:16",
+  },
+  {
+    id: "eyelet-pleat",
+    youtubeId: "Wa7L9clgpLU",
+    title: "ติดตั้งม่านตาไก่ / ม่านจีบ — ลาดกระบัง",
+    duration: "6:56",
+  },
+  {
+    id: "roman-pleat",
+    youtubeId: "4jcs6axKWaI",
+    title: "ติดตั้งม่านพับ ม่านจีบรางโชว์ — อ่างทอง",
+    duration: "4:40",
+  },
+  {
+    id: "school-building",
+    youtubeId: "GWwXLjqo6nA",
+    title: "ติดตั้งม่านม้วนทั้งอาคาร — Mandarin School",
+    duration: "5:26",
+  },
+  {
+    id: "office-factory",
+    youtubeId: "5nQ-ObgI-is",
+    title: "ติดม่านม้วน ม่านบังแสง ออฟฟิศ/โรงงาน",
+    duration: "1:41",
+  },
+  {
+    id: "motor-roller",
+    youtubeId: "AOwHaZTt8mU",
+    title: "ติดตั้งม่านม้วนไฟฟ้า",
+    duration: "1:51",
+  },
+]);
 
 const INSTALL_VIDEOS_BY_CATEGORY: Record<string, InstallVideoClip[]> = {
   curtain: clips("curtain", [
     {
-      id: "install-rail",
-      title: "ติดตั้งรางและแขวนม่านผ้า",
-      duration: "0:48",
+      id: "rail-eyelet",
+      youtubeId: "9vMnFY3EBo8",
+      title: "ติดตั้งราวม่านและม่านตาไก่ง่ายๆ",
+      duration: "1:16",
     },
     {
-      id: "adjust-fold",
-      title: "จัดลอน/จีบให้สวยหลังติด",
-      duration: "0:36",
+      id: "eyelet-pleat",
+      youtubeId: "Wa7L9clgpLU",
+      title: "ติดตั้งม่านตาไก่ / ม่านจีบ — ลาดกระบัง",
+      duration: "6:56",
     },
     {
-      id: "final-check",
-      title: "ตรวจเปิด-ปิดและเก็บงาน",
-      duration: "0:22",
+      id: "roman-pleat",
+      youtubeId: "4jcs6axKWaI",
+      title: "ติดตั้งม่านพับ ม่านจีบรางโชว์ — อ่างทอง",
+      duration: "4:40",
     },
   ]),
   "roller-blinds": clips("roller-blinds", [
     {
-      id: "install-cassette",
-      title: "ติดกล่องม้วนและปรับระดับ",
-      duration: "0:42",
+      id: "school-building",
+      youtubeId: "GWwXLjqo6nA",
+      title: "ติดตั้งม่านม้วนทั้งอาคาร — Mandarin School",
+      duration: "5:26",
     },
     {
-      id: "demo-light",
-      title: "ทดลองเปิด-ปิดคุมแสงม่านม้วน",
-      duration: "0:28",
+      id: "office-factory",
+      youtubeId: "5nQ-ObgI-is",
+      title: "ติดม่านม้วน ม่านบังแสง ออฟฟิศ/โรงงาน",
+      duration: "1:41",
     },
     {
-      id: "final-check",
-      title: "เช็กขอบม้วนและเก็บงาน",
-      duration: "0:20",
+      id: "motor-roller",
+      youtubeId: "AOwHaZTt8mU",
+      title: "ติดตั้งม่านม้วนไฟฟ้า",
+      duration: "1:51",
     },
   ]),
   "venetian-blinds": clips("venetian-blinds", [
     {
-      id: "install-headrail",
-      title: "ติดตั้งรางหัวมู่ลี่",
-      duration: "0:40",
+      id: "wood-review",
+      youtubeId: "_z6e6y6S2mc",
+      title: "มู่ลี่ไม้ + ระบบเชือกวน — รีวิวโดยช่างตี๋",
+      duration: "4:30",
     },
     {
-      id: "tilt-demo",
-      title: "ปรับองศาใบตัดแสง",
-      duration: "0:25",
-    },
-    {
-      id: "final-check",
-      title: "ทดสอบยก-ลดและเก็บงาน",
-      duration: "0:22",
+      id: "install-two",
+      youtubeId: "vINi0csLmkc",
+      title: "ติดตั้งมู่ลี่ 2 ชุดใน 1 ชม. — คู้บอน",
+      duration: "4:15",
     },
   ]),
   "vertical-blinds": clips("vertical-blinds", [
     {
-      id: "install-track",
-      title: "ติดรางม่านปรับแสงบานกว้าง",
-      duration: "0:45",
-    },
-    {
-      id: "vane-demo",
-      title: "หมุนใบและเลื่อนเปิด-ปิด",
-      duration: "0:30",
-    },
-    {
-      id: "final-check",
-      title: "ตรวจแนวใบและเก็บงาน",
-      duration: "0:21",
+      id: "six-sets",
+      youtubeId: "twKZR-UY1E8",
+      title: "ติดตั้งม่านปรับแสง 6 ชุด ใน 2 ชั่วโมง",
+      duration: "1:10",
     },
   ]),
   "pvc-partition": clips("pvc-partition", [
     {
-      id: "install-track",
-      title: "ติดรางฉากกั้น PVC",
-      duration: "0:50",
+      id: "door-size",
+      youtubeId: "_k3l3TtBgIo",
+      title: "ติดตั้งฉากกั้นห้องขนาดเท่าประตู — เสร็จใน 1 ชม.",
+      duration: "1:28",
     },
     {
-      id: "fold-demo",
-      title: "พับเก็บและกางฉากกั้น",
-      duration: "0:32",
+      id: "diy-guide",
+      youtubeId: "ECMg71YqBPo",
+      title: "วิธีการติดฉากกั้นห้องด้วยตัวเอง",
+      duration: "10:44",
     },
     {
-      id: "final-check",
-      title: "เช็กแนวพับและความลื่น",
-      duration: "0:24",
+      id: "cpram",
+      youtubeId: "DeJcmZMPYQk",
+      title: "ติดตั้งฉากกั้นแอร์ PVC ที่ CPRAM",
+      duration: "6:26",
     },
   ]),
   "outdoor-factory": clips("outdoor-factory", [
     {
-      id: "install-outdoor",
-      title: "ติดตั้งม่านภายนอก/รางซิป",
-      duration: "0:55",
+      id: "office-factory",
+      youtubeId: "5nQ-ObgI-is",
+      title: "ติดม่านม้วน ม่านบังแสง ออฟฟิศ/โรงงาน",
+      duration: "1:41",
     },
     {
-      id: "weather-demo",
-      title: "ทดสอบกาง-เก็บหน้างานจริง",
-      duration: "0:34",
+      id: "cpram",
+      youtubeId: "DeJcmZMPYQk",
+      title: "ฉากกั้นแอร์ PVC งานโรงงาน — CPRAM",
+      duration: "6:26",
     },
     {
-      id: "final-check",
-      title: "ตรวจจุดยึดและเก็บงาน",
-      duration: "0:26",
+      id: "school-building",
+      youtubeId: "GWwXLjqo6nA",
+      title: "ม่านม้วนงานใหญ่ทั้งอาคาร",
+      duration: "5:26",
     },
   ]),
   motorized: clips("motorized", [
     {
-      id: "install-motor",
-      title: "ติดตั้งมอเตอร์และทดสอบลิมิต",
-      duration: "0:52",
+      id: "motor-demo",
+      youtubeId: "bcs3VRxkyOE",
+      title: "ม่านม้วนไฟฟ้า — ใช้ง่าย ติดตั้งสะดวก",
+      duration: "0:35",
     },
     {
-      id: "remote-demo",
-      title: "คุมด้วยรีโมท/ซีนเปิด-ปิด",
-      duration: "0:30",
-    },
-    {
-      id: "final-check",
-      title: "ตั้งจุดหยุดและส่งมอบ",
-      duration: "0:24",
+      id: "motor-install",
+      youtubeId: "AOwHaZTt8mU",
+      title: "ติดตั้งม่านม้วนไฟฟ้า",
+      duration: "1:51",
     },
   ]),
   "print-fabric": clips("print-fabric", [
     {
-      id: "hang-print",
-      title: "แขวนม่านพิมพ์ลายตามจุดมอง",
-      duration: "0:38",
+      id: "harajuku-screen",
+      youtubeId: "yGFOS4NqeUw",
+      title: "ผ้าม่านญี่ปุ่น / ผ้าม่านสกรีน — Harajuku Thailand",
+      duration: "8:09",
     },
     {
-      id: "align-pattern",
-      title: "จัดแนวลายให้ตรงบาน",
-      duration: "0:27",
-    },
-    {
-      id: "final-check",
-      title: "ตรวจลายและเก็บงาน",
-      duration: "0:20",
+      id: "harajuku-vertical",
+      youtubeId: "emKvAwIulnw",
+      title: "ติดตั้งผ้าม่านญี่ปุ่น (มุมมองแนวตั้ง)",
+      duration: "8:09",
     },
   ]),
-  surface: clips("surface", [
-    {
-      id: "wallpaper-install",
-      title: "ติดวอลเปเปอร์เก็บขอบ",
-      duration: "0:44",
-    },
-    {
-      id: "film-install",
-      title: "ติดฟิล์มกระจกไล่ฟอง",
-      duration: "0:40",
-    },
-    {
-      id: "final-check",
-      title: "ตรวจรอยต่อและเก็บงาน",
-      duration: "0:22",
-    },
-  ]),
-  service: clips("service", [
-    {
-      id: "take-down",
-      title: "ถอดม่านเตรียมซัก/ซ่อม",
-      duration: "0:35",
-    },
-    {
-      id: "rehang",
-      title: "ติดกลับและจัดทรงม่าน",
-      duration: "0:33",
-    },
-    {
-      id: "final-check",
-      title: "ตรวจเปิด-ปิดหลังดูแล",
-      duration: "0:18",
-    },
-  ]),
+  // No matching channel videos yet — section hidden until clips are added
+  surface: [],
+  service: [],
 };
 
 export function getInstallVideos(categorySlug: string): InstallVideoClip[] {
   return INSTALL_VIDEOS_BY_CATEGORY[categorySlug] ?? [];
+}
+
+export function getFeaturedInstallVideos(limit = 3): InstallVideoClip[] {
+  return FEATURED_INSTALL_VIDEOS.slice(0, limit);
+}
+
+/** Match install clips to blog keywords (same product hints as portfolio). */
+export function installVideosForText(haystack: string, limit = 3): InstallVideoClip[] {
+  const hay = haystack.toLowerCase();
+  const productHints: { slug: string; keywords: string[] }[] = [
+    { slug: "curtain", keywords: ["ผ้าม่าน", "ม่านลอน", "ม่านจีบ", "ม่านตาไก่", "ทึบแสง", "blackout"] },
+    { slug: "roller-blinds", keywords: ["ม่านม้วน", "sunscreen", "เมจิก", "zebra"] },
+    { slug: "motorized", keywords: ["ม่านไฟฟ้า", "มอเตอร์", "รีโมท"] },
+    { slug: "venetian-blinds", keywords: ["มู่ลี่"] },
+    { slug: "vertical-blinds", keywords: ["ม่านปรับแสง"] },
+    { slug: "pvc-partition", keywords: ["ฉากกั้น"] },
+    { slug: "print-fabric", keywords: ["พิมพ์ลาย", "สกรีน", "ม่านญี่ปุ่น"] },
+    { slug: "outdoor-factory", keywords: ["ม่านภายนอก", "zip", "โรงงาน"] },
+  ];
+
+  const preferred = productHints.filter((h) =>
+    h.keywords.some((k) => hay.includes(k.toLowerCase())),
+  );
+
+  const seen = new Set<string>();
+  const out: InstallVideoClip[] = [];
+  for (const hint of preferred) {
+    for (const clip of getInstallVideos(hint.slug)) {
+      const key = clipYoutubeId(clip) ?? clip.id;
+      if (seen.has(key)) continue;
+      seen.add(key);
+      out.push(clip);
+      if (out.length >= limit) return out;
+    }
+  }
+
+  if (out.length >= limit) return out;
+  for (const clip of getFeaturedInstallVideos(limit)) {
+    const key = clipYoutubeId(clip) ?? clip.id;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    out.push(clip);
+    if (out.length >= limit) break;
+  }
+  return out;
 }
 
 export function getCompareTable(categorySlug: string): CompareTable | null {

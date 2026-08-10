@@ -1,6 +1,10 @@
+"use client";
+
+import { useState } from "react";
 import Image from "next/image";
-import { Download, Eye, FileText } from "lucide-react";
+import { FileText } from "lucide-react";
 import type { ProductCatalogFile } from "@/lib/catalogs";
+import { CatalogFlipbookModal } from "@/components/catalog/CatalogFlipbookModal";
 
 type Props = {
   catalog: ProductCatalogFile;
@@ -9,61 +13,68 @@ type Props = {
 
 export function CatalogCard({ catalog, compact = false }: Props) {
   const cover = catalog.coverImage;
+  const [open, setOpen] = useState(false);
+  const fileName = `${catalog.id}.pdf`;
 
   return (
-    <article
-      className={`rounded-2xl border border-line bg-white ${
-        compact ? "p-4" : "p-5 md:p-6"
-      }`}
-    >
-      <div className="flex items-start gap-4">
-        <div
-          className={`relative shrink-0 overflow-hidden rounded-xl border border-line bg-paper ${
-            compact ? "h-16 w-12" : "h-28 w-20 sm:h-32 sm:w-24"
-          }`}
-        >
+    <>
+      <button
+        type="button"
+        onClick={() => setOpen(true)}
+        className="group block w-full rounded-[1.25rem] bg-white p-3 text-left shadow-sm ring-1 ring-line transition hover:ring-navy/20"
+      >
+        <div className="relative aspect-[4/3] overflow-hidden rounded-[1rem] bg-line/40">
           {cover ? (
             <Image
               src={cover}
               alt={`ปก ${catalog.title}`}
               fill
-              className="object-cover object-top"
-              sizes="96px"
+              className="object-cover transition-transform duration-500 group-hover:scale-[1.04]"
+              sizes={compact ? "280px" : "(max-width: 640px) 78vw, 300px"}
             />
           ) : (
             <div className="flex h-full w-full items-center justify-center bg-navy text-white">
-              <FileText className="h-6 w-6" />
+              <FileText className="h-8 w-8" />
             </div>
           )}
         </div>
 
-        <div className="min-w-0 flex-1">
-          <h3 className="font-semibold text-navy">{catalog.title}</h3>
-          <p className="text-xs text-muted">{catalog.titleEn}</p>
+        <div className={`px-1 ${compact ? "pb-1 pt-3" : "pb-1 pt-4"}`}>
+          <h3
+            className={`font-semibold text-navy ${
+              compact ? "text-sm" : "text-base"
+            }`}
+          >
+            {catalog.title}
+          </h3>
           {!compact ? (
-            <p className="mt-2 text-sm leading-6 text-muted">{catalog.description}</p>
-          ) : null}
-          <div className="mt-4 flex flex-wrap gap-2">
-            <a
-              href={catalog.href}
-              target="_blank"
-              rel="noreferrer"
-              className="inline-flex items-center gap-1.5 rounded-md bg-navy px-3 py-2 text-xs font-semibold text-white hover:bg-navy/90"
-            >
-              <Eye className="h-3.5 w-3.5" />
-              เปิดดู PDF
-            </a>
-            <a
-              href={catalog.href}
-              download
-              className="inline-flex items-center gap-1.5 rounded-md bg-brand-red px-3 py-2 text-xs font-semibold text-white hover:bg-brand-red-soft"
-            >
-              <Download className="h-3.5 w-3.5" />
-              ดาวน์โหลด
-            </a>
+            <p className="mt-1 line-clamp-2 text-sm text-muted">
+              {catalog.description}
+            </p>
+          ) : (
+            <p className="mt-0.5 text-xs text-muted">{catalog.titleEn}</p>
+          )}
+          <div className="mt-4 flex items-center justify-between gap-3">
+            <span className="truncate text-xs text-muted">
+              {compact ? "PDF" : catalog.titleEn}
+            </span>
+            <span className="shrink-0 rounded-full bg-navy px-4 py-1.5 text-xs font-semibold text-white transition group-hover:bg-brand-red">
+              เปิดดู
+            </span>
           </div>
         </div>
-      </div>
-    </article>
+      </button>
+
+      {open ? (
+        <CatalogFlipbookModal
+          fileUrl={catalog.href}
+          fileName={fileName}
+          title={catalog.title}
+          catalogId={catalog.id}
+          manifestUrl={catalog.manifestUrl}
+          onClose={() => setOpen(false)}
+        />
+      ) : null}
+    </>
   );
 }

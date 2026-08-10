@@ -97,3 +97,46 @@ export async function writeCmsCollection<T>(
     };
   }
 }
+
+/** Read a non-collection site_settings value by exact key. */
+export async function readSiteSetting<T>(key: string): Promise<T | null> {
+  if (!canUseCmsServer()) return null;
+  try {
+    const supabase = createServiceSupabase();
+    const { data, error } = await supabase
+      .from("site_settings")
+      .select("value")
+      .eq("key", key)
+      .maybeSingle();
+    if (error || !data) return null;
+    return (data.value as T) ?? null;
+  } catch {
+    return null;
+  }
+}
+
+/** Upsert a non-collection site_settings value by exact key. */
+export async function writeSiteSetting<T>(
+  key: string,
+  value: T,
+): Promise<{ ok: true; updatedAt: string } | { ok: false; error: string }> {
+  if (!canUseCmsServer()) {
+    return { ok: false, error: "Supabase service role is not configured" };
+  }
+  try {
+    const supabase = createServiceSupabase();
+    const updatedAt = new Date().toISOString();
+    const { error } = await supabase.from("site_settings").upsert({
+      key,
+      value,
+      updated_at: updatedAt,
+    });
+    if (error) return { ok: false, error: error.message };
+    return { ok: true, updatedAt };
+  } catch (err) {
+    return {
+      ok: false,
+      error: err instanceof Error ? err.message : "Settings write failed",
+    };
+  }
+}

@@ -1,7 +1,8 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { ProductDetailView } from "@/components/products/ProductDetailView";
-import { getCatalogForProduct } from "@/lib/catalogs";
+import { JsonLd } from "@/components/seo/JsonLd";
+import { loadCatalogForProduct } from "@/lib/catalogs-server";
 import {
   getPillar,
   getProduct,
@@ -14,7 +15,7 @@ import {
   getProductJsonLd,
   getProductPresentation,
 } from "@/lib/product-presentation";
-import { siteConfig } from "@/lib/site-config";
+import { pageMetadata } from "@/lib/seo/meta";
 
 type Props = { params: Promise<{ category: string; slug: string }> };
 
@@ -39,32 +40,15 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     content?.tagline ??
     found.product.summary;
   const image = presentation?.assets.hero;
-  const url = `${siteConfig.url.replace(/\/$/, "")}/products/${category}/${slug}`;
 
-  return {
+  return pageMetadata({
     title,
     description,
+    path: `/products/${category}/${slug}`,
+    image,
     keywords: presentation?.seoKeywords,
-    alternates: { canonical: url },
-    openGraph: {
-      title,
-      description,
-      url,
-      type: "website",
-      locale: "th_TH",
-      siteName: siteConfig.name,
-      images: image
-        ? [{ url: image, width: 1200, height: 900, alt: found.product.name }]
-        : undefined,
-    },
-    twitter: {
-      card: "summary_large_image",
-      title,
-      description,
-      images: image ? [image] : undefined,
-    },
     robots: { index: true, follow: true },
-  };
+  });
 }
 
 export default async function ProductDetailPage({ params }: Props) {
@@ -77,7 +61,7 @@ export default async function ProductDetailPage({ params }: Props) {
   const presentation = getProductPresentation(category, slug);
   if (!content || !presentation) notFound();
 
-  const catalog = getCatalogForProduct(cat.slug, product.slug);
+  const catalog = await loadCatalogForProduct(cat.slug, product.slug);
   const pillar = getPillar(cat.pillar);
   const related = cat.children.filter((c) => c.slug !== product.slug).slice(0, 3);
   const portfolioWorks = portfolioForProduct(cat.slug, product.name, undefined, 3);
@@ -85,12 +69,7 @@ export default async function ProductDetailPage({ params }: Props) {
 
   return (
     <>
-      {jsonLd ? (
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-        />
-      ) : null}
+      {jsonLd ? <JsonLd data={jsonLd} /> : null}
       <ProductDetailView
         category={cat}
         product={product}

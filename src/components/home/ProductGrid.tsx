@@ -29,50 +29,40 @@ export function ProductGrid() {
       <div className="px-1 py-4 sm:px-2 sm:py-6 md:py-8">
         <div className="grid grid-cols-2 gap-2 sm:grid-cols-4 sm:gap-3">
           {tiles.map((item, i) => (
-            <div key={`tile-${item.n}`} className="space-y-1">
-              <EditableSpot
-                sectionId="products"
-                fieldKey={`tile${item.n}Image`}
-                label="รูป"
+            <EditableSpot
+              key={`tile-${item.n}`}
+              sectionId="products"
+              fieldKey={`tile${item.n}Image`}
+              label="รูป"
+            >
+              <Link
+                href={item.href}
+                className="group relative block aspect-[716/1024] overflow-hidden rounded-md"
+                aria-label={item.name}
+                onClick={(e) => {
+                  // In preview, let EditableSpot handle clicks
+                  if (
+                    typeof window !== "undefined" &&
+                    window.parent !== window
+                  ) {
+                    e.preventDefault();
+                  }
+                }}
               >
-                <Link
-                  href={item.href}
-                  className="group relative block aspect-[3/4] overflow-hidden rounded-xl"
-                  aria-label={item.name}
-                  onClick={(e) => {
-                    // In preview, let EditableSpot handle clicks
-                    if (
-                      typeof window !== "undefined" &&
-                      window.parent !== window
-                    ) {
-                      e.preventDefault();
-                    }
-                  }}
-                >
-                  <Image
-                    src={item.image}
-                    alt={item.name}
-                    fill
-                    loading={i < 4 ? "eager" : "lazy"}
-                    className="object-cover transition-transform duration-300 group-hover:scale-[1.03]"
-                    sizes="(max-width: 640px) 45vw, 220px"
-                  />
-                </Link>
-              </EditableSpot>
-              <EditableSpot
-                sectionId="products"
-                fieldKey={`tile${item.n}Name`}
-                label="ชื่อ"
-              >
-                <p className="truncate px-0.5 text-center text-xs font-medium text-navy sm:text-sm">
-                  {item.name}
-                </p>
-              </EditableSpot>
-            </div>
+                <Image
+                  src={item.image}
+                  alt={item.name}
+                  fill
+                  loading={i < 4 ? "eager" : "lazy"}
+                  className="object-cover transition-transform duration-300 group-hover:scale-[1.02]"
+                  sizes="(max-width: 640px) 45vw, 220px"
+                />
+              </Link>
+            </EditableSpot>
           ))}
         </div>
 
-        <div className="mt-6 flex justify-center">
+        <div className="mt-6 flex justify-end">
           <EditableSpot
             sectionId="products"
             fieldKey="allLinkLabel"

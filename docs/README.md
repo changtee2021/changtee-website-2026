@@ -27,3 +27,7 @@
 
 - [Decision sheet](decisions/DECISION-SHEET.md)
 - [LINE OA](brand/LINE-OA.md)
+- [Content workflow / วิธีเขียนบทความ](brand/content-workflow.md) — start here: ตี๋ → เฮง → อาร์ต + แผนเนื้อหา 50 บทความ
+- [Writer persona (ตี๋)](brand/content-writer-persona.md)
+- [QC persona (บก.เฮง)](brand/content-qc-persona.md)
+- [Visual persona (อาร์ต)](brand/content-visual-persona.md) — กราฟฟิก Style Lock + ภาพเหมือนจริง + QC ภาพ

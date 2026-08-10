@@ -21,16 +21,29 @@ export const quoteLeadSchema = z.object({
   taxId: z.string().trim().max(30).optional().or(z.literal("")),
   email: z.string().trim().email("กรุณากรอกอีเมลให้ถูกต้อง"),
   productType: z.string().trim().min(1, "กรุณาเลือกประเภทสินค้า"),
-  requestedSize: z.string().trim().max(4000).optional().or(z.literal("")),
+  requestedSize: z
+    .string()
+    .trim()
+    .min(1, "กรุณากรอกขนาดที่ต้องการ (กว้างxสูง เซ็นติเมตร)")
+    .max(4000),
   callbackDate: z.string().trim().max(40).optional().or(z.literal("")),
   referralSource: z.string().trim().min(1, "กรุณาเลือกช่องทางที่หาเราเจอ"),
   note: z.string().trim().max(4000).optional().or(z.literal("")),
   pdpaAccepted: z.boolean(),
   siteImageName: z.string().trim().max(260).optional().or(z.literal("")),
-}).refine((data) => data.pdpaAccepted === true, {
+})
+.refine((data) => data.pdpaAccepted === true, {
   message: "กรุณายอมรับนโยบายความเป็นส่วนตัว",
   path: ["pdpaAccepted"],
-});
+})
+.refine(
+  (data) =>
+    data.contactType === "บุคคลธรรมดา" || Boolean(data.taxId?.trim()),
+  {
+    message: "กรุณากรอกเลขผู้เสียภาษี",
+    path: ["taxId"],
+  },
+);
 
 export type QuoteLeadInput = z.infer<typeof quoteLeadSchema>;
 
