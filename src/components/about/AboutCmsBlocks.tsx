@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { EditableSpot } from "@/components/preview/EditableSpot";
 import { useSectionValues } from "@/lib/cms/demo-store";
 import { ABOUT_SECTION_DEFAULTS } from "@/lib/cms/page-sections/templates";
@@ -15,56 +16,62 @@ export function AboutHeroCms() {
   if (!enabled) return null;
 
   return (
-    <section className="px-6 pb-3 pt-3 sm:px-10 sm:pb-4 sm:pt-4 lg:px-16">
-      <div className="mx-auto grid w-full max-w-5xl overflow-hidden rounded-[var(--radius-panel)] bg-navy text-white md:grid-cols-[1.05fr_0.95fr]">
-        <div className="flex flex-col justify-center p-7 sm:p-10 md:p-12">
-          <EditableSpot sectionId="hero" fieldKey="eyebrow">
-            <p className="text-xs font-semibold tracking-[0.18em] text-white/55 uppercase">
-              {values.eyebrow} · {siteConfig.nameEn}
-            </p>
-          </EditableSpot>
-          <EditableSpot sectionId="hero" fieldKey="title">
-            <h1 className="mt-4 font-display text-3xl font-semibold leading-tight sm:text-4xl lg:text-[2.75rem]">
-              {values.title}
-            </h1>
-          </EditableSpot>
-          <EditableSpot sectionId="hero" fieldKey="lead">
-            <p className="mt-5 max-w-lg text-sm leading-relaxed text-brand-red-soft sm:text-base">
-              {values.lead}
-            </p>
-          </EditableSpot>
-          <EditableSpot sectionId="hero" fieldKey="body">
-            <p className="mt-4 max-w-lg text-sm leading-relaxed text-white/70">
-              {values.body}
-            </p>
-          </EditableSpot>
-          <div className="mt-8 flex flex-wrap gap-3">
-            <a
-              href="#company-contact"
-              className="inline-flex rounded-full bg-white px-5 py-3 text-sm font-semibold text-navy transition hover:bg-white/90"
-            >
-              ติดต่อสำหรับองค์กร
-            </a>
-            <a
-              href="/quote"
-              className="inline-flex rounded-full border border-white/35 px-5 py-3 text-sm font-semibold text-white transition hover:bg-white/10"
-            >
-              ขอใบเสนอราคา
-            </a>
-          </div>
-        </div>
+    <section className="relative bg-navy text-white">
+      <div className="relative min-h-[100dvh] w-full overflow-hidden">
         <EditableSpot sectionId="hero" fieldKey="image" label="รูป">
-          <div className="relative min-h-[280px] md:min-h-full">
+          <div className="absolute inset-0">
             <Image
               src={values.image || ABOUT_SECTION_DEFAULTS.hero.image}
               alt={values.title}
               fill
               priority
-              className="object-cover object-top"
-              sizes="(max-width: 768px) 100vw, 45vw"
+              className="object-cover object-[58%_center] sm:object-[62%_center]"
+              sizes="100vw"
             />
           </div>
         </EditableSpot>
+
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-navy/60 via-navy/20 to-navy/85 sm:bg-gradient-to-r sm:from-navy/80 sm:via-navy/35 sm:to-navy/10" />
+
+        <div className="relative z-[1] flex h-full min-h-[100dvh] flex-col justify-end px-6 pb-16 pt-28 sm:px-10 sm:pb-20 sm:pt-40 lg:px-16">
+          <div className="max-w-xl">
+            <EditableSpot sectionId="hero" fieldKey="eyebrow">
+              <p className="text-xs font-semibold tracking-[0.18em] text-white/70 uppercase">
+                {values.eyebrow} · {siteConfig.nameEn}
+              </p>
+            </EditableSpot>
+            <EditableSpot sectionId="hero" fieldKey="title">
+              <h1 className="mt-3 font-display text-3xl font-semibold leading-tight sm:text-4xl lg:text-[2.9rem]">
+                {values.title}
+              </h1>
+            </EditableSpot>
+            <EditableSpot sectionId="hero" fieldKey="lead">
+              <p className="mt-4 max-w-lg text-sm leading-relaxed text-white/90 sm:text-base">
+                {values.lead}
+              </p>
+            </EditableSpot>
+            <div className="mt-7 flex flex-wrap gap-3">
+              <a
+                href="#company-contact"
+                className="inline-flex rounded-full bg-white px-5 py-3 text-sm font-semibold text-navy transition hover:bg-white/90"
+              >
+                ติดต่อเรา
+              </a>
+              <Link
+                href="/visit-factory"
+                className="inline-flex rounded-full border border-white/35 px-5 py-3 text-sm font-semibold text-white transition hover:bg-white/10"
+              >
+                เยี่ยมชมโรงงาน
+              </Link>
+              <Link
+                href="/careers"
+                className="inline-flex rounded-full border border-white/35 px-5 py-3 text-sm font-semibold text-white transition hover:bg-white/10"
+              >
+                ร่วมงานกับเรา
+              </Link>
+            </div>
+          </div>
+        </div>
       </div>
     </section>
   );

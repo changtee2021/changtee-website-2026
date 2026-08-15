@@ -2,7 +2,7 @@
 
 The app is one Next.js project with three surfaces:
 
-- **Site** — public pages under `src/app`, including products, blog, quote, and estimate.
+- **Site** — public pages under `src/app`, including products, blog, quote, `/learn` (shop knowledge bible), and `/contact` (about; same layout as `/about`).
 - **Admin** — `/admin` pages and `src/components/admin`; it is not linked from the public header.
 - **API** — route handlers under `src/app/api`, including public lead intake and guarded admin lead APIs.
 

@@ -11,16 +11,20 @@ import {
   productLabel,
   type PortfolioItem,
 } from "@/lib/cms/portfolio-demo";
-import { useSectionValues } from "@/lib/cms/demo-store";
+import { BLOG_CATEGORY_LABELS } from "@/lib/cms/blog-demo";
+import { useBlogPosts, useSectionValues } from "@/lib/cms/demo-store";
 import { PORTFOLIO_ITEM_SECTION_DEFAULTS } from "@/lib/cms/page-sections/templates";
-import { bodyParagraphs } from "@/lib/cms/public-content";
-import { trackPortfolioQuoteClick } from "@/lib/cms/portfolio-analytics";
 import {
-  PortfolioQuoteCtas,
-  PortfolioViewTracker,
-} from "@/components/portfolio/PortfolioEngagement";
-import { PortfolioShareBar } from "@/components/portfolio/PortfolioShareBar";
+  blogForPortfolio,
+  bodyParagraphs,
+  learnForPortfolio,
+} from "@/lib/cms/public-content";
+import { roomById } from "@/lib/learn";
+import { trackPortfolioQuoteClick } from "@/lib/cms/portfolio-analytics";
+import { PortfolioViewTracker } from "@/components/portfolio/PortfolioEngagement";
+import { PortfolioShareDialog } from "@/components/portfolio/PortfolioShareDialog";
 import { ProductImageLightbox } from "@/components/products/ProductImageLightbox";
+import { siteConfig } from "@/lib/site-config";
 import { cn } from "@/lib/utils";
 
 function formatInstallDate(raw: string) {
@@ -67,6 +71,12 @@ export function PortfolioDetailView({
     "related",
     PORTFOLIO_ITEM_SECTION_DEFAULTS.related,
   );
+  const posts = useBlogPosts();
+  const relatedPosts = useMemo(
+    () => blogForPortfolio(item, posts, 3),
+    [item, posts],
+  );
+  const relatedLearn = useMemo(() => learnForPortfolio(item, 3), [item]);
 
   const gallery = useMemo(
     () =>
@@ -119,7 +129,7 @@ export function PortfolioDetailView({
             alt={title}
             fill
             className="object-cover transition duration-500 group-hover:scale-[1.01]"
-            sizes="100vw"
+            sizes="(max-width: 768px) 100vw, 1100px"
             priority={!preview}
           />
           <div className="absolute inset-0 bg-gradient-to-t from-navy/55 to-transparent" />
@@ -208,10 +218,7 @@ export function PortfolioDetailView({
 
         {gallery.length > 0 ? (
           <section className="mt-12 max-w-4xl">
-            <h2 className="font-display text-xl font-semibold text-navy">
-              รูปจากหน้างาน
-            </h2>
-            <div className="mt-4 grid gap-3 sm:grid-cols-2">
+            <div className="grid gap-3 sm:grid-cols-2">
               {gallery.map((src, i) => (
                 <button
                   key={`${src}-${i}`}
@@ -249,7 +256,17 @@ export function PortfolioDetailView({
               showQuote={ctaCms.enabled}
             />
           </section>
-        ) : null}
+        ) : (
+          <section className="mt-10 max-w-3xl">
+            <SpecActionButtons
+              item={item}
+              title={title}
+              preview={preview}
+              quoteLabel={ctaCms.values.quoteLabel}
+              showQuote={ctaCms.enabled}
+            />
+          </section>
+        )}
 
         {preview && item.internalNote.trim() ? (
           <div className="mt-6 max-w-3xl rounded-2xl border border-dashed border-amber-300 bg-amber-50/80 p-4 text-sm text-amber-950">
@@ -259,23 +276,6 @@ export function PortfolioDetailView({
             <p className="mt-2 whitespace-pre-wrap">{item.internalNote}</p>
           </div>
         ) : null}
-
-        {preview ? (
-          <div className="mt-12 space-y-4">
-            <PortfolioShareBar
-              portfolioId={item.id}
-              slug={item.slug || "preview"}
-              title={title}
-            />
-          </div>
-        ) : (
-          <PortfolioQuoteCtas
-            portfolioId={item.id}
-            slug={item.slug}
-            title={title}
-            hideQuoteButton={showSpecs && ctaCms.enabled}
-          />
-        )}
 
         {related.length > 0 && relatedCms.enabled ? (
           <section className="mt-14">
@@ -306,6 +306,108 @@ export function PortfolioDetailView({
                   </div>
                 </Link>
               ))}
+            </div>
+          </section>
+        ) : null}
+
+        {relatedPosts.length > 0 ? (
+          <section className="mt-14">
+            <EditableSpot sectionId="related" fieldKey="postsHeading">
+              <h2 className="font-display text-xl font-semibold text-navy">
+                {relatedCms.values.postsHeading || "บทความที่เกี่ยวข้อง"}
+              </h2>
+            </EditableSpot>
+            <div className="mt-4 grid gap-4 sm:grid-cols-3">
+              {relatedPosts.map((post) => (
+                <Link
+                  key={post.id}
+                  href={`/blog/${post.slug}`}
+                  className="overflow-hidden rounded-lg border border-line bg-white hover:border-navy/30"
+                >
+                  <div className="relative aspect-[16/10]">
+                    <Image
+                      src={post.cover}
+                      alt={post.title}
+                      fill
+                      className="object-cover"
+                      sizes="280px"
+                    />
+                  </div>
+                  <div className="p-3">
+                    <span className="text-[11px] font-medium text-brand-red">
+                      {BLOG_CATEGORY_LABELS[post.category]}
+                    </span>
+                    <div className="mt-1 line-clamp-2 font-medium text-navy">
+                      {post.title}
+                    </div>
+                    {post.excerpt ? (
+                      <p className="mt-1 line-clamp-2 text-xs text-muted">
+                        {post.excerpt}
+                      </p>
+                    ) : null}
+                  </div>
+                </Link>
+              ))}
+            </div>
+            <div className="mt-4">
+              <Link
+                href="/blog"
+                className="text-sm font-medium text-brand-red hover:underline"
+              >
+                ดูบทความทั้งหมด →
+              </Link>
+            </div>
+          </section>
+        ) : null}
+
+        {relatedLearn.length > 0 ? (
+          <section className="mt-14">
+            <EditableSpot sectionId="related" fieldKey="learnHeading">
+              <h2 className="font-display text-xl font-semibold text-navy">
+                {relatedCms.values.learnHeading || "ห้องเรียนรู้ที่เกี่ยวข้อง"}
+              </h2>
+            </EditableSpot>
+            <div className="mt-4 grid gap-4 sm:grid-cols-3">
+              {relatedLearn.map((sheet) => {
+                const room = roomById(sheet.room);
+                return (
+                  <Link
+                    key={sheet.slug}
+                    href={`/learn/${sheet.slug}`}
+                    className="overflow-hidden rounded-lg border border-line bg-white hover:border-navy/30"
+                  >
+                    <div className="relative aspect-[16/10]">
+                      <Image
+                        src={sheet.cover}
+                        alt={sheet.title}
+                        fill
+                        className="object-cover"
+                        sizes="280px"
+                      />
+                    </div>
+                    <div className="p-3">
+                      <span className="text-[11px] font-medium text-brand-red">
+                        {room?.label ?? "ห้องเรียนรู้"}
+                        {sheet.kind === "video" ? " · คลิป" : ""}
+                      </span>
+                      <div className="mt-1 line-clamp-2 font-medium text-navy">
+                        {sheet.title}
+                      </div>
+                      <p className="mt-1 line-clamp-2 text-xs text-muted">
+                        {sheet.summary}
+                      </p>
+                    </div>
+                  </Link>
+                );
+              })}
+            </div>
+            <div className="mt-4">
+              <Link
+                href="/learn"
+                className="text-sm font-medium text-brand-red hover:underline"
+              >
+                เข้าห้องเรียนรู้ →
+              </Link>
             </div>
           </section>
         ) : null}
@@ -343,6 +445,72 @@ function FactPill({
     >
       {children}
     </Link>
+  );
+}
+
+function SpecActionButtons({
+  item,
+  title,
+  preview,
+  quoteLabel,
+  showQuote,
+}: {
+  item: PortfolioItem;
+  title: string;
+  preview: boolean;
+  quoteLabel: string;
+  showQuote: boolean;
+}) {
+  const quoteHref = `/quote?from=portfolio&slug=${encodeURIComponent(item.slug || "preview")}`;
+  const coverSrc = item.image.trim() || "/images/mock/curtain-living.jpg";
+  const subtitle = [item.place.trim(), item.summary.trim()]
+    .filter(Boolean)
+    .join(" · ");
+
+  return (
+    <div className="mt-4 flex flex-wrap items-center gap-2">
+      {showQuote ? (
+        preview ? (
+          <EditableSpot sectionId="cta" fieldKey="quoteLabel" className="w-auto">
+            <span className="inline-flex items-center justify-center rounded-xl bg-brand-red px-5 py-3 text-sm font-semibold text-white">
+              {quoteLabel}
+            </span>
+          </EditableSpot>
+        ) : (
+          <Link
+            href={quoteHref}
+            onClick={() => trackPortfolioQuoteClick(item.id)}
+            className="inline-flex items-center justify-center rounded-xl bg-brand-red px-5 py-3 text-sm font-semibold text-white hover:opacity-90"
+          >
+            {quoteLabel}
+          </Link>
+        )
+      ) : null}
+      <a
+        href={siteConfig.lineUrl}
+        target="_blank"
+        rel="noreferrer"
+        aria-label="ปรึกษาเราทาง LINE"
+        title="ปรึกษาเรา (ไลน์)"
+        className="inline-flex size-[46px] shrink-0 items-center justify-center rounded-xl bg-[#06C755] hover:brightness-110"
+      >
+        <Image
+          src="/images/social/line.svg"
+          alt=""
+          width={22}
+          height={22}
+          className="size-[22px] brightness-0 invert"
+          unoptimized
+        />
+      </a>
+      <PortfolioShareDialog
+        portfolioId={item.id}
+        slug={item.slug || "preview"}
+        title={title}
+        subtitle={subtitle}
+        coverSrc={coverSrc}
+      />
+    </div>
   );
 }
 
@@ -409,20 +577,18 @@ function JobFactsCard({
       r.serialOrCode.trim(),
   );
 
-  const quoteHref = `/quote?from=portfolio&slug=${encodeURIComponent(item.slug || "preview")}`;
+  const title = item.title.trim() || "ชื่อผลงาน (ยังไม่ใส่)";
 
   return (
-    <div className="overflow-hidden rounded-2xl border border-line bg-white shadow-sm">
-      <div className="border-b border-line bg-navy px-5 py-4 text-white">
-        <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-white/70">
-          สเปกงานติดตั้ง
-        </p>
-        <h2 className="mt-1 font-display text-lg font-semibold">
-          อ้างอิงสินค้าที่ใช้จริง
-        </h2>
-      </div>
+    <div>
+      <h2 className="font-display text-lg font-semibold text-navy">
+        This Specification
+      </h2>
+      <p className="mt-1 text-sm text-muted">
+        รายละเอียดและสินค้าของผลติดตั้งงานนี้
+      </p>
 
-      <dl className="divide-y divide-line px-5">
+      <dl className="mt-5 divide-y divide-line">
         {rows.map((r) => (
           <div
             key={r.label}
@@ -447,7 +613,7 @@ function JobFactsCard({
       </dl>
 
       {specs.length > 0 ? (
-        <div className="border-t border-line px-5 py-4">
+        <div className="border-t border-line py-4">
           <p className="text-xs font-semibold uppercase tracking-wider text-muted">
             สินค้าในงานนี้
           </p>
@@ -504,52 +670,26 @@ function JobFactsCard({
             ))}
           </ul>
 
-          {showQuote ? (
-            <div className="mt-4">
-              {preview ? (
-                <EditableSpot
-                  sectionId="cta"
-                  fieldKey="quoteLabel"
-                  className="w-auto"
-                >
-                  <span className="inline-flex w-full items-center justify-center rounded-xl bg-brand-red px-5 py-3 text-sm font-semibold text-white sm:w-auto">
-                    {quoteLabel}
-                  </span>
-                </EditableSpot>
-              ) : (
-                <Link
-                  href={quoteHref}
-                  onClick={() => trackPortfolioQuoteClick(item.id)}
-                  className="inline-flex w-full items-center justify-center rounded-xl bg-brand-red px-5 py-3 text-sm font-semibold text-white hover:opacity-90 sm:w-auto"
-                >
-                  {quoteLabel}
-                </Link>
-              )}
-            </div>
-          ) : null}
+          <SpecActionButtons
+            item={item}
+            title={title}
+            preview={preview}
+            quoteLabel={quoteLabel}
+            showQuote={showQuote}
+          />
         </div>
       ) : (
-        <div className="border-t border-line px-5 py-4">
+        <div className="border-t border-line py-4">
           <p className="text-sm text-muted">
             ยังไม่มีรายการสินค้าในสเปก — เติมในแอดมินได้
           </p>
-          {showQuote ? (
-            <div className="mt-4">
-              {preview ? (
-                <span className="inline-flex rounded-xl bg-brand-red px-5 py-3 text-sm font-semibold text-white">
-                  {quoteLabel}
-                </span>
-              ) : (
-                <Link
-                  href={quoteHref}
-                  onClick={() => trackPortfolioQuoteClick(item.id)}
-                  className="inline-flex w-full items-center justify-center rounded-xl bg-brand-red px-5 py-3 text-sm font-semibold text-white hover:opacity-90 sm:w-auto"
-                >
-                  {quoteLabel}
-                </Link>
-              )}
-            </div>
-          ) : null}
+          <SpecActionButtons
+            item={item}
+            title={title}
+            preview={preview}
+            quoteLabel={quoteLabel}
+            showQuote={showQuote}
+          />
         </div>
       )}
     </div>

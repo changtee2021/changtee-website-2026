@@ -137,7 +137,19 @@ export const PORTFOLIO_ITEM_SECTION_DEFS: SectionDef[] = [
       {
         type: "text",
         key: "heading",
-        label: "หัวข้อ",
+        label: "หัวข้อผลงานใกล้เคียง",
+        maxLength: 60,
+      },
+      {
+        type: "text",
+        key: "postsHeading",
+        label: "หัวข้อบทความที่เกี่ยวข้อง",
+        maxLength: 60,
+      },
+      {
+        type: "text",
+        key: "learnHeading",
+        label: "หัวข้อห้องเรียนรู้ที่เกี่ยวข้อง",
         maxLength: 60,
       },
     ],
@@ -147,12 +159,12 @@ export const PORTFOLIO_ITEM_SECTION_DEFS: SectionDef[] = [
 export const ABOUT_SECTION_DEFAULTS: Record<string, Record<string, string>> = {
   hero: {
     eyebrow: "เกี่ยวกับเรา",
-    title: "ช่างม่านที่เข้าใจคุณ",
+    title: "A curtain maker who understands you",
     lead:
       "เราเชื่อว่าผ้าม่านไม่ใช่แค่ของตกแต่ง แต่คือองค์ประกอบสำคัญที่สะท้อนตัวตนและไลฟ์สไตล์ของเจ้าของบ้าน",
     body:
       "ช่างตี๋ใส่ใจตั้งแต่ต้นทาง — รับฟังความต้องการ วิเคราะห์แสง ทิศทางลม และบรรยากาศของห้อง เพื่อออกแบบม่านที่สวยและใช้งานได้จริง เพราะสำหรับเรา งานที่ดีไม่ใช่แค่ติดตั้งเสร็จ แต่ต้องทำให้คุณรู้สึก “ใช่” ทุกครั้งที่มองเห็น",
-    image: "/images/about/technician-hero.webp",
+    image: "/images/generated/ct-hero-about.webp",
   },
   oneStop: {
     subtitle: "CURTAIN & BLINDS",
@@ -164,8 +176,8 @@ export const ABOUT_SECTION_DEFAULTS: Record<string, Record<string, string>> = {
 
 export const CONTACT_SECTION_DEFAULTS: Record<string, Record<string, string>> = {
   header: {
-    title: "ติดต่อเรา",
-    subtitle: "หน้าร้านจริง มีโชว์รูมให้เลือกแบบ ครบ จบ ในที่เดียว",
+    title: "เกี่ยวกับเรา",
+    subtitle: "โชว์รูมจริง วัดหน้างานฟรี — คุยแบบ ดูผ้า ขอใบเสนอราคา จบในที่เดียว",
   },
 };
 
@@ -198,6 +210,8 @@ export const PORTFOLIO_ITEM_SECTION_DEFAULTS: Record<
   },
   related: {
     heading: "ผลงานใกล้เคียง",
+    postsHeading: "บทความที่เกี่ยวข้อง",
+    learnHeading: "ห้องเรียนรู้ที่เกี่ยวข้อง",
   },
 };
 

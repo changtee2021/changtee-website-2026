@@ -8,6 +8,11 @@ export const DEMO_VISITS: FactoryVisitBooking[] = [
     email: "somchai@example.com",
     lineId: "somchai_line",
     businessName: "บริษัท ตัวอย่าง จำกัด",
+    contactPosition: "ผู้จัดการฝ่ายจัดซื้อ",
+    taxId: "0105551234567",
+    visitSites: ["blinds", "curtain"],
+    companyProfileName: "company-profile.pdf",
+    businessCardName: "namecard.jpg",
     visitDate: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000)
       .toISOString()
       .slice(0, 10),
@@ -26,7 +31,12 @@ export const DEMO_VISITS: FactoryVisitBooking[] = [
     phone: "0898765432",
     email: null,
     lineId: "porntip99",
-    businessName: null,
+    businessName: "ร้านผ้าม่านวงศ์สุข",
+    contactPosition: "เจ้าของกิจการ",
+    taxId: "0105559876543",
+    visitSites: ["blinds", "partition", "curtain"],
+    companyProfileName: null,
+    businessCardName: "card.png",
     visitDate: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000)
       .toISOString()
       .slice(0, 10),

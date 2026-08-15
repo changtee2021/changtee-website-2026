@@ -281,6 +281,17 @@ export function CareersCmsBoard() {
               value={editing.summary}
               onChange={(v) => patch({ summary: v })}
             />
+            <Field
+              label="รูปปกการ์ด"
+              value={editing.coverImage}
+              onChange={(v) => patch({ coverImage: v })}
+              placeholder="/images/careers/sew.png"
+            />
+            <Field
+              label="คำอธิบายรูปปก"
+              value={editing.coverAlt}
+              onChange={(v) => patch({ coverAlt: v })}
+            />
             <TextArea
               label="หน้าที่ความรับผิดชอบ"
               value={editing.description}

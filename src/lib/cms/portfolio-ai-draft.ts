@@ -226,21 +226,21 @@ function generateTitle(facts: PortfolioJobFacts) {
 function generateSummary(facts: PortfolioJobFacts, place: string) {
   const product = productName(facts.productSlug);
   const variant = variantName(facts.productSlug, facts.variantSlug);
-  const item = variant ? `${product} (${variant})` : product;
+  const item = variant || product;
   const space = spaceLabel(facts.spaceType);
   const pain = facts.painPoints.trim();
 
   if (facts.tone === "sales") {
     return pain
-      ? `แก้ปัญหา${pain} ด้วย${item} ที่${place} — งาน${space}ติดตั้งจริงโดยช่างช่างที`
-      : `ผลงานติดตั้ง${item} ที่${place} โทนสวย ใช้งานจริงทุกวัน`;
+      ? `${item}ช่วย${pain} ที่${place} — เหมาะ${space}ที่อยากได้ทั้งฟังก์ชันและความเรียบ`
+      : `${item}ที่${place} เลือกให้เข้ากับ${space} ใช้งานจริงทุกวัน`;
   }
   if (facts.tone === "formal") {
-    return `ผลงานติดตั้ง${item} สำหรับ${space} บริเวณ${place}`;
+    return `${item}สำหรับ${space}บริเวณ${place} เน้นการใช้งานและความเรียบร้อย`;
   }
   return pain
-    ? `ติดตั้ง${item} ที่${place} ช่วยเรื่อง${pain} ให้${space}น่าอยู่ขึ้น`
-    : `ติดตั้ง${item} ที่${place} — งาน${space}จากหน้างานจริง`;
+    ? `${item}ที่${place} ช่วยเรื่อง${pain} ให้${space}อยู่สบายขึ้น`
+    : `${item}ที่${place} เลือกให้เหมาะ${space} ทั้งคุมแสงและความเป็นระเบียบ`;
 }
 
 function generateDetail(facts: PortfolioJobFacts, place: string) {
@@ -313,28 +313,20 @@ function generateDetail(facts: PortfolioJobFacts, place: string) {
       return joinDetail([line, factsBlock]);
     }
     default: {
-      const p1 =
-        facts.tone === "sales"
-          ? `${introFriendly} เลือก${variant || product} ให้เข้ากับไลฟ์สไตล์${space}`
-          : facts.tone === "formal"
-            ? introFormal
-            : `${introFriendly} เน้นความสวยและการใช้งานจริงทุกวัน`;
-      const p2 = pain
-        ? `โจทย์จากลูกค้า: ${pain}`
-        : cat
-          ? `${cat.summary}`
-          : "";
-      const p3 = [
-        `รายละเอียดสินค้า: ${variant || product}`,
-        size ? `ขนาด / จำนวนโดยประมาณ: ${size}` : "",
+      const why = pain
+        ? `${space}ที่${place} มีโจทย์${pain} เลยเลือก${variant || product} ให้ตอบการใช้งานจริง`
+        : `${space}ที่${place} เลือก${variant || product} เพราะดูแลง่าย คุมแสงได้ และเข้ากับหน้างานโดยไม่แย่งบรรยากาศ`;
+      const fit = cat
+        ? `${cat.summary} เหมาะ${space}ที่อยากได้ทั้งฟังก์ชันและความเป็นระเบียบ`
+        : `สไตล์นี้เหมาะ${space}ที่อยากคุมแสงและความเป็นส่วนตัวโดยไม่กินพื้นที่`;
+      const extra = [
+        size ? `ขอบเขตงานโดยประมาณ ${size}` : "",
         dateLabel ? `ติดตั้งเมื่อ ${dateLabel}` : "",
+        notes,
       ]
         .filter(Boolean)
-        .join("\n");
-      const p4 =
-        notes ||
-        "รูปจากหน้างานจริง — วัดพื้นที่ เลือกผ้า/ระบบ และติดตั้งโดยช่างช่างที";
-      return joinDetail([p1, p2, factsBlock || p3, factsBlock ? p3 : "", p4]);
+        .join(" ");
+      return joinDetail([why, fit, extra, factsBlock]);
     }
   }
 }

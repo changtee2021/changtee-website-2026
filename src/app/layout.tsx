@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Bai_Jamjuree, IBM_Plex_Sans_Thai } from "next/font/google";
+import { Bai_Jamjuree, IBM_Plex_Sans_Thai, Outfit } from "next/font/google";
 import { loadSeoDefaults } from "@/lib/seo/seo-defaults";
 import { absoluteUrl, defaultOgImagePath } from "@/lib/seo/meta";
 import { siteConfig } from "@/lib/site-config";
@@ -15,6 +15,12 @@ const sans = IBM_Plex_Sans_Thai({
 const display = Bai_Jamjuree({
   variable: "--font-display-family",
   subsets: ["thai", "latin"],
+  weight: ["500", "600", "700"],
+});
+
+const modern = Outfit({
+  variable: "--font-modern-family",
+  subsets: ["latin"],
   weight: ["500", "600", "700"],
 });
 
@@ -59,6 +65,7 @@ export const viewport: Viewport = {
   themeColor: "#0b1220",
   width: "device-width",
   initialScale: 1,
+  viewportFit: "cover",
 };
 
 export default function RootLayout({
@@ -69,7 +76,7 @@ export default function RootLayout({
   return (
     <html
       lang="th"
-      className={`${sans.variable} ${display.variable} h-full`}
+      className={`${sans.variable} ${display.variable} ${modern.variable} h-full`}
       suppressHydrationWarning
     >
       <body className="min-h-full bg-background text-ink antialiased">

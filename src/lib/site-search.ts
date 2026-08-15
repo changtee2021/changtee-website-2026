@@ -6,8 +6,9 @@ import {
 } from "@/lib/cms/portfolio-demo";
 import { BLOG_CATEGORY_LABELS, type BlogPost } from "@/lib/cms/blog-demo";
 import { publishedBlog, publishedPortfolio } from "@/lib/cms/public-content";
+import { LEARN_SHEETS } from "@/lib/learn";
 
-export type SearchEntryType = "product" | "portfolio" | "blog";
+export type SearchEntryType = "product" | "portfolio" | "blog" | "learn";
 
 export type SearchEntry = {
   type: SearchEntryType;
@@ -22,6 +23,7 @@ const ENTRY_TYPE_LABELS: Record<SearchEntryType, string> = {
   product: "สินค้า",
   portfolio: "ผลงาน",
   blog: "บทความ",
+  learn: "ห้องเรียนรู้",
 };
 
 export function entryTypeLabel(type: SearchEntryType): string {
@@ -80,6 +82,24 @@ function blogEntries(posts: BlogPost[]): SearchEntry[] {
   }));
 }
 
+const LEARN_ENTRIES: SearchEntry[] = [
+  {
+    type: "learn",
+    title: "ห้องเรียนรู้",
+    subtitle: "คัมภีร์ช่างตี๋",
+    keywords: ["ความรู้", "แผ่นความรู้", "คลิปสอน", "training"],
+    href: "/learn",
+  },
+  ...LEARN_SHEETS.map((sheet) => ({
+    type: "learn" as const,
+    title: sheet.title,
+    subtitle: sheet.summary,
+    keywords: [sheet.shareLine, sheet.room, sheet.kind],
+    href: `/learn/${sheet.slug}`,
+    image: sheet.cover,
+  })),
+];
+
 /** Merge products (static) + portfolio + blog (CMS-editable) into one index. */
 export function buildSearchIndex(
   portfolioItems: PortfolioItem[],
@@ -87,6 +107,7 @@ export function buildSearchIndex(
 ): SearchEntry[] {
   return [
     ...PRODUCT_ENTRIES,
+    ...LEARN_ENTRIES,
     ...portfolioEntries(portfolioItems),
     ...blogEntries(blogPosts),
   ];

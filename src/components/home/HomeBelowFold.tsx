@@ -38,6 +38,13 @@ const CatalogSection = dynamic(
     })),
   { ssr: false, loading: () => <SectionLoader /> },
 );
+const LearnTeaser = dynamic(
+  () =>
+    import("@/components/learn/LearnTeaser").then((m) => ({
+      default: m.LearnTeaser,
+    })),
+  { ssr: false, loading: () => <SectionLoader /> },
+);
 const BlogPreview = dynamic(
   () =>
     import("@/components/home/BlogPreview").then((m) => ({
@@ -57,7 +64,7 @@ const ContactCta = dynamic(
  * Client-only below-fold chunks — first paint stays hero + product grid.
  *
  * Order: products (above) → portfolio → videos → story (incl. logos) →
- * reviews → catalog → blog → final CTA.
+ * reviews → catalog → learn → blog → final CTA.
  */
 export function HomeBelowFold() {
   return (
@@ -67,6 +74,7 @@ export function HomeBelowFold() {
       <StatsStory />
       <Testimonials />
       <CatalogSection />
+      <LearnTeaser />
       <BlogPreview />
       <ContactCta />
     </>

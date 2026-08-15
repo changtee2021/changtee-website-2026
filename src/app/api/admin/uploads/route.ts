@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { assertAdminApiAccess } from "@/lib/admin-api-guard";
+import { bytesMatchDeclaredType, isJsonBytes, isPdfBytes } from "@/lib/security/file-magic";
 import {
   canUseSupabaseStorage,
   uploadPublicFile,
@@ -63,6 +64,9 @@ export async function POST(request: Request) {
         );
       }
       const buffer = Buffer.from(await file.arrayBuffer());
+      if (!isPdfBytes(buffer)) {
+        return NextResponse.json({ error: "ไฟล์ไม่ใช่ PDF จริง" }, { status: 400 });
+      }
       const baseName =
         file.name
           .replace(/\.[^.]+$/, "")
@@ -85,6 +89,9 @@ export async function POST(request: Request) {
         );
       }
       const buffer = Buffer.from(await file.arrayBuffer());
+      if (!isJsonBytes(buffer)) {
+        return NextResponse.json({ error: "ไฟล์ไม่ใช่ JSON จริง" }, { status: 400 });
+      }
       const baseName =
         file.name
           .replace(/\.[^.]+$/, "")
@@ -114,6 +121,9 @@ export async function POST(request: Request) {
     }
 
     const buffer = Buffer.from(await file.arrayBuffer());
+    if (!bytesMatchDeclaredType(buffer, file.type)) {
+      return NextResponse.json({ error: "เนื้อไฟล์ไม่ตรงกับชนิดที่ประกาศ" }, { status: 400 });
+    }
     const baseName =
       file.name
         .replace(/\.[^.]+$/, "")

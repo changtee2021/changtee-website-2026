@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { RefreshCw, Search } from "lucide-react";
 import { DEMO_VISITS } from "@/lib/visits/visits-demo";
 import {
+  formatVisitSites,
   VISIT_SESSION_SHORT_LABELS,
   VISIT_STATUSES,
   VISIT_STATUS_LABELS,
@@ -193,8 +194,14 @@ export function VisitsBoard() {
                     </td>
                     <td className="px-4 py-3">
                       <div className="font-medium text-navy">{v.fullName}</div>
+                      {v.contactPosition ? (
+                        <div className="text-xs text-muted">{v.contactPosition}</div>
+                      ) : null}
                       {v.businessName ? (
                         <div className="text-xs text-muted">{v.businessName}</div>
+                      ) : null}
+                      {v.taxId ? (
+                        <div className="text-xs text-muted">เลขนิติบุคคล / บัตรประชาชน {v.taxId}</div>
                       ) : null}
                     </td>
                     <td className="px-4 py-3 text-xs text-muted">
@@ -204,7 +211,10 @@ export function VisitsBoard() {
                     </td>
                     <td className="px-4 py-3 whitespace-nowrap">{v.visitorCount} คน</td>
                     <td className="px-4 py-3 text-xs text-muted">
-                      {v.purpose || "-"}
+                      {formatVisitSites(v.visitSites) || v.purpose || "-"}
+                      {v.purpose ? (
+                        <div className="mt-0.5">{v.purpose}</div>
+                      ) : null}
                       {v.productInterest ? (
                         <div className="mt-0.5">สนใจ: {v.productInterest}</div>
                       ) : null}

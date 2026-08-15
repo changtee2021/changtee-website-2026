@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Clock, MapPin, Users } from "lucide-react";
 import { FactoryVisitForm } from "@/components/forms/FactoryVisitForm";
+import { FactorySitesSection } from "@/components/visit/FactorySitesSection";
+import { FactoryVisitHero } from "@/components/visit/FactoryVisitHero";
 import { pageMetadata } from "@/lib/seo/meta";
 import { siteConfig } from "@/lib/site-config";
 
@@ -9,6 +11,7 @@ export const metadata: Metadata = pageMetadata({
   description:
     "นัดเยี่ยมชมโรงงานผลิตผ้าม่านช่างตี๋ เลือกรอบเช้าหรือรอบเย็น ทีมงานจะติดต่อกลับเพื่อยืนยันวันเวลา",
   path: "/visit-factory",
+  image: "/images/factory/visit-01-production.png",
 });
 
 const HIGHLIGHTS = [
@@ -31,22 +34,13 @@ const HIGHLIGHTS = [
 
 export default function VisitFactoryPage() {
   return (
-    <div className="min-h-full bg-shell px-6 py-8 sm:px-10 sm:py-12 lg:px-16">
-      <div className="mx-auto w-full max-w-5xl">
-        <div className="text-center sm:text-left">
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted">
-            Factory Visit
-          </p>
-          <h1 className="mt-2 font-display text-3xl font-semibold text-navy sm:text-4xl">
-            นัดเยี่ยมชมโรงงาน
-          </h1>
-          <p className="mt-3 max-w-xl text-sm leading-relaxed text-muted sm:text-base">
-            ดูขั้นตอนการผลิตผ้าม่านจริง เลือกตัวอย่างเนื้อผ้า และพูดคุยกับทีมงานที่โรงงาน —
-            เลือกรอบเช้าหรือรอบเย็นที่สะดวก แล้วส่งคำขอ ทีมงานจะติดต่อกลับเพื่อยืนยันวันเวลา
-          </p>
-        </div>
+    <div className="bg-shell pb-16">
+      <FactoryVisitHero />
 
-        <div className="mt-6 grid gap-3 sm:grid-cols-3">
+      <div className="mx-auto w-full max-w-5xl px-6 pt-8 sm:px-10 sm:pt-12 lg:px-16">
+        <FactorySitesSection />
+
+        <div className="grid gap-3 sm:grid-cols-3">
           {HIGHLIGHTS.map(({ icon: Icon, title, body }) => (
             <div
               key={title}
@@ -61,7 +55,10 @@ export default function VisitFactoryPage() {
           ))}
         </div>
 
-        <div className="mt-8 rounded-2xl border border-line bg-white p-4 sm:p-6 md:p-8">
+        <div
+          id="visit-form"
+          className="mt-8 scroll-mt-24 rounded-2xl border border-line bg-white p-4 sm:p-6 md:p-8"
+        >
           <h2 className="font-display text-lg font-semibold text-navy sm:text-xl">
             ส่งคำขอนัดเยี่ยมชม
           </h2>

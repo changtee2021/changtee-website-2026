@@ -15,6 +15,10 @@ const frameSrcExtra = siteOrigin ? ` ${siteOrigin}` : "";
 
 const securityHeaders = [
   { key: "X-Content-Type-Options", value: "nosniff" },
+  {
+    key: "Strict-Transport-Security",
+    value: "max-age=31536000; includeSubDomains; preload",
+  },
   // Framing controlled by CSP frame-ancestors only (middleware overrides for preview iframe).
   { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
   { key: "Cross-Origin-Opener-Policy", value: "same-origin-allow-popups" },
@@ -85,6 +89,15 @@ const nextConfig: NextConfig = {
         headers: securityHeaders,
       },
       {
+        source: "/videos/:path*",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, max-age=31536000, immutable",
+          },
+        ],
+      },
+      {
         source: "/admin/editor/:path*",
         headers: [
           { key: "Content-Security-Policy", value: editorFrameSrc },
@@ -110,6 +123,7 @@ const nextConfig: NextConfig = {
   },
   async redirects() {
     return [
+      { source: "/about", destination: "/contact", permanent: true },
       { source: "/estimate", destination: "/quote", permanent: true },
       { source: "/estimate/:path*", destination: "/quote", permanent: true },
       {
@@ -131,6 +145,12 @@ const nextConfig: NextConfig = {
         source: "/sale-gallery",
         destination: "/",
         permanent: false,
+      },
+      {
+        source: "/:path*",
+        has: [{ type: "host", value: "www.changtee-curtain.com" }],
+        destination: "https://changtee-curtain.com/:path*",
+        permanent: true,
       },
     ];
   },

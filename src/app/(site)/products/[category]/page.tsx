@@ -122,7 +122,8 @@ export default async function CategoryPage({ params }: Props) {
                 {child.nameEn ? (
                   <div className="text-xs text-muted">{child.nameEn}</div>
                 ) : null}
-                <p className="mt-1.5 text-sm text-muted">{child.summary}</p>
+                <div className="mt-2 h-px w-8 bg-brand-red" aria-hidden />
+                <p className="mt-2 text-sm text-muted">{child.summary}</p>
               </div>
             </Link>
           ))}

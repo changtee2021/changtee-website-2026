@@ -38,6 +38,7 @@ export function AboutPageView() {
     <div className="bg-shell pb-3 sm:pb-4">
       <AboutHeroCms />
 
+      <div className="pt-10 sm:pt-14">
       <HomePanel>
         <div className="grid divide-y divide-line sm:grid-cols-3 sm:divide-x sm:divide-y-0">
           {aboutValues.map((item, i) => {
@@ -59,6 +60,7 @@ export function AboutPageView() {
           })}
         </div>
       </HomePanel>
+      </div>
 
       <HomePanel>
         <AboutOneStopCms>

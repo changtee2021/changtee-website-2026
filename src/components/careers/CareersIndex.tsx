@@ -1,7 +1,9 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import Image from "next/image";
 import { Banknote, Briefcase, MapPin, Users } from "lucide-react";
+import { normalizeJobPosting } from "@/lib/cms/careers-demo";
 import { useJobPostings } from "@/lib/cms/demo-store";
 import { JobApplicationForm } from "@/components/forms/JobApplicationForm";
 import { cn } from "@/lib/utils";
@@ -9,7 +11,10 @@ import { cn } from "@/lib/utils";
 export function CareersIndex() {
   const postings = useJobPostings();
   const openJobs = useMemo(
-    () => postings.filter((job) => job.status === "published"),
+    () =>
+      postings
+        .filter((job) => job.status === "published")
+        .map(normalizeJobPosting),
     [postings],
   );
   const [selectedJobId, setSelectedJobId] = useState<string | null>(null);
@@ -88,54 +93,67 @@ function JobCard({
   return (
     <article
       className={cn(
-        "flex flex-col rounded-2xl border bg-white p-5 shadow-sm transition",
+        "flex flex-col overflow-hidden rounded-2xl border bg-white shadow-sm transition",
         selected ? "border-navy ring-1 ring-navy/30" : "border-line hover:border-navy/30",
       )}
     >
-      <h3 className="font-display text-lg font-semibold text-navy">{job.title}</h3>
-      <p className="mt-1 text-sm text-muted">{job.summary}</p>
-
-      <dl className="mt-4 space-y-1.5 text-xs text-muted">
-        <div className="flex items-center gap-2">
-          <Briefcase className="size-3.5 shrink-0" aria-hidden />
-          <span>
-            {job.department} · {job.employmentType}
-          </span>
+      {job.coverImage ? (
+        <div className="relative aspect-[16/9] w-full bg-paper">
+          <Image
+            src={job.coverImage}
+            alt={job.coverAlt || job.title}
+            fill
+            className="object-cover object-center"
+            sizes="(min-width: 640px) 50vw, 100vw"
+          />
         </div>
-        <div className="flex items-center gap-2">
-          <MapPin className="size-3.5 shrink-0" aria-hidden />
-          <span>{job.location}</span>
-        </div>
-        {job.salaryRange ? (
-          <div className="flex items-center gap-2">
-            <Banknote className="size-3.5 shrink-0" aria-hidden />
-            <span>{job.salaryRange}</span>
-          </div>
-        ) : null}
-        <div className="flex items-center gap-2">
-          <Users className="size-3.5 shrink-0" aria-hidden />
-          <span>รับ {job.headcount} ตำแหน่ง</span>
-        </div>
-      </dl>
-
-      {job.requirements.length ? (
-        <ul className="mt-3 space-y-1 text-xs leading-relaxed text-muted">
-          {job.requirements.slice(0, 3).map((req) => (
-            <li key={req} className="flex gap-1.5">
-              <span className="text-brand-red">•</span>
-              <span>{req}</span>
-            </li>
-          ))}
-        </ul>
       ) : null}
+      <div className="flex flex-1 flex-col p-5">
+        <h3 className="font-display text-lg font-semibold text-navy">{job.title}</h3>
+        <p className="mt-1 text-sm text-muted">{job.summary}</p>
 
-      <button
-        type="button"
-        onClick={onApply}
-        className="mt-4 inline-flex w-fit rounded-full bg-navy px-4 py-2 text-sm font-semibold text-white transition hover:bg-navy-deep"
-      >
-        สมัครตำแหน่งนี้
-      </button>
+        <dl className="mt-4 space-y-1.5 text-xs text-muted">
+          <div className="flex items-center gap-2">
+            <Briefcase className="size-3.5 shrink-0" aria-hidden />
+            <span>
+              {job.department} · {job.employmentType}
+            </span>
+          </div>
+          <div className="flex items-center gap-2">
+            <MapPin className="size-3.5 shrink-0" aria-hidden />
+            <span>{job.location}</span>
+          </div>
+          {job.salaryRange ? (
+            <div className="flex items-center gap-2">
+              <Banknote className="size-3.5 shrink-0" aria-hidden />
+              <span>{job.salaryRange}</span>
+            </div>
+          ) : null}
+          <div className="flex items-center gap-2">
+            <Users className="size-3.5 shrink-0" aria-hidden />
+            <span>รับ {job.headcount} ตำแหน่ง</span>
+          </div>
+        </dl>
+
+        {job.requirements.length ? (
+          <ul className="mt-3 space-y-1 text-xs leading-relaxed text-muted">
+            {job.requirements.slice(0, 3).map((req) => (
+              <li key={req} className="flex gap-1.5">
+                <span className="text-brand-red">•</span>
+                <span>{req}</span>
+              </li>
+            ))}
+          </ul>
+        ) : null}
+
+        <button
+          type="button"
+          onClick={onApply}
+          className="mt-4 inline-flex w-fit rounded-full bg-navy px-4 py-2 text-sm font-semibold text-white transition hover:bg-navy-deep"
+        >
+          สมัครตำแหน่งนี้
+        </button>
+      </div>
     </article>
   );
 }

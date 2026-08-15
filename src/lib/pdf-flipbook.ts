@@ -51,43 +51,35 @@ async function resolveManifest(
   return null;
 }
 
-function preloadImage(url: string): Promise<FlipbookPage> {
-  return new Promise((resolve) => {
-    const img = new window.Image();
-    const done = () => resolve({ url, width: img.naturalWidth, height: img.naturalHeight });
-    img.onload = done;
-    img.onerror = done;
-    img.src = url;
-    if (img.complete && img.naturalWidth > 0) done();
-  });
+/** Warm the browser cache for a page image without blocking the UI. */
+export function prefetchPageImage(url: string) {
+  if (typeof window === "undefined") return;
+  const img = new window.Image();
+  img.decoding = "async";
+  img.src = url;
 }
 
 /**
  * Opens a pre-rendered catalog (static JPEGs) — near-instant, browser-cacheable,
  * no PDF parsing or canvas rendering on the client at all.
+ * getPage resolves immediately with the JPEG URL so the first spread can paint
+ * while later pages download in the background.
  */
 function openPrerenderedDocument(manifest: CatalogManifest): FlipbookDoc {
-  const cache = new Map<number, Promise<FlipbookPage>>();
-
   function getPage(index: number): Promise<FlipbookPage> {
     const entry = manifest.pages[index];
     if (!entry) return Promise.reject(new Error("Page index out of range"));
-    let cached = cache.get(index);
-    if (!cached) {
-      cached = preloadImage(entry.file).then((loaded) => ({
-        url: entry.file,
-        width: loaded.width || entry.width,
-        height: loaded.height || entry.height,
-      }));
-      cache.set(index, cached);
-    }
-    return cached;
+    return Promise.resolve({
+      url: entry.file,
+      width: entry.width,
+      height: entry.height,
+    });
   }
 
   return {
     numPages: manifest.pages.length || manifest.numPages || 0,
     getPage,
-    destroy: () => cache.clear(),
+    destroy: () => {},
   };
 }
 
@@ -100,8 +92,8 @@ async function openPdfDocument(
   fileUrl: string,
   onDownloadProgress?: (loaded: number, total: number) => void,
 ): Promise<FlipbookDoc> {
-  const pdfjsLib = await import("pdfjs-dist");
-  pdfjsLib.GlobalWorkerOptions.workerSrc = "/pdf/pdf.worker.min.mjs";
+  const { loadPdfjs } = await import("./pdfjs-browser");
+  const pdfjsLib = await loadPdfjs();
 
   const loadingTask = pdfjsLib.getDocument({ url: fileUrl });
   if (onDownloadProgress) {

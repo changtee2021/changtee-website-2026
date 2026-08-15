@@ -41,6 +41,20 @@ async function writeAll(bookings: FactoryVisitBooking[]) {
   await fs.writeFile(DATA_FILE, JSON.stringify(bookings, null, 2), "utf8");
 }
 
+function payloadField(row: Record<string, unknown>, key: string): string {
+  const payload = row.form_payload;
+  if (!payload || typeof payload !== "object") return "";
+  const value = (payload as Record<string, unknown>)[key];
+  return typeof value === "string" ? value : "";
+}
+
+function payloadStringArray(row: Record<string, unknown>, key: string): string[] {
+  const payload = row.form_payload;
+  if (!payload || typeof payload !== "object") return [];
+  const value = (payload as Record<string, unknown>)[key];
+  return Array.isArray(value) ? value.map(String) : [];
+}
+
 function mapDbBooking(row: Record<string, unknown>): FactoryVisitBooking {
   return {
     id: String(row.id),
@@ -49,6 +63,14 @@ function mapDbBooking(row: Record<string, unknown>): FactoryVisitBooking {
     email: (row.email as string) || null,
     lineId: (row.line_id as string) || null,
     businessName: (row.business_name as string) || null,
+    contactPosition:
+      (row.contact_position as string) || payloadField(row, "contactPosition") || null,
+    taxId: (row.tax_id as string) || payloadField(row, "taxId") || null,
+    visitSites: payloadStringArray(row, "visitSites"),
+    companyProfileName: payloadField(row, "companyProfileName") || null,
+    companyProfilePath: payloadField(row, "companyProfilePath") || null,
+    businessCardName: payloadField(row, "businessCardName") || null,
+    businessCardPath: payloadField(row, "businessCardPath") || null,
     visitDate: String(row.visit_date || ""),
     session: (row.session as FactoryVisitBooking["session"]) || "morning",
     visitorCount: Number(row.visitor_count || 1),
@@ -85,6 +107,7 @@ export async function createVisitBooking(
         email: booking.email || null,
         line_id: booking.lineId || null,
         business_name: booking.businessName || null,
+        contact_position: booking.contactPosition || null,
         visit_date: booking.visitDate,
         session: booking.session,
         visitor_count: booking.visitorCount,

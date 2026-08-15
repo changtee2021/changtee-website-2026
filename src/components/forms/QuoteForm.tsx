@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type HTMLAttributes } from "react";
 import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Check, Eye, ImageIcon, MapPin, Trash2, X } from "lucide-react";
@@ -702,7 +702,7 @@ export function QuoteForm() {
 
       {/* Preview confirm dialog (mobile sheet + desktop modal) */}
       {sheetOpen ? (
-        <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/45 sm:items-center sm:p-4">
+        <div className="fixed inset-0 z-[60] flex items-end justify-center bg-black/45 sm:items-center sm:p-4">
           <button
             type="button"
             className="absolute inset-0"
@@ -740,7 +740,9 @@ export function QuoteForm() {
             </div>
 
             {error ? (
-              <p className="px-4 pb-2 text-sm text-brand-red">{error}</p>
+              <p className="px-4 pb-2 text-sm text-brand-red" role="alert" aria-live="polite">
+                {error}
+              </p>
             ) : null}
 
             <div className="sticky bottom-0 flex flex-col gap-2 border-t border-line bg-white px-4 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] sm:flex-row-reverse sm:pb-3">
@@ -930,6 +932,19 @@ function PreviewRow({
   );
 }
 
+const FIELD_HINTS: Record<
+  string,
+  { autoComplete?: string; inputMode?: HTMLAttributes<HTMLInputElement>["inputMode"] }
+> = {
+  contactName: { autoComplete: "name" },
+  jobTitle: { autoComplete: "organization-title" },
+  phone: { autoComplete: "tel", inputMode: "tel" },
+  lineId: { autoComplete: "off" },
+  businessName: { autoComplete: "organization" },
+  taxId: { autoComplete: "off" },
+  email: { autoComplete: "email" },
+};
+
 function Field({
   label,
   name,
@@ -951,6 +966,8 @@ function Field({
   value: string;
   onChange: (value: string) => void;
 }) {
+  const hints = FIELD_HINTS[name] || {};
+  const inputType = name === "phone" ? "tel" : type;
   return (
     <label className={`block text-sm ${className}`}>
       <span className="mb-1 flex gap-1 font-medium text-ink">
@@ -959,12 +976,14 @@ function Field({
       </span>
       <input
         name={name}
-        type={type}
+        type={inputType}
         required={required}
         disabled={disabled}
         placeholder={placeholder}
         value={value}
         onChange={(e) => onChange(e.target.value)}
+        autoComplete={hints.autoComplete}
+        inputMode={hints.inputMode}
         className="w-full rounded-lg border border-line bg-field px-3 py-2 outline-none focus:border-navy disabled:text-muted"
       />
     </label>

@@ -1,7 +1,9 @@
 "use client";
 
+import { useEffect } from "react";
 import Link from "next/link";
 import { Bai_Jamjuree, IBM_Plex_Sans_Thai } from "next/font/google";
+import { reportClientError } from "@/lib/security/report-client-error";
 
 const sans = IBM_Plex_Sans_Thai({
   subsets: ["thai", "latin"],
@@ -14,11 +16,16 @@ const display = Bai_Jamjuree({
 });
 
 export default function GlobalError({
+  error,
   reset,
 }: {
   error: Error & { digest?: string };
   reset: () => void;
 }) {
+  useEffect(() => {
+    reportClientError(error);
+  }, [error]);
+
   return (
     <html lang="th">
       <body

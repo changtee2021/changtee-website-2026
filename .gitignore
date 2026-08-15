@@ -47,6 +47,7 @@ yarn-error.log*
 # supabase / temp
 supabase/.temp/
 .tmp-mig*.json
+.tmp-profile/
 .tools/
 
 # vercel

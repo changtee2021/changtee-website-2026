@@ -9,11 +9,14 @@ import { AnimatePresence, motion } from "framer-motion";
 import { ArrowRight, Search, X } from "lucide-react";
 import { useBlogPosts, usePortfolioItems } from "@/lib/cms/demo-store";
 import { buildSearchIndex, entryTypeLabel, searchSite } from "@/lib/site-search";
+import { useLockBodyScroll } from "@/lib/use-lock-body-scroll";
 
 export function SiteSearch({ className = "" }: { className?: string }) {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
+  const dialogRef = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
   const router = useRouter();
 
   const portfolioItems = usePortfolioItems();
@@ -25,10 +28,12 @@ export function SiteSearch({ className = "" }: { className?: string }) {
   );
 
   const results = useMemo(() => searchSite(index, query), [index, query]);
+  useLockBodyScroll(open);
 
   function close() {
     setOpen(false);
     setQuery("");
+    window.setTimeout(() => triggerRef.current?.focus(), 0);
   }
 
   useEffect(() => {
@@ -40,7 +45,25 @@ export function SiteSearch({ className = "" }: { className?: string }) {
   useEffect(() => {
     if (!open) return;
     function onKey(e: KeyboardEvent) {
-      if (e.key === "Escape") close();
+      if (e.key === "Escape") {
+        e.preventDefault();
+        close();
+        return;
+      }
+      if (e.key !== "Tab" || !dialogRef.current) return;
+      const focusable = dialogRef.current.querySelectorAll<HTMLElement>(
+        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
+      );
+      if (!focusable.length) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
     }
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
@@ -59,9 +82,12 @@ export function SiteSearch({ className = "" }: { className?: string }) {
   return (
     <>
       <button
+        ref={triggerRef}
         type="button"
         onClick={() => setOpen(true)}
         aria-label="ค้นหา"
+        aria-haspopup="dialog"
+        aria-expanded={open}
         className={className}
       >
         <Search className="h-4 w-4" aria-hidden />
@@ -78,6 +104,10 @@ export function SiteSearch({ className = "" }: { className?: string }) {
             onClick={() => close()}
           >
             <motion.div
+              ref={dialogRef}
+              role="dialog"
+              aria-modal="true"
+              aria-label="ค้นหาในเว็บไซต์"
               className="relative w-full max-w-xl"
               initial={{ opacity: 0, y: -12, scale: 0.98 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
@@ -136,7 +166,15 @@ export function SiteSearch({ className = "" }: { className?: string }) {
                     </p>
                   ) : results.length === 0 ? (
                     <p className="px-3 py-6 text-center text-sm text-muted">
-                      ไม่พบผลลัพธ์ที่ตรงกับ &ldquo;{query}&rdquo; ลองคำอื่น หรือ{" "}
+                      ไม่พบผลลัพธ์ที่ตรงกับ &ldquo;{query}&rdquo; ลองคำอื่น ดู{" "}
+                      <Link
+                        href={`/search?q=${encodeURIComponent(query)}`}
+                        onClick={() => close()}
+                        className="font-semibold text-navy hover:underline"
+                      >
+                        หน้าค้นหา
+                      </Link>{" "}
+                      หรือ{" "}
                       <Link
                         href="/quote"
                         onClick={() => close()}

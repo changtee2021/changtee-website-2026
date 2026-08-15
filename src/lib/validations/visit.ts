@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { VISIT_SESSIONS } from "@/lib/visits/types";
+import { VISIT_SESSIONS, VISIT_SITE_IDS } from "@/lib/visits/types";
 
 export const factoryVisitSchema = z
   .object({
@@ -10,9 +10,19 @@ export const factoryVisitSchema = z
       .min(9, "กรุณากรอกเบอร์โทรศัพท์")
       .max(20)
       .regex(/^[0-9+\-\s()]+$/, "รูปแบบเบอร์ไม่ถูกต้อง"),
-    email: z.string().trim().email("อีเมลไม่ถูกต้อง").optional().or(z.literal("")),
-    lineId: z.string().trim().max(80).optional().or(z.literal("")),
-    businessName: z.string().trim().max(200).optional().or(z.literal("")),
+    email: z.string().trim().email("กรุณากรอกอีเมลให้ถูกต้อง"),
+    lineId: z.string().trim().min(2, "กรุณากรอก LINE ID").max(80),
+    businessName: z.string().trim().min(2, "กรุณากรอกชื่อบริษัท/องค์กร").max(200),
+    contactPosition: z.string().trim().min(2, "กรุณากรอกตำแหน่งผู้ติดต่อ").max(120),
+    taxId: z
+      .string()
+      .trim()
+      .min(10, "กรุณากรอกเลขนิติบุคคลหรือเลขบัตรประชาชน")
+      .max(20)
+      .regex(/^[0-9\-]+$/, "กรุณากรอกเป็นตัวเลข 13 หลัก"),
+    visitSites: z
+      .array(z.enum(VISIT_SITE_IDS))
+      .min(1, "กรุณาเลือกสถานที่ที่ต้องการเยี่ยมชม"),
     visitDate: z
       .string()
       .trim()
@@ -23,8 +33,8 @@ export const factoryVisitSchema = z
       .int("กรุณากรอกจำนวนผู้เยี่ยมชมเป็นจำนวนเต็ม")
       .min(1, "อย่างน้อย 1 คน")
       .max(100, "หากเกิน 100 คน กรุณาติดต่อทีมงานโดยตรง"),
-    purpose: z.string().trim().max(200).optional().or(z.literal("")),
-    productInterest: z.string().trim().max(200).optional().or(z.literal("")),
+    purpose: z.string().trim().min(1, "กรุณาเลือกวัตถุประสงค์การเยี่ยมชม").max(200),
+    productInterest: z.string().trim().min(2, "กรุณากรอกสินค้าที่สนใจ").max(200),
     note: z.string().trim().max(2000).optional().or(z.literal("")),
     pdpaAccepted: z.boolean(),
     turnstileToken: z.string().optional(),
@@ -32,10 +42,6 @@ export const factoryVisitSchema = z
   .refine((data) => data.pdpaAccepted === true, {
     message: "กรุณายอมรับนโยบายความเป็นส่วนตัว",
     path: ["pdpaAccepted"],
-  })
-  .refine((data) => Boolean(data.lineId?.trim() || data.email?.trim()), {
-    message: "กรุณากรอก LINE หรืออีเมลอย่างน้อย 1 ช่อง เพื่อให้ทีมงานยืนยันการนัด",
-    path: ["lineId"],
   })
   .refine(
     (data) => {

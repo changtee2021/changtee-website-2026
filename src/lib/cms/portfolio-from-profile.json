@@ -1,0 +1,1402 @@
+[
+  {
+    "id": "pf-cp-017",
+    "title": "ม่านตาไก่ หาดบ้านดิน รีสอร์ท",
+    "slug": "eyelet-had-ban-din-resort",
+    "summary": "ม่านตาไก่โทนเทา เข้ากับห้องไม้รีสอร์ทกาญจนบุรี โดยไม่แย่งบรรยากาศ",
+    "detail": "ห้องพักไม้ที่หาดบ้านดินต้องการม่านที่ดูเป็นธรรมชาติ ไม่แข็งเหมือนโรงแรมทั่วไป เลยเลือกม่านตาไก่ผ้าทึบโทนเทา ให้ลอนผ้าทิ้งตัวสบายตา\n\nผ้าทึบช่วยบังแดดและให้ความเป็นส่วนตัวตอนกลางคืน ขณะที่สไตล์ตาไก่เข้ากับเฟอร์นิเจอร์ไม้รีสอร์ทได้โดยไม่แย่งบรรยากาศ",
+    "place": "กาญจนบุรี",
+    "productSlug": "curtain",
+    "spaceType": "hotel-resort",
+    "tags": [
+      "ม่านตาไก่",
+      "รีสอร์ท"
+    ],
+    "image": "/images/portfolio/eyelet-had-ban-din-resort/01.webp",
+    "gallery": [
+      "/images/portfolio/eyelet-had-ban-din-resort/01.webp",
+      "/images/portfolio/eyelet-had-ban-din-resort/02.webp",
+      "/images/portfolio/eyelet-had-ban-din-resort/03.webp",
+      "/images/portfolio/eyelet-had-ban-din-resort/04.webp"
+    ],
+    "status": "published",
+    "pinned": false,
+    "sortOrder": 1,
+    "customerName": "หาดบ้านดิน รีสอร์ท",
+    "showCustomerName": true,
+    "installLocation": "ห้องพักรีสอร์ท",
+    "installDate": "2026",
+    "lineItems": [
+      {
+        "productName": "ม่านตาไก่",
+        "sku": "AZ20-26",
+        "serialOrCode": "",
+        "material": "",
+        "color": "",
+        "quantity": "",
+        "notes": ""
+      }
+    ],
+    "updatedAt": "2026-08-15T20:10:00+07:00",
+    "seoDescription": "ผลงานติดม่านตาไก่ผ้าทึบโทนเทาที่หาดบ้านดิน รีสอร์ท กาญจนบุรี เข้ากับห้องไม้ บังแดดและให้ความเป็นส่วนตัว"
+  },
+  {
+    "id": "pf-cp-020",
+    "title": "ม่านจีบ พาทิโอ อพาร์ทเมนท์",
+    "slug": "pleat-patio-apartment",
+    "summary": "ม่านจีบชั้นคู่ผ้าโปร่งคู่ผ้าทึบเทา คุมแสงห้องนอนอพาร์ทเมนท์ได้ทั้งวัน",
+    "detail": "อพาร์ทเมนท์กลางกรุงเทพฯ หน้าต่างโดนแดดเกือบทั้งวัน เลยติดม่านจีบชั้นคู่ ผ้าโปร่งกรองแสงตอนกลางวัน คู่ผ้าทึบเทาปิดมืดตอนนอน\n\nม่านจีบเรียบ ดูแลง่าย เหมาะห้องพักและคอนโดที่อยากได้ทั้งความเป็นส่วนตัวและความเป็นระเบียบ โดยไม่กินพื้นที่หน้าต่าง",
+    "place": "กรุงเทพฯ",
+    "productSlug": "curtain",
+    "spaceType": "home-condo",
+    "tags": [
+      "ม่านจีบ",
+      "อพาร์ทเมนท์",
+      "ผ้าทึบแสง",
+      "ตกแต่งคอนโด"
+    ],
+    "image": "/images/portfolio/pleat-patio-apartment/01.webp",
+    "gallery": [
+      "/images/portfolio/pleat-patio-apartment/01.webp",
+      "/images/portfolio/pleat-patio-apartment/02.webp",
+      "/images/portfolio/pleat-patio-apartment/03.webp"
+    ],
+    "status": "published",
+    "pinned": true,
+    "sortOrder": 2,
+    "customerName": "พาทิโอ อพาร์ทเมนท์",
+    "showCustomerName": true,
+    "installLocation": "ห้องพักอพาร์ทเมนท์",
+    "installDate": "2026",
+    "lineItems": [
+      {
+        "productName": "ม่านจีบ",
+        "sku": "FSW3-6",
+        "serialOrCode": "",
+        "material": "",
+        "color": "",
+        "quantity": "",
+        "notes": ""
+      }
+    ],
+    "updatedAt": "2026-08-15T20:10:00+07:00",
+    "seoDescription": "ติดม่านจีบชั้นคู่ผ้าโปร่งคู่ผ้าทึบเทาที่พาทิโอ อพาร์ทเมนท์ กรุงเทพฯ คุมแสงห้องนอน เหมาะตกแต่งคอนโดและอพาร์ทเมนท์"
+  },
+  {
+    "id": "pf-cp-021",
+    "title": "ม่านจีบ หมู่บ้านซื้อตรง พรีเมียม พระราม 2",
+    "slug": "pleat-premium-rama2",
+    "summary": "ม่านจีบบ้านพักพระราม 2 โทนเรียบ คุมแสงทั้งหลัง ดูแลง่าย",
+    "detail": "บ้านในหมู่บ้านซื้อตรง พรีเมียม พระราม 2 เลือกม่านจีบเพราะจีบเรียบ เข้ากับบ้านพักสไตล์โมเดิร์น และดูแลง่ายกว่าม่านที่มีลอนซับซ้อน\n\nผ้าทึบช่วยกันแดดบ้านทิศร้อน ลดความร้อนเข้าห้องนั่งเล่นและห้องนอน เป็นงานติดผ้าม่านกรุงเทพฯ ฝั่งพระราม 2 ที่อ้างอิงสไตล์บ้านโครงการได้",
+    "place": "พระราม 2 กรุงเทพฯ",
+    "productSlug": "curtain",
+    "spaceType": "home-condo",
+    "tags": [
+      "ม่านจีบ",
+      "บ้าน"
+    ],
+    "image": "/images/portfolio/pleat-premium-rama2/01.webp",
+    "gallery": [
+      "/images/portfolio/pleat-premium-rama2/01.webp",
+      "/images/portfolio/pleat-premium-rama2/02.webp",
+      "/images/portfolio/pleat-premium-rama2/03.webp",
+      "/images/portfolio/pleat-premium-rama2/04.webp"
+    ],
+    "status": "published",
+    "pinned": false,
+    "sortOrder": 3,
+    "customerName": "หมู่บ้านซื้อตรง พรีเมียม พระราม 2",
+    "showCustomerName": true,
+    "installLocation": "บ้านพักอาศัย",
+    "installDate": "2026",
+    "lineItems": [
+      {
+        "productName": "ม่านจีบ",
+        "sku": "AZ20-26",
+        "serialOrCode": "",
+        "material": "",
+        "color": "",
+        "quantity": "",
+        "notes": ""
+      }
+    ],
+    "updatedAt": "2026-08-15T20:10:00+07:00",
+    "seoDescription": "ติดม่านจีบบ้านพักหมู่บ้านซื้อตรง พรีเมียม พระราม 2 กรุงเทพฯ โทนเรียบ กันแดด เหมาะบ้านโครงการ"
+  },
+  {
+    "id": "pf-cp-022",
+    "title": "ม่านจีบ ทาวน์อินทาวน์ ชมพูมุก",
+    "slug": "pleat-town-in-town",
+    "summary": "ม่านจีบโทนชมพูมุก แต่งบ้านทาวน์อินทาวน์ให้อุ่นตาโดยไม่ต้องเปลี่ยนเฟอร์นิเจอร์",
+    "detail": "บ้านทาวน์อินทาวน์เลือกม่านจีบโทนชมพูมุก เพื่อให้ห้องดูนุ่มขึ้นโดยไม่ต้องเปลี่ยนเฟอร์นิเจอร์ทั้งห้อง\n\nจีบเรียบช่วยให้ผ้าทิ้งตัวสวยแม้บานไม่กว้าง และยังคุมแสงได้ถ้าจับคู่ผ้าทึบ เหมาะบ้านในเมืองที่อยากได้ม่านแต่งบ้านกรุงเทพฯ โทนหวานแต่ใช้งานจริง",
+    "place": "ทาวน์อินทาวน์ กรุงเทพฯ",
+    "productSlug": "curtain",
+    "spaceType": "home-condo",
+    "tags": [
+      "ม่านจีบ",
+      "บ้าน"
+    ],
+    "image": "/images/portfolio/pleat-town-in-town/01.webp",
+    "gallery": [
+      "/images/portfolio/pleat-town-in-town/01.webp",
+      "/images/portfolio/pleat-town-in-town/02.webp",
+      "/images/portfolio/pleat-town-in-town/03.webp",
+      "/images/portfolio/pleat-town-in-town/04.webp"
+    ],
+    "status": "published",
+    "pinned": false,
+    "sortOrder": 4,
+    "customerName": "ทาวน์อินทาวน์",
+    "showCustomerName": true,
+    "installLocation": "บ้านพักอาศัย",
+    "installDate": "2026",
+    "lineItems": [],
+    "updatedAt": "2026-08-15T20:10:00+07:00",
+    "seoDescription": "ติดม่านจีบโทนชมพูมุกบ้านทาวน์อินทาวน์ กรุงเทพฯ แต่งห้องให้อุ่นตา คุมแสงได้ เหมาะบ้านในเมือง"
+  },
+  {
+    "id": "pf-cp-025",
+    "title": "ม่านลอนเทป หรรษา เอสวิลล่า",
+    "slug": "swave-hansa-svilla",
+    "summary": "ม่านลอนเทปบ้านหรรษา เอสวิลล่า ลอนสม่ำเสมอทั้งบาน ดูแพงโดยไม่ใช้ผ้าเยอะเกิน",
+    "detail": "บ้านพักบางแคเลือกม่านลอนเทปเพราะลอน S-wave เรียงเท่ากันทั้งบาน ดูแพงกว่าม่านจีบทั่วไป โดยไม่ต้องใช้ผ้าเยอะเกิน\n\nเหมาะบ้านโครงการที่อยากได้ม่านแต่งบ้านสไตล์โมเดิร์น เปิด-ปิดลื่น และยังคุมแสงห้องนั่งเล่นได้ทั้งวัน",
+    "place": "บางแค กรุงเทพฯ",
+    "productSlug": "curtain",
+    "spaceType": "home-condo",
+    "tags": [
+      "ม่านลอนเทป",
+      "บ้าน"
+    ],
+    "image": "/images/portfolio/swave-hansa-svilla/01.webp",
+    "gallery": [
+      "/images/portfolio/swave-hansa-svilla/01.webp",
+      "/images/portfolio/swave-hansa-svilla/02.webp",
+      "/images/portfolio/swave-hansa-svilla/03.webp",
+      "/images/portfolio/swave-hansa-svilla/04.webp"
+    ],
+    "status": "published",
+    "pinned": false,
+    "sortOrder": 5,
+    "customerName": "หมู่บ้านหรรษา เอสวิลล่า",
+    "showCustomerName": true,
+    "installLocation": "บ้านพักอาศัย",
+    "installDate": "2026",
+    "lineItems": [
+      {
+        "productName": "ม่านลอนเทป",
+        "sku": "BB12",
+        "serialOrCode": "",
+        "material": "",
+        "color": "",
+        "quantity": "",
+        "notes": ""
+      }
+    ],
+    "updatedAt": "2026-08-15T20:10:00+07:00",
+    "seoDescription": "ติดม่านลอนเทปบ้านหรรษา เอสวิลล่า บางแค กรุงเทพฯ ลอนสม่ำเสมอ เหมาะบ้านโมเดิร์น"
+  },
+  {
+    "id": "pf-cp-026",
+    "title": "ม่านลอนเทป โครงการพลีโน่",
+    "slug": "swave-pleno-thairamun",
+    "summary": "ม่านลอนเทปโครงการพลีโน่ ลอนสวยเข้ากับบ้านใหม่ เก็บผ้าชิดข้างได้ดี",
+    "detail": "บ้านโครงการพลีโน่ ถนนไทยรามัญ ใช้ม่านลอนเทปให้ลอนผ้าสม่ำเสมอ เข้ากับบ้านใหม่โทนเรียบ\n\nลอนเทปเก็บผ้าชิดข้างได้ดี หน้าต่างดูโล่งตอนกลางวัน และยังเป็นสไตล์ที่ลูกค้าบ้านโครงการค้นหาบ่อยเวลาอยากติดผ้าม่านบ้านใหม่กรุงเทพฯ",
+    "place": "ถนนไทยรามัญ กรุงเทพฯ",
+    "productSlug": "curtain",
+    "spaceType": "home-condo",
+    "tags": [
+      "ม่านลอนเทป",
+      "บ้าน"
+    ],
+    "image": "/images/portfolio/swave-pleno-thairamun/01.webp",
+    "gallery": [
+      "/images/portfolio/swave-pleno-thairamun/01.webp",
+      "/images/portfolio/swave-pleno-thairamun/02.webp",
+      "/images/portfolio/swave-pleno-thairamun/03.webp",
+      "/images/portfolio/swave-pleno-thairamun/04.webp"
+    ],
+    "status": "published",
+    "pinned": false,
+    "sortOrder": 6,
+    "customerName": "โครงการพลีโน่",
+    "showCustomerName": true,
+    "installLocation": "บ้านโครงการ",
+    "installDate": "2026",
+    "lineItems": [
+      {
+        "productName": "ม่านลอนเทป",
+        "sku": "ASW",
+        "serialOrCode": "",
+        "material": "",
+        "color": "",
+        "quantity": "",
+        "notes": ""
+      }
+    ],
+    "updatedAt": "2026-08-15T20:10:00+07:00",
+    "seoDescription": "ติดม่านลอนเทปโครงการพลีโน่ ถนนไทยรามัญ กรุงเทพฯ ลอนสวย เก็บผ้าชิด เหมาะบ้านใหม่"
+  },
+  {
+    "id": "pf-cp-029",
+    "title": "ม่านพับ คุณสุน",
+    "slug": "roman-khun-sun",
+    "summary": "ม่านพับบานแคบ เก็บผ้าชิดบน ไม่กินพื้นที่หน้าต่าง",
+    "detail": "หน้าต่างบานแคบหรือทรงสูงติดม่านจีบแล้วผ้าจะดูแน่นเกินไป เลยเลือกม่านพับให้พับเก็บชิดบน ไม่บังบาน\n\nเหมาะบ้านที่อยากได้ม่านแต่งบ้านแบบเรียบ คุมแสงได้ และยังดูเป็นระเบียบแม้พื้นที่หน้าต่างจำกัด",
+    "place": "กรุงเทพฯ",
+    "productSlug": "curtain",
+    "spaceType": "home-condo",
+    "tags": [
+      "ม่านพับ",
+      "บ้าน"
+    ],
+    "image": "/images/portfolio/roman-khun-sun/01.webp",
+    "gallery": [
+      "/images/portfolio/roman-khun-sun/01.webp",
+      "/images/portfolio/roman-khun-sun/02.webp",
+      "/images/portfolio/roman-khun-sun/03.webp",
+      "/images/portfolio/roman-khun-sun/04.webp"
+    ],
+    "status": "published",
+    "pinned": false,
+    "sortOrder": 7,
+    "customerName": "คุณสุน",
+    "showCustomerName": false,
+    "installLocation": "บ้านพักอาศัย",
+    "installDate": "2026",
+    "lineItems": [
+      {
+        "productName": "ม่านพับ",
+        "sku": "KB280-08",
+        "serialOrCode": "",
+        "material": "",
+        "color": "",
+        "quantity": "",
+        "notes": ""
+      }
+    ],
+    "updatedAt": "2026-08-15T20:10:00+07:00",
+    "seoDescription": "ติดม่านพับบ้านพักกรุงเทพฯ งานบานแคบ-ทรงสูง เก็บผ้าชิดบน คุมแสงได้โดยไม่กินพื้นที่"
+  },
+  {
+    "id": "pf-cp-032",
+    "title": "ม่านโรงพยาบาล ราชวิทยาลัยจุฬาภรณ์",
+    "slug": "hospital-chulabhorn",
+    "summary": "ม่านโรงพยาบาลราชวิทยาลัยจุฬาภรณ์ เน้นสะอาด ถอดซักได้ ทนการใช้งานทุกวัน",
+    "detail": "สถานพยาบาลต้องการม่านที่ถอดซักได้ สะอาด และไม่รบกวนการทำงานของเจ้าหน้าที่ เลยเลือกม่านโรงพยาบาลมาตรฐานที่ราชวิทยาลัยจุฬาภรณ์ แจ้งวัฒนะ\n\nผ้าทึบพอให้ความเป็นส่วนตัวคนไข้ แต่ยังดูแลง่าย เหมาะงานติดม่านโรงพยาบาลกรุงเทพฯ ที่ต้องทนการใช้งานทุกวัน",
+    "place": "หลักสี่ กรุงเทพฯ",
+    "productSlug": "curtain",
+    "spaceType": "hospital",
+    "tags": [
+      "ม่านโรงพยาบาล",
+      "สถานพยาบาล"
+    ],
+    "image": "/images/portfolio/hospital-chulabhorn/01.webp",
+    "gallery": [
+      "/images/portfolio/hospital-chulabhorn/01.webp",
+      "/images/portfolio/hospital-chulabhorn/02.webp",
+      "/images/portfolio/hospital-chulabhorn/03.webp"
+    ],
+    "status": "published",
+    "pinned": true,
+    "sortOrder": 8,
+    "customerName": "โรงพยาบาลราชวิทยาลัยจุฬาภรณ์",
+    "showCustomerName": true,
+    "installLocation": "แจ้งวัฒนะ 5",
+    "installDate": "2026",
+    "lineItems": [
+      {
+        "productName": "ม่านโรงพยาบาล",
+        "sku": "HP4",
+        "serialOrCode": "",
+        "material": "",
+        "color": "",
+        "quantity": "",
+        "notes": ""
+      }
+    ],
+    "updatedAt": "2026-08-15T20:10:00+07:00",
+    "seoDescription": "ติดม่านโรงพยาบาลราชวิทยาลัยจุฬาภรณ์ แจ้งวัฒนะ กรุงเทพฯ ถอดซักได้ ให้ความเป็นส่วนตัวคนไข้"
+  },
+  {
+    "id": "pf-cp-033",
+    "title": "ม่านโรงพยาบาล ตึกโคเซน KMITL",
+    "slug": "hospital-kosen-kmitl",
+    "summary": "ม่านโรงพยาบาลตึกโคเซน สจล. ห้องพยาบาลในสถานศึกษา ทนเปิด-ปิดบ่อย",
+    "detail": "ตึกโคเซน สจล. ลาดกระบัง ใช้ม่านโรงพยาบาลในห้องพยาบาลของสถานศึกษา ต้องทนการเปิด-ปิดบ่อยและดูแลความสะอาดได้\n\nเลือกผ้าที่ให้ความเป็นส่วนตัวคนไข้โดยไม่ทำให้ห้องมืดทึบ เหมาะงานม่านสถานศึกษาและม่านห้องพยาบาลในกรุงเทพฯ",
+    "place": "ลาดกระบัง กรุงเทพฯ",
+    "productSlug": "curtain",
+    "spaceType": "education",
+    "tags": [
+      "ม่านโรงพยาบาล",
+      "สถานศึกษา"
+    ],
+    "image": "/images/portfolio/hospital-kosen-kmitl/01.webp",
+    "gallery": [
+      "/images/portfolio/hospital-kosen-kmitl/01.webp",
+      "/images/portfolio/hospital-kosen-kmitl/02.webp",
+      "/images/portfolio/hospital-kosen-kmitl/03.webp",
+      "/images/portfolio/hospital-kosen-kmitl/04.webp"
+    ],
+    "status": "published",
+    "pinned": false,
+    "sortOrder": 9,
+    "customerName": "ตึกโคเซน KMITL",
+    "showCustomerName": true,
+    "installLocation": "ตึกโคเซน",
+    "installDate": "2026",
+    "lineItems": [],
+    "updatedAt": "2026-08-15T20:10:00+07:00",
+    "seoDescription": "ติดม่านโรงพยาบาลตึกโคเซน สจล. ลาดกระบัง ให้ความเป็นส่วนตัวคนไข้ เหมาะห้องพยาบาลสถานศึกษา"
+  },
+  {
+    "id": "pf-cp-034",
+    "title": "ม่านโรงพยาบาล สวนจิตรลดา",
+    "slug": "hospital-chitralada",
+    "summary": "ม่านห้องพยาบาลสวนจิตรลดา เน้นสุภาพ เรียบ และใช้งานจริง",
+    "detail": "ห้องพยาบาลพระราชวังดุสิต สวนจิตรลดา ต้องการม่านที่สุภาพ เรียบ และดูแลง่าย\n\nม่านโรงพยาบาลช่วยกั้นสายตา ให้ความเป็นส่วนตัวขณะรักษา โดยยังเข้ากับอาคารที่ต้องดูเป็นระเบียบตลอดเวลา",
+    "place": "ดุสิต กรุงเทพฯ",
+    "productSlug": "curtain",
+    "spaceType": "hospital",
+    "tags": [
+      "ม่านโรงพยาบาล"
+    ],
+    "image": "/images/portfolio/hospital-chitralada/01.webp",
+    "gallery": [
+      "/images/portfolio/hospital-chitralada/01.webp",
+      "/images/portfolio/hospital-chitralada/02.webp",
+      "/images/portfolio/hospital-chitralada/03.webp",
+      "/images/portfolio/hospital-chitralada/04.webp"
+    ],
+    "status": "published",
+    "pinned": false,
+    "sortOrder": 10,
+    "customerName": "ห้องพยาบาลพระราชวังดุสิต สวนจิตรลดา",
+    "showCustomerName": true,
+    "installLocation": "ห้องพยาบาล",
+    "installDate": "2026",
+    "lineItems": [
+      {
+        "productName": "ม่านโรงพยาบาล",
+        "sku": "HP6",
+        "serialOrCode": "",
+        "material": "",
+        "color": "",
+        "quantity": "",
+        "notes": ""
+      }
+    ],
+    "updatedAt": "2026-08-15T20:10:00+07:00",
+    "seoDescription": "ติดม่านโรงพยาบาลห้องพยาบาลพระราชวังดุสิต สวนจิตรลดา กรุงเทพฯ สุภาพ เรียบ ให้ความเป็นส่วนตัว"
+  },
+  {
+    "id": "pf-cp-041",
+    "title": "ม่านม้วน สนามบินดอนเมือง",
+    "slug": "roller-don-mueang",
+    "summary": "ม่านม้วนกรองแสงโถงผู้โดยสารดอนเมือง กันแดดจัด ยังมองเห็นลานจอดเครื่อง",
+    "detail": "โถงกระจกสนามบินดอนเมืองโดนแดดจัด แต่ยังต้องมองเห็นลานจอดเครื่อง เลยเลือกม่านม้วนกรองแสง ไม่ทึบมืด\n\nม่านม้วนเก็บชิดบน ดูแลง่าย เหมาะพื้นที่สาธารณะที่ใช้งานหนัก และเป็นงานม่านม้วนกรุงเทพฯ ขนาดใหญ่ที่อ้างอิงสเปกอาคารกระจกได้",
+    "place": "ดอนเมือง กรุงเทพฯ",
+    "productSlug": "roller-blinds",
+    "spaceType": "office-corp",
+    "tags": [
+      "ม่านม้วน",
+      "สนามบิน"
+    ],
+    "image": "/images/portfolio/roller-don-mueang/01.webp",
+    "gallery": [
+      "/images/portfolio/roller-don-mueang/01.webp",
+      "/images/portfolio/roller-don-mueang/02.webp",
+      "/images/portfolio/roller-don-mueang/03.webp",
+      "/images/portfolio/roller-don-mueang/04.webp"
+    ],
+    "status": "published",
+    "pinned": true,
+    "sortOrder": 11,
+    "customerName": "สนามบินดอนเมือง",
+    "showCustomerName": true,
+    "installLocation": "โถงผู้โดยสาร",
+    "installDate": "2026",
+    "lineItems": [
+      {
+        "productName": "ม่านม้วน",
+        "sku": "CTR5003",
+        "serialOrCode": "",
+        "material": "",
+        "color": "",
+        "quantity": "",
+        "notes": ""
+      }
+    ],
+    "updatedAt": "2026-08-15T20:10:00+07:00",
+    "seoDescription": "ติดม่านม้วนกรองแสงโถงผู้โดยสารสนามบินดอนเมือง กันแดดจัด ยังมองเห็นลานจอดเครื่อง"
+  },
+  {
+    "id": "pf-cp-042",
+    "title": "ม่านม้วนเครือสุกี้ตี๋น้อย",
+    "slug": "roller-teenoi-network",
+    "summary": "ม่านม้วนเครือสุกี้ตี๋น้อย คุมแสงหลายสาขาให้โทนเดียวกัน เช็ดง่าย",
+    "detail": "ร้านอาหารเปิดยาว กระจกหน้าร้านโดนแดดและต้องดูสะอาดทุกสาขา เลยใช้ม่านม้วนชุดเดียวกันทั้งเครือสุกี้ตี๋น้อย ทั้งโกลด์ เมเจอร์ บิ๊กซี อินเด็กซ์ โอโซน โลตัส และสาขา BBQ\n\nม่านม้วนร้านอาหารช่วยลดแสงจ้า ลดความร้อน และยังดูแลง่ายกว่าผ้าม่านที่ซับกลิ่น",
+    "place": "หลายสาขาทั่วประเทศ",
+    "productSlug": "roller-blinds",
+    "spaceType": "restaurant-cafe",
+    "tags": [
+      "ม่านม้วน",
+      "ร้านอาหาร",
+      "ตี๋น้อย"
+    ],
+    "image": "/brochure/company-profile-2026/pages/page-042.jpg",
+    "gallery": [
+      "/brochure/company-profile-2026/pages/page-042.jpg"
+    ],
+    "status": "published",
+    "pinned": false,
+    "sortOrder": 12,
+    "customerName": "สุกี้ตี๋น้อย",
+    "showCustomerName": true,
+    "installLocation": "สาขาเครือสุกี้ตี๋น้อย",
+    "installDate": "2026",
+    "lineItems": [],
+    "updatedAt": "2026-08-15T20:10:00+07:00",
+    "seoDescription": "ผลงานม่านม้วนเครือสุกี้ตี๋น้อยหลายสาขาทั่วประเทศ คุมแสงหน้าร้าน เช็ดง่าย เหมาะร้านอาหาร"
+  },
+  {
+    "id": "pf-cp-043",
+    "title": "ม่านม้วน สุกี้ตี๋น้อย สรงประภา",
+    "slug": "roller-teenoi-songprapa",
+    "summary": "ม่านม้วนสุกี้ตี๋น้อยสรงประภา คุมแสงหน้าร้านโดยไม่บังโต๊ะ",
+    "detail": "สาขาสรงประภาติดม่านม้วนที่หน้าร้านและโซนรับประทาน เพื่อกันแดดโดยไม่ให้ผ้าไปกินพื้นที่โต๊ะ\n\nม่านม้วนร้านอาหารกรุงเทพฯ แบบนี้ดูแลเช็ดง่าย โทนเรียบ ไม่แย่งบรรยากาศร้าน และยังคุมแสงได้ทั้งวัน",
+    "place": "สรงประภา กรุงเทพฯ",
+    "productSlug": "roller-blinds",
+    "spaceType": "restaurant-cafe",
+    "tags": [
+      "ม่านม้วน",
+      "ร้านอาหาร"
+    ],
+    "image": "/images/portfolio/roller-teenoi-songprapa/01.webp",
+    "gallery": [
+      "/images/portfolio/roller-teenoi-songprapa/01.webp",
+      "/images/portfolio/roller-teenoi-songprapa/02.webp",
+      "/images/portfolio/roller-teenoi-songprapa/03.webp"
+    ],
+    "status": "published",
+    "pinned": true,
+    "sortOrder": 13,
+    "customerName": "สุกี้ตี๋น้อย สรงประภา",
+    "showCustomerName": true,
+    "installLocation": "หน้าร้าน / โซนรับประทาน",
+    "installDate": "2026",
+    "lineItems": [
+      {
+        "productName": "ม่านม้วน",
+        "sku": "WPRB2005",
+        "serialOrCode": "",
+        "material": "",
+        "color": "",
+        "quantity": "",
+        "notes": ""
+      }
+    ],
+    "updatedAt": "2026-08-15T20:10:00+07:00",
+    "seoDescription": "ติดม่านม้วนสุกี้ตี๋น้อย สรงประภา กรุงเทพฯ กันแดดหน้าร้านโดยไม่บังโต๊ะ เช็ดง่าย"
+  },
+  {
+    "id": "pf-cp-044",
+    "title": "ม่านม้วน TEENOI BBQ แจสกรีนวิลเลจ",
+    "slug": "roller-teenoi-bbq-jas",
+    "summary": "ม่านม้วนร้านปิ้งย่างแจสกรีนวิลเลจ กันแดด เช็ดง่าย ไม่ซับกลิ่น",
+    "detail": "ร้านปิ้งย่างมีควัน กลิ่น และแดดหน้าร้าน ผ้าม่านทั่วไปจะเลอะง่าย เลยเลือกม่านม้วนที่ TEENOI BBQ แจสกรีนวิลเลจ คู้เมือง\n\nม้วนเก็บชิด เช็ดทำความสะอาดง่าย เหมาะม่านม้วนร้านอาหารที่อยากคุมแสงโดยไม่ต้องซักผ้าบ่อย",
+    "place": "คู้เมือง กรุงเทพฯ",
+    "productSlug": "roller-blinds",
+    "spaceType": "restaurant-cafe",
+    "tags": [
+      "ม่านม้วน",
+      "ร้านอาหาร"
+    ],
+    "image": "/images/portfolio/roller-teenoi-bbq-jas/01.webp",
+    "gallery": [
+      "/images/portfolio/roller-teenoi-bbq-jas/01.webp",
+      "/images/portfolio/roller-teenoi-bbq-jas/02.webp",
+      "/images/portfolio/roller-teenoi-bbq-jas/03.webp",
+      "/images/portfolio/roller-teenoi-bbq-jas/04.webp"
+    ],
+    "status": "published",
+    "pinned": false,
+    "sortOrder": 14,
+    "customerName": "TEENOI BBQ แจสกรีนวิลเลจ",
+    "showCustomerName": true,
+    "installLocation": "ร้านปิ้งย่าง",
+    "installDate": "2026",
+    "lineItems": [
+      {
+        "productName": "ม่านม้วน",
+        "sku": "WPRB2005",
+        "serialOrCode": "",
+        "material": "",
+        "color": "",
+        "quantity": "",
+        "notes": ""
+      }
+    ],
+    "updatedAt": "2026-08-15T20:10:00+07:00",
+    "seoDescription": "ติดม่านม้วน TEENOI BBQ แจสกรีนวิลเลจ คู้เมือง กันแดดร้านปิ้งย่าง เช็ดง่าย ไม่ซับกลิ่น"
+  },
+  {
+    "id": "pf-cp-045",
+    "title": "ม่านม้วน นายพรานหมูกะทะ นครปฐม",
+    "slug": "roller-nai-pran-nakhonpathom",
+    "summary": "ม่านม้วนร้านหมูกะทะนครปฐม กันแดดหน้าร้าน โต๊ะไม่ร้อน เช็ดง่าย",
+    "detail": "ร้านหมูกะทะนายพรานโดนแดดหน้าร้านและมีไอน้ำจากเตา เลยใช้ม่านม้วนแทนผ้าม่านที่ซับกลิ่น\n\nม่านม้วนร้านอาหารช่วยลดแสงจ้า โต๊ะไม่ร้อน และยังเช็ดทำความสะอาดได้เร็วหลังปิดร้าน",
+    "place": "นครปฐม",
+    "productSlug": "roller-blinds",
+    "spaceType": "restaurant-cafe",
+    "tags": [
+      "ม่านม้วน",
+      "ร้านอาหาร"
+    ],
+    "image": "/images/portfolio/roller-nai-pran-nakhonpathom/01.webp",
+    "gallery": [
+      "/images/portfolio/roller-nai-pran-nakhonpathom/01.webp",
+      "/images/portfolio/roller-nai-pran-nakhonpathom/02.webp",
+      "/images/portfolio/roller-nai-pran-nakhonpathom/03.webp",
+      "/images/portfolio/roller-nai-pran-nakhonpathom/04.webp"
+    ],
+    "status": "published",
+    "pinned": false,
+    "sortOrder": 15,
+    "customerName": "นายพรานหมูกะทะ",
+    "showCustomerName": true,
+    "installLocation": "ร้านอาหาร",
+    "installDate": "2026",
+    "lineItems": [
+      {
+        "productName": "ม่านม้วน",
+        "sku": "WPRB2005",
+        "serialOrCode": "",
+        "material": "",
+        "color": "",
+        "quantity": "",
+        "notes": ""
+      }
+    ],
+    "updatedAt": "2026-08-15T20:10:00+07:00",
+    "seoDescription": "ติดม่านม้วนร้านนายพรานหมูกะทะ นครปฐม กันแดดหน้าร้าน เช็ดง่าย เหมาะร้านอาหาร"
+  },
+  {
+    "id": "pf-cp-046",
+    "title": "ม่านม้วน ตึกโคเซน KMITL",
+    "slug": "roller-kosen-kmitl",
+    "summary": "ม่านม้วนอาคารเรียนตึกโคเซน สจล. คุมแสงห้องเรียนโดยไม่บังกระดาน",
+    "detail": "ห้องเรียนและโถงกระจกตึกโคเซน สจล. ต้องการกันแสงจ้าโดยไม่ทำให้ห้องมืดจนต้องเปิดไฟทั้งวัน เลยเลือกม่านม้วนกรองแสง\n\nม้วนเก็บชิด ไม่กินกระดานหรือจอ เหมาะม่านม้วนสถานศึกษาลาดกระบังที่ใช้งานทุกวัน",
+    "place": "ลาดกระบัง กรุงเทพฯ",
+    "productSlug": "roller-blinds",
+    "spaceType": "education",
+    "tags": [
+      "ม่านม้วน",
+      "สถานศึกษา"
+    ],
+    "image": "/images/portfolio/roller-kosen-kmitl/01.webp",
+    "gallery": [
+      "/images/portfolio/roller-kosen-kmitl/01.webp",
+      "/images/portfolio/roller-kosen-kmitl/02.webp",
+      "/images/portfolio/roller-kosen-kmitl/03.webp",
+      "/images/portfolio/roller-kosen-kmitl/04.webp"
+    ],
+    "status": "published",
+    "pinned": false,
+    "sortOrder": 16,
+    "customerName": "ตึกโคเซน KMITL",
+    "showCustomerName": true,
+    "installLocation": "ตึกโคเซน",
+    "installDate": "2026",
+    "lineItems": [
+      {
+        "productName": "ม่านม้วน",
+        "sku": "WPR3009",
+        "serialOrCode": "",
+        "material": "",
+        "color": "",
+        "quantity": "",
+        "notes": ""
+      }
+    ],
+    "updatedAt": "2026-08-15T20:10:00+07:00",
+    "seoDescription": "ติดม่านม้วนกรองแสงตึกโคเซน สจล. ลาดกระบัง คุมแสงห้องเรียนและโถงกระจก โดยไม่บังกระดาน"
+  },
+  {
+    "id": "pf-cp-047",
+    "title": "ม่านม้วน ต้นตาลยูสคาร์",
+    "slug": "roller-tontan-used-car",
+    "summary": "ม่านม้วนโชว์รูมรถมือสองนนทบุรี กันแดดรถ ไม่บังวิวหน้าร้าน",
+    "detail": "โชว์รูมต้นตาลยูสคาร์ต้องกันแดดไม่ให้รถซีด แต่ลูกค้ายังต้องมองเห็นรถจากภายนอก เลยใช้ม่านม้วนกรองแสง\n\nม่านม้วนโชว์รูมเก็บชิดบน ดูโปร่ง เหมาะพื้นที่กระจกใหญ่ที่อยากลดความร้อนโดยไม่ปิดหน้าร้านทึบ",
+    "place": "นนทบุรี",
+    "productSlug": "roller-blinds",
+    "spaceType": "office-corp",
+    "tags": [
+      "ม่านม้วน",
+      "โชว์รูม"
+    ],
+    "image": "/images/portfolio/roller-tontan-used-car/01.webp",
+    "gallery": [
+      "/images/portfolio/roller-tontan-used-car/01.webp"
+    ],
+    "status": "published",
+    "pinned": false,
+    "sortOrder": 17,
+    "customerName": "ต้นตาลยูสคาร์",
+    "showCustomerName": true,
+    "installLocation": "โชว์รูม",
+    "installDate": "2026",
+    "lineItems": [
+      {
+        "productName": "ม่านม้วน",
+        "sku": "WPR5007",
+        "serialOrCode": "",
+        "material": "",
+        "color": "",
+        "quantity": "",
+        "notes": ""
+      }
+    ],
+    "updatedAt": "2026-08-15T20:10:00+07:00",
+    "seoDescription": "ติดม่านม้วนโชว์รูมต้นตาลยูสคาร์ นนทบุรี กรองแสงกันรถซีด โดยยังมองเห็นรถจากภายนอก"
+  },
+  {
+    "id": "pf-cp-048",
+    "title": "ม่านม้วน คณะสถาปัตยกรรมศาสตร์ KMITL",
+    "slug": "roller-architecture-kmitl",
+    "summary": "ม่านม้วนคณะสถาปัตย์ สจล. คุมแสงสตูดิโอโดยไม่บังงานโชว์ผนัง",
+    "detail": "อาคารคณะสถาปัตยกรรมศาสตร์มีกระจกใหญ่และต้องดูงานสี แสงจ้าจะรบกวน เลยติดม่านม้วนกรองแสง\n\nม้วนเก็บชิด ไม่บังผนังโชว์งาน เหมาะม่านม้วนสถานศึกษาที่อยากได้ทั้งฟังก์ชันและความเรียบ",
+    "place": "ลาดกระบัง กรุงเทพฯ",
+    "productSlug": "roller-blinds",
+    "spaceType": "education",
+    "tags": [
+      "ม่านม้วน",
+      "สถานศึกษา"
+    ],
+    "image": "/images/portfolio/roller-architecture-kmitl/01.webp",
+    "gallery": [
+      "/images/portfolio/roller-architecture-kmitl/01.webp"
+    ],
+    "status": "published",
+    "pinned": false,
+    "sortOrder": 18,
+    "customerName": "คณะสถาปัตยกรรมศาสตร์ KMITL",
+    "showCustomerName": true,
+    "installLocation": "อาคารคณะ",
+    "installDate": "2026",
+    "lineItems": [
+      {
+        "productName": "ม่านม้วน",
+        "sku": "WPR3006",
+        "serialOrCode": "",
+        "material": "",
+        "color": "",
+        "quantity": "",
+        "notes": ""
+      }
+    ],
+    "updatedAt": "2026-08-15T20:10:00+07:00",
+    "seoDescription": "ติดม่านม้วนคณะสถาปัตยกรรมศาสตร์ สจล. ลาดกระบัง กรองแสงสตูดิโอโดยไม่บังงานโชว์"
+  },
+  {
+    "id": "pf-cp-054",
+    "title": "ม่านปรับแสง การไฟฟ้าส่วนภูมิภาค จตุจักร",
+    "slug": "vertical-pea-chatuchak",
+    "summary": "ม่านปรับแสงสำนักงาน กฟภ. จตุจักร หมุนใบกันแดดได้ทีละโซน",
+    "detail": "สำนักงานการไฟฟ้าส่วนภูมิภาค จตุจักร มีกระจกยาว แสงเข้าไม่เท่ากันทั้งแถว เลยเลือกม่านปรับแสงที่หมุนใบได้\n\nเหมาะสำนักงานราชการที่อยากกันแสงจอคอมพิวเตอร์ โดยยังมองออกไปข้างนอกได้ และดูแลเป็นแผ่น เปลี่ยนใบได้เมื่อชำรุด",
+    "place": "จตุจักร กรุงเทพฯ",
+    "productSlug": "vertical-blinds",
+    "spaceType": "government",
+    "tags": [
+      "ม่านปรับแสง",
+      "ราชการ"
+    ],
+    "image": "/images/portfolio/vertical-pea-chatuchak/01.webp",
+    "gallery": [
+      "/images/portfolio/vertical-pea-chatuchak/01.webp",
+      "/images/portfolio/vertical-pea-chatuchak/02.webp",
+      "/images/portfolio/vertical-pea-chatuchak/03.webp"
+    ],
+    "status": "published",
+    "pinned": false,
+    "sortOrder": 19,
+    "customerName": "การไฟฟ้าส่วนภูมิภาค",
+    "showCustomerName": true,
+    "installLocation": "สำนักงานจตุจักร",
+    "installDate": "2026",
+    "lineItems": [
+      {
+        "productName": "ม่านปรับแสง",
+        "sku": "WPRB1002",
+        "serialOrCode": "",
+        "material": "",
+        "color": "",
+        "quantity": "",
+        "notes": ""
+      }
+    ],
+    "updatedAt": "2026-08-15T20:10:00+07:00",
+    "seoDescription": "ติดม่านปรับแสงการไฟฟ้าส่วนภูมิภาค จตุจักร กรุงเทพฯ หมุนใบกันแดดจอคอมพิวเตอร์ เหมาะสำนักงานราชการ"
+  },
+  {
+    "id": "pf-cp-055",
+    "title": "ม่านปรับแสง ซีพีแรม ชลบุรี",
+    "slug": "vertical-cp-ram-chonburi",
+    "summary": "ม่านปรับแสงสำนักงานซีพีแรม ชลบุรี คุมแสงห้องประชุมและโต๊ะทำงาน",
+    "detail": "สำนักงานซีพีแรม ชลบุรี ใช้ม่านปรับแสงกับกระจกยาว เพื่อหมุนใบกันแดดเฉพาะช่วงที่จ้า\n\nม่านปรับแสงสำนักงานช่วยลดแสงสะท้อนจอ โดยไม่ต้องปิดม่านทั้งแผง เหมาะอาคารองค์กรที่ใช้งานทั้งวัน",
+    "place": "ชลบุรี",
+    "productSlug": "vertical-blinds",
+    "spaceType": "office-corp",
+    "tags": [
+      "ม่านปรับแสง",
+      "องค์กร"
+    ],
+    "image": "/images/portfolio/vertical-cp-ram-chonburi/01.webp",
+    "gallery": [
+      "/images/portfolio/vertical-cp-ram-chonburi/01.webp"
+    ],
+    "status": "published",
+    "pinned": false,
+    "sortOrder": 20,
+    "customerName": "บริษัท ซีพีแรม จำกัด (CP RAM)",
+    "showCustomerName": true,
+    "installLocation": "สำนักงาน",
+    "installDate": "2026",
+    "lineItems": [
+      {
+        "productName": "ม่านปรับแสง",
+        "sku": "WPRB1002",
+        "serialOrCode": "",
+        "material": "",
+        "color": "",
+        "quantity": "",
+        "notes": ""
+      }
+    ],
+    "updatedAt": "2026-08-15T20:10:00+07:00",
+    "seoDescription": "ติดม่านปรับแสงสำนักงานซีพีแรม ชลบุรี ลดแสงสะท้อนจอ หมุนใบได้ เหมาะอาคารองค์กร"
+  },
+  {
+    "id": "pf-cp-056",
+    "title": "ม่านปรับแสง สำนักงานราชการแผ่นดิน",
+    "slug": "vertical-national-reform",
+    "summary": "ม่านปรับแสงหน่วยงานราชการ เรียบ เป็นระเบียบ คุมแสงได้ละเอียด",
+    "detail": "สำนักงานราชการต้องการม่านที่ดูสุภาพ เป็นระเบียบ และทนการใช้งาน เลยเลือกม่านปรับแสงใบแนวตั้ง\n\nหมุนใบได้ตามแดดแต่ละช่วงวัน เหมาะงานม่านสำนักงานราชการกรุงเทพฯ ที่ต้องดูเรียบร้อยตลอดเวลา",
+    "place": "กรุงเทพฯ",
+    "productSlug": "vertical-blinds",
+    "spaceType": "government",
+    "tags": [
+      "ม่านปรับแสง",
+      "ราชการ"
+    ],
+    "image": "/images/portfolio/vertical-national-reform/01.webp",
+    "gallery": [
+      "/images/portfolio/vertical-national-reform/01.webp",
+      "/images/portfolio/vertical-national-reform/02.webp",
+      "/images/portfolio/vertical-national-reform/03.webp"
+    ],
+    "status": "published",
+    "pinned": false,
+    "sortOrder": 21,
+    "customerName": "สำนักงานราชการแผ่นดิน",
+    "showCustomerName": true,
+    "installLocation": "สำนักงาน",
+    "installDate": "2026",
+    "lineItems": [
+      {
+        "productName": "ม่านปรับแสง",
+        "sku": "WPRB1003",
+        "serialOrCode": "",
+        "material": "",
+        "color": "",
+        "quantity": "",
+        "notes": ""
+      }
+    ],
+    "updatedAt": "2026-08-15T20:10:00+07:00",
+    "seoDescription": "ติดม่านปรับแสงสำนักงานราชการแผ่นดิน กรุงเทพฯ เรียบ เป็นระเบียบ หมุนใบคุมแสงได้ละเอียด"
+  },
+  {
+    "id": "pf-cp-060",
+    "title": "มู่ลี่ไม้ Link Weld ชลบุรี",
+    "slug": "wood-link-weld-chonburi",
+    "summary": "มู่ลี่ไม้โทน Nature White สำนักงานชลบุรี ดูอบอุ่นแต่ยังปรับแสงได้",
+    "detail": "สำนักงานลิงค์เวลด์ ชลบุรี เลือกมู่ลี่ไม้โทน Nature White ให้ห้องดูอบอุ่นกว่ามู่ลี่อลูมิเนียม แต่ยังปรับองศาใบกันแดดได้\n\nเหมาะสำนักงานองค์กรที่อยากได้มู่ลี่ไม้แต่งออฟฟิศ ดูแพง โดยไม่ทำให้ห้องมืดทึบ",
+    "place": "ชลบุรี",
+    "productSlug": "venetian-blinds",
+    "spaceType": "office-corp",
+    "tags": [
+      "มู่ลี่ไม้",
+      "องค์กร"
+    ],
+    "image": "/images/portfolio/wood-link-weld-chonburi/01.webp",
+    "gallery": [
+      "/images/portfolio/wood-link-weld-chonburi/01.webp",
+      "/images/portfolio/wood-link-weld-chonburi/02.webp",
+      "/images/portfolio/wood-link-weld-chonburi/03.webp",
+      "/images/portfolio/wood-link-weld-chonburi/04.webp"
+    ],
+    "status": "published",
+    "pinned": false,
+    "sortOrder": 22,
+    "customerName": "บริษัท ลิงค์เวลด์ (ประเทศไทย) จำกัด",
+    "showCustomerName": true,
+    "installLocation": "สำนักงาน",
+    "installDate": "2026",
+    "lineItems": [
+      {
+        "productName": "มู่ลี่ไม้",
+        "sku": "Nature White",
+        "serialOrCode": "",
+        "material": "",
+        "color": "",
+        "quantity": "",
+        "notes": ""
+      }
+    ],
+    "updatedAt": "2026-08-15T20:10:00+07:00",
+    "seoDescription": "ติดมู่ลี่ไม้โทน Nature White สำนักงานลิงค์เวลด์ ชลบุรี อบอุ่น ปรับแสงได้ เหมาะออฟฟิศองค์กร"
+  },
+  {
+    "id": "pf-cp-061",
+    "title": "มู่ลี่ไม้ กรมทางหลวง นครนายก",
+    "slug": "wood-highway-nakhonnayok",
+    "summary": "มู่ลี่ไม้ Dk Walnut สำนักงานกรมทางหลวง โทนเข้มสุภาพ กันแสงจอได้ละเอียด",
+    "detail": "สำนักงานกรมทางหลวง นครนายก ใช้มู่ลี่ไม้โทน Dk Walnut ให้ดูสุภาพ เข้ากับโต๊ะไม้และโทนอาคารราชการ\n\nปรับใบกันแสงจอได้ละเอียด เหมาะมู่ลี่ไม้สำนักงานที่อยากได้ทั้งความเป็นทางการและการใช้งานจริง",
+    "place": "นครนายก",
+    "productSlug": "venetian-blinds",
+    "spaceType": "government",
+    "tags": [
+      "มู่ลี่ไม้",
+      "ราชการ"
+    ],
+    "image": "/images/portfolio/wood-highway-nakhonnayok/01.webp",
+    "gallery": [
+      "/images/portfolio/wood-highway-nakhonnayok/01.webp",
+      "/images/portfolio/wood-highway-nakhonnayok/02.webp",
+      "/images/portfolio/wood-highway-nakhonnayok/03.webp",
+      "/images/portfolio/wood-highway-nakhonnayok/04.webp"
+    ],
+    "status": "published",
+    "pinned": false,
+    "sortOrder": 23,
+    "customerName": "กรมทางหลวง นครนายก",
+    "showCustomerName": true,
+    "installLocation": "สำนักงาน",
+    "installDate": "2026",
+    "lineItems": [
+      {
+        "productName": "มู่ลี่ไม้",
+        "sku": "Dk Walnut",
+        "serialOrCode": "",
+        "material": "",
+        "color": "",
+        "quantity": "",
+        "notes": ""
+      }
+    ],
+    "updatedAt": "2026-08-15T20:10:00+07:00",
+    "seoDescription": "ติดมู่ลี่ไม้โทน Dk Walnut กรมทางหลวง นครนายก สุภาพ ปรับใบกันแสงจอ เหมาะสำนักงานราชการ"
+  },
+  {
+    "id": "pf-cp-067",
+    "title": "มู่ลี่อลูมิเนียม การรถไฟแห่งประเทศไทย",
+    "slug": "alu-railway-bangkok",
+    "summary": "มู่ลี่อลูมิเนียมการรถไฟฯ เบา ทน เช็ดฝุ่นง่ายในสำนักงานใหญ่",
+    "detail": "สำนักงานการรถไฟแห่งประเทศไทยเลือกมู่ลี่อลูมิเนียมเพราะเบา ทนความชื้นแอร์ และเช็ดฝุ่นง่ายกว่าผ้าม่าน\n\nปรับใบกันแสงได้ละเอียด เหมาะมู่ลี่อลูมิเนียมสำนักงานราชการกรุงเทพฯ ที่ใช้งานทุกวัน",
+    "place": "กรุงเทพฯ",
+    "productSlug": "venetian-blinds",
+    "spaceType": "government",
+    "tags": [
+      "มู่ลี่อลูมิเนียม",
+      "ราชการ"
+    ],
+    "image": "/images/portfolio/alu-railway-bangkok/01.webp",
+    "gallery": [
+      "/images/portfolio/alu-railway-bangkok/01.webp",
+      "/images/portfolio/alu-railway-bangkok/02.webp"
+    ],
+    "status": "published",
+    "pinned": false,
+    "sortOrder": 24,
+    "customerName": "การรถไฟแห่งประเทศไทย",
+    "showCustomerName": true,
+    "installLocation": "สำนักงาน",
+    "installDate": "2026",
+    "lineItems": [
+      {
+        "productName": "มู่ลี่อลูมิเนียม",
+        "sku": "6010",
+        "serialOrCode": "",
+        "material": "",
+        "color": "",
+        "quantity": "",
+        "notes": ""
+      }
+    ],
+    "updatedAt": "2026-08-15T20:10:00+07:00",
+    "seoDescription": "ติดมู่ลี่อลูมิเนียมการรถไฟแห่งประเทศไทย กรุงเทพฯ เบา ทน เช็ดง่าย ปรับแสงได้ละเอียด"
+  },
+  {
+    "id": "pf-cp-078",
+    "title": "มู่ลี่อลูมิเนียม บิ๊กซี ราชดำริ",
+    "slug": "alu-bigc-ratchadamri",
+    "summary": "มู่ลี่อลูมิเนียมขาวเรียบ บิ๊กซีราชดำริ โปร่ง สะอาด เช็ดง่าย",
+    "detail": "พื้นที่ร้านและสำนักงานบิ๊กซีราชดำริต้องการม่านที่ดูสะอาด ไม่ซับกลิ่น และเช็ดได้เร็ว เลยเลือกมู่ลี่อลูมิเนียมสีขาวเรียบ\n\nโทนขาวเข้ากับพื้นที่ค้าปลีก ปรับแสงได้โดยไม่ปิดวิว เหมาะงานมู่ลี่อลูมิเนียมกรุงเทพฯ ใจกลางเมือง",
+    "place": "ราชดำริ กรุงเทพฯ",
+    "productSlug": "venetian-blinds",
+    "spaceType": "office-corp",
+    "tags": [
+      "มู่ลี่อลูมิเนียม"
+    ],
+    "image": "/images/portfolio/alu-bigc-ratchadamri/01.webp",
+    "gallery": [
+      "/images/portfolio/alu-bigc-ratchadamri/01.webp",
+      "/images/portfolio/alu-bigc-ratchadamri/02.webp"
+    ],
+    "status": "published",
+    "pinned": false,
+    "sortOrder": 25,
+    "customerName": "บิ๊กซี ราชดำริ",
+    "showCustomerName": true,
+    "installLocation": "พื้นที่ร้าน / สำนักงาน",
+    "installDate": "2026",
+    "lineItems": [
+      {
+        "productName": "มู่ลี่อลูมิเนียม",
+        "sku": "สีขาวเรียบ",
+        "serialOrCode": "",
+        "material": "",
+        "color": "",
+        "quantity": "",
+        "notes": ""
+      }
+    ],
+    "updatedAt": "2026-08-15T20:10:00+07:00",
+    "seoDescription": "ติดมู่ลี่อลูมิเนียมสีขาวเรียบบิ๊กซีราชดำริ กรุงเทพฯ สะอาด เช็ดง่าย ปรับแสงได้โดยไม่ปิดวิว"
+  },
+  {
+    "id": "pf-cp-079",
+    "title": "ฉากกั้นห้อง พันธุ์ทิพย์ งามวงศ์วาน",
+    "slug": "partition-pantip-ngamwongwan",
+    "summary": "ฉากกั้นขาวลายไม้ พันธุ์ทิพย์งามวงศ์วาน แบ่งโซนร้านโดยไม่ก่อผนัง",
+    "detail": "พื้นที่ร้านในพันธุ์ทิพย์งามวงศ์วานต้องการกั้นโซนเร็ว โดยไม่ทุบผนัง เลยใช้ฉากกั้นห้องสีขาวลายไม้\n\nฉากกั้นช่วยบังสายตา ให้ความเป็นส่วนตัว และยังย้ายได้ถ้าปรับผังร้าน เหมาะงานฉากกั้นห้องนนทบุรีในพื้นที่เช่า",
+    "place": "งามวงศ์วาน นนทบุรี",
+    "productSlug": "pvc-partition",
+    "spaceType": "office-corp",
+    "tags": [
+      "ฉากกั้นห้อง"
+    ],
+    "image": "/images/portfolio/partition-pantip-ngamwongwan/01.webp",
+    "gallery": [
+      "/images/portfolio/partition-pantip-ngamwongwan/01.webp",
+      "/images/portfolio/partition-pantip-ngamwongwan/02.webp"
+    ],
+    "status": "published",
+    "pinned": false,
+    "sortOrder": 26,
+    "customerName": "พันธุ์ทิพย์ งามวงศ์วาน",
+    "showCustomerName": true,
+    "installLocation": "พื้นที่ร้าน",
+    "installDate": "2026",
+    "lineItems": [
+      {
+        "productName": "ฉากกั้นห้อง",
+        "sku": "สีขาวลายไม้",
+        "serialOrCode": "",
+        "material": "",
+        "color": "",
+        "quantity": "",
+        "notes": ""
+      }
+    ],
+    "updatedAt": "2026-08-15T20:10:00+07:00",
+    "seoDescription": "ติดฉากกั้นห้องสีขาวลายไม้พันธุ์ทิพย์งามวงศ์วาน นนทบุรี แบ่งโซนร้านโดยไม่ก่อผนัง ย้ายได้"
+  },
+  {
+    "id": "pf-cp-080",
+    "title": "ฉากกั้นห้อง องค์การสุรา",
+    "slug": "partition-liquor-ngamwongwan",
+    "summary": "ฉากกั้นสำนักงานองค์การสุรา แบ่งห้องประชุมโดยไม่ต้องก่อสร้าง",
+    "detail": "สำนักงานองค์การสุรา งามวงศ์วาน ใช้ฉากกั้นสีขาวลายไม้แบ่งโซนทำงานและห้องประชุมโดยไม่ต้องก่อผนัง\n\nติดตั้งเร็ว ดูสุภาพ เหมาะฉากกั้นห้องสำนักงานราชการที่อยากได้ความเป็นส่วนตัวโดยงบไม่บาน",
+    "place": "งามวงศ์วาน นนทบุรี",
+    "productSlug": "pvc-partition",
+    "spaceType": "government",
+    "tags": [
+      "ฉากกั้นห้อง",
+      "ราชการ"
+    ],
+    "image": "/images/portfolio/partition-liquor-ngamwongwan/01.webp",
+    "gallery": [
+      "/images/portfolio/partition-liquor-ngamwongwan/01.webp"
+    ],
+    "status": "published",
+    "pinned": false,
+    "sortOrder": 27,
+    "customerName": "องค์การสุรา",
+    "showCustomerName": true,
+    "installLocation": "สำนักงาน",
+    "installDate": "2026",
+    "lineItems": [
+      {
+        "productName": "ฉากกั้นห้อง",
+        "sku": "สีขาวลายไม้",
+        "serialOrCode": "",
+        "material": "",
+        "color": "",
+        "quantity": "",
+        "notes": ""
+      }
+    ],
+    "updatedAt": "2026-08-15T20:10:00+07:00",
+    "seoDescription": "ติดฉากกั้นห้องสีขาวลายไม้องค์การสุรา งามวงศ์วาน แบ่งห้องประชุมโดยไม่ก่อสร้าง"
+  },
+  {
+    "id": "pf-cp-084",
+    "title": "ฉากกั้นห้อง หมู่บ้านถนนสามวา",
+    "slug": "partition-samwa-village",
+    "summary": "ฉากกั้นบ้านคลองสามวา แบ่งห้องเพิ่ม กั้นแอร์ได้โดยไม่ทุบผนัง",
+    "detail": "บ้านหมู่บ้านถนนสามวาต้องการห้องเพิ่ม เช่น มุมทำงานหรือกั้นแอร์ เลยเลือกฉากกั้นห้องแทนการก่อผนัง\n\nติดตั้งเร็ว ย้ายได้ เหมาะฉากกั้นห้องบ้านพักกรุงเทพฯ ที่อยากแบ่งโซนโดยไม่เสียโครงสร้างเดิม",
+    "place": "คลองสามวา กรุงเทพฯ",
+    "productSlug": "pvc-partition",
+    "spaceType": "home-condo",
+    "tags": [
+      "ฉากกั้นห้อง",
+      "บ้าน"
+    ],
+    "image": "/images/portfolio/partition-samwa-village/01.webp",
+    "gallery": [
+      "/images/portfolio/partition-samwa-village/01.webp",
+      "/images/portfolio/partition-samwa-village/02.webp",
+      "/images/portfolio/partition-samwa-village/03.webp"
+    ],
+    "status": "published",
+    "pinned": false,
+    "sortOrder": 28,
+    "customerName": "หมู่บ้านถนนสามวา",
+    "showCustomerName": true,
+    "installLocation": "บ้านพักอาศัย",
+    "installDate": "2026",
+    "lineItems": [
+      {
+        "productName": "ฉากกั้นห้อง",
+        "sku": "WPRB1006",
+        "serialOrCode": "",
+        "material": "",
+        "color": "",
+        "quantity": "",
+        "notes": ""
+      }
+    ],
+    "updatedAt": "2026-08-15T20:10:00+07:00",
+    "seoDescription": "ติดฉากกั้นห้องบ้านหมู่บ้านถนนสามวา คลองสามวา กรุงเทพฯ แบ่งห้อง กั้นแอร์ โดยไม่ทุบผนัง"
+  },
+  {
+    "id": "pf-cp-085",
+    "title": "ฉากกั้นห้อง เขาย้อย เพชรบุรี",
+    "slug": "partition-khao-yoi",
+    "summary": "ฉากกั้นบ้านเขาย้อย เพชรบุรี แบ่งโซนบ้านโดยไม่ต้องรองานก่อสร้าง",
+    "detail": "บ้านพักเขาย้อยใช้ฉากกั้นห้องเพื่อแบ่งพื้นที่ใช้สอย โดยไม่ต้องรองานก่อสร้าง\n\nฉากกั้นช่วยกั้นแอร์และบังสายตา เหมาะบ้านต่างจังหวัดที่อยากได้ห้องเพิ่มแบบงบคุมได้",
+    "place": "เขาย้อย เพชรบุรี",
+    "productSlug": "pvc-partition",
+    "spaceType": "home-condo",
+    "tags": [
+      "ฉากกั้นห้อง",
+      "บ้าน"
+    ],
+    "image": "/images/portfolio/partition-khao-yoi/01.webp",
+    "gallery": [
+      "/images/portfolio/partition-khao-yoi/01.webp",
+      "/images/portfolio/partition-khao-yoi/02.webp",
+      "/images/portfolio/partition-khao-yoi/03.webp"
+    ],
+    "status": "published",
+    "pinned": false,
+    "sortOrder": 29,
+    "customerName": "เขาย้อย",
+    "showCustomerName": true,
+    "installLocation": "บ้านพักอาศัย",
+    "installDate": "2026",
+    "lineItems": [
+      {
+        "productName": "ฉากกั้นห้อง",
+        "sku": "WPRB1003",
+        "serialOrCode": "",
+        "material": "",
+        "color": "",
+        "quantity": "",
+        "notes": ""
+      }
+    ],
+    "updatedAt": "2026-08-15T20:10:00+07:00",
+    "seoDescription": "ติดฉากกั้นห้องบ้านเขาย้อย เพชรบุรี แบ่งโซน กั้นแอร์ โดยไม่ต้องก่อสร้าง"
+  },
+  {
+    "id": "pf-cp-087",
+    "title": "ม่านม้วน Zip blinds คลองสามวา",
+    "slug": "zip-khlong-sam-wa",
+    "summary": "ม่านม้วนซิปคลองสามวา กันแมลง กันฝนสาด ยังเปิดวิวระเบียงได้",
+    "detail": "ระเบียงบ้านคลองสามวาโดนแมลงและฝนสาด ผ้าม่านในบ้านช่วยไม่ได้ เลยติดม่านม้วน Zip blinds ซิปสองข้าง\n\nกันแมลง คุมแสง และยังมองออกไปข้างนอกได้ เหมาะม่านภายนอกบ้านกรุงเทพฯ ที่อยากใช้ระเบียงได้จริง",
+    "place": "คลองสามวา กรุงเทพฯ",
+    "productSlug": "outdoor-factory",
+    "spaceType": "home-condo",
+    "tags": [
+      "ม่านซิป",
+      "ม่านภายนอก"
+    ],
+    "image": "/images/portfolio/zip-khlong-sam-wa/01.webp",
+    "gallery": [
+      "/images/portfolio/zip-khlong-sam-wa/01.webp",
+      "/images/portfolio/zip-khlong-sam-wa/02.webp"
+    ],
+    "status": "published",
+    "pinned": false,
+    "sortOrder": 30,
+    "customerName": "คลองสามวา",
+    "showCustomerName": true,
+    "installLocation": "ระเบียง / นอกอาคาร",
+    "installDate": "2026",
+    "lineItems": [
+      {
+        "productName": "ม่านซิป",
+        "sku": "WPRB1006",
+        "serialOrCode": "",
+        "material": "",
+        "color": "",
+        "quantity": "",
+        "notes": ""
+      }
+    ],
+    "updatedAt": "2026-08-15T20:10:00+07:00",
+    "seoDescription": "ติดม่านม้วนซิป Zip blinds คลองสามวา กรุงเทพฯ กันแมลง กันฝนสาด ใช้ระเบียงได้จริง"
+  },
+  {
+    "id": "pf-cp-089",
+    "title": "ม่านม้วนสกายไลท์ ซีพีแรม ลาดหลุมแก้ว",
+    "slug": "skylight-cp-ram-ladlumkaew",
+    "summary": "ม่านม้วนสกายไลท์ซีพีแรม ลาดหลุมแก้ว กันแดดหลังคากระจก ลดความร้อนโถง",
+    "detail": "หลังคากระจกซีพีแรม ลาดหลุมแก้ว ทำให้โถงร้อนและแสงจ้า เลยติดม่านม้วนสกายไลท์แนวนอน\n\nม้วนเก็บได้เมื่อต้องการแสงธรรมชาติ เหมาะม่านม้วนหลังคากระจกโรงงานและสำนักงานที่อยากลดความร้อนโดยไม่ปิดสกายไลท์ถาวร",
+    "place": "ลาดหลุมแก้ว ปทุมธานี",
+    "productSlug": "outdoor-factory",
+    "spaceType": "office-corp",
+    "tags": [
+      "สกายไลท์",
+      "ม่านม้วน"
+    ],
+    "image": "/images/portfolio/skylight-cp-ram-ladlumkaew/01.webp",
+    "gallery": [
+      "/images/portfolio/skylight-cp-ram-ladlumkaew/01.webp",
+      "/images/portfolio/skylight-cp-ram-ladlumkaew/02.webp",
+      "/images/portfolio/skylight-cp-ram-ladlumkaew/03.webp"
+    ],
+    "status": "published",
+    "pinned": false,
+    "sortOrder": 31,
+    "customerName": "ซีพีแรม ลาดหลุมแก้ว",
+    "showCustomerName": true,
+    "installLocation": "สกายไลท์",
+    "installDate": "2026",
+    "lineItems": [
+      {
+        "productName": "สกายไลท์",
+        "sku": "WPRB1005",
+        "serialOrCode": "",
+        "material": "",
+        "color": "",
+        "quantity": "",
+        "notes": ""
+      }
+    ],
+    "updatedAt": "2026-08-15T20:10:00+07:00",
+    "seoDescription": "ติดม่านม้วนสกายไลท์ซีพีแรม ลาดหลุมแก้ว ปทุมธานี กันแดดหลังคากระจก ลดความร้อนโถง"
+  },
+  {
+    "id": "pf-cp-100",
+    "title": "พิมพ์ลาย Colors of Buriram 2025",
+    "slug": "print-buriram-arena-2025",
+    "summary": "พิมพ์ลาย Colors of Buriram 2025 ที่สนามช้างอารีนา งานใหญ่ สีตรงจากระยะไกล",
+    "detail": "งานอีเวนต์ที่สนามช้างอารีนาต้องการผ้าพิมพ์ลายสีตรง ขนาดใหญ่ และติดตั้งตามกำหนด เลยผลิตพิมพ์ลาย Colors of Buriram 2025 ทั้งผืน\n\nเหมาะงานพิมพ์ลายผ้าอีเวนต์ที่ต้องเห็นสีจากระยะไกล และยังอ้างอิงงานสนามกีฬาบุรีรัมย์ได้",
+    "place": "บุรีรัมย์",
+    "productSlug": "print-fabric",
+    "spaceType": "office-corp",
+    "tags": [
+      "พิมพ์ลาย",
+      "อีเวนต์"
+    ],
+    "image": "/images/portfolio/print-buriram-arena-2025/01.webp",
+    "gallery": [
+      "/images/portfolio/print-buriram-arena-2025/01.webp",
+      "/images/portfolio/print-buriram-arena-2025/02.webp",
+      "/images/portfolio/print-buriram-arena-2025/03.webp",
+      "/images/portfolio/print-buriram-arena-2025/04.webp"
+    ],
+    "status": "published",
+    "pinned": true,
+    "sortOrder": 32,
+    "customerName": "Colors of Buriram 2025 · สนามช้างอารีนา",
+    "showCustomerName": true,
+    "installLocation": "สนามช้างอารีนา",
+    "installDate": "2026",
+    "lineItems": [],
+    "updatedAt": "2026-08-15T20:10:00+07:00",
+    "seoDescription": "ผลงานพิมพ์ลาย Colors of Buriram 2025 สนามช้างอารีนา บุรีรัมย์ ผ้าพิมพ์สีตรง งานอีเวนต์ขนาดใหญ่"
+  },
+  {
+    "id": "pf-cp-103",
+    "title": "ม่านญี่ปุ่น ร้านแบร์เฮาส์",
+    "slug": "noren-bear-house",
+    "summary": "ม่านญี่ปุ่นผ้าแคนวาส 9 ออนซ์ ร้านแบร์เฮาส์ หน้าร้านดูเป็นคาเฟ่ทันที",
+    "detail": "ร้านแบร์เฮาส์ใช้ม่านญี่ปุ่นผ้าแคนวาส 9 ออนซ์ ที่หน้าร้าน เพื่อแบ่งโซนและสร้างบรรยากาศโดยไม่ต้องทำประตูทึบ\n\nผ้าแคนวาสหนาพอให้ทรงสวย เหมาะม่านญี่ปุ่นร้านกาแฟที่อยากได้ทั้งแบรนด์และความเป็นส่วนตัว",
+    "place": "กรุงเทพฯ",
+    "productSlug": "print-fabric",
+    "spaceType": "restaurant-cafe",
+    "tags": [
+      "ม่านญี่ปุ่น",
+      "พิมพ์ลาย"
+    ],
+    "image": "/images/portfolio/noren-bear-house/01.webp",
+    "gallery": [
+      "/images/portfolio/noren-bear-house/01.webp",
+      "/images/portfolio/noren-bear-house/02.webp",
+      "/images/portfolio/noren-bear-house/03.webp"
+    ],
+    "status": "published",
+    "pinned": false,
+    "sortOrder": 33,
+    "customerName": "ร้านแบร์เฮาส์",
+    "showCustomerName": true,
+    "installLocation": "หน้าร้าน",
+    "installDate": "2026",
+    "lineItems": [
+      {
+        "productName": "ม่านญี่ปุ่น",
+        "sku": "ผ้าแคนวาส 9 ออนซ์",
+        "serialOrCode": "",
+        "material": "",
+        "color": "",
+        "quantity": "",
+        "notes": ""
+      }
+    ],
+    "updatedAt": "2026-08-15T20:10:00+07:00",
+    "seoDescription": "ม่านญี่ปุ่นผ้าแคนวาส 9 ออนซ์ร้านแบร์เฮาส์ กรุงเทพฯ แบ่งโซนหน้าร้าน ดูเป็นคาเฟ่ทันที"
+  },
+  {
+    "id": "pf-cp-104",
+    "title": "ม่านญี่ปุ่น ร้านอาหารญี่ปุ่น",
+    "slug": "noren-japanese-restaurants",
+    "summary": "ม่านญี่ปุ่นผ้าแคนวาสร้านอาหาร แบ่งโซนครัว-หน้าร้านได้ทันที",
+    "detail": "ร้านอาหารและร้านน้ำใช้ม่านญี่ปุ่นผ้าแคนวาส 9 ออนซ์ กั้นหน้าร้านหรือปากทางครัว โดยไม่ปิดทึบจนดูอึดอัด\n\nพิมพ์ลายได้ตามแบรนด์ เหมาะม่านญี่ปุ่นร้านอาหารที่อยากได้ทั้งฟังก์ชันและภาพลักษณ์",
+    "place": "กรุงเทพฯ",
+    "productSlug": "print-fabric",
+    "spaceType": "restaurant-cafe",
+    "tags": [
+      "ม่านญี่ปุ่น",
+      "พิมพ์ลาย"
+    ],
+    "image": "/images/portfolio/noren-japanese-restaurants/01.webp",
+    "gallery": [
+      "/images/portfolio/noren-japanese-restaurants/01.webp",
+      "/images/portfolio/noren-japanese-restaurants/02.webp",
+      "/images/portfolio/noren-japanese-restaurants/03.webp"
+    ],
+    "status": "published",
+    "pinned": false,
+    "sortOrder": 34,
+    "customerName": "ร้านอาหารญี่ปุ่น",
+    "showCustomerName": true,
+    "installLocation": "หน้าร้าน",
+    "installDate": "2026",
+    "lineItems": [
+      {
+        "productName": "ม่านญี่ปุ่น",
+        "sku": "ผ้าแคนวาส 9 ออนซ์",
+        "serialOrCode": "",
+        "material": "",
+        "color": "",
+        "quantity": "",
+        "notes": ""
+      }
+    ],
+    "updatedAt": "2026-08-15T20:10:00+07:00",
+    "seoDescription": "ม่านญี่ปุ่นผ้าแคนวาส 9 ออนซ์สำหรับร้านอาหารและร้านน้ำ กรุงเทพฯ แบ่งโซนครัว-หน้าร้าน พิมพ์ลายได้"
+  },
+  {
+    "id": "pf-cp-105",
+    "title": "ม่านญี่ปุ่น อิชิคะระ",
+    "slug": "noren-ichikara",
+    "summary": "ม่านญี่ปุ่นอิชิคะระ ผ้าแคนวาสหนา ทรงสวย เข้ากับร้านอาหารญี่ปุ่น",
+    "detail": "ร้านอิชิคะระเลือกม่านญี่ปุ่นผ้าแคนวาส 9 ออนซ์ ให้หน้าร้านดูเป็นร้านอาหารญี่ปุ่นตั้งแต่ทางเข้า\n\nผ้าหนาพอไม่ปลิวง่าย แบ่งโซนได้ และยังพิมพ์ลายเข้ากับแบรนด์ เหมาะม่านหน้าร้านอาหารกรุงเทพฯ",
+    "place": "กรุงเทพฯ",
+    "productSlug": "print-fabric",
+    "spaceType": "restaurant-cafe",
+    "tags": [
+      "ม่านญี่ปุ่น",
+      "พิมพ์ลาย"
+    ],
+    "image": "/images/portfolio/noren-ichikara/01.webp",
+    "gallery": [
+      "/images/portfolio/noren-ichikara/01.webp",
+      "/images/portfolio/noren-ichikara/02.webp",
+      "/images/portfolio/noren-ichikara/03.webp"
+    ],
+    "status": "published",
+    "pinned": false,
+    "sortOrder": 35,
+    "customerName": "อิชิคะระ",
+    "showCustomerName": true,
+    "installLocation": "หน้าร้าน",
+    "installDate": "2026",
+    "lineItems": [
+      {
+        "productName": "ม่านญี่ปุ่น",
+        "sku": "ผ้าแคนวาส 9 ออนซ์",
+        "serialOrCode": "",
+        "material": "",
+        "color": "",
+        "quantity": "",
+        "notes": ""
+      }
+    ],
+    "updatedAt": "2026-08-15T20:10:00+07:00",
+    "seoDescription": "ม่านญี่ปุ่นผ้าแคนวาส 9 ออนซ์ร้านอิชิคะระ กรุงเทพฯ ทรงสวย แบ่งโซนหน้าร้านอาหารญี่ปุ่น"
+  },
+  {
+    "id": "pf-cp-113",
+    "title": "ม่านม้วนพิมพ์ลาย บาร์บีคิวพลาซ่า",
+    "slug": "print-roller-bbq-plaza",
+    "summary": "ม่านม้วนพิมพ์ลายบาร์บีคิวพลาซ่า กันแดดและโชว์แบรนด์ในผืนเดียว",
+    "detail": "บาร์บีคิวพลาซ่าใช้ม่านม้วนพิมพ์ลายสีขาว เพื่อกันแดดหน้าร้านและโชว์แบรนด์โดยไม่ต้องติดสติ๊กเกอร์กระจก\n\nม้วนเก็บได้ตอนกลางคืน เช็ดง่าย เหมาะม่านม้วนพิมพ์ลายร้านอาหารที่อยากได้ทั้งฟังก์ชันและภาพลักษณ์",
+    "place": "กรุงเทพฯ",
+    "productSlug": "print-fabric",
+    "spaceType": "restaurant-cafe",
+    "tags": [
+      "ม่านม้วนพิมพ์ลาย",
+      "ร้านอาหาร"
+    ],
+    "image": "/images/portfolio/print-roller-bbq-plaza/01.webp",
+    "gallery": [
+      "/images/portfolio/print-roller-bbq-plaza/01.webp",
+      "/images/portfolio/print-roller-bbq-plaza/02.webp"
+    ],
+    "status": "published",
+    "pinned": false,
+    "sortOrder": 36,
+    "customerName": "บาร์บีคิวพลาซ่า",
+    "showCustomerName": true,
+    "installLocation": "ร้านอาหาร",
+    "installDate": "2026",
+    "lineItems": [
+      {
+        "productName": "ม่านม้วนพิมพ์ลาย",
+        "sku": "WRP2013",
+        "serialOrCode": "",
+        "material": "",
+        "color": "",
+        "quantity": "",
+        "notes": ""
+      }
+    ],
+    "updatedAt": "2026-08-15T20:10:00+07:00",
+    "seoDescription": "ติดม่านม้วนพิมพ์ลายสีขาวบาร์บีคิวพลาซ่า กรุงเทพฯ กันแดดหน้าร้านและโชว์แบรนด์ในผืนเดียว"
+  }
+]

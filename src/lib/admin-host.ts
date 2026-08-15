@@ -73,6 +73,7 @@ const MARKETING_PREFIXES = [
   "/portfolio",
   "/blog",
   "/quote",
+  "/learn",
   "/about",
   "/contact",
   "/privacy",

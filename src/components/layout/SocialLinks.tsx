@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { siteConfig } from "@/lib/site-config";
+import { isPlaceholderSocialUrl, siteConfig } from "@/lib/site-config";
 
 const brandStyles: Record<string, string> = {
   Facebook: "bg-[#1877F2]",
@@ -25,12 +25,14 @@ type Props = {
 export function SocialLinks({ className = "", size = 28 }: Props) {
   return (
     <div className={`flex items-center gap-2 ${className}`}>
-      {siteConfig.social.map((item) => (
+      {siteConfig.social
+        .filter((item) => !isPlaceholderSocialUrl(item.href))
+        .map((item) => (
         <a
           key={item.label}
           href={item.href}
           target="_blank"
-          rel="noreferrer"
+          rel="noopener noreferrer"
           aria-label={item.label}
           title={item.label}
           className={`inline-flex items-center justify-center rounded-full transition hover:opacity-80 ${brandStyles[item.label] || "bg-navy"}`}

@@ -10,6 +10,7 @@ import {
 } from "@/lib/cms/blog-demo";
 import { publishedBlog } from "@/lib/cms/public-content";
 import { useBlogPosts } from "@/lib/cms/demo-store";
+import { PageHero } from "@/components/ui/page-hero";
 
 /** Business-priority order for homepage sections */
 const CATEGORY_ORDER: BlogCategory[] = [
@@ -59,22 +60,42 @@ export function BlogIndex() {
 
   return (
     <div className="bg-shell pb-16">
-      <section className="border-b border-line/70 bg-white">
-        <div className="mx-auto max-w-5xl px-6 sm:px-10 lg:px-16 py-10 sm:py-14">
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted">
-            Knowledge · อ่านก่อนตัดสินใจ
-          </p>
-          <h1 className="mt-3 font-display text-3xl font-semibold text-navy sm:text-4xl">
-            บทความ
-          </h1>
-          <p className="mt-3 max-w-xl text-sm leading-relaxed text-muted sm:text-base">
-            ความรู้เรื่องม่าน ไอเดียแต่งบ้าน และเคล็ดลับดูแล
-          </p>
-          <p className="mt-2 text-sm font-medium text-navy">
-            {published.length} บทความ
-          </p>
-        </div>
-      </section>
+      <PageHero
+        image="/images/generated/ct-hero-blog.webp"
+        imageAlt="มุมนั่งอ่านข้างหน้าต่างผ้าม่านช่างตี๋ พร้อมตัวอย่างผ้าและสมุดบันทึก"
+        eyebrow="Knowledge · อ่านก่อนตัดสินใจ"
+        title="Articles"
+        description="ความรู้เรื่องม่าน ไอเดียแต่งบ้าน และเคล็ดลับดูแล"
+        copyClassName="lg:self-end lg:pb-6"
+        aside={
+          starter.length > 0 ? (
+            <aside>
+              <h2 className="font-display text-sm font-semibold tracking-[0.16em] text-white/75 uppercase">
+                Start from this
+              </h2>
+              <ol className="mt-6 divide-y divide-white/20">
+                {starter.map((post, i) => (
+                  <li key={post.id} className="py-4 first:pt-0 last:pb-0">
+                    <Link href={`/blog/${post.slug}`} className="group flex gap-4">
+                      <span className="w-8 shrink-0 font-display text-2xl font-light leading-none text-white">
+                        {String(i + 1).padStart(2, "0")}
+                      </span>
+                      <span className="min-w-0">
+                        <span className="block text-[11px] font-medium text-brand-red-soft">
+                          {BLOG_CATEGORY_LABELS[post.category]}
+                        </span>
+                        <span className="mt-1 block text-sm font-semibold leading-relaxed text-white/90 transition group-hover:text-white">
+                          {post.title}
+                        </span>
+                      </span>
+                    </Link>
+                  </li>
+                ))}
+              </ol>
+            </aside>
+          ) : null
+        }
+      />
 
       <div className="mx-auto max-w-5xl px-6 sm:px-10 lg:px-16 pt-8">
         {published.length === 0 ? (
@@ -89,7 +110,7 @@ export function BlogIndex() {
               {featured ? (
                 <Link
                   href={`/blog/${featured.slug}`}
-                  className="group flex flex-col overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-line transition hover:ring-navy/25 lg:col-span-5"
+                  className="group flex flex-col overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-line transition hover:ring-navy/25 lg:col-span-7"
                 >
                   <div className="relative aspect-[16/10] w-full">
                     <Image
@@ -97,7 +118,7 @@ export function BlogIndex() {
                       alt={featured.title}
                       fill
                       className="object-cover transition duration-300 group-hover:scale-[1.02]"
-                      sizes="(max-width: 1024px) 100vw, 420px"
+                      sizes="(max-width: 1024px) 100vw, 560px"
                       priority
                     />
                   </div>
@@ -120,53 +141,14 @@ export function BlogIndex() {
                 </Link>
               ) : null}
 
-              <div className="flex flex-col gap-3 lg:col-span-4">
+              <div className="flex flex-col gap-3 lg:col-span-5">
                 {sideStack.map((post) => (
                   <HorizontalCard key={post.id} post={post} />
                 ))}
               </div>
-
-              <aside className="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-line lg:col-span-3">
-                <h2 className="font-display text-sm font-semibold tracking-wide text-navy">
-                  เริ่มจากตรงนี้
-                </h2>
-                <p className="mt-1 text-xs text-muted">
-                  คู่มือช่วยตัดสินใจที่อ่านก่อนคุ้ม
-                </p>
-                <ol className="mt-5 space-y-4">
-                  {starter.map((post, i) => (
-                    <li key={post.id}>
-                      <Link
-                        href={`/blog/${post.slug}`}
-                        className="group flex gap-3"
-                      >
-                        <span className="w-7 shrink-0 font-display text-2xl font-bold leading-none text-line transition group-hover:text-brand-red">
-                          {String(i + 1).padStart(2, "0")}
-                        </span>
-                        <span className="min-w-0">
-                          <span className="block text-[11px] font-medium text-brand-red">
-                            {BLOG_CATEGORY_LABELS[post.category]}
-                          </span>
-                          <span className="mt-0.5 block text-sm font-semibold leading-snug text-navy group-hover:underline">
-                            {post.title}
-                          </span>
-                        </span>
-                      </Link>
-                    </li>
-                  ))}
-                </ol>
-              </aside>
             </section>
 
             <div className="mt-14 space-y-12">
-              <div className="border-b border-line pb-2">
-                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted">
-                  แยกตามหมวด
-                </p>
-                <h2 className="mt-1 font-display text-xl font-semibold text-navy">
-                  เลือกอ่านตามสิ่งที่อยากรู้
-                </h2>
-              </div>
               {categorySections.map(({ cat, items, preview }) => {
                 const isOpen = !!expanded[cat];
                 const shown = isOpen ? items : preview;

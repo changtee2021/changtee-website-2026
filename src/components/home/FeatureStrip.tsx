@@ -7,8 +7,8 @@ const icons = [Ruler, Truck, BadgeCheck] as const;
 export function FeatureStrip() {
   return (
     <section className="px-6 pb-3 sm:px-10 sm:pb-4 lg:px-16">
-      <div className="mx-auto w-full max-w-5xl overflow-hidden rounded-[var(--radius-panel)] bg-panel text-ink">
-        <div className="grid divide-y divide-line sm:grid-cols-3 sm:divide-x sm:divide-y-0">
+      <div className="mx-auto w-full max-w-5xl text-ink">
+        <div className="grid sm:grid-cols-3">
           {whyItems.map((item, i) => {
             const Icon = icons[i] ?? BadgeCheck;
             return (

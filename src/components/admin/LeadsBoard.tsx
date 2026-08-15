@@ -25,8 +25,10 @@ import {
   Search,
   X,
 } from "lucide-react";
+import { LeadSiteImages } from "@/components/admin/LeadSiteImages";
 import { DEMO_LEADS } from "@/lib/leads/leads-demo";
 import { downloadLeadsExcel } from "@/lib/export-leads-excel";
+import { leadImageRefs } from "@/lib/security/lead-media";
 import {
   LEAD_STATUSES,
   LEAD_STATUS_LABELS,
@@ -931,37 +933,7 @@ export function LeadsBoard() {
                 wide
               />
             </dl>
-            {(selected.siteImageUrls?.length
-              ? selected.siteImageUrls
-              : selected.siteImageUrl
-                ? [selected.siteImageUrl]
-                : []
-            ).length > 0 ? (
-              <div className="mt-4 flex flex-wrap gap-2">
-                {(selected.siteImageUrls?.length
-                  ? selected.siteImageUrls
-                  : selected.siteImageUrl
-                    ? [selected.siteImageUrl]
-                    : []
-                ).map((url, i) => (
-                  <a
-                    key={`${url}-${i}`}
-                    href={url}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="relative block size-20 overflow-hidden rounded-lg border border-line bg-paper"
-                    title={`รูปที่ ${i + 1}`}
-                  >
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src={url}
-                      alt={`แนบ ${i + 1}`}
-                      className="size-full object-cover"
-                    />
-                  </a>
-                ))}
-              </div>
-            ) : null}
+            <LeadSiteImages refs={leadImageRefs(selected)} />
 
             {selected.status === "cancelled" ? (
               <div className="mt-5 rounded-xl border border-rose-200 bg-rose-50/60 p-4">

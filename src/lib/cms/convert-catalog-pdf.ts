@@ -37,8 +37,8 @@ export async function convertPdfCatalog(
   file: File,
   onProgress?: (done: number, total: number) => void,
 ): Promise<ConvertedCatalog> {
-  const pdfjsLib = await import("pdfjs-dist");
-  pdfjsLib.GlobalWorkerOptions.workerSrc = "/pdf/pdf.worker.min.mjs";
+  const { loadPdfjs } = await import("@/lib/pdfjs-browser");
+  const pdfjsLib = await loadPdfjs();
 
   const data = new Uint8Array(await file.arrayBuffer());
   const loadingTask = pdfjsLib.getDocument({ data });

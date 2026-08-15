@@ -7,10 +7,17 @@ import {
   ChevronLeft,
   ChevronRight,
   Download,
+  Minus,
+  Plus,
   Square,
   X,
 } from "lucide-react";
-import { openFlipbookDocument, type FlipbookDoc, type FlipbookPage } from "@/lib/pdf-flipbook";
+import {
+  openFlipbookDocument,
+  prefetchPageImage,
+  type FlipbookDoc,
+  type FlipbookPage,
+} from "@/lib/pdf-flipbook";
 
 type Props = {
   fileUrl: string;
@@ -26,8 +33,18 @@ type Props = {
 };
 
 const SLIDE_MS = 320;
-/** How many pages ahead of the current view to keep pre-rendered in the background. */
-const PREFETCH_AHEAD = 3;
+/** Pages ahead of the current view to warm in the background (not the whole book). */
+const PREFETCH_AHEAD = 4;
+const ZOOM_STEPS = [100, 125, 150, 175, 200, 250] as const;
+const ZOOM_MIN = ZOOM_STEPS[0];
+const ZOOM_MAX = ZOOM_STEPS[ZOOM_STEPS.length - 1]!;
+
+function nextZoom(current: number, dir: 1 | -1) {
+  if (dir === 1) {
+    return ZOOM_STEPS.find((step) => step > current) ?? ZOOM_MAX;
+  }
+  return [...ZOOM_STEPS].reverse().find((step) => step < current) ?? ZOOM_MIN;
+}
 
 type ViewMode = 1 | 2;
 
@@ -45,13 +62,26 @@ export function CatalogFlipbookModal({
   const [ready, setReady] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [downloadProgress, setDownloadProgress] = useState({ loaded: 0, total: 0 });
-  const [viewMode, setViewMode] = useState<ViewMode>(1);
+  const [viewMode, setViewMode] = useState<ViewMode>(() =>
+    typeof window !== "undefined" && window.innerWidth >= 768 ? 2 : 1,
+  );
   const [modeLocked, setModeLocked] = useState(false);
   const [index, setIndex] = useState(0);
   const [slideDir, setSlideDir] = useState<"next" | "prev" | null>(null);
   const [slideKey, setSlideKey] = useState(0);
   const [turning, setTurning] = useState(false);
+  const [zoom, setZoom] = useState(100);
+  const [pan, setPan] = useState({ x: 0, y: 0 });
+  const [dragging, setDragging] = useState(false);
   const slideTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const dragRef = useRef<{
+    pointerId: number;
+    startX: number;
+    startY: number;
+    originX: number;
+    originY: number;
+    moved: boolean;
+  } | null>(null);
 
   useEffect(() => {
     return () => {
@@ -88,28 +118,26 @@ export function CatalogFlipbookModal({
         setDoc(handle);
         setNumPages(handle.numPages);
 
-        // Show the very first page as fast as possible; the rest fills in
-        // a beat later via background prefetch below.
-        const firstBatch = Math.min(1, handle.numPages);
+        const firstCount = Math.min(2, handle.numPages);
         const first = await Promise.all(
-          Array.from({ length: firstBatch }, (_, i) =>
+          Array.from({ length: firstCount }, (_, i) =>
             handle.getPage(i).then((p) => [i, p] as [number, FlipbookPage]),
           ),
         );
         if (cancelled) return;
         addPages(first);
         setReady(true);
-
-        for (let i = firstBatch; i < handle.numPages; i++) {
-          if (cancelled) break;
-          try {
-            const p = await handle.getPage(i);
-            if (cancelled) break;
-            addPages([[i, p]]);
-          } catch {
-            // ignore background prefetch failures; page will retry on demand
-          }
-          await new Promise((r) => setTimeout(r, 0));
+        for (const [, page] of first) prefetchPageImage(page.url);
+        const aheadEnd = Math.min(firstCount + PREFETCH_AHEAD, handle.numPages);
+        for (let i = firstCount; i < aheadEnd; i++) {
+          handle
+            .getPage(i)
+            .then((p) => {
+              if (cancelled) return;
+              addPages([[i, p]]);
+              prefetchPageImage(p.url);
+            })
+            .catch(() => {});
         }
       })
       .catch((err) => {
@@ -125,17 +153,6 @@ export function CatalogFlipbookModal({
     };
   }, [fileUrl, catalogId, manifestUrl, addPages]);
 
-  // Default to 2-up on desktop, 1-up on mobile — until the user toggles.
-  useEffect(() => {
-    if (modeLocked) return;
-    function syncDefault() {
-      setViewMode(window.innerWidth >= 768 ? 2 : 1);
-    }
-    syncDefault();
-    window.addEventListener("resize", syncDefault);
-    return () => window.removeEventListener("resize", syncDefault);
-  }, [modeLocked]);
-
   const perView = viewMode;
   const maxIndex = Math.max(0, numPages - perView);
   const safeIndex = Math.min(index, maxIndex);
@@ -150,26 +167,45 @@ export function CatalogFlipbookModal({
   const ensurePagesReady = useCallback(
     async (start: number, count: number) => {
       if (!doc) return;
-      const need = Array.from({ length: count }, (_, i) => start + i).filter(
-        (i) => i >= 0 && i < numPages && !(i in pageCache),
+      const visible = Array.from({ length: count }, (_, i) => start + i).filter(
+        (i) => i >= 0 && i < numPages,
       );
+      const need = visible.filter((i) => !(i in pageCache));
       if (need.length > 0) {
         const rendered = await Promise.all(
           need.map((i) => doc.getPage(i).then((p) => [i, p] as [number, FlipbookPage])),
         );
         addPages(rendered);
+        for (const [, page] of rendered) prefetchPageImage(page.url);
       }
       for (let i = start + count; i < Math.min(start + count + PREFETCH_AHEAD, numPages); i++) {
-        if (!(i in pageCache)) {
-          doc
-            .getPage(i)
-            .then((p) => addPages([[i, p]]))
-            .catch(() => {});
+        if (i in pageCache) {
+          prefetchPageImage(pageCache[i]!.url);
+          continue;
         }
+        doc
+          .getPage(i)
+          .then((p) => {
+            addPages([[i, p]]);
+            prefetchPageImage(p.url);
+          })
+          .catch(() => {});
       }
     },
     [doc, numPages, pageCache, addPages],
   );
+
+  // Default to 2-up on desktop, 1-up on mobile — until the user toggles.
+  useEffect(() => {
+    if (modeLocked) return;
+    function syncDefault() {
+      const next: ViewMode = window.innerWidth >= 768 ? 2 : 1;
+      setViewMode(next);
+      void ensurePagesReady(safeIndex, next);
+    }
+    window.addEventListener("resize", syncDefault);
+    return () => window.removeEventListener("resize", syncDefault);
+  }, [modeLocked, ensurePagesReady, safeIndex]);
 
   const goTo = useCallback(
     async (next: number, dir: "next" | "prev") => {
@@ -178,6 +214,7 @@ export function CatalogFlipbookModal({
       if (clamped === safeIndex) return;
       setTurning(true);
       await ensurePagesReady(clamped, perView);
+      setPan({ x: 0, y: 0 });
       setSlideDir(dir);
       setSlideKey((k) => k + 1);
       setIndex(clamped);
@@ -206,10 +243,9 @@ export function CatalogFlipbookModal({
   function setMode(mode: ViewMode) {
     setModeLocked(true);
     setViewMode(mode);
-    // Align to even index for tidy 2-up spreads when switching up.
-    if (mode === 2) {
-      setIndex((i) => Math.floor(i / 2) * 2);
-    }
+    const nextIndex = mode === 2 ? Math.floor(index / 2) * 2 : index;
+    if (nextIndex !== index) setIndex(nextIndex);
+    void ensurePagesReady(nextIndex, mode);
   }
 
   useEffect(() => {
@@ -219,6 +255,15 @@ export function CatalogFlipbookModal({
       if (e.key === "Escape") onClose();
       if (e.key === "ArrowRight") goNext();
       if (e.key === "ArrowLeft") goPrev();
+      if (e.key === "+" || e.key === "=") {
+        e.preventDefault();
+        setZoom((z) => nextZoom(z, 1));
+      }
+      if (e.key === "-" || e.key === "_") {
+        e.preventDefault();
+        setZoom((z) => nextZoom(z, -1));
+      }
+      if (e.key === "0") setZoom(ZOOM_MIN);
     }
     window.addEventListener("keydown", onKey);
     return () => {
@@ -229,6 +274,10 @@ export function CatalogFlipbookModal({
 
   const touchStartX = useRef<number | null>(null);
   function onTouchStart(e: React.TouchEvent) {
+    if (zoom > 100 || e.touches.length > 1) {
+      touchStartX.current = null;
+      return;
+    }
     touchStartX.current = e.touches[0]?.clientX ?? null;
   }
   function onTouchEnd(e: React.TouchEvent) {
@@ -238,6 +287,65 @@ export function CatalogFlipbookModal({
     if (Math.abs(dx) < 40) return;
     if (dx < 0) goNext();
     else goPrev();
+  }
+
+  function zoomBy(dir: 1 | -1) {
+    setZoom((z) => {
+      const next = nextZoom(z, dir);
+      if (next === ZOOM_MIN) setPan({ x: 0, y: 0 });
+      return next;
+    });
+  }
+
+  function onPageClick() {
+    if (dragRef.current?.moved) return;
+    setZoom((z) => {
+      if (z >= ZOOM_MAX) {
+        setPan({ x: 0, y: 0 });
+        return ZOOM_MIN;
+      }
+      return nextZoom(z, 1);
+    });
+  }
+
+  function onPagePointerDown(e: React.PointerEvent) {
+    if (e.button !== 0) return;
+    dragRef.current = {
+      pointerId: e.pointerId,
+      startX: e.clientX,
+      startY: e.clientY,
+      originX: pan.x,
+      originY: pan.y,
+      moved: false,
+    };
+    (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
+  }
+
+  function onPagePointerMove(e: React.PointerEvent) {
+    const drag = dragRef.current;
+    if (!drag || drag.pointerId !== e.pointerId) return;
+    const dx = e.clientX - drag.startX;
+    const dy = e.clientY - drag.startY;
+    if (!drag.moved && Math.hypot(dx, dy) < 6) return;
+    drag.moved = true;
+    if (zoom <= 100) return;
+    setDragging(true);
+    setPan({ x: drag.originX + dx, y: drag.originY + dy });
+  }
+
+  function onPagePointerUp(e: React.PointerEvent) {
+    const drag = dragRef.current;
+    if (!drag || drag.pointerId !== e.pointerId) return;
+    const wasDrag = drag.moved;
+    dragRef.current = null;
+    setDragging(false);
+    if (!wasDrag) onPageClick();
+  }
+
+  function onPageWheel(e: React.WheelEvent) {
+    if (!e.ctrlKey && Math.abs(e.deltaY) < 40) return;
+    e.preventDefault();
+    zoomBy(e.deltaY < 0 ? 1 : -1);
   }
 
   const aspect = useMemo(() => {
@@ -340,7 +448,7 @@ export function CatalogFlipbookModal({
       </div>
 
       <div
-        className="relative flex flex-1 items-center justify-center overflow-hidden px-3 pb-4 sm:px-8"
+        className="relative flex min-h-0 flex-1 items-center justify-center overflow-hidden px-10 pb-2 sm:px-14"
         onTouchStart={onTouchStart}
         onTouchEnd={onTouchEnd}
       >
@@ -371,17 +479,36 @@ export function CatalogFlipbookModal({
 
             <div
               key={slideKey}
-              className={`relative mx-auto w-full overflow-hidden ${slideAnimClass}`}
+              className={`relative mx-auto h-full max-h-full overflow-hidden ${slideAnimClass}`}
               style={{
-                maxWidth: perView === 2 ? "min(92vw, 1000px)" : "min(92vw, 560px)",
-                maxHeight: "80vh",
+                width: "auto",
+                maxWidth: perView === 2 ? "min(100%, 1200px)" : "min(100%, calc(100vw - 7rem))",
                 aspectRatio: aspect,
               }}
+              onWheel={onPageWheel}
             >
-              <div className="absolute inset-0 flex gap-0.5">
-                {visibleIndices.map((pageIndex) => (
-                  <PageFace key={pageIndex} page={pageCache[pageIndex]} />
+              <div
+                className="absolute inset-0 flex origin-center gap-0.5 will-change-transform"
+                style={{
+                  transform: `translate(${pan.x}px, ${pan.y}px) scale(${zoom / 100})`,
+                  cursor: dragging ? "grabbing" : zoom > 100 ? "grab" : "zoom-in",
+                  transition: dragging ? "none" : "transform 180ms ease-out",
+                }}
+                onPointerDown={onPagePointerDown}
+                onPointerMove={onPagePointerMove}
+                onPointerUp={onPagePointerUp}
+                onPointerCancel={onPagePointerUp}
+              >
+                {visibleIndices.map((pageIndex, i) => (
+                  <PageFace
+                    key={pageIndex}
+                    page={pageCache[pageIndex]}
+                    priority={i === 0}
+                  />
                 ))}
+              </div>
+              <div className="pointer-events-none absolute bottom-2 left-2 z-10 rounded-full bg-navy/70 px-2.5 py-1 text-xs font-semibold tabular-nums text-white shadow-sm">
+                {zoom}%
               </div>
             </div>
 
@@ -427,6 +554,33 @@ export function CatalogFlipbookModal({
             </button>
           </div>
           <p className="text-center text-xs text-white/60 sm:text-sm">{rangeLabel}</p>
+          <div
+            className="inline-flex items-center rounded-full bg-white/10 p-0.5"
+            role="group"
+            aria-label="ซูมหน้า"
+          >
+            <button
+              type="button"
+              onClick={() => zoomBy(-1)}
+              disabled={zoom <= ZOOM_MIN}
+              aria-label="ซูมออก"
+              className="rounded-full p-1.5 text-white/80 transition hover:bg-white/10 disabled:opacity-30"
+            >
+              <Minus className="h-3.5 w-3.5" />
+            </button>
+            <span className="min-w-10 px-1 text-center text-xs font-semibold tabular-nums text-white">
+              {zoom}%
+            </span>
+            <button
+              type="button"
+              onClick={() => zoomBy(1)}
+              disabled={zoom >= ZOOM_MAX}
+              aria-label="ซูมเข้า"
+              className="rounded-full p-1.5 text-white/80 transition hover:bg-white/10 disabled:opacity-30"
+            >
+              <Plus className="h-3.5 w-3.5" />
+            </button>
+          </div>
         </div>
       ) : null}
     </div>,
@@ -434,18 +588,38 @@ export function CatalogFlipbookModal({
   );
 }
 
-function PageFace({ page }: { page: FlipbookPage | undefined }) {
+function PageFace({
+  page,
+  priority = false,
+}: {
+  page: FlipbookPage | undefined;
+  priority?: boolean;
+}) {
+  const [loaded, setLoaded] = useState(false);
+
   if (!page) {
     return (
       <div className="h-full w-full flex-1 animate-pulse rounded-sm bg-white/10" />
     );
   }
+
   return (
-    // eslint-disable-next-line @next/next/no-img-element
-    <img
-      src={page.url}
-      alt=""
-      className="h-full w-full flex-1 rounded-sm bg-white object-contain shadow-2xl"
-    />
+    <div className="relative h-full w-full flex-1">
+      {loaded ? null : (
+        <div className="absolute inset-0 animate-pulse rounded-sm bg-white/10" />
+      )}
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src={page.url}
+        alt=""
+        fetchPriority={priority ? "high" : "low"}
+        decoding="async"
+        onLoad={() => setLoaded(true)}
+        draggable={false}
+        className={`pointer-events-none h-full w-full select-none rounded-sm bg-white object-contain shadow-2xl transition-opacity duration-200 ${
+          loaded ? "opacity-100" : "opacity-0"
+        }`}
+      />
+    </div>
   );
 }

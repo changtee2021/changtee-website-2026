@@ -6,9 +6,12 @@ import { createLead } from "@/lib/leads/store";
 import { sendQuoteEmails } from "@/lib/email/mailer";
 import type { QuoteLead } from "@/lib/leads/types";
 import { verifyTurnstileToken } from "@/lib/security/turnstile";
+import { bytesMatchDeclaredType } from "@/lib/security/file-magic";
+import { toStorageRef } from "@/lib/security/lead-media";
+import { getRequestIp, isRateLimited } from "@/lib/security/rate-limit";
 import {
   canUseSupabaseStorage,
-  uploadPublicFile,
+  uploadPrivateFile,
 } from "@/lib/storage/upload";
 
 export const runtime = "nodejs";
@@ -21,22 +24,6 @@ const ALLOWED_UPLOAD_TYPES: Record<string, ".jpg" | ".png" | ".webp"> = {
 };
 const RATE_LIMIT_WINDOW_MS = 10 * 60 * 1000;
 const RATE_LIMIT_MAX_REQUESTS = 10;
-const requestTimestamps = new Map<string, number[]>();
-
-function getRequestIp(request: Request) {
-  return request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
-}
-
-function isRateLimited(request: Request) {
-  const now = Date.now();
-  const ip = getRequestIp(request);
-  const timestamps = (requestTimestamps.get(ip) ?? []).filter(
-    (timestamp) => timestamp > now - RATE_LIMIT_WINDOW_MS,
-  );
-  timestamps.push(now);
-  requestTimestamps.set(ip, timestamps);
-  return timestamps.length > RATE_LIMIT_MAX_REQUESTS;
-}
 
 function notificationFailure() {
   return process.env.NODE_ENV === "production"
@@ -61,15 +48,18 @@ async function saveUpload(file: File | null) {
       .replace(/[^\w\-ก-๙]+/g, "_")
       .replace(/^_+|_+$/g, "") || "upload";
   const buffer = Buffer.from(await file.arrayBuffer());
+  if (!bytesMatchDeclaredType(buffer, file.type)) {
+    throw new Error("UPLOAD_TYPE_NOT_ALLOWED");
+  }
 
   if (canUseSupabaseStorage()) {
-    const uploaded = await uploadPublicFile({
+    const uploaded = await uploadPrivateFile({
       folder: "leads",
       fileName: `${baseName}${extension}`,
       bytes: buffer,
       contentType: file.type,
     });
-    return { name: file.name, url: uploaded.url };
+    return { name: file.name, url: toStorageRef(uploaded.path) };
   }
 
   // Local filesystem only (dev). Production must use Supabase Storage.
@@ -88,7 +78,11 @@ async function saveUpload(file: File | null) {
 }
 
 export async function POST(request: Request) {
-  if (isRateLimited(request)) {
+  if (await isRateLimited(request, {
+    scope: "leads",
+    windowMs: RATE_LIMIT_WINDOW_MS,
+    max: RATE_LIMIT_MAX_REQUESTS,
+  })) {
     return NextResponse.json(
       { error: "ส่งคำขอบ่อยเกินไป กรุณาลองใหม่อีกครั้งในภายหลัง" },
       { status: 429 },
@@ -224,7 +218,7 @@ export async function POST(request: Request) {
       phone: data.phone,
       contactType: data.companyName?.trim() ? "นิติบุคคล" : "ไม่ระบุ",
       installAddress: "-",
-      email: data.email || "no-email@changtee.local",
+      email: data.email || "",
       productType: data.productInterest || data.inquiryType || "อื่นๆ",
       referralSource: "เว็บไซต์",
       note: noteParts.length ? noteParts.join("\n\n") : null,

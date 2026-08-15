@@ -52,7 +52,65 @@ export function ProductCompareSection({
         </h2>
         <p className="mt-2 max-w-2xl text-sm text-muted">{table.subtitle}</p>
 
-        <div className="mt-6 -mx-1 overflow-x-auto px-1">
+        <div className="mt-6 space-y-3 md:hidden">
+          {table.columns.map((col) => {
+            const active =
+              col.productSlug != null && col.productSlug === currentProductSlug;
+            const href = col.productSlug
+              ? `/products/${categorySlug}/${col.productSlug}`
+              : null;
+            const title =
+              href && !active ? (
+                <Link
+                  href={href}
+                  className="font-semibold text-navy hover:text-brand-red"
+                >
+                  {col.name}
+                </Link>
+              ) : (
+                <span className="font-semibold text-navy">
+                  {col.name}
+                  {active ? (
+                    <span className="ml-2 rounded-full bg-navy px-2 py-0.5 text-[10px] font-medium text-white">
+                      รุ่นนี้
+                    </span>
+                  ) : null}
+                </span>
+              );
+            return (
+              <article
+                key={col.id}
+                className={`rounded-2xl border border-line p-4 ${
+                  active ? "bg-paper/80" : "bg-white"
+                }`}
+              >
+                <h3 className="text-base">{title}</h3>
+                <dl className="mt-3 space-y-2 text-sm">
+                  <div>
+                    <dt className="text-xs font-semibold uppercase tracking-wider text-muted">
+                      คุมแสง
+                    </dt>
+                    <dd className="mt-0.5 text-ink/80">{col.light}</dd>
+                  </div>
+                  <div>
+                    <dt className="text-xs font-semibold uppercase tracking-wider text-muted">
+                      เหมาะกับ
+                    </dt>
+                    <dd className="mt-0.5 text-ink/80">{col.bestFor}</dd>
+                  </div>
+                  <div>
+                    <dt className="text-xs font-semibold uppercase tracking-wider text-muted">
+                      จุดเด่น
+                    </dt>
+                    <dd className="mt-0.5 text-ink/80">{col.note}</dd>
+                  </div>
+                </dl>
+              </article>
+            );
+          })}
+        </div>
+
+        <div className="mt-6 hidden overflow-x-auto md:block">
           <table className="w-full min-w-[640px] border-collapse text-left text-sm">
             <thead>
               <tr className="border-b border-line text-xs uppercase tracking-wider text-muted">

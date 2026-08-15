@@ -5,12 +5,24 @@ export function turnstileConfigured(): boolean {
   );
 }
 
-/** Verify Turnstile when keys exist; skip (allow) when not configured. */
+function isProductionRuntime() {
+  return process.env.NODE_ENV === "production" || Boolean(process.env.VERCEL);
+}
+
+/** Verify Turnstile when keys exist. Production requires keys; local may skip. */
 export async function verifyTurnstileToken(
   token: string | undefined | null,
   ip?: string,
 ): Promise<{ ok: true } | { ok: false; error: string }> {
-  if (!turnstileConfigured()) return { ok: true };
+  if (!turnstileConfigured()) {
+    if (isProductionRuntime()) {
+      return {
+        ok: false,
+        error: "ระบบป้องกันสแปมยังไม่พร้อม กรุณาลองใหม่หรือติดต่อทาง LINE",
+      };
+    }
+    return { ok: true };
+  }
 
   const secret = process.env.TURNSTILE_SECRET_KEY!.trim();
   if (!token?.trim()) {

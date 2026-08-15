@@ -298,14 +298,15 @@ export function ProductDetailView({
                   rel="noreferrer"
                   aria-label="ปรึกษา LINE"
                   title="ปรึกษา LINE"
-                  className="inline-flex size-11 shrink-0 items-center justify-center rounded-full bg-[#06C755] shadow-sm transition hover:brightness-105"
+                  className="inline-flex size-11 shrink-0 items-center justify-center rounded-xl bg-[#06C755] shadow-sm transition hover:brightness-105"
                 >
                   <Image
                     src="/images/social/line.svg"
                     alt=""
                     width={22}
                     height={22}
-                    className="size-[22px]"
+                    className="size-[22px] brightness-0 invert"
+                    unoptimized
                   />
                 </a>
               </div>

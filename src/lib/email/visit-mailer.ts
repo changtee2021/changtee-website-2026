@@ -1,6 +1,7 @@
 import { escapeHtml, fieldRow, getTransport } from "@/lib/email/mailer";
 import { siteConfig } from "@/lib/site-config";
 import {
+  formatVisitSites,
   VISIT_SESSION_LABELS,
   type FactoryVisitBooking,
 } from "@/lib/visits/types";
@@ -26,7 +27,12 @@ function buildAdminVisitHtml(visit: FactoryVisitBooking) {
         ${fieldRow("วันที่ต้องการเข้าเยี่ยมชม", formatVisitDate(visit.visitDate))}
         ${fieldRow("รอบ", VISIT_SESSION_LABELS[visit.session])}
         ${fieldRow("ชื่อผู้ติดต่อ", visit.fullName)}
+        ${fieldRow("ตำแหน่ง", visit.contactPosition)}
         ${fieldRow("ชื่อบริษัท/องค์กร", visit.businessName)}
+        ${fieldRow("เลขนิติบุคคล / บัตรประชาชน", visit.taxId)}
+        ${fieldRow("สถานที่ที่ต้องการเยี่ยมชม", formatVisitSites(visit.visitSites))}
+        ${fieldRow("Company Profile", visit.companyProfileName)}
+        ${fieldRow("นามบัตร", visit.businessCardName)}
         ${fieldRow("เบอร์โทรศัพท์", visit.phone)}
         ${fieldRow("LINE ID", visit.lineId)}
         ${fieldRow("E-mail", visit.email)}
@@ -52,6 +58,7 @@ function buildCustomerVisitHtml(visit: FactoryVisitBooking) {
       <p>เราได้รับคำขอนัดเยี่ยมชมโรงงานของท่านแล้ว</p>
       <p><strong>วันที่:</strong> ${escapeHtml(formatVisitDate(visit.visitDate))}<br/>
       <strong>รอบ:</strong> ${escapeHtml(VISIT_SESSION_LABELS[visit.session])}<br/>
+      <strong>สถานที่:</strong> ${escapeHtml(formatVisitSites(visit.visitSites))}<br/>
       <strong>จำนวนผู้เข้าเยี่ยมชม:</strong> ${visit.visitorCount} คน</p>
       <p>ทีมงานจะติดต่อกลับเพื่อ<strong>ยืนยันวันเวลา</strong>ผ่านช่องทางที่ท่านให้ไว้ภายใน 1 วันทำการ</p>
       <p>หากต้องการพูดคุยด่วน ทัก LINE ได้ที่

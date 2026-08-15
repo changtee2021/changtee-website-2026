@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback, useState, type HTMLAttributes } from "react";
 import { useRouter } from "next/navigation";
 import { PdpaConsentField } from "@/components/forms/PdpaConsentField";
 import {
@@ -98,11 +98,15 @@ export function CompanyContactForm() {
       </label>
       <PdpaConsentField />
       <TurnstileField onToken={onTurnstile} />
-      {error ? <p className="text-sm text-brand-red">{error}</p> : null}
+      {error ? (
+        <p className="text-sm text-brand-red" role="alert" aria-live="polite">
+          {error}
+        </p>
+      ) : null}
       <button
         type="submit"
         disabled={pending}
-        className="rounded-full bg-brand-red px-6 py-3 text-sm font-semibold text-white transition hover:bg-brand-red-soft disabled:opacity-60"
+        className="w-full rounded-full bg-brand-red px-6 py-3 text-sm font-semibold text-white transition hover:bg-brand-red-soft disabled:opacity-60 sm:w-auto"
       >
         {pending ? "กำลังส่ง..." : "ส่งข้อความถึงเรา"}
       </button>
@@ -116,6 +120,15 @@ export function CompanyContactForm() {
   );
 }
 
+const FIELD_HINTS: Record<string, { autoComplete?: string; inputMode?: HTMLAttributes<HTMLInputElement>["inputMode"] }> = {
+  companyName: { autoComplete: "organization" },
+  fullName: { autoComplete: "name" },
+  jobTitle: { autoComplete: "organization-title" },
+  phone: { autoComplete: "tel", inputMode: "tel" },
+  email: { autoComplete: "email" },
+  lineId: { autoComplete: "off" },
+};
+
 function Field({
   label,
   name,
@@ -127,13 +140,17 @@ function Field({
   required?: boolean;
   type?: string;
 }) {
+  const hints = FIELD_HINTS[name] || {};
+  const inputType = name === "phone" ? "tel" : type;
   return (
     <label className="block">
       <span className="mb-1 block text-sm font-medium text-ink">{label}</span>
       <input
         name={name}
-        type={type}
+        type={inputType}
         required={required}
+        autoComplete={hints.autoComplete}
+        inputMode={hints.inputMode}
         className="w-full rounded-xl border border-line bg-white px-3 py-2.5 text-sm outline-none focus:border-navy"
       />
     </label>

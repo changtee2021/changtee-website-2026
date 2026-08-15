@@ -26,6 +26,9 @@ export type JobPosting = {
   salaryRange: string | null;
   headcount: number;
   summary: string;
+  /** Card cover photo of someone doing the job */
+  coverImage: string;
+  coverAlt: string;
   /** Plain text, blank-line separated paragraphs (หน้าที่ความรับผิดชอบ) */
   description: string;
   /** Bullet lines (คุณสมบัติผู้สมัคร) */
@@ -45,6 +48,8 @@ export function emptyJobPosting(): JobPosting {
     salaryRange: "",
     headcount: 1,
     summary: "",
+    coverImage: "",
+    coverAlt: "",
     description: "",
     requirements: [],
     status: "draft",
@@ -63,6 +68,8 @@ export const DEMO_CAREERS: JobPosting[] = [
     salaryRange: "400 - 700 บาท/วัน (ตามฝีมือ + ค่าตัดเย็บ)",
     headcount: 3,
     summary: "เย็บผ้าม่าน ม่านจีบ ม่านลอน ตามแบบและขนาดที่กำหนด",
+    coverImage: "/images/careers/sew.png",
+    coverAlt: "ช่างเย็บผ้าม่านกำลังเย็บผ้าบนจักรอุตสาหกรรมในโรงงานช่างตี๋",
     description:
       "รับผิดชอบงานเย็บผ้าม่านตามใบสั่งงาน ตรวจสอบคุณภาพก่อนส่งมอบ\n\nทำงานร่วมกับทีมตัดผ้าและทีมติดตั้งเพื่อให้งานเสร็จตามกำหนดเวลา",
     requirements: [
@@ -83,6 +90,8 @@ export const DEMO_CAREERS: JobPosting[] = [
     salaryRange: "12,000 - 15,000 บาท/เดือน",
     headcount: 2,
     summary: "รับ-จ่ายสินค้า จัดเก็บผ้าและวัสดุ เตรียมของขึ้นรถส่งติดตั้ง",
+    coverImage: "/images/careers/warehouse.png",
+    coverAlt: "พนักงานคลังสินค้ากำลังจัดเก็บม้วนผ้าในโกดังโรงงานช่างตี๋",
     description:
       "ดูแลการรับเข้า-เบิกจ่ายผ้าม่านและวัสดุ จัดเรียงสต๊อกให้เป็นระบบ ตรวจนับสินค้าประจำงวด\n\nประสานงานกับทีมขายและทีมติดตั้งเรื่องการจัดของขึ้นรถ",
     requirements: [
@@ -103,6 +112,8 @@ export const DEMO_CAREERS: JobPosting[] = [
     salaryRange: "ตามตกลง + คอมมิชชั่น",
     headcount: 2,
     summary: "ให้คำปรึกษาลูกค้า วัดหน้างาน ปิดการขาย ดูแลลูกค้าหลังการขาย",
+    coverImage: "",
+    coverAlt: "",
     description:
       "ต้อนรับและให้คำปรึกษาลูกค้าที่โชว์รูม/ทางโทรศัพท์/LINE ออกวัดหน้างานตามนัด เสนอราคาและปิดการขาย\n\nติดตามงานติดตั้งและดูแลลูกค้าหลังการขายให้พึงพอใจ",
     requirements: [
@@ -115,3 +126,26 @@ export const DEMO_CAREERS: JobPosting[] = [
     updatedAt: "2026-08-10T00:00:00.000Z",
   },
 ];
+
+export function normalizeJobPosting(
+  item: Partial<JobPosting> & { id: string },
+): JobPosting {
+  const seed = DEMO_CAREERS.find((job) => job.id === item.id);
+  return {
+    id: item.id,
+    title: item.title ?? seed?.title ?? "",
+    department: item.department ?? seed?.department ?? "",
+    location: item.location ?? seed?.location ?? "",
+    employmentType: item.employmentType ?? seed?.employmentType ?? EMPLOYMENT_TYPES[0],
+    salaryRange: item.salaryRange ?? seed?.salaryRange ?? null,
+    headcount: item.headcount ?? seed?.headcount ?? 1,
+    summary: item.summary ?? seed?.summary ?? "",
+    coverImage: item.coverImage || seed?.coverImage || "",
+    coverAlt: item.coverAlt || seed?.coverAlt || item.title || seed?.title || "",
+    description: item.description ?? seed?.description ?? "",
+    requirements: item.requirements ?? seed?.requirements ?? [],
+    status: item.status ?? seed?.status ?? "draft",
+    publishedAt: item.publishedAt ?? seed?.publishedAt ?? null,
+    updatedAt: item.updatedAt ?? seed?.updatedAt ?? new Date().toISOString(),
+  };
+}

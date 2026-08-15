@@ -45,8 +45,8 @@ function inferPageKey(pathname: string): string {
   if (pathname === "/blog") return "blogIndex";
   if (pathname.startsWith("/portfolio/")) return "portfolioItem";
   if (pathname === "/portfolio") return "portfolioIndex";
-  if (pathname === "/about") return "about";
-  if (pathname === "/contact") return "contact";
+  if (pathname === "/about" || pathname === "/contact") return "contact";
+  if (pathname.startsWith("/learn")) return "home";
   if (pathname === "/quote") return "quote";
   return "home";
 }

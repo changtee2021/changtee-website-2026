@@ -28,7 +28,7 @@ export function PortfolioMobileLinks({ onNavigate }: { onNavigate: () => void })
           key={`${item.label}-${item.href}`}
           href={item.href}
           onClick={onNavigate}
-          className="block py-2 text-sm text-white/90 hover:text-white"
+          className="flex min-h-11 items-center py-2 text-sm text-white/90 hover:text-white"
         >
           {item.label}
         </Link>

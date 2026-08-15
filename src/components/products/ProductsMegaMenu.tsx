@@ -54,6 +54,9 @@ export function ProductsMegaPanel({ onNavigate }: { onNavigate?: () => void }) {
               className="rounded-md px-3 py-2 hover:bg-paper"
             >
               <div className="text-sm font-semibold text-navy">{item.name}</div>
+              {item.nameEn ? (
+                <div className="text-[11px] text-muted">{item.nameEn}</div>
+              ) : null}
               <div className="line-clamp-1 text-xs text-muted">{item.summary}</div>
             </Link>
           ))}
@@ -75,29 +78,29 @@ export function ProductsMegaPanel({ onNavigate }: { onNavigate?: () => void }) {
 /** Compact list for mobile accordion */
 export function ProductsMobileLinks({ onNavigate }: { onNavigate: () => void }) {
   return (
-    <div className="space-y-3 pb-3 pl-2">
+    <div className="pb-3 pl-2">
       <Link
         href="/products"
-        className="block rounded-md px-2 py-2 text-sm font-medium text-white/90 hover:bg-white/10"
+        className="flex min-h-11 items-center rounded-md px-2 py-2 text-sm font-medium text-white/90 hover:bg-white/10"
         onClick={onNavigate}
       >
         ดูทั้งหมด (7 กลุ่ม)
       </Link>
       {PRODUCT_PILLARS.map((p) => (
-        <div key={p.id}>
+        <div key={p.id} className="border-t border-white/25">
           <Link
             href={`/products#pillar-${p.id}`}
-            className="block px-2 py-1.5 text-xs font-semibold uppercase tracking-wide text-white/60"
+            className="block px-2 py-2 text-xs font-semibold tracking-wide text-brand-red"
             onClick={onNavigate}
           >
             {p.code} {p.name}
           </Link>
-          <div className="space-y-0.5">
+          <div className="space-y-0.5 pb-2">
             {hubItemsForPillar(p.id).map((item) => (
               <Link
                 key={item.href}
                 href={item.href}
-                className="block rounded-md px-2 py-1.5 text-sm text-white/85 hover:bg-white/10"
+                className="flex min-h-11 items-center rounded-md px-2 py-2 text-sm text-white/85 hover:bg-white/10"
                 onClick={onNavigate}
               >
                 {item.name}

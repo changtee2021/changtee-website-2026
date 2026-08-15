@@ -2,7 +2,7 @@
 
 export const aboutHero = {
   eyebrow: "เกี่ยวกับเรา",
-  title: "ช่างม่านที่เข้าใจคุณ",
+  title: "A curtain maker who understands you",
   lead:
     "เราเชื่อว่าผ้าม่านไม่ใช่แค่ของตกแต่ง แต่คือองค์ประกอบสำคัญที่สะท้อนตัวตนและไลฟ์สไตล์ของเจ้าของบ้าน",
   body:

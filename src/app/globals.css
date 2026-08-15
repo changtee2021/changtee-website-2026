@@ -9,7 +9,7 @@
   --red-soft: #e11d3a;
   --paper: #f5f7fa;
   --ink: #142033;
-  --muted: #5b677a;
+  --muted: #3f4d63;
   --line: #d7dee8;
   --background: #ffffff;
   --foreground: var(--ink);
@@ -53,12 +53,48 @@
   --radius-panel: 1.75rem;
   --font-sans: var(--font-body), "IBM Plex Sans Thai", sans-serif;
   --font-display: var(--font-display-family), var(--font-body), "Bai Jamjuree", "IBM Plex Sans Thai", sans-serif;
+  --font-modern: var(--font-modern-family), ui-sans-serif, sans-serif;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-sans);
+}
+
+/* iOS Safari zooms the page when focused inputs are under 16px */
+@media (max-width: 1023px) {
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="hidden"]):not([type="file"]):not([type="button"]):not([type="submit"]):not([type="reset"]),
+  select,
+  textarea {
+    font-size: 16px;
+  }
+}
+
+:focus-visible {
+  outline: 2px solid var(--navy);
+  outline-offset: 2px;
+}
+
+.bg-navy :focus-visible,
+.bg-navy-solid :focus-visible {
+  outline-color: #ffffff;
+}
+
+@media print {
+  header,
+  footer,
+  [data-print-hide] {
+    display: none !important;
+  }
+
+  main {
+    overflow: visible !important;
+  }
+
+  a[href]::after {
+    content: none !important;
+  }
 }
 
 ::selection {
@@ -106,6 +142,23 @@ body {
   animation: logo-marquee-right 105s linear infinite;
 }
 
+@keyframes cover-marquee-up {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(-50%);
+  }
+}
+
+.animate-cover-marquee-up {
+  animation: cover-marquee-up 70s linear infinite;
+}
+
+.animate-cover-marquee-up:hover {
+  animation-play-state: paused;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .animate-home-fade-up {
     animation: none;
@@ -116,7 +169,8 @@ body {
   }
 
   .animate-logo-marquee-left,
-  .animate-logo-marquee-right {
+  .animate-logo-marquee-right,
+  .animate-cover-marquee-up {
     animation: none;
   }
 }
@@ -158,6 +212,25 @@ body {
 
 .animate-catalog-slide-prev {
   animation: catalog-slide-prev 320ms ease-out;
+}
+
+@keyframes header-slide-down {
+  from {
+    transform: translateY(-100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+.animate-header-slide-down {
+  animation: header-slide-down 420ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-header-slide-down {
+    animation: none;
+  }
 }
 
 /* Keep filled navy surfaces as brand navy (text-navy stays light for headings) */

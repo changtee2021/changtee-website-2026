@@ -62,18 +62,18 @@ export const PAGE_TREE: EditorPageNode[] = [
       {
         id: "about",
         label: "เกี่ยวกับเรา",
-        livePath: "/about",
+        livePath: "/contact",
         status: "editable",
         kind: "single",
         pageKey: "about",
         defs: ABOUT_SECTION_DEFS,
         defaults: ABOUT_SECTION_DEFAULTS,
         uploadFolder: "about-sections",
-        revalidate: ["/about"],
+        revalidate: ["/contact", "/about"],
       },
       {
         id: "contact",
-        label: "ติดต่อเรา",
+        label: "เกี่ยวกับเรา · ติดต่อ",
         livePath: "/contact",
         status: "editable",
         kind: "single",
@@ -140,6 +140,13 @@ export const PAGE_TREE: EditorPageNode[] = [
     status: "locked",
     kind: "single",
     children: [
+      {
+        id: "learn",
+        label: "ห้องเรียนรู้",
+        livePath: "/learn",
+        status: "locked",
+        kind: "single",
+      },
       {
         id: "blog.index",
         label: "หน้ารวมบทความ",

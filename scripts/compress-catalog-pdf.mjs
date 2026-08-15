@@ -13,8 +13,9 @@
  * copy with the compressed version.
  *
  * Usage:
- *   node scripts/compress-catalog-pdf.mjs <name-without-ext> [dpi] [quality]
+ *   node scripts/compress-catalog-pdf.mjs <name-without-ext> [dpi] [quality] [folder]
  *   node scripts/compress-catalog-pdf.mjs wooden-blinds 90 62
+ *   node scripts/compress-catalog-pdf.mjs company-profile-2026 90 62 brochure
  */
 import { createCanvas } from "@napi-rs/canvas";
 import { PDFDocument } from "pdf-lib";
@@ -29,21 +30,24 @@ import {
 import path from "node:path";
 import { pathToFileURL } from "node:url";
 
-const [, , nameArg, dpiArg, qualityArg] = process.argv;
+const [, , nameArg, dpiArg, qualityArg, folderArg] = process.argv;
 if (!nameArg) {
-  console.error("Usage: node scripts/compress-catalog-pdf.mjs <name-without-ext> [dpi] [quality]");
+  console.error(
+    "Usage: node scripts/compress-catalog-pdf.mjs <name-without-ext> [dpi] [quality] [folder]",
+  );
   process.exit(1);
 }
 
 const dpi = Number(dpiArg) || 90;
 const quality = Number(qualityArg) || 62;
+const publicFolder = folderArg || "catalog";
 
 const root = process.cwd();
-const publicPath = path.join(root, "public", "catalog", `${nameArg}.pdf`);
+const publicPath = path.join(root, "public", publicFolder, `${nameArg}.pdf`);
 const originalsDir = path.join(root, "public", "_pdf-originals");
 const originalPath = path.join(originalsDir, `${nameArg}.pdf`);
-const pagesDir = path.join(root, "public", "catalog", nameArg, "pages");
-const manifestPath = path.join(root, "public", "catalog", nameArg, "manifest.json");
+const pagesDir = path.join(root, "public", publicFolder, nameArg, "pages");
+const manifestPath = path.join(root, "public", publicFolder, nameArg, "manifest.json");
 
 mkdirSync(originalsDir, { recursive: true });
 mkdirSync(pagesDir, { recursive: true });
@@ -108,7 +112,7 @@ for (let i = 1; i <= pdf.numPages; i++) {
   const fileName = `page-${String(i).padStart(3, "0")}.jpg`;
   writeFileSync(path.join(pagesDir, fileName), jpegBuffer);
   manifestPages.push({
-    file: `/catalog/${nameArg}/pages/${fileName}`,
+    file: `/${publicFolder}/${nameArg}/pages/${fileName}`,
     width: canvas.width,
     height: canvas.height,
   });
@@ -117,7 +121,7 @@ for (let i = 1; i <= pdf.numPages; i++) {
   process.stdout.write(`  page ${i}/${pdf.numPages}\r`);
 }
 
-await loadingTask.destroy();
+await loadingTask.destroy?.();
 
 const outBytes = await outDoc.save({ useObjectStreams: true });
 writeFileSync(publicPath, outBytes);

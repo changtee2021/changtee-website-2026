@@ -21,6 +21,7 @@ CREATE TABLE changtee_web.factory_visit_bookings (
   email TEXT,
   line_id TEXT,
   business_name TEXT,
+  contact_position TEXT,
   visit_date DATE NOT NULL,
   session changtee_web.visit_session NOT NULL,
   visitor_count INT NOT NULL DEFAULT 1,
