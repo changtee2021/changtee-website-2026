@@ -21,6 +21,7 @@ import {
   type PageSectionRecord,
   sectionStoreKey,
 } from "@/lib/cms/page-sections";
+import { DEMO_CAREERS, type JobPosting } from "@/lib/cms/careers-demo";
 import type { CmsCollection } from "@/lib/cms/cms-collections";
 
 type Listener = () => void;
@@ -374,4 +375,41 @@ export function useSectionValues(
     values: { ...defaults, ...(rec?.values ?? {}) },
     enabled: rec?.enabled ?? true,
   };
+}
+
+const careersStore = createDemoStore<JobPosting>(
+  "changtee.cms.careers.v1",
+  DEMO_CAREERS,
+  "careers",
+);
+
+export function useJobPostings(): JobPosting[] {
+  return useSyncExternalStore(
+    careersStore.subscribe,
+    careersStore.getSnapshot,
+    careersStore.getServerSnapshot,
+  );
+}
+
+export function setJobPostings(items: JobPosting[]) {
+  careersStore.write(items);
+}
+
+export function upsertJobPosting(item: JobPosting) {
+  const prev = careersStore.read();
+  const idx = prev.findIndex((p) => p.id === item.id);
+  if (idx === -1) setJobPostings([item, ...prev]);
+  else {
+    const copy = [...prev];
+    copy[idx] = item;
+    setJobPostings(copy);
+  }
+}
+
+export function removeJobPosting(id: string) {
+  setJobPostings(careersStore.read().filter((p) => p.id !== id));
+}
+
+export function getJobPostingById(id: string): JobPosting | undefined {
+  return careersStore.read().find((p) => p.id === id);
 }

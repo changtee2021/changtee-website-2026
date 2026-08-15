@@ -21,7 +21,7 @@ const PLACEHOLDER_SOCIAL_HOSTS = new Set([
   "youtube.com",
 ]);
 
-function isPlaceholderSocialUrl(href: string): boolean {
+export function isPlaceholderSocialUrl(href: string): boolean {
   try {
     const u = new URL(href);
     if (!PLACEHOLDER_SOCIAL_HOSTS.has(u.hostname)) return false;
@@ -137,6 +137,7 @@ export const siteConfig = {
     },
   ],
   brochureUrl: "/brochure/company-profile-2026.pdf",
+  brochureManifestUrl: "/brochure/company-profile-2026/manifest.json",
   brochureLabel: "Download Brochure ช่างตี๋ 2026",
 } as const;
 
@@ -153,7 +154,9 @@ export const navItems = [
   { href: "/", label: "หน้าแรก" },
   { href: "/products", label: "สินค้า/บริการ" },
   { href: "/portfolio", label: "ผลงาน" },
+  { href: "/learn", label: "ห้องเรียนรู้" },
   { href: "/blog", label: "บทความ" },
-  { href: "/about", label: "เกี่ยวกับเรา" },
+  { href: "/contact", label: "เกี่ยวกับเรา" },
+  { href: "/careers", label: "ร่วมงานกับเรา" },
   { href: "/quote", label: "ขอใบเสนอราคา" },
 ] as const;

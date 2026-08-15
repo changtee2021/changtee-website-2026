@@ -3,6 +3,7 @@ import { DEMO_BLOG } from "@/lib/cms/blog-demo";
 import { DEMO_PORTFOLIO } from "@/lib/cms/portfolio-demo";
 import { publishedBlog, publishedPortfolio } from "@/lib/cms/public-content";
 import { readCmsCollection } from "@/lib/cms/cms-server";
+import { LEARN_SHEETS } from "@/lib/learn";
 import { productCatalog } from "@/lib/product-catalog";
 import { siteConfig } from "@/lib/site-config";
 import type { BlogPost } from "@/lib/cms/blog-demo";
@@ -44,9 +45,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { path: "/products", changeFrequency: "weekly", priority: 0.8 },
     { path: "/portfolio", changeFrequency: "weekly", priority: 0.8 },
     { path: "/blog", changeFrequency: "weekly", priority: 0.8 },
+    { path: "/learn", changeFrequency: "weekly", priority: 0.8 },
     { path: "/quote", changeFrequency: "monthly", priority: 0.9 },
-    { path: "/about", changeFrequency: "monthly", priority: 0.7 },
     { path: "/contact", changeFrequency: "monthly", priority: 0.7 },
+    { path: "/visit-factory", changeFrequency: "monthly", priority: 0.6 },
+    { path: "/careers", changeFrequency: "weekly", priority: 0.6 },
     { path: "/privacy", changeFrequency: "yearly", priority: 0.3 },
     { path: "/cookies", changeFrequency: "yearly", priority: 0.3 },
     { path: "/terms", changeFrequency: "yearly", priority: 0.3 },
@@ -75,6 +78,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       entry(base, r.path, {
         changeFrequency: r.changeFrequency,
         priority: r.priority,
+      }),
+    ),
+    ...LEARN_SHEETS.map((sheet) =>
+      entry(base, `/learn/${sheet.slug}`, {
+        changeFrequency: "monthly",
+        priority: 0.7,
       }),
     ),
     ...productRoutes,

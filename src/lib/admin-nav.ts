@@ -1,5 +1,7 @@
 import type { LucideIcon } from "lucide-react";
 import {
+  Briefcase,
+  CalendarCheck,
   ClipboardList,
   FileText,
   Images,
@@ -10,6 +12,7 @@ import {
   ScrollText,
   Settings2,
   BookOpen,
+  UserSquare,
   Users,
 } from "lucide-react";
 import { isPageEditorEnabled } from "@/lib/editor/page-registry";
@@ -35,6 +38,14 @@ export const adminNavGroups: AdminNavGroup[] = [
     items: [
       { path: "", label: "ภาพรวม", icon: LayoutDashboard },
       { path: "/leads", label: "คำขอใบเสนอราคา", icon: ClipboardList },
+      { path: "/visits", label: "นัดเยี่ยมชมโรงงาน", icon: CalendarCheck },
+    ],
+  },
+  {
+    label: "งาน",
+    items: [
+      { path: "/careers", label: "ประกาศรับสมัครงาน", icon: Briefcase },
+      { path: "/careers/applications", label: "ใบสมัครงาน", icon: UserSquare },
     ],
   },
   {

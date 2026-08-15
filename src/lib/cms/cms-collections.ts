@@ -11,6 +11,7 @@ export const PUBLIC_CMS_COLLECTIONS = [
   "page-sections",
   "reviews",
   "catalogs",
+  "careers",
 ] as const;
 
 export const ADMIN_ONLY_CMS_COLLECTIONS = [

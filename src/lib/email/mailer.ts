@@ -1,9 +1,11 @@
 import nodemailer from "nodemailer";
 import type { QuoteLead } from "@/lib/leads/types";
 import { LEAD_STATUS_LABELS } from "@/lib/leads/types";
+import { isStorageRef, leadImageRefs, storagePathFromRef } from "@/lib/security/lead-media";
 import { siteConfig } from "@/lib/site-config";
+import { createSignedUploadUrl } from "@/lib/storage/upload";
 
-function getTransport() {
+export function getTransport() {
   const user = process.env.SMTP_USER || process.env.EMAIL_FROM || "changtee2021@gmail.com";
   const pass = process.env.SMTP_PASS || process.env.GMAIL_APP_PASSWORD;
   const host = process.env.SMTP_HOST || "smtp.gmail.com";
@@ -25,7 +27,7 @@ function getTransport() {
   };
 }
 
-function fieldRow(label: string, value?: string | null) {
+export function fieldRow(label: string, value?: string | null) {
   const v = value?.trim() ? value : "-";
   return `<tr>
     <td style="padding:8px 12px;border-bottom:1px solid #eee;color:#666;width:38%;vertical-align:top">${label}</td>
@@ -33,7 +35,7 @@ function fieldRow(label: string, value?: string | null) {
   </tr>`;
 }
 
-function escapeHtml(s: string) {
+export function escapeHtml(s: string) {
   return s
     .replaceAll("&", "&amp;")
     .replaceAll("<", "&lt;")
@@ -122,17 +124,32 @@ export function buildCustomerReplyHtml(lead: QuoteLead) {
 </body></html>`;
 }
 
+async function withSignedLeadImages(lead: QuoteLead): Promise<QuoteLead> {
+  const refs = leadImageRefs(lead);
+  if (!refs.length) return lead;
+  const urls = await Promise.all(
+    refs.map(async (ref) => {
+      if (!isStorageRef(ref)) return ref;
+      return (await createSignedUploadUrl(storagePathFromRef(ref), 60 * 60 * 24 * 7)) || "";
+    }),
+  );
+  const signed = urls.filter(Boolean);
+  return { ...lead, siteImageUrl: signed[0] ?? null, siteImageUrls: signed.length ? signed : null };
+}
+
 export async function sendQuoteEmails(lead: QuoteLead) {
   const { transporter, from, adminTo } = getTransport();
   const results: Array<{ channel: string; ok: boolean; error?: string }> = [];
+  const mailLead = await withSignedLeadImages(lead);
+  const customerEmail = lead.email.trim();
 
   try {
     await transporter.sendMail({
       from,
       to: adminTo,
-      replyTo: lead.email,
+      ...(customerEmail ? { replyTo: customerEmail } : {}),
       subject: `[ขอใบเสนอราคา] ${lead.contactName} · ${lead.productType}`,
-      html: buildAdminSummaryHtml(lead),
+      html: buildAdminSummaryHtml(mailLead),
     });
     results.push({ channel: "admin-email", ok: true });
   } catch (err) {
@@ -143,10 +160,12 @@ export async function sendQuoteEmails(lead: QuoteLead) {
     });
   }
 
+  if (!customerEmail) return results;
+
   try {
     await transporter.sendMail({
       from,
-      to: lead.email,
+      to: customerEmail,
       replyTo: adminTo,
       subject: "รับเรื่องขอใบเสนอราคา — ช่างตี๋ ผ้าม่าน",
       html: buildCustomerReplyHtml(lead),

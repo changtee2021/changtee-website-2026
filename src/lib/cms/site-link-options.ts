@@ -13,8 +13,10 @@ export const SITE_LINK_OPTIONS: SiteLinkOption[] = [
   { group: "หลัก", value: "/portfolio", label: "ผลงาน" },
   { group: "หลัก", value: "/blog", label: "บทความ" },
   { group: "หลัก", value: "/quote", label: "ขอใบเสนอราคา" },
-  { group: "หลัก", value: "/contact", label: "ติดต่อเรา" },
-  { group: "หลัก", value: "/about", label: "เกี่ยวกับเรา" },
+  { group: "หลัก", value: "/learn", label: "ห้องเรียนรู้" },
+  { group: "หลัก", value: "/contact", label: "เกี่ยวกับเรา" },
+  { group: "หลัก", value: "/visit-factory", label: "นัดเยี่ยมชมโรงงาน" },
+  { group: "หลัก", value: "/careers", label: "ร่วมงานกับเรา" },
   ...productCatalog.flatMap((cat) => [
     {
       group: "สินค้า",

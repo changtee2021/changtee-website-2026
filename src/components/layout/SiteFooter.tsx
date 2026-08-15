@@ -3,32 +3,34 @@ import Link from "next/link";
 import { siteConfig } from "@/lib/site-config";
 import { LazyMapsEmbed } from "@/components/layout/LazyMapsEmbed";
 import { SocialLinks } from "@/components/layout/SocialLinks";
-import { ThemeToggle } from "@/components/layout/ThemeToggle";
 import { CookieSettingsButton } from "@/components/legal/CookieSettingsButton";
+import { BrochureLink } from "@/components/catalog/BrochureLink";
 
 export function SiteFooter() {
   const year = new Date().getFullYear();
 
   return (
     <footer className="mt-auto border-t border-line bg-panel">
-      <div className="mx-auto max-w-5xl px-6 py-12 sm:px-10 lg:px-16">
-        <div className="grid gap-10 md:grid-cols-2 lg:grid-cols-[1.1fr_1fr_1fr]">
-          {/* Brand */}
+      <div className="mx-auto max-w-5xl px-4 py-8 sm:px-10 sm:py-12 lg:px-16">
+        <div className="grid gap-8 md:grid-cols-2 md:gap-8 lg:grid-cols-[1.15fr_1fr_0.95fr] lg:gap-10">
           <div>
-            <div className="flex items-center gap-3">
+            <div className="flex items-start gap-3">
               <Image
-                src="/images/brand/logo-mark.png"
+                src="/images/brand/logo-footer.png"
                 alt=""
-                width={56}
-                height={56}
-                className="h-14 w-14 object-contain"
+                width={48}
+                height={60}
+                className="h-12 w-auto shrink-0 object-contain sm:h-16"
               />
-              <div>
-                <div className="font-display text-xl font-bold uppercase tracking-wide text-navy">
+              <div className="min-w-0">
+                <div className="font-display text-lg font-bold uppercase tracking-wide text-navy sm:text-xl">
                   {siteConfig.nameEn}
                 </div>
-                <div className="text-sm font-semibold text-brand-red">
-                  {siteConfig.usp} · {siteConfig.tagline}
+                <div className="text-sm font-semibold leading-5 text-brand-red">
+                  Quickly Quality Professional
+                </div>
+                <div className="text-sm font-light leading-5 text-navy">
+                  Curtain & Blinds Service Solution
                 </div>
               </div>
             </div>
@@ -40,20 +42,28 @@ export function SiteFooter() {
             <div className="mt-6 flex flex-wrap gap-2">
               <Link
                 href="/quote"
-                className="rounded-md bg-brand-red px-3 py-1.5 text-xs font-semibold text-white hover:bg-brand-red-soft"
+                className="inline-flex min-h-11 items-center rounded-md bg-brand-red px-3 py-1.5 text-xs font-semibold text-white hover:bg-brand-red-soft"
               >
                 ขอใบเสนอราคา
               </Link>
-              <a
-                href={siteConfig.brochureUrl}
-                className="rounded-md border border-line px-3 py-1.5 text-xs font-medium text-navy hover:bg-paper"
+              <Link
+                href="/visit-factory"
+                className="inline-flex min-h-11 items-center rounded-md border border-line px-3 py-1.5 text-xs font-medium text-navy hover:bg-paper"
               >
+                นัดเยี่ยมชมโรงงาน
+              </Link>
+              <Link
+                href="/careers"
+                className="inline-flex min-h-11 items-center rounded-md border border-line px-3 py-1.5 text-xs font-medium text-navy hover:bg-paper"
+              >
+                ร่วมงานกับเรา
+              </Link>
+              <BrochureLink className="inline-flex min-h-11 items-center rounded-md border border-line px-3 py-1.5 text-xs font-medium text-navy hover:bg-paper">
                 Download Brochure
-              </a>
+              </BrochureLink>
             </div>
           </div>
 
-          {/* Contact */}
           <div>
             <h3 className="text-sm font-bold uppercase tracking-wide text-navy">
               Contact
@@ -86,7 +96,7 @@ export function SiteFooter() {
                 <br />
                 <a
                   href={`mailto:${siteConfig.emailTo}`}
-                  className="font-medium text-navy hover:text-brand-red"
+                  className="font-medium break-all text-navy hover:text-brand-red"
                 >
                   {siteConfig.emailTo}
                 </a>
@@ -114,7 +124,6 @@ export function SiteFooter() {
             </div>
           </div>
 
-          {/* Map */}
           <div className="md:col-span-2 lg:col-span-1">
             <h3 className="text-sm font-bold uppercase tracking-wide text-navy">
               Location
@@ -131,44 +140,43 @@ export function SiteFooter() {
               href={siteConfig.mapsUrl}
               target="_blank"
               rel="noreferrer"
-              className="mt-3 inline-flex text-sm font-semibold text-navy hover:text-brand-red"
+              className="mt-3 inline-flex min-h-11 items-center text-sm font-semibold text-navy hover:text-brand-red"
             >
               เปิดใน Google Maps →
             </a>
           </div>
         </div>
-
-        <div className="mt-10 rounded-md border border-line bg-paper px-4 py-3 text-center text-sm text-ink/80">
-          วัดหน้างานฟรี · โรงงานผลิตเอง · ติดตั้งทั่วไทย · รับประกันงานติดตั้ง 1 ปี
-        </div>
       </div>
 
       <div className="bg-[#0b1220] text-white">
-        <div className="mx-auto flex max-w-5xl flex-col gap-3 px-6 py-4 text-xs text-white/70 sm:px-10 md:flex-row md:items-center md:justify-between lg:px-16">
-          <nav className="flex flex-wrap items-center gap-x-3 gap-y-1">
+        <div className="mx-auto flex max-w-5xl flex-col gap-3 px-4 py-4 text-xs text-white/70 sm:px-10 md:flex-row md:items-center md:justify-between lg:px-16">
+          <nav className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center sm:gap-x-0 sm:gap-y-1">
             <Link href="/privacy" className="hover:text-white">
               Privacy Policy
             </Link>
-            <span className="text-white/30">|</span>
+            <span className="mx-3 hidden text-white/30 sm:inline" aria-hidden>
+              |
+            </span>
             <Link href="/cookies" className="hover:text-white">
               Cookie Policy
             </Link>
-            <span className="text-white/30">|</span>
+            <span className="mx-3 hidden text-white/30 sm:inline" aria-hidden>
+              |
+            </span>
             <Link href="/terms" className="hover:text-white">
               Terms of Service
             </Link>
-            <span className="text-white/30">|</span>
+            <span className="mx-3 hidden text-white/30 sm:inline" aria-hidden>
+              |
+            </span>
             <CookieSettingsButton
               label="Cookie Settings"
               className="text-left text-white/70 hover:text-white"
             />
           </nav>
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
-            <ThemeToggle />
-            <p>
-              © {year} {siteConfig.legalName}. All rights reserved.
-            </p>
-          </div>
+          <p>
+            © {year} {siteConfig.legalName}. All rights reserved.
+          </p>
         </div>
       </div>
     </footer>
