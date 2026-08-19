@@ -22,6 +22,7 @@ import {
   upsertCatalog,
   useCatalogs,
 } from "@/lib/cms/demo-store";
+import { parseAdminUploadResponse } from "@/lib/cms/admin-upload";
 import { productCatalog } from "@/lib/product-catalog";
 import { cn } from "@/lib/utils";
 import {
@@ -46,7 +47,7 @@ async function uploadBlob(
     body,
     credentials: "include",
   });
-  const data = (await res.json()) as { url?: string; error?: string };
+  const data = await parseAdminUploadResponse(res);
   if (!res.ok || !data.url) throw new Error(data.error || "อัปโหลดไม่สำเร็จ");
   return data.url;
 }
@@ -412,7 +413,7 @@ async function uploadJson(
     body,
     credentials: "include",
   });
-  const data = (await res.json()) as { url?: string; error?: string };
+  const data = await parseAdminUploadResponse(res);
   if (!res.ok || !data.url) throw new Error(data.error || "อัปโหลด manifest ไม่สำเร็จ");
   return data.url;
 }
