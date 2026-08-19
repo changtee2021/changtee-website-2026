@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { PortfolioEditor } from "@/components/admin/PortfolioEditor";
+import { PortfolioAiWizard } from "@/components/admin/PortfolioAiWizard";
 
 export const metadata: Metadata = {
   title: "แก้ไขผลงาน",
@@ -12,5 +12,5 @@ export default async function AdminPortfolioEditPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  return <PortfolioEditor id={id} />;
+  return <PortfolioAiWizard id={id} />;
 }

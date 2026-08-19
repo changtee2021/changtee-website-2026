@@ -26,6 +26,7 @@ import {
   X,
 } from "lucide-react";
 import { LeadSiteImages } from "@/components/admin/LeadSiteImages";
+import { requestInboxBadgeRefresh } from "@/lib/admin-inbox";
 import { DEMO_LEADS } from "@/lib/leads/leads-demo";
 import { downloadLeadsExcel } from "@/lib/export-leads-excel";
 import { leadImageRefs } from "@/lib/security/lead-media";
@@ -274,6 +275,7 @@ export function LeadsBoard() {
     if (selected?.id === id) {
       setSelected((s) => (s ? { ...s, ...patch } : s));
     }
+    if (patch.status) requestInboxBadgeRefresh();
   }
 
   async function changeStatus(id: string, status: LeadStatus) {
@@ -783,8 +785,8 @@ export function LeadsBoard() {
                       <button
                         type="button"
                         aria-label="ดูรายละเอียด"
-                        title="ดูรายละเอียด"
-                        className="inline-flex rounded-lg p-1.5 text-brand-red hover:bg-brand-red/10"
+                        title="ดูรายละเอียดทั้งหมด"
+                        className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-xl border border-line text-navy hover:bg-paper sm:min-h-9 sm:min-w-9"
                         onClick={() => setSelected(lead)}
                       >
                         <Eye className="size-4" />

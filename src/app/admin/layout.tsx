@@ -1,6 +1,7 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
+import { AdminForceLight } from "@/components/admin/AdminForceLight";
 import { AdminShell } from "@/components/admin/AdminShell";
 import {
   getAdminSession,
@@ -15,6 +16,11 @@ export const metadata: Metadata = {
     template: "%s | ช่างตี๋ Admin",
   },
   robots: { index: false, follow: false },
+};
+
+export const viewport: Viewport = {
+  colorScheme: "light",
+  themeColor: "#eef2f7",
 };
 
 export default async function AdminLayout({
@@ -38,24 +44,32 @@ export default async function AdminLayout({
 
   // Page Editor is its own full-bleed shell (no AdminSidebar)
   if (isEditorPath(pathname, basePath)) {
-    return children;
+    return (
+      <>
+        <AdminForceLight />
+        {children}
+      </>
+    );
   }
 
   return (
-    <AdminShell
-      basePath={basePath}
-      siteUrl={getSiteUrl()}
-      sessionLabel={
-        session
-          ? {
-              fullName: session.fullName,
-              employeeCode: session.employeeCode,
-              roleLabel: session.roleLabel,
-            }
-          : undefined
-      }
-    >
-      {children}
-    </AdminShell>
+    <>
+      <AdminForceLight />
+      <AdminShell
+        basePath={basePath}
+        siteUrl={getSiteUrl()}
+        sessionLabel={
+          session
+            ? {
+                fullName: session.fullName,
+                employeeCode: session.employeeCode,
+                roleLabel: session.roleLabel,
+              }
+            : undefined
+        }
+      >
+        {children}
+      </AdminShell>
+    </>
   );
 }

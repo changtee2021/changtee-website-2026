@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { LockKeyhole, UserRound } from "lucide-react";
 import { BOOTSTRAP_ADMIN_CODE } from "@/lib/admin-users";
@@ -52,8 +53,15 @@ export function AdminLoginForm({ basePath }: AdminLoginFormProps) {
     <div className="flex min-h-screen items-center justify-center bg-[#eef2f7] px-4 py-10">
       <div className="w-full max-w-md rounded-2xl border border-line bg-white p-6 shadow-sm sm:p-8">
         <div className="flex items-center gap-3">
-          <div className="flex size-11 items-center justify-center rounded-xl bg-brand-red font-display text-sm font-bold text-white">
-            CT
+          <div className="relative size-11 overflow-hidden rounded-xl bg-navy ring-1 ring-line">
+            <Image
+              src="/images/brand/logo-mark-nav.png"
+              alt="ช่างตี๋"
+              fill
+              className="object-contain p-0.5"
+              sizes="44px"
+              priority
+            />
           </div>
           <div>
             <h1 className="font-display text-xl font-semibold text-navy">

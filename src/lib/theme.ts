@@ -14,11 +14,7 @@ export function getStoredTheme(): ThemeMode | null {
 }
 
 export function resolveTheme(stored: ThemeMode | null): ThemeMode {
-  if (stored) return stored;
-  if (typeof window === "undefined") return "light";
-  return window.matchMedia("(prefers-color-scheme: dark)").matches
-    ? "dark"
-    : "light";
+  return stored ?? "light";
 }
 
 export function applyTheme(mode: ThemeMode) {
@@ -32,5 +28,16 @@ export function applyTheme(mode: ThemeMode) {
   }
 }
 
-/** Inline script — runs before paint to avoid theme flash */
-export const themeInitScript = `(function(){try{var k=${JSON.stringify(THEME_STORAGE_KEY)};var t=localStorage.getItem(k);var d=t==="dark"||(t!=="light"&&window.matchMedia("(prefers-color-scheme: dark)").matches);var r=document.documentElement;r.classList.toggle("dark",d);r.style.colorScheme=d?"dark":"light";}catch(e){}})();`;
+/** Admin is always light — do not write localStorage (keep public-site preference). */
+export function forceLightAppearance() {
+  const root = document.documentElement;
+  root.classList.remove("dark");
+  root.style.colorScheme = "light";
+}
+
+export function restoreStoredTheme() {
+  applyTheme(resolveTheme(getStoredTheme()));
+}
+
+/** Inline script — runs before paint to avoid theme flash. Admin stays light. */
+export const themeInitScript = `(function(){try{var k=${JSON.stringify(THEME_STORAGE_KEY)};var r=document.documentElement;var h=location.hostname.toLowerCase();var p=location.pathname;var admin=p==="/admin"||p.indexOf("/admin/")===0||h==="admin.localhost"||h.indexOf("admin.")===0;if(admin){r.classList.remove("dark");r.style.colorScheme="light";return;}var d=localStorage.getItem(k)==="dark";r.classList.toggle("dark",d);r.style.colorScheme=d?"dark":"light";}catch(e){}})();`;

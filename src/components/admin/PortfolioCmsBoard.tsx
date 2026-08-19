@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useSyncExternalStore } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -32,6 +32,7 @@ import { relatedPortfolio } from "@/lib/cms/public-content";
 import { adminBaseFromPathname, adminHref } from "@/lib/admin-nav";
 import { cn } from "@/lib/utils";
 import {
+  CmsModal,
   DemoBadge,
   FilterChip,
   StatPill,
@@ -46,6 +47,26 @@ type StatusFilter = ContentStatus | "all";
 type LayoutMode = "grid3" | "grid6" | "list";
 
 const LAYOUT_KEY = "changtee.cms.portfolio.layout";
+const LAYOUT_EVENT = "changtee.cms.portfolio.layout-change";
+
+function readLayout(): LayoutMode {
+  try {
+    const saved = window.localStorage.getItem(LAYOUT_KEY);
+    if (saved === "grid3" || saved === "grid6" || saved === "list") return saved;
+  } catch {
+    /* ignore */
+  }
+  return "grid3";
+}
+
+function subscribeLayout(onStoreChange: () => void) {
+  window.addEventListener(LAYOUT_EVENT, onStoreChange);
+  window.addEventListener("storage", onStoreChange);
+  return () => {
+    window.removeEventListener(LAYOUT_EVENT, onStoreChange);
+    window.removeEventListener("storage", onStoreChange);
+  };
+}
 
 export function PortfolioCmsBoard() {
   const pathname = usePathname() || "";
@@ -55,25 +76,21 @@ export function PortfolioCmsBoard() {
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
   const [q, setQ] = useState("");
   const [toast, setToast] = useState<string | null>(null);
-  const [layout, setLayout] = useState<LayoutMode>(() => {
-    if (typeof window === "undefined") return "grid3";
-    try {
-      const saved = window.localStorage.getItem(LAYOUT_KEY) as LayoutMode | null;
-      if (saved === "grid3" || saved === "grid6" || saved === "list") return saved;
-    } catch {
-      /* ignore */
-    }
-    return "grid3";
-  });
+  const layout = useSyncExternalStore(
+    subscribeLayout,
+    readLayout,
+    () => "grid3" as LayoutMode,
+  );
   const [previewItem, setPreviewItem] = useState<PortfolioItem | null>(null);
+  const [pendingDelete, setPendingDelete] = useState<PortfolioItem | null>(null);
 
   function changeLayout(next: LayoutMode) {
-    setLayout(next);
     try {
       window.localStorage.setItem(LAYOUT_KEY, next);
     } catch {
       /* ignore */
     }
+    window.dispatchEvent(new Event(LAYOUT_EVENT));
   }
 
   const counts = useMemo(() => {
@@ -127,34 +144,28 @@ export function PortfolioCmsBoard() {
         <button
           type="button"
           onClick={() => setPreviewItem(item)}
-          className="inline-flex items-center gap-1 rounded-lg border border-line px-2 py-1 text-xs text-navy hover:bg-paper"
+          className="inline-flex size-9 items-center justify-center rounded-lg border border-line text-navy hover:bg-paper"
           title="พรีวิวหน้าผลงาน"
           aria-label="พรีวิว"
         >
-          <Eye className="size-3.5" />
-          <span className="hidden sm:inline">พรีวิว</span>
+          <Eye className="size-4" />
         </button>
         <button
           type="button"
-          className="rounded-lg p-1.5 text-muted hover:bg-paper hover:text-brand-red"
-          onClick={() => {
-            if (
-              !confirm("ลบออกจากรายการ? (demo — เก็บในเครื่องนี้เท่านั้น)")
-            )
-              return;
-            removePortfolioItem(item.id);
-            flash("ลบแล้ว (demo)");
-          }}
-          aria-label="ลบ"
+          className="inline-flex size-11 items-center justify-center rounded-xl border border-rose-200 text-rose-700 hover:bg-rose-50 sm:size-9"
+          title="ลบผลงาน"
+          aria-label={`ลบ ${item.title}`}
+          onClick={() => setPendingDelete(item)}
         >
-          <Trash2 className="size-3.5" />
+          <Trash2 className="size-4" />
         </button>
         <Link
           href={adminHref(basePath, `/cms/portfolio/${item.id}`)}
-          className="inline-flex items-center gap-1 text-sm font-medium text-brand-red hover:underline"
+          className="inline-flex size-11 items-center justify-center rounded-xl border border-line text-navy hover:bg-paper sm:size-9"
+          title="แก้ไขผลงาน"
+          aria-label={`แก้ไข ${item.title}`}
         >
-          <Pencil className="size-3.5" />
-          แก้ไข
+          <Pencil className="size-4" />
         </Link>
       </div>
     );
@@ -456,6 +467,39 @@ export function PortfolioCmsBoard() {
           />
         ) : null}
       </CmsSitePreview>
+
+      {pendingDelete ? (
+        <CmsModal
+          title="ยืนยันการลบผลงาน"
+          subtitle={pendingDelete.title}
+          onClose={() => setPendingDelete(null)}
+        >
+          <p className="text-sm text-muted">
+            ลบแล้วจะหายจากรายการและหน้าเว็บ ต้องการลบรายการนี้ใช่ไหม
+          </p>
+          <div className="mt-5 flex flex-wrap justify-end gap-2">
+            <button
+              type="button"
+              onClick={() => setPendingDelete(null)}
+              className="inline-flex min-h-11 items-center rounded-xl border border-line px-4 text-sm font-medium text-navy hover:bg-paper sm:min-h-9"
+            >
+              ยกเลิก
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                removePortfolioItem(pendingDelete.id);
+                setPendingDelete(null);
+                flash("ลบผลงานแล้ว");
+              }}
+              className="inline-flex min-h-11 items-center gap-1.5 rounded-xl bg-rose-600 px-4 text-sm font-medium text-white hover:bg-rose-700 sm:min-h-9"
+            >
+              <Trash2 className="size-4" />
+              ลบผลงาน
+            </button>
+          </div>
+        </CmsModal>
+      ) : null}
 
       {toast ? (
         <div className="fixed bottom-6 left-1/2 z-[60] -translate-x-1/2 rounded-full bg-navy px-4 py-2 text-sm text-white shadow-lg">

@@ -92,6 +92,22 @@ export const PAGE_TREE: EditorPageNode[] = [
         pageKey: "quote",
         revalidate: ["/quote"],
       },
+      {
+        id: "visit-factory",
+        label: "นัดเยี่ยมชมโรงงาน",
+        livePath: "/visit-factory",
+        status: "external",
+        kind: "single",
+        externalPath: "/visits",
+      },
+      {
+        id: "presentation",
+        label: "นัดนำเสนอสินค้า",
+        livePath: "/visit-factory?mode=presentation",
+        status: "external",
+        kind: "single",
+        externalPath: "/presentations",
+      },
     ],
   },
   {

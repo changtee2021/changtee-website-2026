@@ -5,6 +5,7 @@ import Link from "next/link";
 export const ABOUT_NAV_ITEMS = [
   { href: "/contact", label: "ติดต่อ" },
   { href: "/visit-factory", label: "เยี่ยมชมโรงงาน" },
+  { href: "/visit-factory?mode=presentation", label: "นัดนำเสนอสินค้า" },
   { href: "/careers", label: "ร่วมงานกับเรา" },
 ] as const;
 

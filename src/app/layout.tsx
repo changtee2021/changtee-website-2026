@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import Script from "next/script";
 import { Bai_Jamjuree, IBM_Plex_Sans_Thai, Outfit } from "next/font/google";
 import { loadSeoDefaults } from "@/lib/seo/seo-defaults";
 import { absoluteUrl, defaultOgImagePath } from "@/lib/seo/meta";
@@ -80,7 +81,9 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <body className="min-h-full bg-background text-ink antialiased">
-        <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
+        <Script id="changtee-theme" strategy="beforeInteractive">
+          {themeInitScript}
+        </Script>
         {children}
       </body>
     </html>

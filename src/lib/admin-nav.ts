@@ -3,6 +3,7 @@ import {
   Briefcase,
   CalendarCheck,
   ClipboardList,
+  Presentation,
   FileText,
   Images,
   LayoutDashboard,
@@ -15,6 +16,7 @@ import {
   UserSquare,
   Users,
 } from "lucide-react";
+import type { AdminInboxKey } from "@/lib/admin-inbox";
 import { isPageEditorEnabled } from "@/lib/editor/page-registry";
 
 export type AdminNavItem = {
@@ -25,6 +27,8 @@ export type AdminNavItem = {
   soon?: boolean;
   /** Match pathname exactly (don’t highlight parent when on child routes) */
   exact?: boolean;
+  /** Inbox badge: pending / new count */
+  badgeKey?: AdminInboxKey;
 };
 
 export type AdminNavGroup = {
@@ -37,15 +41,36 @@ export const adminNavGroups: AdminNavGroup[] = [
     label: "หลัก",
     items: [
       { path: "", label: "ภาพรวม", icon: LayoutDashboard },
-      { path: "/leads", label: "คำขอใบเสนอราคา", icon: ClipboardList },
-      { path: "/visits", label: "นัดเยี่ยมชมโรงงาน", icon: CalendarCheck },
+      {
+        path: "/leads",
+        label: "คำขอใบเสนอราคา",
+        icon: ClipboardList,
+        badgeKey: "leads",
+      },
+      {
+        path: "/visits",
+        label: "นัดเยี่ยมชมโรงงาน",
+        icon: CalendarCheck,
+        badgeKey: "visits",
+      },
+      {
+        path: "/presentations",
+        label: "นัดนำเสนอสินค้า",
+        icon: Presentation,
+        badgeKey: "presentations",
+      },
     ],
   },
   {
     label: "งาน",
     items: [
       { path: "/careers", label: "ประกาศรับสมัครงาน", icon: Briefcase },
-      { path: "/careers/applications", label: "ใบสมัครงาน", icon: UserSquare },
+      {
+        path: "/careers/applications",
+        label: "ใบสมัครงาน",
+        icon: UserSquare,
+        badgeKey: "applications",
+      },
     ],
   },
   {

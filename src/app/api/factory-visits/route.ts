@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { factoryVisitSchema } from "@/lib/validations/visit";
+import { productPresentationSchema } from "@/lib/validations/presentation";
 import { createVisitBooking } from "@/lib/visits/store";
 import { sendFactoryVisitEmails } from "@/lib/email/visit-mailer";
 import { pushLineMessage, visitLineTarget } from "@/lib/outbound/line";
@@ -7,8 +8,13 @@ import {
   formatVisitSites,
   VISIT_SESSION_LABELS,
   VISIT_SITE_IDS,
+  type FactoryVisitBooking,
   type VisitSiteId,
 } from "@/lib/visits/types";
+import {
+  PRESENTATION_VENUE_LABELS,
+  type PresentationVenueId,
+} from "@/lib/visits/presentation";
 import { verifyTurnstileToken } from "@/lib/security/turnstile";
 import { bytesMatchDeclaredType, isPdfBytes } from "@/lib/security/file-magic";
 import { toStorageRef } from "@/lib/security/lead-media";
@@ -116,52 +122,10 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "กรุณาแนบนามบัตร" }, { status: 400 });
     }
 
-    const parsed = factoryVisitSchema.safeParse({
-      fullName: String(form.get("fullName") || ""),
-      phone: String(form.get("phone") || ""),
-      email: String(form.get("email") || ""),
-      lineId: String(form.get("lineId") || ""),
-      businessName: String(form.get("businessName") || ""),
-      contactPosition: String(form.get("contactPosition") || ""),
-      taxId: String(form.get("taxId") || ""),
-      visitSites: parseVisitSites(form.getAll("visitSites")),
-      visitDate: String(form.get("visitDate") || ""),
-      session: String(form.get("session") || ""),
-      visitorCount: Number(form.get("visitorCount") || 1),
-      purpose: String(form.get("purpose") || ""),
-      productInterest: String(form.get("productInterest") || ""),
-      note: String(form.get("note") || ""),
-      pdpaAccepted:
-        form.get("pdpaAccepted") === "on" || form.get("pdpaAccepted") === "true",
-    });
-    if (!parsed.success) {
-      return NextResponse.json(
-        { error: parsed.error.issues[0]?.message || "ข้อมูลไม่ครบ" },
-        { status: 400 },
-      );
-    }
-
-    const data = parsed.data;
-    const visit = await createVisitBooking({
-      fullName: data.fullName,
-      phone: data.phone,
-      email: data.email || null,
-      lineId: data.lineId || null,
-      businessName: data.businessName || null,
-      contactPosition: data.contactPosition,
-      taxId: data.taxId,
-      visitSites: data.visitSites,
-      companyProfileName: companyProfile.name,
-      companyProfilePath: companyProfile.ref,
-      businessCardName: businessCard.name,
-      businessCardPath: businessCard.ref,
-      visitDate: data.visitDate,
-      session: data.session,
-      visitorCount: data.visitorCount,
-      purpose: data.purpose || null,
-      productInterest: data.productInterest || null,
-      note: data.note || null,
-    });
+    const isPresentation = String(form.get("bookingKind") || "") === "product-presentation";
+    const visit = isPresentation
+      ? await createPresentationBooking(form, companyProfile, businessCard)
+      : await createFactoryVisitFromForm(form, companyProfile, businessCard);
 
     let notify: Array<{ channel: string; ok: boolean; error?: string }> = [];
     try {
@@ -172,11 +136,19 @@ export async function POST(request: Request) {
       ];
     }
 
+    const isPresentationLine = visit.bookingKind === "product-presentation";
+    const venueLabel =
+      isPresentationLine && visit.presentationVenue
+        ? PRESENTATION_VENUE_LABELS[visit.presentationVenue as PresentationVenueId] ||
+          visit.presentationVenue
+        : formatVisitSites(visit.visitSites);
     const line = await pushLineMessage(
       [
-        "📅 มีคำขอนัดเยี่ยมชมโรงงานใหม่",
+        isPresentationLine
+          ? "📊 มีคำขอนัดนำเสนอสินค้าใหม่"
+          : "📅 มีคำขอนัดเยี่ยมชมโรงงานใหม่",
         `ชื่อ: ${visit.fullName}${visit.contactPosition ? ` · ${visit.contactPosition}` : ""}${visit.businessName ? ` (${visit.businessName})` : ""}`,
-        `สถานที่: ${formatVisitSites(visit.visitSites)}`,
+        `สถานที่: ${venueLabel}`,
         `วันที่: ${visit.visitDate} · ${VISIT_SESSION_LABELS[visit.session]}`,
         `จำนวน: ${visit.visitorCount} คน`,
         `โทร: ${visit.phone}`,
@@ -187,6 +159,12 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ ok: true, id: visit.id, notify });
   } catch (err) {
+    if (err instanceof Error && err.message.startsWith("VALIDATION:")) {
+      return NextResponse.json(
+        { error: err.message.slice("VALIDATION:".length) },
+        { status: 400 },
+      );
+    }
     if (
       err instanceof Error &&
       err.message === "VISIT_PERSISTENCE_UNAVAILABLE"
@@ -222,4 +200,130 @@ export async function POST(request: Request) {
           : "Server error";
     return NextResponse.json({ error }, { status: 500 });
   }
+}
+
+type SavedFile = { name: string | null; ref: string | null };
+
+function validationError(message: string): never {
+  throw new Error(`VALIDATION:${message}`);
+}
+
+async function createFactoryVisitFromForm(
+  form: FormData,
+  companyProfile: SavedFile,
+  businessCard: SavedFile,
+): Promise<FactoryVisitBooking> {
+  const parsed = factoryVisitSchema.safeParse({
+    fullName: String(form.get("fullName") || ""),
+    phone: String(form.get("phone") || ""),
+    email: String(form.get("email") || ""),
+    lineId: String(form.get("lineId") || ""),
+    businessName: String(form.get("businessName") || ""),
+    contactPosition: String(form.get("contactPosition") || ""),
+    taxId: String(form.get("taxId") || ""),
+    visitSites: parseVisitSites(form.getAll("visitSites")),
+    visitDate: String(form.get("visitDate") || ""),
+    session: String(form.get("session") || ""),
+    visitorCount: Number(form.get("visitorCount") || 1),
+    purpose: String(form.get("purpose") || ""),
+    productInterest: String(form.get("productInterest") || ""),
+    note: String(form.get("note") || ""),
+    pdpaAccepted:
+      form.get("pdpaAccepted") === "on" || form.get("pdpaAccepted") === "true",
+  });
+  if (!parsed.success) {
+    validationError(parsed.error.issues[0]?.message || "ข้อมูลไม่ครบ");
+  }
+
+  const data = parsed.data;
+  return createVisitBooking({
+    bookingKind: "factory-visit",
+    fullName: data.fullName,
+    phone: data.phone,
+    email: data.email || null,
+    lineId: data.lineId || null,
+    businessName: data.businessName || null,
+    contactPosition: data.contactPosition,
+    taxId: data.taxId,
+    visitSites: data.visitSites,
+    companyProfileName: companyProfile.name,
+    companyProfilePath: companyProfile.ref,
+    businessCardName: businessCard.name,
+    businessCardPath: businessCard.ref,
+    visitDate: data.visitDate,
+    session: data.session,
+    visitorCount: data.visitorCount,
+    purpose: data.purpose || null,
+    productInterest: data.productInterest || null,
+    note: data.note || null,
+  });
+}
+
+async function createPresentationBooking(
+  form: FormData,
+  companyProfile: SavedFile,
+  businessCard: SavedFile,
+): Promise<FactoryVisitBooking> {
+  const parsed = productPresentationSchema.safeParse({
+    fullName: String(form.get("fullName") || ""),
+    contactPosition: String(form.get("contactPosition") || ""),
+    department: String(form.get("department") || ""),
+    businessName: String(form.get("businessName") || ""),
+    legalEntityType: String(form.get("legalEntityType") || ""),
+    taxId: String(form.get("taxId") || ""),
+    industry: String(form.get("industry") || ""),
+    officeAddress: String(form.get("officeAddress") || ""),
+    phone: String(form.get("phone") || ""),
+    email: String(form.get("email") || ""),
+    lineId: String(form.get("lineId") || ""),
+    presentationVenue: String(form.get("presentationVenue") || ""),
+    venueAddress: String(form.get("venueAddress") || ""),
+    visitDate: String(form.get("visitDate") || ""),
+    session: String(form.get("session") || ""),
+    visitorCount: Number(form.get("visitorCount") || 1),
+    products: form.getAll("products").map(String).filter(Boolean),
+    jobType: String(form.get("jobType") || ""),
+    estimatedScope: String(form.get("estimatedScope") || ""),
+    decisionTimeline: String(form.get("decisionTimeline") || ""),
+    note: String(form.get("note") || ""),
+    pdpaAccepted:
+      form.get("pdpaAccepted") === "on" || form.get("pdpaAccepted") === "true",
+  });
+  if (!parsed.success) {
+    validationError(parsed.error.issues[0]?.message || "ข้อมูลไม่ครบ");
+  }
+
+  const data = parsed.data;
+  const venueLabel =
+    PRESENTATION_VENUE_LABELS[data.presentationVenue] || data.presentationVenue;
+  return createVisitBooking({
+    bookingKind: "product-presentation",
+    fullName: data.fullName,
+    phone: data.phone,
+    email: data.email || null,
+    lineId: data.lineId || null,
+    businessName: data.businessName,
+    contactPosition: data.contactPosition,
+    department: data.department || null,
+    taxId: data.taxId,
+    legalEntityType: data.legalEntityType,
+    industry: data.industry,
+    officeAddress: data.officeAddress,
+    visitSites: [],
+    presentationVenue: data.presentationVenue,
+    venueAddress: data.venueAddress || data.officeAddress,
+    jobType: data.jobType || null,
+    decisionTimeline: data.decisionTimeline || null,
+    estimatedScope: data.estimatedScope || null,
+    companyProfileName: companyProfile.name,
+    companyProfilePath: companyProfile.ref,
+    businessCardName: businessCard.name,
+    businessCardPath: businessCard.ref,
+    visitDate: data.visitDate,
+    session: data.session,
+    visitorCount: data.visitorCount,
+    purpose: `นัดนำเสนอสินค้า · ${venueLabel}`,
+    productInterest: data.products.join(", "),
+    note: data.note || null,
+  });
 }

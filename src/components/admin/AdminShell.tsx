@@ -1,11 +1,13 @@
 "use client";
 
 import { useEffect, useState, useSyncExternalStore } from "react";
-import { usePathname } from "next/navigation";
-import { Menu, PanelLeftOpen, X } from "lucide-react";
+import Image from "next/image";
+import { usePathname, useRouter } from "next/navigation";
+import { ExternalLink, LogOut, Menu, PanelLeftOpen, X } from "lucide-react";
 import { AdminSidebar } from "@/components/admin/AdminSidebar";
-import { isAdminLoginPath } from "@/lib/admin-auth-edge";
-import { resolveAdminPageTitle } from "@/lib/admin-nav";
+import { isAdminAuthEnforced, isAdminLoginPath } from "@/lib/admin-auth-edge";
+import { adminHref, resolveAdminPageTitle } from "@/lib/admin-nav";
+import { getBootstrapAdmin } from "@/lib/admin-users";
 import { cn } from "@/lib/utils";
 
 const SIDEBAR_COLLAPSED_KEY = "ctc-admin-sidebar-collapsed";
@@ -41,7 +43,14 @@ export function AdminShell({
   sessionLabel,
   children,
 }: AdminShellProps) {
+  const router = useRouter();
   const pathname = usePathname() || basePath || "/";
+  const bootstrapAdmin = getBootstrapAdmin();
+  const user = sessionLabel ?? {
+    fullName: bootstrapAdmin.fullName,
+    employeeCode: bootstrapAdmin.employeeCode,
+    roleLabel: "แอดมิน",
+  };
   /** Open only while path matches — auto-closes on navigation */
   const [openForPath, setOpenForPath] = useState<string | null>(null);
   const mobileOpen = openForPath === pathname;
@@ -77,7 +86,7 @@ export function AdminShell({
   }
 
   return (
-    <div className="flex min-h-screen bg-[#eef2f7] text-ink">
+    <div className="flex min-h-screen bg-[#eef2f7] text-ink [color-scheme:light]">
       {/* Desktop sidebar */}
       <div
         className={cn(
@@ -87,8 +96,6 @@ export function AdminShell({
       >
         <AdminSidebar
           basePath={basePath}
-          siteUrl={siteUrl}
-          sessionLabel={sessionLabel}
           collapsed={desktopCollapsed}
           onToggleCollapse={toggleDesktopSidebar}
         />
@@ -118,8 +125,6 @@ export function AdminShell({
         >
           <AdminSidebar
             basePath={basePath}
-            siteUrl={siteUrl}
-            sessionLabel={sessionLabel}
             onNavigate={() => setOpenForPath(null)}
             headerAction={
               <button
@@ -161,6 +166,15 @@ export function AdminShell({
               <PanelLeftOpen className="size-5" />
             </button>
           ) : null}
+          <div className="relative size-9 shrink-0 overflow-hidden rounded-lg bg-navy ring-1 ring-line lg:hidden">
+            <Image
+              src="/images/brand/logo-mark-nav.png"
+              alt=""
+              fill
+              className="object-contain p-0.5"
+              sizes="36px"
+            />
+          </div>
           <div className="min-w-0 flex-1">
             <p className="text-[11px] font-medium uppercase tracking-wide text-muted">
               Backoffice
@@ -169,13 +183,39 @@ export function AdminShell({
               {title}
             </h1>
           </div>
-          <div className="hidden items-center gap-2 sm:flex">
-            <span className="rounded-full bg-paper px-2.5 py-1 text-xs text-muted">
-              changtee_web
-            </span>
-            <span className="rounded-full bg-navy/10 px-2.5 py-1 text-xs font-medium text-navy">
-              Admin
-            </span>
+          <div className="flex min-w-0 shrink-0 items-center gap-1.5 sm:gap-2">
+            <div className="hidden min-w-0 text-right sm:block">
+              <p className="truncate text-sm font-semibold text-navy">{user.fullName}</p>
+              <p className="truncate text-[11px] text-muted">
+                รหัส {user.employeeCode} · {user.roleLabel}
+                {!isAdminAuthEnforced() ? " · auth ปิดอยู่" : null}
+              </p>
+            </div>
+            <button
+              type="button"
+              aria-label="ออกจากระบบ"
+              onClick={() => {
+                void (async () => {
+                  await fetch("/api/admin/session", { method: "DELETE" });
+                  router.replace(adminHref(basePath, "/login"));
+                  router.refresh();
+                })();
+              }}
+              className="inline-flex min-h-11 items-center gap-1.5 rounded-xl border border-line px-2.5 text-sm font-medium text-navy hover:bg-paper sm:min-h-9"
+            >
+              <LogOut className="size-4 shrink-0" />
+              <span className="hidden sm:inline">ออกจากระบบ</span>
+            </button>
+            <a
+              href={siteUrl}
+              target="_blank"
+              rel="noreferrer"
+              aria-label="เปิดเว็บหลัก"
+              className="inline-flex min-h-11 items-center gap-1.5 rounded-xl border border-line px-2.5 text-sm font-medium text-navy hover:bg-paper sm:min-h-9"
+            >
+              <ExternalLink className="size-4 shrink-0" />
+              <span className="hidden sm:inline">เปิดเว็บหลัก</span>
+            </a>
           </div>
         </header>
 

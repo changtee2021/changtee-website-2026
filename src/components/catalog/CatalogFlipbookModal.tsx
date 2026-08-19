@@ -7,6 +7,7 @@ import {
   ChevronLeft,
   ChevronRight,
   Download,
+  ExternalLink,
   Minus,
   Plus,
   Square,
@@ -29,6 +30,9 @@ type Props = {
   catalogId?: string;
   /** Absolute or relative URL to a pre-rendered manifest.json (CMS uploads). */
   manifestUrl?: string;
+  /** Public Canva (or similar) presentation — videos play there. */
+  onlineUrl?: string;
+  onlineLabel?: string;
   onClose: () => void;
 };
 
@@ -54,6 +58,8 @@ export function CatalogFlipbookModal({
   title,
   catalogId,
   manifestUrl,
+  onlineUrl,
+  onlineLabel = "ดูออนไลน์",
   onClose,
 }: Props) {
   const [doc, setDoc] = useState<FlipbookDoc | null>(null);
@@ -391,7 +397,7 @@ export function CatalogFlipbookModal({
         <h2 className="min-w-0 truncate text-sm font-semibold text-white sm:text-base">
           {title}
         </h2>
-        <div className="flex shrink-0 items-center gap-2">
+        <div className="flex shrink-0 flex-wrap items-center justify-end gap-2">
           <div
             className="hidden items-center rounded-full bg-white/10 p-0.5 sm:inline-flex"
             role="group"
@@ -426,12 +432,24 @@ export function CatalogFlipbookModal({
               2 หน้า
             </button>
           </div>
+          {onlineUrl ? (
+            <a
+              href={onlineUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              title="เปิดพรีเซ้นท์ออนไลน์ — มีวิดีโอเล่นได้"
+              className="inline-flex min-h-9 items-center gap-1.5 rounded-full border border-white/25 bg-white/10 px-3.5 py-2 text-xs font-semibold text-white transition hover:bg-white/20 sm:text-sm"
+            >
+              <ExternalLink className="h-3.5 w-3.5" />
+              {onlineLabel}
+            </a>
+          ) : null}
           <a
             href={fileUrl}
             download={fileName}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-1.5 rounded-full bg-brand-red px-3.5 py-2 text-xs font-semibold text-white transition hover:bg-brand-red-soft sm:text-sm"
+            className="inline-flex min-h-9 items-center gap-1.5 rounded-full bg-brand-red px-3.5 py-2 text-xs font-semibold text-white transition hover:bg-brand-red-soft sm:text-sm"
           >
             <Download className="h-3.5 w-3.5" />
             ดาวน์โหลด

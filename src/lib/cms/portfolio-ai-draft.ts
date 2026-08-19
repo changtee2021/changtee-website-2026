@@ -24,6 +24,10 @@ export type PortfolioDraftImage = {
 };
 
 export type PortfolioJobFacts = {
+  /** ชื่องานที่โชว์บนเว็บ — ว่างแล้วให้ AI ตั้งจากสินค้า + ลูกค้า */
+  jobTitle: string;
+  /** สถานที่ที่โชว์บนการ์ด / หน้ารายละเอียด */
+  place: string;
   patternId: PortfolioPatternId;
   province: string;
   district: string;
@@ -109,20 +113,52 @@ export const MOCK_PORTFOLIO_IMAGES = [
 export function emptyJobFacts(): PortfolioJobFacts {
   const productSlug = PRODUCT_OPTIONS[0]?.value ?? "curtain";
   return {
+    jobTitle: "",
+    place: "",
     patternId: "hero-gallery",
-    province: "กรุงเทพมหานคร",
+    province: "",
     district: "",
-    installDate: new Date().toISOString().slice(0, 10),
+    installDate: "",
     productSlug,
     variantSlug: variantOptions(productSlug)[0]?.value ?? "",
     spaceType: "home-condo",
     customerLabel: "",
-    showCustomerName: false,
+    showCustomerName: true,
     approxSizeNote: "",
     painPoints: "",
     notesFromStaff: "",
     images: [],
     tone: "friendly",
+  };
+}
+
+export function factsFromPortfolioItem(item: PortfolioItem): PortfolioJobFacts {
+  const urls = Array.from(
+    new Set((item.gallery.length ? item.gallery : [item.image]).filter(Boolean)),
+  );
+  const cover = item.image.trim() || urls[0] || "";
+  const variants = variantOptions(item.productSlug);
+  const sku = item.lineItems[0]?.sku?.trim() ?? "";
+  const variantSlug = variants.some((v) => v.value === sku)
+    ? sku
+    : "";
+
+  return {
+    ...emptyJobFacts(),
+    jobTitle: item.title,
+    place: item.place,
+    productSlug: item.productSlug,
+    variantSlug,
+    spaceType: item.spaceType,
+    customerLabel: item.customerName,
+    showCustomerName: item.showCustomerName,
+    installDate: item.installDate,
+    approxSizeNote: item.installLocation,
+    images: urls.map((url, index) => ({
+      id: `img-${item.id}-${index}`,
+      url,
+      role: url === cover && urls.indexOf(cover) === index ? "cover" : "gallery",
+    })),
   };
 }
 
@@ -136,6 +172,7 @@ function variantName(productSlug: string, variantSlug: string) {
 }
 
 function formatPlace(facts: PortfolioJobFacts) {
+  if (facts.place?.trim()) return facts.place.trim();
   const district = facts.district.trim();
   const province = facts.province.trim();
   if (district && province) return `${district} ${province}`;
@@ -205,22 +242,16 @@ function joinDetail(parts: string[]) {
 }
 
 function generateTitle(facts: PortfolioJobFacts) {
+  if (facts.jobTitle?.trim()) return facts.jobTitle.trim();
   const product = productName(facts.productSlug);
   const variant = variantName(facts.productSlug, facts.variantSlug);
-  const space = spaceLabel(facts.spaceType);
-  const placeBit = facts.district.trim() || facts.province.trim();
   const main = variant || product;
-
-  switch (facts.patternId) {
-    case "before-after":
-      return `ก่อน-หลังติดตั้ง${main} ${space}${placeBit ? ` ${placeBit}` : ""}`;
-    case "corp":
-      return `โปรเจกต์${main} ${space}${placeBit ? ` — ${placeBit}` : ""}`;
-    case "short":
-      return `${main} ${space}${placeBit ? ` ${placeBit}` : ""}`;
-    default:
-      return `${main}${space !== "บ้าน" ? ` ${space}` : ""}${placeBit ? ` ${placeBit}` : ""}`;
-  }
+  const who = facts.customerLabel.trim();
+  const placeBit =
+    facts.place?.trim() || facts.district.trim() || facts.province.trim();
+  if (who) return `${main} ${who}`;
+  if (placeBit) return `${main} ${placeBit}`;
+  return main;
 }
 
 function generateSummary(facts: PortfolioJobFacts, place: string) {
@@ -229,18 +260,21 @@ function generateSummary(facts: PortfolioJobFacts, place: string) {
   const item = variant || product;
   const space = spaceLabel(facts.spaceType);
   const pain = facts.painPoints.trim();
+  const who = facts.customerLabel.trim();
+  const where = who && who !== place ? `${who} ${place}` : who || place;
 
   if (facts.tone === "sales") {
     return pain
-      ? `${item}ช่วย${pain} ที่${place} — เหมาะ${space}ที่อยากได้ทั้งฟังก์ชันและความเรียบ`
-      : `${item}ที่${place} เลือกให้เข้ากับ${space} ใช้งานจริงทุกวัน`;
+      ? `${item}ช่วย${pain} ที่${where} — เหมาะ${space}ที่อยากได้ทั้งฟังก์ชันและความเรียบ`
+      : `${item}ที่${where} เลือกให้เข้ากับ${space} ใช้งานจริงทุกวัน`;
   }
   if (facts.tone === "formal") {
-    return `${item}สำหรับ${space}บริเวณ${place} เน้นการใช้งานและความเรียบร้อย`;
+    return `${item}สำหรับ${space}บริเวณ${where} เน้นการใช้งานและความเรียบร้อย`;
   }
-  return pain
-    ? `${item}ที่${place} ช่วยเรื่อง${pain} ให้${space}อยู่สบายขึ้น`
-    : `${item}ที่${place} เลือกให้เหมาะ${space} ทั้งคุมแสงและความเป็นระเบียบ`;
+  if (pain) {
+    return `${item}ที่${where} ช่วยเรื่อง${pain} ให้${space}อยู่สบายขึ้น`;
+  }
+  return `${item}ที่${where} เลือกให้เข้ากับ${space} ทั้งคุมแสงและความเป็นระเบียบ`;
 }
 
 function generateDetail(facts: PortfolioJobFacts, place: string) {
@@ -326,7 +360,7 @@ function generateDetail(facts: PortfolioJobFacts, place: string) {
       ]
         .filter(Boolean)
         .join(" ");
-      return joinDetail([why, fit, extra, factsBlock]);
+      return joinDetail([why, fit, extra]);
     }
   }
 }

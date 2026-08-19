@@ -28,6 +28,8 @@ export function BrochureLink({ className, children }: Props) {
           fileName="changtee-brochure-2026.pdf"
           title={siteConfig.brochureLabel}
           manifestUrl={siteConfig.brochureManifestUrl}
+          onlineUrl={siteConfig.brochureOnlineUrl}
+          onlineLabel="เปิดพรีเซ้นท์"
           onClose={() => setOpen(false)}
         />
       ) : null}

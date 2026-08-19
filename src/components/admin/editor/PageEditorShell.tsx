@@ -1,6 +1,14 @@
 "use client";
 
-import { Menu, Monitor, Smartphone, Tablet, X } from "lucide-react";
+import {
+  Menu,
+  Monitor,
+  PanelLeftClose,
+  PanelLeftOpen,
+  Smartphone,
+  Tablet,
+  X,
+} from "lucide-react";
 import { useEffect, useState, type ReactNode } from "react";
 import { EditorInspector } from "@/components/admin/editor/inspector/EditorInspector";
 import { EditorTopBar } from "@/components/admin/editor/EditorTopBar";
@@ -29,6 +37,7 @@ export function PageEditorShell({
 }) {
   const { dirty, fieldDirty, pageKey, selected } = useSectionDraft();
   const [treeOpen, setTreeOpen] = useState(false);
+  const [treeCollapsed, setTreeCollapsed] = useState(false);
   const [inspectorOpen, setInspectorOpen] = useState(true);
   const [closedWhileSelected, setClosedWhileSelected] = useState<string | null>(
     null,
@@ -40,6 +49,25 @@ export function PageEditorShell({
   const inspectorVisible = selectedKey
     ? closedWhileSelected !== selectedKey
     : inspectorOpen;
+
+  useEffect(() => {
+    try {
+      setTreeCollapsed(
+        window.localStorage.getItem("ctc-editor-tree-collapsed") === "1",
+      );
+    } catch {
+      /* ignore */
+    }
+  }, []);
+
+  function persistTreeCollapsed(next: boolean) {
+    setTreeCollapsed(next);
+    try {
+      window.localStorage.setItem("ctc-editor-tree-collapsed", next ? "1" : "0");
+    } catch {
+      /* ignore */
+    }
+  }
 
   useEffect(() => {
     const onBeforeUnload = (e: BeforeUnloadEvent) => {
@@ -63,11 +91,24 @@ export function PageEditorShell({
           <div className="flex items-center gap-2">
             <button
               type="button"
-              className="rounded-lg border border-line p-2 text-navy lg:hidden"
+              className="inline-flex min-h-9 min-w-9 items-center justify-center rounded-lg border border-line text-navy hover:bg-paper lg:hidden"
               aria-label="เปิดผังเว็บ"
               onClick={() => setTreeOpen(true)}
             >
               <Menu className="size-4" />
+            </button>
+            <button
+              type="button"
+              className="hidden min-h-9 min-w-9 items-center justify-center rounded-lg border border-line text-navy hover:bg-paper lg:inline-flex"
+              aria-label={treeCollapsed ? "เปิดผังเว็บ" : "หุบผังเว็บ"}
+              title={treeCollapsed ? "เปิดผังเว็บ" : "หุบผังเว็บ"}
+              onClick={() => persistTreeCollapsed(!treeCollapsed)}
+            >
+              {treeCollapsed ? (
+                <PanelLeftOpen className="size-4" />
+              ) : (
+                <PanelLeftClose className="size-4" />
+              )}
             </button>
             {device && onDeviceChange ? (
               <div className="hidden items-center rounded-full border border-line p-0.5 sm:flex">
@@ -121,11 +162,26 @@ export function PageEditorShell({
       <div className="relative flex min-h-0 flex-1">
         {/* Desktop tree */}
         <div className="hidden lg:flex">
-          <PageTreeSidebar
-            activeId={page.id}
-            basePath={basePath}
-            dirtyPageKeys={dirtyKeys}
-          />
+          {treeCollapsed ? (
+            <div className="flex w-12 flex-col items-center border-r border-line bg-white py-3">
+              <button
+                type="button"
+                onClick={() => persistTreeCollapsed(false)}
+                className="inline-flex min-h-9 min-w-9 items-center justify-center rounded-lg border border-line text-navy hover:bg-paper"
+                aria-label="เปิดผังเว็บ"
+                title="เปิดผังเว็บ"
+              >
+                <PanelLeftOpen className="size-4" />
+              </button>
+            </div>
+          ) : (
+            <PageTreeSidebar
+              activeId={page.id}
+              basePath={basePath}
+              dirtyPageKeys={dirtyKeys}
+              onCollapse={() => persistTreeCollapsed(true)}
+            />
+          )}
         </div>
 
         {/* Mobile tree drawer */}

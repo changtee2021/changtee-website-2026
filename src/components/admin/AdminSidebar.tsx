@@ -1,27 +1,19 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import {
-  ExternalLink,
-  LogOut,
-  PanelLeftClose,
-  PanelLeftOpen,
-} from "lucide-react";
-import { useRouter } from "next/navigation";
-import { isAdminAuthEnforced } from "@/lib/admin-auth-edge";
-import { getBootstrapAdmin } from "@/lib/admin-users";
+import { PanelLeftClose, PanelLeftOpen } from "lucide-react";
 import {
   adminHref,
   adminNavGroups,
   isAdminNavActive,
 } from "@/lib/admin-nav";
+import { useAdminInboxBadges } from "@/components/admin/useAdminInboxBadges";
 import { cn } from "@/lib/utils";
 
 type AdminSidebarProps = {
   basePath: string;
-  siteUrl: string;
-  sessionLabel?: { fullName: string; employeeCode: string; roleLabel: string };
   onNavigate?: () => void;
   headerAction?: React.ReactNode;
   /** Desktop icon-rail mode */
@@ -31,28 +23,13 @@ type AdminSidebarProps = {
 
 export function AdminSidebar({
   basePath,
-  siteUrl,
-  sessionLabel,
   onNavigate,
   headerAction,
   collapsed = false,
   onToggleCollapse,
 }: AdminSidebarProps) {
-  const router = useRouter();
   const pathname = usePathname() || basePath || "/";
-  const bootstrapAdmin = getBootstrapAdmin();
-  const user = sessionLabel ?? {
-    fullName: bootstrapAdmin.fullName,
-    employeeCode: bootstrapAdmin.employeeCode,
-    roleLabel: "แอดมิน",
-  };
-
-  async function logout() {
-    await fetch("/api/admin/session", { method: "DELETE" });
-    onNavigate?.();
-    router.replace(adminHref(basePath, "/login"));
-    router.refresh();
-  }
+  const badges = useAdminInboxBadges();
 
   return (
     <aside className="flex h-full w-full flex-col bg-navy-deep text-white">
@@ -62,9 +39,21 @@ export function AdminSidebar({
           collapsed ? "flex-col gap-2 px-2" : "gap-3 px-4",
         )}
       >
-        <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-brand-red font-display text-sm font-bold">
-          CT
-        </div>
+        <Link
+          href={adminHref(basePath, "")}
+          onClick={onNavigate}
+          className="relative size-10 shrink-0 overflow-hidden rounded-xl bg-navy ring-1 ring-white/15"
+          aria-label="ช่างตี๋ Admin หน้าแรก"
+        >
+          <Image
+            src="/images/brand/logo-mark-nav.png"
+            alt="ช่างตี๋"
+            fill
+            className="object-contain p-0.5"
+            sizes="40px"
+            priority
+          />
+        </Link>
         {!collapsed ? (
           <div className="min-w-0 flex-1">
             <div className="truncate font-display text-sm font-semibold">
@@ -115,6 +104,9 @@ export function AdminSidebar({
                   !item.soon &&
                   isAdminNavActive(pathname, basePath, item.path, item.exact);
                 const Icon = item.icon;
+                const badgeCount = item.badgeKey ? badges[item.badgeKey] : 0;
+                const badgeLabel =
+                  badgeCount > 99 ? "99+" : String(badgeCount);
 
                 if (item.soon) {
                   return (
@@ -147,9 +139,13 @@ export function AdminSidebar({
                     <Link
                       href={href}
                       onClick={onNavigate}
-                      title={item.label}
+                      title={
+                        badgeCount > 0
+                          ? `${item.label} · ใหม่ ${badgeCount} รายการ`
+                          : item.label
+                      }
                       className={cn(
-                        "flex items-center rounded-lg text-sm transition-colors",
+                        "relative flex min-h-11 items-center rounded-lg text-sm transition-colors sm:min-h-10",
                         collapsed
                           ? "justify-center px-2 py-2.5"
                           : "gap-3 px-3 py-2.5",
@@ -158,9 +154,39 @@ export function AdminSidebar({
                           : "text-white/75 hover:bg-white/10 hover:text-white",
                       )}
                     >
-                      <Icon className="size-4 shrink-0" />
+                      <span className="relative shrink-0">
+                        <Icon className="size-4" />
+                        {collapsed && badgeCount > 0 ? (
+                          <span
+                            className={cn(
+                              "absolute -top-1.5 -right-1.5 flex size-4 items-center justify-center rounded-full text-[9px] font-bold",
+                              active
+                                ? "bg-white text-brand-red"
+                                : "bg-brand-red text-white",
+                            )}
+                          >
+                            {badgeCount > 9 ? "9+" : badgeCount}
+                          </span>
+                        ) : null}
+                      </span>
                       {!collapsed ? (
-                        <span className="truncate">{item.label}</span>
+                        <>
+                          <span className="min-w-0 flex-1 truncate">
+                            {item.label}
+                          </span>
+                          {badgeCount > 0 ? (
+                            <span
+                              className={cn(
+                                "min-w-5 shrink-0 rounded-full px-1.5 py-0.5 text-center text-[10px] font-bold leading-none",
+                                active
+                                  ? "bg-white text-brand-red"
+                                  : "bg-brand-red text-white",
+                              )}
+                            >
+                              {badgeLabel}
+                            </span>
+                          ) : null}
+                        </>
                       ) : null}
                     </Link>
                   </li>
@@ -170,50 +196,6 @@ export function AdminSidebar({
           </div>
         ))}
       </nav>
-
-      <div className={cn("border-t border-white/10", collapsed ? "p-2" : "p-3")}>
-        {!collapsed ? (
-          <div className="mb-2 rounded-lg bg-white/5 px-3 py-2.5">
-            <div className="truncate text-xs font-medium text-white/90">
-              {user.fullName}
-            </div>
-            <div className="mt-0.5 text-[11px] text-white/45">
-              รหัส {user.employeeCode} · {user.roleLabel}
-              {!isAdminAuthEnforced() ? " · auth ปิดอยู่" : null}
-            </div>
-          </div>
-        ) : null}
-        <button
-          type="button"
-          onClick={() => void logout()}
-          title="ออกจากระบบ"
-          className={cn(
-            "mb-1 flex w-full items-center rounded-lg text-sm text-white/65 transition-colors hover:bg-white/10 hover:text-white",
-            collapsed ? "justify-center px-2 py-2.5" : "gap-2 px-3 py-2.5",
-          )}
-        >
-          <LogOut className="size-4 shrink-0" />
-          {!collapsed ? <span className="truncate">ออกจากระบบ</span> : null}
-        </button>
-        <a
-          href={siteUrl}
-          target="_blank"
-          rel="noreferrer"
-          title="เปิดเว็บหลัก"
-          className={cn(
-            "flex items-center rounded-lg text-sm text-white/65 transition-colors hover:bg-white/10 hover:text-white",
-            collapsed ? "justify-center px-2 py-2.5" : "gap-2 px-3 py-2.5",
-          )}
-        >
-          <ExternalLink className="size-4 shrink-0" />
-          {!collapsed ? <span className="truncate">เปิดเว็บหลัก</span> : null}
-        </a>
-        {!collapsed ? (
-          <p className="mt-2 px-3 text-[11px] leading-relaxed text-white/35">
-            Production: admin.changtee-curtain.com
-          </p>
-        ) : null}
-      </div>
     </aside>
   );
 }

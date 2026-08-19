@@ -1,3 +1,11 @@
+import type { VisitBookingKind } from "@/lib/visits/modes";
+import type {
+  VisitNextStep,
+  VisitOutcomeScores,
+} from "@/lib/visits/outcome";
+
+export type { VisitBookingKind };
+
 export const VISIT_SESSIONS = ["morning", "evening"] as const;
 export type VisitSession = (typeof VISIT_SESSIONS)[number];
 
@@ -14,6 +22,7 @@ export const VISIT_SESSION_SHORT_LABELS: Record<VisitSession, string> = {
 export const VISIT_STATUSES = [
   "pending",
   "confirmed",
+  "rescheduled",
   "cancelled",
   "completed",
 ] as const;
@@ -22,13 +31,25 @@ export type VisitStatus = (typeof VISIT_STATUSES)[number];
 export const VISIT_STATUS_LABELS: Record<VisitStatus, string> = {
   pending: "รอยืนยัน",
   confirmed: "ยืนยันแล้ว",
+  rescheduled: "เลื่อนนัด",
   cancelled: "ยกเลิก",
   completed: "เยี่ยมชมแล้ว",
 };
 
+export function visitStatusLabel(
+  status: VisitStatus,
+  kind?: VisitBookingKind,
+): string {
+  if (status === "completed" && kind === "product-presentation") {
+    return "นำเสนอแล้ว";
+  }
+  return VISIT_STATUS_LABELS[status];
+}
+
 export const VISIT_STATUS_STYLES: Record<VisitStatus, { select: string }> = {
   pending: { select: "border-sky-300 bg-sky-50 text-sky-800" },
   confirmed: { select: "border-emerald-300 bg-emerald-50 text-emerald-800" },
+  rescheduled: { select: "border-amber-300 bg-amber-50 text-amber-900" },
   cancelled: { select: "border-rose-300 bg-rose-50 text-rose-800" },
   completed: { select: "border-violet-300 bg-violet-50 text-violet-900" },
 };
@@ -80,18 +101,30 @@ export const VISIT_PURPOSES = [
 
 export type FactoryVisitBooking = {
   id: string;
+  bookingKind?: VisitBookingKind;
   fullName: string;
   phone: string;
   email?: string | null;
   lineId?: string | null;
   businessName?: string | null;
   contactPosition?: string | null;
+  department?: string | null;
   taxId?: string | null;
+  legalEntityType?: string | null;
+  industry?: string | null;
+  officeAddress?: string | null;
   visitSites?: string[];
+  presentationVenue?: string | null;
+  venueAddress?: string | null;
+  jobType?: string | null;
+  decisionTimeline?: string | null;
+  estimatedScope?: string | null;
   companyProfileName?: string | null;
   companyProfilePath?: string | null;
+  companyProfileUrl?: string | null;
   businessCardName?: string | null;
   businessCardPath?: string | null;
+  businessCardUrl?: string | null;
   visitDate: string;
   session: VisitSession;
   visitorCount: number;
@@ -99,6 +132,13 @@ export type FactoryVisitBooking = {
   productInterest?: string | null;
   note?: string | null;
   status: VisitStatus;
+  cancelReason?: string | null;
+  rescheduleReason?: string | null;
+  previousVisitDate?: string | null;
+  previousSession?: VisitSession | null;
+  outcomeScores?: VisitOutcomeScores | null;
+  outcomeNote?: string | null;
+  outcomeNextStep?: VisitNextStep | null;
   createdAt: string;
   updatedAt: string;
 };

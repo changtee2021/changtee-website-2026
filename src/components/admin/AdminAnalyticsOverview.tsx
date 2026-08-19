@@ -696,6 +696,8 @@ export function AdminAnalyticsOverview({ basePath }: Props) {
           <div className="mt-4 space-y-2">
             {[
               { href: "/leads", label: "คำขอใบเสนอราคา", ready: true },
+              { href: "/visits", label: "นัดเยี่ยมชมโรงงาน", ready: true },
+              { href: "/presentations", label: "นัดนำเสนอสินค้า", ready: true },
               { href: "/editor/home", label: "Page Editor", ready: true },
               { href: "/cms/hero-slides", label: "สไลด์หน้าแรก", ready: true },
               { href: "/cms/portfolio", label: "ผลงาน", ready: true },

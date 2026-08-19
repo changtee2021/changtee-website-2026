@@ -43,16 +43,16 @@ export function MobileDock() {
       aria-label="เมนูล่าง"
       className="pointer-events-none fixed inset-x-0 bottom-0 z-50 px-3 pb-[max(0.75rem,env(safe-area-inset-bottom,0px))] lg:hidden"
     >
-      <div className="pointer-events-auto mx-auto flex max-w-md items-stretch gap-0.5 rounded-full border border-white/70 bg-white/55 px-1.5 py-1 shadow-[0_8px_32px_rgba(11,31,58,0.16)] backdrop-blur-xl">
+      <div className="pointer-events-auto mx-auto flex max-w-md items-stretch gap-0.5 rounded-full border border-white/70 bg-white/55 px-1.5 py-1 shadow-[0_8px_32px_rgba(11,31,58,0.16)] backdrop-blur-xl dark:border-line dark:bg-[#1a2433]/90 dark:shadow-[0_8px_32px_rgba(0,0,0,0.35)]">
         <div
-          className="relative flex min-w-[7.75rem] flex-[1.7] rounded-full bg-navy/8 p-0.5"
+          className="relative flex min-w-[7.75rem] flex-[1.7] rounded-full bg-navy/8 p-0.5 dark:bg-white/8"
           onTouchStart={onToggleTouchStart}
           onTouchEnd={onToggleTouchEnd}
         >
           {browse ? (
             <motion.span
               layoutId={reduced ? undefined : "dock-browse-pill"}
-              className="absolute inset-y-0.5 w-[calc(50%-2px)] rounded-full bg-white shadow-sm"
+              className="absolute inset-y-0.5 w-[calc(50%-2px)] rounded-full bg-white shadow-sm dark:bg-[#0b1f3a]"
               initial={false}
               animate={{ left: browse === "portfolio" ? "calc(50% + 1px)" : "2px" }}
               transition={
