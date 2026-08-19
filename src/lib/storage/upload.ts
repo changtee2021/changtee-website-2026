@@ -3,6 +3,18 @@ import { createServiceSupabase } from "@/lib/supabase/server";
 
 export const UPLOAD_BUCKET = "changtee-uploads";
 
+/** Supabase Storage keys must be ASCII — Thai filenames were rejected as Invalid key. */
+export function asciiSafeFileBase(fileName: string): string {
+  const stem = fileName.replace(/\.[^.]+$/, "");
+  const ascii = stem
+    .normalize("NFKD")
+    .replace(/[^\x00-\x7F]/g, "")
+    .replace(/[^a-zA-Z0-9_-]+/g, "_")
+    .replace(/^_+|_+$/g, "")
+    .slice(0, 60);
+  return ascii || "upload";
+}
+
 export function canUseSupabaseStorage(): boolean {
   return Boolean(
     process.env.NEXT_PUBLIC_SUPABASE_URL &&
@@ -25,11 +37,7 @@ export async function uploadPublicFile(opts: {
     .map((part) => part.replace(/[^a-z0-9_-]/gi, ""))
     .filter(Boolean)
     .join("/") || "misc";
-  const safeBase =
-    opts.fileName
-      .replace(/\.[^.]+$/, "")
-      .replace(/[^\w\-ก-๙]+/g, "_")
-      .replace(/^_+|_+$/g, "") || "upload";
+  const safeBase = asciiSafeFileBase(opts.fileName);
   const extMatch = opts.fileName.match(/\.[a-z0-9]+$/i);
   const ext = extMatch?.[0]?.toLowerCase() || "";
   const path = `${folder}/${Date.now()}-${randomUUID().slice(0, 8)}-${safeBase}${ext}`;
@@ -64,11 +72,7 @@ export async function uploadPrivateFile(opts: {
     .map((part) => part.replace(/[^a-z0-9_-]/gi, ""))
     .filter(Boolean)
     .join("/") || "misc";
-  const safeBase =
-    opts.fileName
-      .replace(/\.[^.]+$/, "")
-      .replace(/[^\w\-ก-๙]+/g, "_")
-      .replace(/^_+|_+$/g, "") || "upload";
+  const safeBase = asciiSafeFileBase(opts.fileName);
   const extMatch = opts.fileName.match(/\.[a-z0-9]+$/i);
   const ext = extMatch?.[0]?.toLowerCase() || "";
   const path = `${folder}/${Date.now()}-${randomUUID().slice(0, 8)}-${safeBase}${ext}`;

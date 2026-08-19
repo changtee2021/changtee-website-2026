@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { assertAdminApiAccess } from "@/lib/admin-api-guard";
 import { bytesMatchDeclaredType, isJsonBytes, isPdfBytes } from "@/lib/security/file-magic";
 import {
+  asciiSafeFileBase,
   canUseSupabaseStorage,
   uploadPublicFile,
 } from "@/lib/storage/upload";
@@ -81,14 +82,11 @@ export async function POST(request: Request) {
       if (!isPdfBytes(buffer)) {
         return NextResponse.json({ error: "ไฟล์ไม่ใช่ PDF จริง" }, { status: 400 });
       }
-      const baseName =
-        file.name
-          .replace(/\.[^.]+$/, "")
-          .replace(/[^\w\-ก-๙]+/g, "_")
-          .replace(/^_+|_+$/g, "") || "catalog";
       const uploaded = await uploadPublicFile({
         folder,
-        fileName: `${baseName}.pdf`,
+        fileName: file.name.toLowerCase().endsWith(".pdf")
+          ? file.name
+          : `${file.name}.pdf`,
         bytes: buffer,
         contentType: "application/pdf",
       });
@@ -106,14 +104,11 @@ export async function POST(request: Request) {
       if (!isJsonBytes(buffer)) {
         return NextResponse.json({ error: "ไฟล์ไม่ใช่ JSON จริง" }, { status: 400 });
       }
-      const baseName =
-        file.name
-          .replace(/\.[^.]+$/, "")
-          .replace(/[^\w\-ก-๙]+/g, "_")
-          .replace(/^_+|_+$/g, "") || "manifest";
       const uploaded = await uploadPublicFile({
         folder,
-        fileName: `${baseName}.json`,
+        fileName: file.name.toLowerCase().endsWith(".json")
+          ? file.name
+          : `${file.name}.json`,
         bytes: buffer,
         contentType: "application/json",
       });
@@ -139,14 +134,9 @@ export async function POST(request: Request) {
     if (!bytesMatchDeclaredType(buffer, imageType)) {
       return NextResponse.json({ error: "เนื้อไฟล์ไม่ตรงกับชนิดที่ประกาศ" }, { status: 400 });
     }
-    const baseName =
-      file.name
-        .replace(/\.[^.]+$/, "")
-        .replace(/[^\w\-ก-๙]+/g, "_")
-        .replace(/^_+|_+$/g, "") || "upload";
     const uploaded = await uploadPublicFile({
       folder,
-      fileName: `${baseName}${extension}`,
+      fileName: `${asciiSafeFileBase(file.name)}${extension}`,
       bytes: buffer,
       contentType: imageType,
     });
@@ -154,6 +144,13 @@ export async function POST(request: Request) {
     return NextResponse.json({ url: uploaded.url, name: file.name, path: uploaded.path });
   } catch (error) {
     console.error("admin upload failed", error);
+    const raw = error instanceof Error ? error.message : "";
+    if (/invalid key/i.test(raw)) {
+      return NextResponse.json(
+        { error: "ชื่อไฟล์มีอักขระที่ระบบจัดเก็บไม่รับ — ลองอัปอีกครั้ง" },
+        { status: 400 },
+      );
+    }
     return NextResponse.json({ error: "อัปโหลดไม่สำเร็จ" }, { status: 500 });
   }
 }
