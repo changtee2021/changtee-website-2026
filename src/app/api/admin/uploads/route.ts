@@ -14,10 +14,24 @@ const MAX_JSON_BYTES = 2 * 1024 * 1024;
 
 const IMAGE_ALLOWED: Record<string, ".jpg" | ".png" | ".webp" | ".gif"> = {
   "image/jpeg": ".jpg",
+  "image/jpg": ".jpg",
+  "image/pjpeg": ".jpg",
   "image/png": ".png",
   "image/webp": ".webp",
   "image/gif": ".gif",
 };
+
+function resolvedImageType(file: File): string {
+  const raw = file.type.toLowerCase();
+  if (raw === "image/jpg" || raw === "image/pjpeg") return "image/jpeg";
+  if (IMAGE_ALLOWED[raw]) return raw;
+  const name = file.name.toLowerCase();
+  if (name.endsWith(".jpg") || name.endsWith(".jpeg")) return "image/jpeg";
+  if (name.endsWith(".png")) return "image/png";
+  if (name.endsWith(".webp")) return "image/webp";
+  if (name.endsWith(".gif")) return "image/gif";
+  return raw;
+}
 
 export async function POST(request: Request) {
   const unauthorized = await assertAdminApiAccess(request);
@@ -108,11 +122,12 @@ export async function POST(request: Request) {
 
     if (file.size > MAX_IMAGE_BYTES) {
       return NextResponse.json(
-        { error: "ไฟล์ใหญ่เกิน 8MB" },
+        { error: "ไฟล์ใหญ่เกิน 8MB — บันทึกเป็น JPG แล้วลองใหม่" },
         { status: 400 },
       );
     }
-    const extension = IMAGE_ALLOWED[file.type];
+    const imageType = resolvedImageType(file);
+    const extension = IMAGE_ALLOWED[imageType] ?? IMAGE_ALLOWED[file.type];
     if (!extension) {
       return NextResponse.json(
         { error: "รองรับเฉพาะ JPG, PNG, WEBP, GIF, PDF หรือ JSON" },
@@ -121,7 +136,7 @@ export async function POST(request: Request) {
     }
 
     const buffer = Buffer.from(await file.arrayBuffer());
-    if (!bytesMatchDeclaredType(buffer, file.type)) {
+    if (!bytesMatchDeclaredType(buffer, imageType)) {
       return NextResponse.json({ error: "เนื้อไฟล์ไม่ตรงกับชนิดที่ประกาศ" }, { status: 400 });
     }
     const baseName =
@@ -133,7 +148,7 @@ export async function POST(request: Request) {
       folder,
       fileName: `${baseName}${extension}`,
       bytes: buffer,
-      contentType: file.type,
+      contentType: imageType,
     });
 
     return NextResponse.json({ url: uploaded.url, name: file.name, path: uploaded.path });

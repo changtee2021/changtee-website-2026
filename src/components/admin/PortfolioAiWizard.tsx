@@ -39,9 +39,14 @@ import {
   usePortfolioItems,
 } from "@/lib/cms/demo-store";
 import { relatedPortfolio } from "@/lib/cms/public-content";
+import {
+  uploadAdminFile,
+  type UploadPrepStatus,
+} from "@/lib/cms/admin-upload";
 import { adminBaseFromPathname, adminHref } from "@/lib/admin-nav";
 import { cn } from "@/lib/utils";
 import { CmsModal, Field, SelectField, TextArea } from "@/components/admin/cms/CmsShared";
+import { UploadPrepBar } from "@/components/admin/cms/UploadPrepBar";
 import { CmsSitePreview } from "@/components/admin/cms/CmsSitePreview";
 import { PortfolioDetailView } from "@/components/portfolio/PortfolioDetailView";
 
@@ -91,6 +96,7 @@ function PortfolioComposer({
   const [detail, setDetail] = useState(existing?.detail ?? "");
   const [generating, setGenerating] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [uploadStatus, setUploadStatus] = useState<UploadPrepStatus | null>(null);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [dragging, setDragging] = useState(false);
   const [previewOpen, setPreviewOpen] = useState(false);
@@ -183,28 +189,26 @@ function PortfolioComposer({
     setUploading(true);
     const added: PortfolioDraftImage[] = [];
     try {
-      for (const file of list) {
-        const body = new FormData();
-        body.set("file", file);
-        body.set("folder", "portfolio");
-        const res = await fetch("/api/admin/uploads", {
-          method: "POST",
-          body,
-          credentials: "include",
+      for (let i = 0; i < list.length; i += 1) {
+        const file = list[i]!;
+        const prefix =
+          list.length > 1 ? `รูป ${i + 1}/${list.length} — ` : "";
+        const url = await uploadAdminFile(file, "portfolio", (status) => {
+          setUploadStatus({
+            ...status,
+            label: `${prefix}${status.label}`,
+          });
         });
-        const data = (await res.json()) as { url?: string; error?: string };
-        if (!res.ok || !data.url) {
-          throw new Error(data.error || "อัปโหลดไม่สำเร็จ");
-        }
         const role: PortfolioImageRole =
           facts.images.length + added.length === 0 ? "cover" : "gallery";
-        added.push(newImage(data.url, role));
+        added.push(newImage(url, role));
       }
       setImages([...facts.images, ...added]);
     } catch (e) {
       setUploadError(e instanceof Error ? e.message : "อัปโหลดไม่สำเร็จ");
     } finally {
       setUploading(false);
+      setUploadStatus(null);
       if (fileRef.current) fileRef.current.value = "";
     }
   }
@@ -460,7 +464,7 @@ function PortfolioComposer({
               รูปผลงาน
             </h2>
             <p className="mt-1 text-sm text-muted">
-              โยนเข้าไปกี่รูปก็ได้ รูปแรกเป็นปก — กดดาวเพื่อเปลี่ยนปก
+              โยนเข้าไปกี่รูปก็ได้ รูปแรกเป็นปก — กดดาวเพื่อเปลี่ยนปก ระบบย่อรูปให้อัตโนมัติก่อนอัป
             </p>
           </div>
           <button
@@ -479,7 +483,7 @@ function PortfolioComposer({
           <input
             ref={fileRef}
             type="file"
-            accept="image/jpeg,image/png,image/webp,image/gif"
+            accept="image/jpeg,image/jpg,image/png,image/webp,image/gif"
             multiple
             className="hidden"
             onChange={(e) => {
@@ -509,6 +513,13 @@ function PortfolioComposer({
         >
           ลากรูปมาวางที่นี่ หรือกดเลือกไฟล์ — รองรับหลายรูปพร้อมกัน
         </div>
+
+        {uploadStatus ? (
+          <UploadPrepBar
+            status={uploadStatus}
+            className="rounded-xl border border-line bg-paper px-3 py-3"
+          />
+        ) : null}
 
         {uploadError ? (
           <p className="text-xs text-brand-red">{uploadError}</p>
