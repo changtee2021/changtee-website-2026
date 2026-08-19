@@ -15,16 +15,28 @@ export function createServerSupabase() {
   });
 }
 
-/** Service-role client for trusted API routes only. */
-export function createServiceSupabase() {
+function serviceRoleEnv() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
   if (!url || !serviceKey) {
     throw new Error("Missing NEXT_PUBLIC_SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY");
   }
+  return { url, serviceKey };
+}
 
+/** Service-role client for trusted API routes only. */
+export function createServiceSupabase() {
+  const { url, serviceKey } = serviceRoleEnv();
   return createClient(url, serviceKey, {
     db: { schema: SUPABASE_SCHEMA },
+    auth: { persistSession: false, autoRefreshToken: false },
+  });
+}
+
+/** Public-schema service client for RPCs that live in `public`. */
+export function createPublicServiceSupabase() {
+  const { url, serviceKey } = serviceRoleEnv();
+  return createClient(url, serviceKey, {
     auth: { persistSession: false, autoRefreshToken: false },
   });
 }

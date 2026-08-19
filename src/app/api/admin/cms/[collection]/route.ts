@@ -3,6 +3,7 @@ import { assertAdminApiAccess } from "@/lib/admin-api-guard";
 import { isAdminCmsCollection } from "@/lib/cms/cms-collections";
 import { readCmsCollection, writeCmsCollection } from "@/lib/cms/cms-server";
 import {
+  canUseLocalCmsStore,
   readLocalCmsCollection,
   writeLocalCmsCollection,
 } from "@/lib/cms/cms-local-store";
@@ -80,11 +81,15 @@ export async function PUT(request: Request, { params }: Props) {
   const merged = mergeCmsItems(existing, items, deletedIds, collection);
 
   let result = await writeCmsCollection(collection, merged);
-  if (!result.ok) {
+  if (!result.ok && canUseLocalCmsStore()) {
     result = await writeLocalCmsCollection(collection, merged);
   }
   if (!result.ok) {
-    return NextResponse.json({ error: result.error }, { status: 503 });
+    const error =
+      result.error === "Local CMS store is not available"
+        ? "บันทึกขึ้นเซิร์ฟเวอร์ไม่สำเร็จ — ลองอีกครั้ง"
+        : result.error;
+    return NextResponse.json({ error }, { status: 503 });
   }
   revalidateCmsCollection(collection);
   return NextResponse.json({ ok: true, updatedAt: result.updatedAt });
