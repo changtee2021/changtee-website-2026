@@ -6,33 +6,23 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
   ArrowLeft,
-  ArrowRight,
-  Check,
   Eye,
   ImagePlus,
   Loader2,
+  MapPin,
   Sparkles,
+  Star,
   Trash2,
-  Wand2,
-  X,
 } from "lucide-react";
+import { slugifyTh } from "@/lib/cms/content-status";
 import {
-  CONTENT_STATUS_LABELS,
-  type ContentStatus,
-} from "@/lib/cms/content-status";
-import {
-  MOCK_PORTFOLIO_IMAGES,
-  PORTFOLIO_PATTERNS,
-  TH_PROVINCES,
   emptyJobFacts,
+  factsFromPortfolioItem,
   generatePortfolioDraft,
-  patternLabel,
   variantOptions,
   type PortfolioDraftImage,
-  type PortfolioDraftTone,
   type PortfolioImageRole,
   type PortfolioJobFacts,
-  type PortfolioPatternId,
 } from "@/lib/cms/portfolio-ai-draft";
 import {
   PRODUCT_OPTIONS,
@@ -41,57 +31,89 @@ import {
   type SpaceType,
 } from "@/lib/cms/portfolio-demo";
 import {
+  removePortfolioItem,
   upsertPortfolioItem,
   usePortfolioItems,
 } from "@/lib/cms/demo-store";
 import { relatedPortfolio } from "@/lib/cms/public-content";
 import { adminBaseFromPathname, adminHref } from "@/lib/admin-nav";
 import { cn } from "@/lib/utils";
-import {
-  DemoBadge,
-  Field,
-  SelectField,
-  TextArea,
-} from "@/components/admin/cms/CmsShared";
+import { CmsModal, Field, SelectField, TextArea } from "@/components/admin/cms/CmsShared";
 import { CmsSitePreview } from "@/components/admin/cms/CmsSitePreview";
 import { PortfolioDetailView } from "@/components/portfolio/PortfolioDetailView";
 
-type Step = 1 | 2 | 3 | 4;
-
-const STEPS: { n: Step; label: string }[] = [
-  { n: 1, label: "แพทเทิร์น" },
-  { n: 2, label: "ข้อมูล + รูป" },
-  { n: 3, label: "ร่าง AI" },
-  { n: 4, label: "ยืนยัน" },
-];
-
-function newImage(url: string, role: PortfolioImageRole = "gallery"): PortfolioDraftImage {
-  return { id: `img-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`, url, role };
+function newImage(
+  url: string,
+  role: PortfolioImageRole = "gallery",
+): PortfolioDraftImage {
+  return {
+    id: `img-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+    url,
+    role,
+  };
 }
 
-export function PortfolioAiWizard() {
+export function PortfolioAiWizard({ id }: { id?: string }) {
+  const items = usePortfolioItems();
+  const existing =
+    id && id !== "new" ? items.find((item) => item.id === id) : undefined;
+
+  return (
+    <PortfolioComposer
+      key={existing ? `${existing.id}-${existing.updatedAt}` : "new"}
+      existing={existing}
+      missingEdit={Boolean(id && id !== "new" && !existing)}
+    />
+  );
+}
+
+function PortfolioComposer({
+  existing,
+  missingEdit,
+}: {
+  existing?: PortfolioItem;
+  missingEdit?: boolean;
+}) {
   const router = useRouter();
   const pathname = usePathname() || "";
   const basePath = adminBaseFromPathname(pathname);
   const allItems = usePortfolioItems();
   const listHref = adminHref(basePath, "/cms/portfolio");
-  const manualHref = adminHref(basePath, "/cms/portfolio/new?mode=manual");
+  const isEdit = Boolean(existing);
 
-  const [step, setStep] = useState<Step>(1);
-  const [facts, setFacts] = useState<PortfolioJobFacts>(() => emptyJobFacts());
-  const [draft, setDraft] = useState<PortfolioItem | null>(null);
+  const [facts, setFacts] = useState<PortfolioJobFacts>(() =>
+    existing ? factsFromPortfolioItem(existing) : emptyJobFacts(),
+  );
+  const [summary, setSummary] = useState(existing?.summary ?? "");
+  const [detail, setDetail] = useState(existing?.detail ?? "");
   const [generating, setGenerating] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
+  const [dragging, setDragging] = useState(false);
   const [previewOpen, setPreviewOpen] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [publishStatus, setPublishStatus] = useState<ContentStatus>("draft");
-  const [pinned, setPinned] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
 
   const variants = useMemo(
     () => variantOptions(facts.productSlug),
     [facts.productSlug],
+  );
+
+  const draft = useMemo(
+    () =>
+      buildLiveDraft(facts, {
+        summary,
+        detail,
+        status: existing?.status === "published" ? "published" : "draft",
+        existing,
+      }),
+    [facts, summary, detail, existing],
+  );
+
+  const related = useMemo(
+    () => relatedPortfolio(draft, allItems),
+    [draft, allItems],
   );
 
   function patchFacts(partial: Partial<PortfolioJobFacts>) {
@@ -102,14 +124,21 @@ export function PortfolioAiWizard() {
     patchFacts({ images });
   }
 
-  function updateImage(id: string, partial: Partial<PortfolioDraftImage>) {
-    setImages(
-      facts.images.map((img) => (img.id === id ? { ...img, ...partial } : img)),
-    );
+  function removeImage(id: string) {
+    const next = facts.images.filter((img) => img.id !== id);
+    if (next.length && !next.some((img) => img.role === "cover")) {
+      next[0] = { ...next[0]!, role: "cover" };
+    }
+    setImages(next);
   }
 
-  function removeImage(id: string) {
-    setImages(facts.images.filter((img) => img.id !== id));
+  function setCover(id: string) {
+    setImages(
+      facts.images.map((img) => ({
+        ...img,
+        role: img.id === id ? "cover" : "gallery",
+      })),
+    );
   }
 
   async function uploadFiles(files: FileList | File[]) {
@@ -145,708 +174,527 @@ export function PortfolioAiWizard() {
     }
   }
 
-  function addMockImage(url: string) {
-    const role: PortfolioImageRole =
-      facts.images.length === 0 ? "cover" : "gallery";
-    setImages([...facts.images, newImage(url, role)]);
-  }
-
-  function validateStep2(): string | null {
-    if (!facts.province.trim()) return "เลือกจังหวัด";
+  function missingForPublish(): string | null {
+    if (!facts.place.trim()) return "ใส่สถานที่ที่โชว์บนเว็บ";
     if (!facts.productSlug) return "เลือกสินค้า";
-    if (!facts.installDate) return "ใส่วันที่ติดตั้ง";
-    if (facts.images.length === 0) return "อัปโหลดหรือเลือกรูปอย่างน้อย 1 รูป";
-    if (facts.patternId === "before-after") {
-      const hasBefore = facts.images.some((i) => i.role === "before");
-      const hasAfter = facts.images.some((i) => i.role === "after");
-      if (!hasBefore || !hasAfter) {
-        return "แพทเทิร์น Before/After ต้องติดป้ายรูปอย่างน้อย 1 ก่อน และ 1 หลัง";
-      }
+    if (facts.images.length === 0) return "ใส่รูปอย่างน้อย 1 รูป";
+    if (!facts.jobTitle.trim() && !facts.customerLabel.trim()) {
+      return "ใส่ชื่องาน หรือชื่อลูกค้า เพื่อตั้งหัวข้อบนเว็บ";
     }
     return null;
   }
 
-  async function runGenerate() {
-    const err = validateStep2();
-    if (err) {
+  async function writeCaption() {
+    const err = missingForPublish();
+    if (err && !facts.productSlug) {
       alert(err);
       return;
     }
     setGenerating(true);
-    // Small delay so the UI feels like “AI working” in demo mode
-    await new Promise((r) => window.setTimeout(r, 450));
-    const next = generatePortfolioDraft(facts, {
-      id: draft?.id,
-      status: publishStatus,
-      pinned,
-    });
-    setDraft(next);
+    await new Promise((r) => window.setTimeout(r, 350));
+    const next = generatePortfolioDraft(
+      {
+        ...facts,
+        jobTitle: facts.jobTitle.trim(),
+        place: facts.place.trim(),
+      },
+      { id: existing?.id ?? draft.id },
+    );
+    if (!facts.jobTitle.trim()) {
+      patchFacts({ jobTitle: next.title });
+    }
+    setSummary(next.summary);
+    setDetail(next.detail);
     setGenerating(false);
-    setStep(3);
   }
 
-  function confirmPublish() {
-    if (!draft) return;
-    if (!draft.title.trim() || !draft.place.trim()) {
-      alert("ชื่อผลงานและที่ตั้งต้องมี");
+  function save(status: "draft" | "published") {
+    const err = missingForPublish();
+    if (err) {
+      alert(err);
       return;
     }
     setSaving(true);
+    const item = buildLiveDraft(facts, {
+      summary:
+        summary.trim() ||
+        generatePortfolioDraft(facts, { id: existing?.id ?? draft.id }).summary,
+      detail:
+        detail.trim() ||
+        generatePortfolioDraft(facts, { id: existing?.id ?? draft.id }).detail,
+      status,
+      existing,
+    });
     upsertPortfolioItem({
-      ...draft,
-      status: publishStatus,
-      pinned,
+      ...item,
       updatedAt: new Date().toISOString(),
     });
     router.push(listHref);
   }
 
-  const related = draft ? relatedPortfolio(draft, allItems) : [];
+  function removeWork() {
+    if (!existing) return;
+    removePortfolioItem(existing.id);
+    router.push(listHref);
+  }
+
+  if (missingEdit) {
+    return (
+      <div className="mx-auto max-w-5xl space-y-3">
+        <Link
+          href={listHref}
+          className="inline-flex min-h-11 items-center gap-1 text-sm text-muted hover:text-navy sm:min-h-9"
+        >
+          <ArrowLeft className="size-4" />
+          กลับรายการผลงาน
+        </Link>
+        <p className="text-sm text-muted">ไม่พบผลงานนี้</p>
+      </div>
+    );
+  }
 
   return (
-    <div className="mx-auto max-w-5xl space-y-5">
+    <div className="mx-auto max-w-5xl space-y-5 pb-28">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <Link
             href={listHref}
-            className="inline-flex items-center gap-1 text-sm text-muted hover:text-navy"
+            className="inline-flex min-h-11 items-center gap-1 text-sm text-muted hover:text-navy sm:min-h-9"
           >
             <ArrowLeft className="size-4" />
             กลับรายการผลงาน
           </Link>
           <h1 className="mt-2 font-display text-xl font-semibold text-navy sm:text-2xl">
-            ลงผลงานด้วยตัวช่วย AI
+            {isEdit ? "แก้ไขผลงาน" : "ลงผลงาน"}
           </h1>
-          <p className="mt-1 text-sm text-muted">
-            เลือกรูปแบบ → ใส่ข้อเท็จจริง + รูป → ให้ระบบจัดเนื้อหา → ยืนยันก่อนลง{" "}
-            <DemoBadge>demo — จัดเนื้อหาแบบเทมเพลต (ยังไม่ต่อ LLM)</DemoBadge>
+          <p className="mt-1 max-w-xl text-sm text-muted">
+            กรอกเท่าที่โชว์บนหน้าเว็บ โยนรูปเข้าไป แล้วให้ระบบเขียนแคปชัน — จากนั้นพรีวิวแล้วเผยแพร่
           </p>
         </div>
-        <Link
-          href={manualHref}
-          className="rounded-xl border border-line px-3 py-2 text-sm text-navy hover:bg-paper"
-        >
-          ใช้ฟอร์มเต็มแทน
-        </Link>
       </div>
 
-      <ol className="flex flex-wrap gap-2">
-        {STEPS.map((s) => (
-          <li key={s.n}>
-            <button
-              type="button"
-              onClick={() => {
-                if (s.n < step || (s.n === 3 && draft) || s.n === step) {
-                  setStep(s.n);
-                }
-              }}
-              className={cn(
-                "inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-medium sm:text-sm",
-                step === s.n
-                  ? "border-navy bg-navy text-white"
-                  : step > s.n
-                    ? "border-emerald-200 bg-emerald-50 text-emerald-800"
-                    : "border-line bg-white text-muted",
-              )}
-            >
-              <span
-                className={cn(
-                  "flex size-5 items-center justify-center rounded-full text-[11px]",
-                  step === s.n
-                    ? "bg-white/20"
-                    : step > s.n
-                      ? "bg-emerald-200 text-emerald-900"
-                      : "bg-paper",
-                )}
-              >
-                {step > s.n ? <Check className="size-3" /> : s.n}
-              </span>
-              {s.label}
-            </button>
-          </li>
-        ))}
-      </ol>
-
-      {step === 1 ? (
-        <section className="space-y-4 rounded-2xl border border-line bg-white p-4 shadow-sm sm:p-6">
+      <section className="space-y-4 rounded-2xl border border-line bg-white p-4 shadow-sm sm:p-6">
+        <div>
           <h2 className="font-display text-lg font-semibold text-navy">
-            เลือกแพทเทิร์นเลย์เอาต์
+            ข้อมูลที่โชว์บนเว็บ
           </h2>
-          <div className="grid gap-3 sm:grid-cols-2">
-            {PORTFOLIO_PATTERNS.map((p) => {
-              const active = facts.patternId === p.id;
-              return (
-                <button
-                  key={p.id}
-                  type="button"
-                  onClick={() => patchFacts({ patternId: p.id })}
-                  className={cn(
-                    "rounded-2xl border p-4 text-left transition",
-                    active
-                      ? "border-navy bg-navy/[0.04] ring-2 ring-navy/20"
-                      : "border-line hover:border-navy/30",
-                  )}
-                >
-                  <PatternSketch id={p.id} active={active} />
-                  <div className="mt-3 font-display font-semibold text-navy">
-                    {p.name}
-                  </div>
-                  <p className="mt-1 text-sm text-muted">{p.description}</p>
-                  <p className="mt-2 text-[11px] text-brand-red">เหมาะกับ: {p.bestFor}</p>
-                </button>
-              );
-            })}
-          </div>
-          <div className="flex justify-end">
-            <button
-              type="button"
-              onClick={() => setStep(2)}
-              className="inline-flex items-center gap-1.5 rounded-xl bg-navy px-4 py-2.5 text-sm font-medium text-white hover:bg-navy-deep"
-            >
-              ถัดไป
-              <ArrowRight className="size-4" />
-            </button>
-          </div>
-        </section>
-      ) : null}
+          <p className="mt-1 text-sm text-muted">
+            ตรงกับการ์ดผลงานและหน้ารายละเอียด — ลูกค้าเห็นชื่องาน สถานที่ และสินค้า
+          </p>
+        </div>
 
-      {step === 2 ? (
-        <section className="space-y-5 rounded-2xl border border-line bg-white p-4 shadow-sm sm:p-6">
+        <div className="grid gap-4 sm:grid-cols-2">
+          <Field
+            label="ชื่อลูกค้า / โครงการ"
+            value={facts.customerLabel}
+            onChange={(v) => patchFacts({ customerLabel: v })}
+            placeholder="หาดบ้านดิน รีสอร์ท / คุณสุน"
+          />
+          <Field
+            label="ชื่องานบนเว็บ"
+            value={facts.jobTitle}
+            onChange={(v) => patchFacts({ jobTitle: v })}
+            placeholder="ว่างไว้ได้ — กดให้ AI ตั้งให้"
+            hint="ตัวอย่างจริง: ม่านตาไก่ หาดบ้านดิน รีสอร์ท"
+          />
+          <Field
+            label="สถานที่ *"
+            value={facts.place}
+            onChange={(v) => patchFacts({ place: v })}
+            placeholder="กาญจนบุรี / พระราม 5 นนทบุรี"
+          />
+          <SelectField
+            label="ประเภทพื้นที่"
+            value={facts.spaceType}
+            onChange={(v) => patchFacts({ spaceType: v as SpaceType })}
+            options={(Object.keys(SPACE_TYPE_LABELS) as SpaceType[]).map(
+              (k) => ({ value: k, label: SPACE_TYPE_LABELS[k] }),
+            )}
+          />
+          <SelectField
+            label="สินค้า *"
+            value={facts.productSlug}
+            onChange={(v) =>
+              patchFacts({
+                productSlug: v,
+                variantSlug: variantOptions(v)[0]?.value ?? "",
+              })
+            }
+            options={PRODUCT_OPTIONS}
+          />
+          <SelectField
+            label="แบบที่ติด"
+            value={facts.variantSlug}
+            onChange={(v) => patchFacts({ variantSlug: v })}
+            options={[
+              { value: "", label: "— ไม่ระบุแบบ —" },
+              ...variants,
+            ]}
+          />
+        </div>
+
+        <label className="flex min-h-11 items-center gap-2 text-sm text-navy">
+          <input
+            type="checkbox"
+            checked={facts.showCustomerName}
+            onChange={(e) =>
+              patchFacts({ showCustomerName: e.target.checked })
+            }
+          />
+          โชว์ชื่อลูกค้าบนหน้าเว็บ
+        </label>
+      </section>
+
+      <section className="space-y-4 rounded-2xl border border-line bg-white p-4 shadow-sm sm:p-6">
+        <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
             <h2 className="font-display text-lg font-semibold text-navy">
-              ข้อเท็จจริงหน้างาน + รูป
+              รูปผลงาน
             </h2>
             <p className="mt-1 text-sm text-muted">
-              แพทเทิร์น: {patternLabel(facts.patternId)} — AI จะไม่แต่งข้อมูลที่คุณไม่ได้ใส่
+              โยนเข้าไปกี่รูปก็ได้ รูปแรกเป็นปก — กดดาวเพื่อเปลี่ยนปก
             </p>
           </div>
-
-          <div className="grid gap-4 sm:grid-cols-2">
-            <SelectField
-              label="จังหวัด *"
-              value={facts.province}
-              onChange={(v) => patchFacts({ province: v })}
-              options={TH_PROVINCES.map((p) => ({ value: p, label: p }))}
-            />
-            <Field
-              label="อำเภอ / ย่าน"
-              value={facts.district}
-              onChange={(v) => patchFacts({ district: v })}
-              placeholder="ลาดกระบัง / พระราม 5"
-            />
-            <SelectField
-              label="ประเภทพื้นที่ *"
-              value={facts.spaceType}
-              onChange={(v) => patchFacts({ spaceType: v as SpaceType })}
-              options={(Object.keys(SPACE_TYPE_LABELS) as SpaceType[]).map(
-                (k) => ({ value: k, label: SPACE_TYPE_LABELS[k] }),
-              )}
-            />
-            <Field
-              label="วันที่ติดตั้ง *"
-              type="date"
-              value={facts.installDate}
-              onChange={(v) => patchFacts({ installDate: v })}
-            />
-            <SelectField
-              label="สินค้าหลัก *"
-              value={facts.productSlug}
-              onChange={(v) =>
-                patchFacts({
-                  productSlug: v,
-                  variantSlug: variantOptions(v)[0]?.value ?? "",
-                })
-              }
-              options={PRODUCT_OPTIONS}
-            />
-            <SelectField
-              label="รุ่น / SKU"
-              value={facts.variantSlug}
-              onChange={(v) => patchFacts({ variantSlug: v })}
-              options={[
-                { value: "", label: "— ไม่ระบุ —" },
-                ...variants,
-              ]}
-            />
-          </div>
-
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div className="space-y-2">
-              <Field
-                label="ชื่อลูกค้า / โครงการ"
-                value={facts.customerLabel}
-                onChange={(v) => patchFacts({ customerLabel: v })}
-                placeholder="คุณเอ / โครงการ B"
-              />
-              <label className="flex items-center gap-2 text-sm text-navy">
-                <input
-                  type="checkbox"
-                  checked={facts.showCustomerName}
-                  onChange={(e) =>
-                    patchFacts({ showCustomerName: e.target.checked })
-                  }
-                />
-                อนุญาตให้โชว์ชื่อในบทความ
-              </label>
-            </div>
-            <SelectField
-              label="โทนภาษา"
-              value={facts.tone}
-              onChange={(v) => patchFacts({ tone: v as PortfolioDraftTone })}
-              options={[
-                { value: "friendly", label: "เป็นกันเอง" },
-                { value: "formal", label: "ทางการ" },
-                { value: "sales", label: "เน้นขาย / CTA" },
-              ]}
-            />
-          </div>
-
-          <Field
-            label="ขนาด / จำนวนโดยประมาณ"
-            value={facts.approxSizeNote}
-            onChange={(v) => patchFacts({ approxSizeNote: v })}
-            placeholder="เช่น ห้องนั่งเล่น 3 บาน / ทั้งชั้น 12 ชุด"
-          />
-          <Field
-            label="ปัญหาเดิม / โจทย์ลูกค้า"
-            value={facts.painPoints}
-            onChange={(v) => patchFacts({ painPoints: v })}
-            placeholder="แดดจ้า มองจากข้างบ้าน อยากโปร่งแต่กันสายตา"
-          />
-          <TextArea
-            label="หมายเหตุจากช่าง (ภาษาพูดก็ได้)"
-            value={facts.notesFromStaff}
-            onChange={(v) => patchFacts({ notesFromStaff: v })}
-            rows={3}
-            hint="ระบบจะจัดเป็นประโยคอ่านง่ายในขั้นถัดไป"
-          />
-
-          <div className="space-y-3 border-t border-line pt-4">
-            <div className="flex flex-wrap items-center justify-between gap-2">
-              <h3 className="text-sm font-medium text-navy">รูปหน้างาน *</h3>
-              <button
-                type="button"
-                disabled={uploading}
-                onClick={() => fileRef.current?.click()}
-                className="inline-flex items-center gap-1.5 rounded-xl bg-navy px-3 py-2 text-sm font-medium text-white hover:bg-navy-deep disabled:opacity-60"
-              >
-                {uploading ? (
-                  <Loader2 className="size-4 animate-spin" />
-                ) : (
-                  <ImagePlus className="size-4" />
-                )}
-                อัปโหลดรูป
-              </button>
-              <input
-                ref={fileRef}
-                type="file"
-                accept="image/jpeg,image/png,image/webp,image/gif"
-                multiple
-                className="hidden"
-                onChange={(e) => {
-                  if (e.target.files) void uploadFiles(e.target.files);
-                }}
-              />
-            </div>
-            {uploadError ? (
-              <p className="text-xs text-brand-red">{uploadError}</p>
-            ) : null}
-
-            {facts.images.length === 0 ? (
-              <div className="rounded-xl border border-dashed border-line bg-paper/60 px-4 py-8 text-center text-sm text-muted">
-                ยังไม่มีรูป — อัปโหลด หรือเลือกรูปตัวอย่างด้านล่าง
-              </div>
+          <button
+            type="button"
+            disabled={uploading}
+            onClick={() => fileRef.current?.click()}
+            className="inline-flex min-h-11 items-center gap-1.5 rounded-xl bg-navy px-3 text-sm font-medium text-white hover:bg-navy-deep disabled:opacity-60 sm:min-h-9"
+          >
+            {uploading ? (
+              <Loader2 className="size-4 animate-spin" />
             ) : (
-              <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
-                {facts.images.map((img) => (
-                  <li
-                    key={img.id}
-                    className="overflow-hidden rounded-xl border border-line bg-paper"
-                  >
-                    <div className="relative aspect-[4/3]">
-                      <Image
-                        src={img.url}
-                        alt=""
-                        fill
-                        className="object-cover"
-                        sizes="200px"
-                      />
+              <ImagePlus className="size-4" />
+            )}
+            เลือกไฟล์
+          </button>
+          <input
+            ref={fileRef}
+            type="file"
+            accept="image/jpeg,image/png,image/webp,image/gif"
+            multiple
+            className="hidden"
+            onChange={(e) => {
+              if (e.target.files) void uploadFiles(e.target.files);
+            }}
+          />
+        </div>
+
+        <div
+          onDragOver={(e) => {
+            e.preventDefault();
+            setDragging(true);
+          }}
+          onDragLeave={() => setDragging(false)}
+          onDrop={(e) => {
+            e.preventDefault();
+            setDragging(false);
+            if (e.dataTransfer.files.length) void uploadFiles(e.dataTransfer.files);
+          }}
+          className={cn(
+            "cursor-pointer rounded-2xl border border-dashed px-4 py-8 text-center text-sm transition",
+            dragging
+              ? "border-navy bg-navy/[0.04] text-navy"
+              : "border-line bg-paper/50 text-muted",
+          )}
+          onClick={() => fileRef.current?.click()}
+        >
+          ลากรูปมาวางที่นี่ หรือกดเลือกไฟล์ — รองรับหลายรูปพร้อมกัน
+        </div>
+
+        {uploadError ? (
+          <p className="text-xs text-brand-red">{uploadError}</p>
+        ) : null}
+
+        {facts.images.length > 0 ? (
+          <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
+            {facts.images.map((img) => {
+              const isCover = img.role === "cover";
+              return (
+                <li
+                  key={img.id}
+                  className={cn(
+                    "overflow-hidden rounded-xl border bg-paper",
+                    isCover ? "border-navy ring-2 ring-navy/20" : "border-line",
+                  )}
+                >
+                  <div className="relative aspect-[4/3]">
+                    <Image
+                      src={img.url}
+                      alt=""
+                      fill
+                      className="object-cover"
+                      sizes="200px"
+                    />
+                    {isCover ? (
+                      <span className="absolute left-1.5 top-1.5 rounded-full bg-navy px-2 py-0.5 text-[10px] font-medium text-white">
+                        ปก
+                      </span>
+                    ) : null}
+                    <div className="absolute right-1 top-1 flex gap-1">
+                      <button
+                        type="button"
+                        onClick={() => setCover(img.id)}
+                        className="inline-flex size-9 items-center justify-center rounded-md bg-black/55 text-white hover:bg-black/75"
+                        aria-label="ตั้งเป็นปก"
+                      >
+                        <Star
+                          className={cn(
+                            "size-3.5",
+                            isCover && "fill-amber-300 text-amber-300",
+                          )}
+                        />
+                      </button>
                       <button
                         type="button"
                         onClick={() => removeImage(img.id)}
-                        className="absolute right-1 top-1 rounded-md bg-black/55 p-1 text-white hover:bg-black/75"
+                        className="inline-flex size-9 items-center justify-center rounded-md bg-black/55 text-white hover:bg-black/75"
                         aria-label="ลบรูป"
                       >
                         <Trash2 className="size-3.5" />
                       </button>
                     </div>
-                    <div className="p-2">
-                      <select
-                        value={img.role}
-                        onChange={(e) =>
-                          updateImage(img.id, {
-                            role: e.target.value as PortfolioImageRole,
-                          })
-                        }
-                        className="w-full rounded-lg border border-line bg-white px-2 py-1 text-[11px] text-navy"
-                      >
-                        <option value="cover">ปก</option>
-                        <option value="gallery">แกลเลอรี</option>
-                        <option value="before">ก่อนติดตั้ง</option>
-                        <option value="after">หลังติดตั้ง</option>
-                      </select>
-                    </div>
-                  </li>
-                ))}
-              </ul>
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
+        ) : null}
+      </section>
+
+      <section className="space-y-4 rounded-2xl border border-line bg-white p-4 shadow-sm sm:p-6">
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <div>
+            <h2 className="font-display text-lg font-semibold text-navy">
+              แคปชันบนหน้าเว็บ
+            </h2>
+            <p className="mt-1 text-sm text-muted">
+              สรุปสั้น + รายละเอียด — สไตล์เดียวกับผลงานที่ลงไว้แล้ว เช่น ม่านตาไก่โทนเทา เข้ากับห้องไม้รีสอร์ท
+            </p>
+          </div>
+          <button
+            type="button"
+            disabled={generating}
+            onClick={() => void writeCaption()}
+            className="inline-flex min-h-11 items-center gap-1.5 rounded-xl bg-brand-red px-3 text-sm font-medium text-white hover:bg-brand-red/90 disabled:opacity-60 sm:min-h-9"
+          >
+            {generating ? (
+              <Loader2 className="size-4 animate-spin" />
+            ) : (
+              <Sparkles className="size-4" />
             )}
+            ให้ AI เขียนแคปชัน
+          </button>
+        </div>
 
-            <div>
-              <p className="mb-2 text-[11px] text-muted">
-                รูปตัวอย่าง (demo ถ้ายังอัปโหลดไม่ได้)
-              </p>
-              <div className="flex flex-wrap gap-2">
-                {MOCK_PORTFOLIO_IMAGES.map((url) => (
-                  <button
-                    key={url}
-                    type="button"
-                    onClick={() => addMockImage(url)}
-                    className="relative size-14 overflow-hidden rounded-lg border border-line hover:border-navy/40"
-                    title="เพิ่มรูปนี้"
-                  >
-                    <Image src={url} alt="" fill className="object-cover" sizes="56px" />
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
+        <Field
+          label="อยากให้แคปชันพูดถึงอะไร (ไม่บังคับ)"
+          value={facts.painPoints}
+          onChange={(v) => patchFacts({ painPoints: v })}
+          placeholder="แดดจ้า / อยากโปร่งแต่กันสายตา / เข้ากับห้องไม้"
+        />
 
-          <div className="flex flex-wrap justify-between gap-2 border-t border-line pt-4">
+        <TextArea
+          label="สรุปสั้น"
+          value={summary}
+          onChange={setSummary}
+          rows={2}
+        />
+        <TextArea
+          label="รายละเอียด"
+          value={detail}
+          onChange={setDetail}
+          rows={5}
+        />
+
+        <SiteCardPreview
+          title={draft.title}
+          place={draft.place}
+          space={SPACE_TYPE_LABELS[draft.spaceType]}
+          image={draft.image}
+          summary={summary}
+        />
+      </section>
+
+      <div className="fixed inset-x-0 bottom-0 z-30 border-t border-line bg-white/95 px-4 py-3 backdrop-blur sm:px-6">
+        <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-end gap-2">
+          {isEdit ? (
             <button
               type="button"
-              onClick={() => setStep(1)}
-              className="rounded-xl border border-line px-4 py-2.5 text-sm text-navy hover:bg-paper"
+              disabled={saving}
+              onClick={() => setConfirmDelete(true)}
+              className="mr-auto inline-flex size-11 items-center justify-center rounded-xl border border-rose-200 text-rose-700 hover:bg-rose-50 disabled:opacity-60 sm:size-9"
+              title="ลบผลงาน"
+              aria-label="ลบผลงาน"
             >
-              กลับ
+              <Trash2 className="size-4" />
             </button>
-            <button
-              type="button"
-              disabled={generating}
-              onClick={() => void runGenerate()}
-              className="inline-flex items-center gap-1.5 rounded-xl bg-brand-red px-4 py-2.5 text-sm font-medium text-white hover:bg-brand-red/90 disabled:opacity-60"
-            >
-              {generating ? (
-                <Loader2 className="size-4 animate-spin" />
-              ) : (
-                <Wand2 className="size-4" />
-              )}
-              ให้ AI จัดเนื้อหา
-            </button>
-          </div>
-        </section>
-      ) : null}
+          ) : null}
+          <button
+            type="button"
+            onClick={() => setPreviewOpen(true)}
+            className="inline-flex size-11 items-center justify-center rounded-xl border border-navy/20 text-navy hover:bg-paper sm:size-9"
+            title="พรีวิวหน้าเว็บ"
+            aria-label="พรีวิวหน้าเว็บ"
+          >
+            <Eye className="size-4" />
+          </button>
+          <button
+            type="button"
+            disabled={saving}
+            onClick={() => save("draft")}
+            className="inline-flex min-h-11 items-center rounded-xl border border-line px-4 text-sm font-medium text-navy hover:bg-paper disabled:opacity-60 sm:min-h-9"
+          >
+            บันทึกฉบับร่าง
+          </button>
+          <button
+            type="button"
+            disabled={saving}
+            onClick={() => save("published")}
+            className="inline-flex min-h-11 items-center rounded-xl bg-navy px-4 text-sm font-medium text-white hover:bg-navy-deep disabled:opacity-60 sm:min-h-9"
+          >
+            เผยแพร่
+          </button>
+        </div>
+      </div>
 
-      {step === 3 && draft ? (
-        <section className="space-y-4 rounded-2xl border border-line bg-white p-4 shadow-sm sm:p-6">
-          <div className="flex flex-wrap items-start justify-between gap-3">
-            <div>
-              <h2 className="font-display text-lg font-semibold text-navy">
-                ตรวจร่างที่ระบบจัดให้
-              </h2>
-              <p className="mt-1 text-sm text-muted">
-                แก้ข้อความได้ก่อนยืนยัน — หรือสร้างใหม่ด้วยโทน/แพทเทิร์นอื่น
-              </p>
-            </div>
-            <div className="flex flex-wrap gap-2">
-              <button
-                type="button"
-                onClick={() => setPreviewOpen(true)}
-                className="inline-flex items-center gap-1.5 rounded-xl border border-navy/20 bg-paper px-3 py-2 text-sm font-medium text-navy hover:bg-white"
-              >
-                <Eye className="size-4" />
-                พรีวิวหน้าเว็บ
-              </button>
-              <button
-                type="button"
-                disabled={generating}
-                onClick={() => void runGenerate()}
-                className="inline-flex items-center gap-1.5 rounded-xl border border-line px-3 py-2 text-sm text-navy hover:bg-paper disabled:opacity-60"
-              >
-                <Sparkles className="size-4" />
-                สร้างร่างใหม่
-              </button>
-            </div>
-          </div>
-
-          <div className="grid gap-4 lg:grid-cols-[1fr_280px]">
-            <div className="space-y-3">
-              <Field
-                label="ชื่อผลงาน"
-                value={draft.title}
-                onChange={(v) => setDraft({ ...draft, title: v })}
-              />
-              <Field
-                label="ที่ตั้ง (แสดงบนเว็บ)"
-                value={draft.place}
-                onChange={(v) => setDraft({ ...draft, place: v })}
-              />
-              <Field
-                label="Slug"
-                value={draft.slug}
-                onChange={(v) => setDraft({ ...draft, slug: v })}
-                hint={`/portfolio/${draft.slug || "..."}`}
-              />
-              <TextArea
-                label="สรุปสั้น"
-                value={draft.summary}
-                onChange={(v) => setDraft({ ...draft, summary: v })}
-                rows={2}
-              />
-              <TextArea
-                label="รายละเอียด"
-                value={draft.detail}
-                onChange={(v) => setDraft({ ...draft, detail: v })}
-                rows={8}
-              />
-              <Field
-                label="แท็ก (คั่นด้วยจุลภาค)"
-                value={draft.tags.join(", ")}
-                onChange={(v) =>
-                  setDraft({
-                    ...draft,
-                    tags: v
-                      .split(",")
-                      .map((t) => t.trim())
-                      .filter(Boolean),
-                  })
-                }
-              />
-            </div>
-            <aside className="space-y-3 rounded-xl border border-line bg-paper/50 p-3">
-              <p className="text-xs font-medium text-navy">ปรับก่อนสร้างใหม่</p>
-              <SelectField
-                label="แพทเทิร์น"
-                value={facts.patternId}
-                onChange={(v) =>
-                  patchFacts({ patternId: v as PortfolioPatternId })
-                }
-                options={PORTFOLIO_PATTERNS.map((p) => ({
-                  value: p.id,
-                  label: p.name,
-                }))}
-              />
-              <SelectField
-                label="โทนภาษา"
-                value={facts.tone}
-                onChange={(v) => patchFacts({ tone: v as PortfolioDraftTone })}
-                options={[
-                  { value: "friendly", label: "เป็นกันเอง" },
-                  { value: "formal", label: "ทางการ" },
-                  { value: "sales", label: "เน้นขาย" },
-                ]}
-              />
-              <div className="relative aspect-[4/3] overflow-hidden rounded-lg border border-line bg-white">
-                {draft.image ? (
-                  <Image
-                    src={draft.image}
-                    alt=""
-                    fill
-                    className="object-cover"
-                    sizes="280px"
-                  />
-                ) : null}
-              </div>
-              <p className="text-[11px] text-muted">
-                แกลเลอรี {draft.gallery.length} รูป
-              </p>
-            </aside>
-          </div>
-
-          <div className="flex flex-wrap justify-between gap-2 border-t border-line pt-4">
-            <button
-              type="button"
-              onClick={() => setStep(2)}
-              className="rounded-xl border border-line px-4 py-2.5 text-sm text-navy hover:bg-paper"
-            >
-              กลับแก้ข้อมูล
-            </button>
-            <button
-              type="button"
-              onClick={() => setStep(4)}
-              className="inline-flex items-center gap-1.5 rounded-xl bg-navy px-4 py-2.5 text-sm font-medium text-white hover:bg-navy-deep"
-            >
-              ไปยืนยัน
-              <ArrowRight className="size-4" />
-            </button>
-          </div>
-        </section>
-      ) : null}
-
-      {step === 4 && draft ? (
-        <section className="space-y-4 rounded-2xl border border-line bg-white p-4 shadow-sm sm:p-6">
-          <h2 className="font-display text-lg font-semibold text-navy">
-            ยืนยันก่อนลงผลงาน
-          </h2>
-          <div className="grid gap-4 sm:grid-cols-[140px_1fr]">
-            <div className="relative aspect-[4/3] overflow-hidden rounded-xl border border-line bg-paper sm:aspect-square">
-              <Image
-                src={draft.image}
-                alt=""
-                fill
-                className="object-cover"
-                sizes="140px"
-              />
-            </div>
-            <dl className="grid gap-2 text-sm sm:grid-cols-2">
-              <div>
-                <dt className="text-[11px] text-muted">ชื่อ</dt>
-                <dd className="font-medium text-navy">{draft.title}</dd>
-              </div>
-              <div>
-                <dt className="text-[11px] text-muted">ที่ตั้ง</dt>
-                <dd className="text-navy">{draft.place}</dd>
-              </div>
-              <div>
-                <dt className="text-[11px] text-muted">แพทเทิร์น</dt>
-                <dd className="text-navy">{patternLabel(facts.patternId)}</dd>
-              </div>
-              <div>
-                <dt className="text-[11px] text-muted">สินค้า / SKU</dt>
-                <dd className="text-navy">
-                  {PRODUCT_OPTIONS.find((p) => p.value === facts.productSlug)
-                    ?.label ?? facts.productSlug}
-                  {facts.variantSlug ? ` / ${facts.variantSlug}` : ""}
-                </dd>
-              </div>
-              <div>
-                <dt className="text-[11px] text-muted">วันที่ติดตั้ง</dt>
-                <dd className="text-navy">{facts.installDate || "—"}</dd>
-              </div>
-              <div>
-                <dt className="text-[11px] text-muted">รูป</dt>
-                <dd className="text-navy">{draft.gallery.length} รูป</dd>
-              </div>
-            </dl>
-          </div>
-
-          <div className="grid gap-3 sm:grid-cols-2">
-            <SelectField
-              label="สถานะเมื่อบันทึก"
-              value={publishStatus}
-              onChange={(v) => setPublishStatus(v as ContentStatus)}
-              options={(Object.keys(CONTENT_STATUS_LABELS) as ContentStatus[]).map(
-                (k) => ({ value: k, label: CONTENT_STATUS_LABELS[k] }),
-              )}
-            />
-            <label className="flex items-end gap-2 pb-2 text-sm text-navy">
-              <input
-                type="checkbox"
-                checked={pinned}
-                onChange={(e) => setPinned(e.target.checked)}
-              />
-              ปักหมุดหน้าแรก
-            </label>
-          </div>
-
-          <div className="flex flex-wrap items-center justify-between gap-2 border-t border-line pt-4">
-            <button
-              type="button"
-              onClick={() => setStep(3)}
-              className="inline-flex items-center gap-1 rounded-xl border border-line px-4 py-2.5 text-sm text-navy hover:bg-paper"
-            >
-              <X className="size-4" />
-              กลับแก้ร่าง
-            </button>
-            <div className="flex flex-wrap gap-2">
-              <button
-                type="button"
-                onClick={() => setPreviewOpen(true)}
-                className="inline-flex items-center gap-1.5 rounded-xl border border-navy/20 px-4 py-2.5 text-sm font-medium text-navy hover:bg-paper"
-              >
-                <Eye className="size-4" />
-                พรีวิว
-              </button>
-              <button
-                type="button"
-                disabled={saving}
-                onClick={confirmPublish}
-                className="inline-flex items-center gap-1.5 rounded-xl bg-navy px-4 py-2.5 text-sm font-medium text-white hover:bg-navy-deep disabled:opacity-60"
-              >
-                <Check className="size-4" />
-                ยืนยันลงผลงาน
-              </button>
-            </div>
-          </div>
-        </section>
-      ) : null}
-
-      {draft ? (
-        <CmsSitePreview
-          open={previewOpen}
-          onClose={() => setPreviewOpen(false)}
-          title={draft.title || "ผลงาน"}
-          status={publishStatus}
+      {confirmDelete && existing ? (
+        <CmsModal
+          title="ยืนยันการลบผลงาน"
+          subtitle={existing.title}
+          onClose={() => setConfirmDelete(false)}
         >
-          <PortfolioDetailView item={draft} related={related} preview />
-        </CmsSitePreview>
+          <p className="text-sm text-muted">
+            ลบแล้วจะหายจากรายการและหน้าเว็บ ต้องการลบรายการนี้ใช่ไหม
+          </p>
+          <div className="mt-5 flex flex-wrap justify-end gap-2">
+            <button
+              type="button"
+              onClick={() => setConfirmDelete(false)}
+              className="inline-flex min-h-11 items-center rounded-xl border border-line px-4 text-sm font-medium text-navy hover:bg-paper sm:min-h-9"
+            >
+              ยกเลิก
+            </button>
+            <button
+              type="button"
+              onClick={removeWork}
+              className="inline-flex min-h-11 items-center gap-1.5 rounded-xl bg-rose-600 px-4 text-sm font-medium text-white hover:bg-rose-700 sm:min-h-9"
+            >
+              <Trash2 className="size-4" />
+              ลบผลงาน
+            </button>
+          </div>
+        </CmsModal>
       ) : null}
+
+      <CmsSitePreview
+        open={previewOpen}
+        onClose={() => setPreviewOpen(false)}
+        title={draft.title || "ผลงาน"}
+        status={draft.status}
+      >
+        <PortfolioDetailView item={draft} related={related} preview />
+      </CmsSitePreview>
     </div>
   );
 }
 
-function PatternSketch({
-  id,
-  active,
+function buildLiveDraft(
+  facts: PortfolioJobFacts,
+  opts: {
+    summary: string;
+    detail: string;
+    status: "draft" | "published";
+    existing?: PortfolioItem;
+  },
+) {
+  const generated = generatePortfolioDraft(facts, {
+    id: opts.existing?.id,
+    status: opts.status,
+    pinned: opts.existing?.pinned,
+  });
+  const title = facts.jobTitle.trim() || generated.title;
+  return {
+    ...opts.existing,
+    ...generated,
+    id: opts.existing?.id ?? generated.id,
+    slug: opts.existing?.slug || slugifyTh(title) || generated.slug,
+    title,
+    place: facts.place.trim() || generated.place,
+    summary: opts.summary.trim() || generated.summary,
+    detail: opts.detail.trim() || generated.detail,
+    status: opts.status,
+    pinned: opts.existing?.pinned ?? generated.pinned,
+    sortOrder: opts.existing?.sortOrder ?? generated.sortOrder,
+    seoTitle: opts.existing?.seoTitle ?? "",
+    seoDescription: opts.existing?.seoDescription ?? "",
+    installLocation: opts.existing?.installLocation ?? generated.installLocation,
+    installDate: opts.existing?.installDate ?? generated.installDate,
+    lineItems: opts.existing?.lineItems?.length
+      ? opts.existing.lineItems.map((row, index) =>
+          index === 0
+            ? {
+                ...row,
+                productName:
+                  generated.lineItems[0]?.productName || row.productName,
+                sku: facts.variantSlug || row.sku,
+              }
+            : row,
+        )
+      : generated.lineItems,
+    image: generated.image,
+    gallery: generated.gallery,
+    customerName: facts.customerLabel.trim(),
+    showCustomerName: facts.showCustomerName,
+  };
+}
+
+function SiteCardPreview({
+  title,
+  place,
+  space,
+  image,
+  summary,
 }: {
-  id: PortfolioPatternId;
-  active: boolean;
+  title: string;
+  place: string;
+  space: string;
+  image: string;
+  summary: string;
 }) {
-  const bar = active ? "bg-navy/25" : "bg-line";
-  const block = active ? "bg-navy/15" : "bg-paper";
-  if (id === "before-after") {
-    return (
-      <div className="grid grid-cols-2 gap-1.5">
-        <div className={cn("aspect-[4/3] rounded-md", block)} />
-        <div className={cn("aspect-[4/3] rounded-md", bar)} />
-        <div className={cn("col-span-2 h-2 rounded", bar)} />
-        <div className={cn("col-span-2 h-2 w-2/3 rounded", block)} />
-      </div>
-    );
-  }
-  if (id === "corp") {
-    return (
-      <div className="space-y-1.5">
-        <div className={cn("h-10 rounded-md", bar)} />
-        <div className="grid grid-cols-3 gap-1">
-          <div className={cn("h-6 rounded", block)} />
-          <div className={cn("h-6 rounded", block)} />
-          <div className={cn("h-6 rounded", block)} />
-        </div>
-        <div className={cn("h-2 rounded", bar)} />
-      </div>
-    );
-  }
-  if (id === "short") {
-    return (
-      <div className="space-y-1.5">
-        <div className={cn("h-12 rounded-md", bar)} />
-        <div className={cn("h-2 w-4/5 rounded", block)} />
-        <div className="flex gap-1">
-          <div className={cn("h-4 w-10 rounded-full", block)} />
-          <div className={cn("h-4 w-10 rounded-full", block)} />
-        </div>
-      </div>
-    );
-  }
   return (
-    <div className="space-y-1.5">
-      <div className={cn("h-14 rounded-md", bar)} />
-      <div className="grid grid-cols-3 gap-1">
-        <div className={cn("aspect-square rounded", block)} />
-        <div className={cn("aspect-square rounded", block)} />
-        <div className={cn("aspect-square rounded", block)} />
+    <div className="overflow-hidden rounded-2xl border border-line bg-paper/40">
+      <p className="px-4 pt-3 text-[11px] font-medium text-muted">
+        ตัวอย่างการ์ดบนหน้าผลงาน
+      </p>
+      <div className="m-3 max-w-sm overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-line">
+        <div className="relative aspect-[4/3] bg-paper">
+          {image ? (
+            <Image
+              src={image}
+              alt=""
+              fill
+              className="object-cover"
+              sizes="320px"
+            />
+          ) : null}
+          <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-navy/70 to-transparent p-3 pt-10">
+            <p className="flex items-center gap-1 text-[11px] font-medium text-white/90">
+              <MapPin className="size-3 shrink-0 opacity-80" />
+              <span className="truncate">{place || "สถานที่"}</span>
+            </p>
+          </div>
+        </div>
+        <div className="p-4">
+          <p className="truncate text-[11px] text-muted">{space}</p>
+          <p className="mt-1.5 font-display text-base font-semibold leading-snug text-navy">
+            {title || "ชื่องาน"}
+          </p>
+          {summary ? (
+            <p className="mt-1 line-clamp-2 text-sm text-muted">{summary}</p>
+          ) : null}
+        </div>
       </div>
-      <div className={cn("h-2 rounded", bar)} />
     </div>
   );
 }

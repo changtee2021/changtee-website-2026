@@ -1,16 +1,23 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { FileDown, RefreshCw, Search } from "lucide-react";
+import { Eye, FileDown, RefreshCw, Search } from "lucide-react";
+import { requestInboxBadgeRefresh } from "@/lib/admin-inbox";
 import { DEMO_APPLICATIONS } from "@/lib/careers/applications-demo";
 import {
-  APPLICATION_STATUSES,
+  APPLICATION_STATUS_CHOICES,
   APPLICATION_STATUS_LABELS,
   APPLICATION_STATUS_STYLES,
+  applicationStatusChoices,
+  formatInterviewAt,
   type ApplicationStatus,
   type JobApplication,
 } from "@/lib/careers/types";
 import { CmsModal, DemoBadge, FilterChip, StatPill } from "@/components/admin/cms/CmsShared";
+import {
+  InterviewDialog,
+  RejectDialog,
+} from "@/components/admin/ApplicationFollowupDialogs";
 import { cn } from "@/lib/utils";
 
 export function JobApplicationsBoard() {
@@ -22,6 +29,10 @@ export function JobApplicationsBoard() {
   const [search, setSearch] = useState("");
   const [savingId, setSavingId] = useState<string | null>(null);
   const [selected, setSelected] = useState<JobApplication | null>(null);
+  const [followup, setFollowup] = useState<{
+    application: JobApplication;
+    mode: "interview_scheduled" | "rejected";
+  } | null>(null);
 
   async function load() {
     setLoading(true);
@@ -81,23 +92,55 @@ export function JobApplicationsBoard() {
     });
   }, [applications, statusFilter, search]);
 
-  async function updateStatus(id: string, status: ApplicationStatus) {
+  function applyApplication(next: JobApplication) {
+    setApplications((prev) => prev.map((a) => (a.id === next.id ? next : a)));
+    setSelected((prev) => (prev && prev.id === next.id ? next : prev));
+  }
+
+  function onStatusSelect(application: JobApplication, next: ApplicationStatus) {
+    if (next === application.status) return;
+    if (next === "interview_scheduled" || next === "rejected") {
+      setFollowup({ application, mode: next });
+      return;
+    }
+    void saveApplication(application.id, { status: next });
+  }
+
+  async function saveApplication(
+    id: string,
+    payload: Record<string, unknown>,
+  ) {
     setSavingId(id);
-    setApplications((prev) => prev.map((a) => (a.id === id ? { ...a, status } : a)));
-    setSelected((prev) => (prev && prev.id === id ? { ...prev, status } : prev));
+    setError(null);
+    const current = applications.find((a) => a.id === id);
+    if (current) {
+      applyApplication({
+        ...current,
+        ...payload,
+        updatedAt: new Date().toISOString(),
+      } as JobApplication);
+    }
+
     if (!usingDemo) {
       try {
         const res = await fetch(`/api/admin/careers/applications/${id}`, {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ status }),
+          body: JSON.stringify(payload),
         });
-        if (!res.ok) throw new Error();
-      } catch {
-        setError("อัปเดตสถานะไม่สำเร็จ กรุณาลองใหม่");
+        const json = (await res.json()) as {
+          application?: JobApplication;
+          error?: string;
+        };
+        if (!res.ok) throw new Error(json.error || "อัปเดตไม่สำเร็จ");
+        if (json.application) applyApplication(json.application);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "อัปเดตสถานะไม่สำเร็จ");
       }
     }
     setSavingId(null);
+    setFollowup(null);
+    requestInboxBadgeRefresh();
   }
 
   return (
@@ -113,7 +156,7 @@ export function JobApplicationsBoard() {
               <a href="/careers" target="_blank" className="text-navy underline">
                 /careers
               </a>{" "}
-              รวมทั้งใบสมัครทั่วไป (Talent Pool) ที่ยังไม่มีตำแหน่งตรงในขณะนั้น
+              รวมใบสมัครทั่วไปที่ยังไม่มีตำแหน่งตรงในขณะนั้น
               {usingDemo ? (
                 <span className="ml-1">
                   <DemoBadge />
@@ -130,13 +173,12 @@ export function JobApplicationsBoard() {
             รีเฟรช
           </button>
         </div>
-        <div className="mt-5 grid grid-cols-3 gap-2 sm:grid-cols-6">
+        <div className="mt-5 grid grid-cols-2 gap-2 sm:grid-cols-5">
           <StatPill label="ทั้งหมด" value={counts.all} />
           <StatPill label="ใหม่" value={counts.new} />
-          <StatPill label="พิจารณา" value={counts.reviewing} tone="amber" />
           <StatPill label="นัดสัมภาษณ์" value={counts.interview_scheduled} />
           <StatPill label="รับเข้าทำงาน" value={counts.hired} tone="green" />
-          <StatPill label="Talent Pool" value={counts.talent_pool} />
+          <StatPill label="ไม่ผ่าน" value={counts.rejected} tone="red" />
         </div>
       </section>
 
@@ -148,7 +190,7 @@ export function JobApplicationsBoard() {
               onClick={() => setStatusFilter("all")}
               label={`ทั้งหมด (${counts.all})`}
             />
-            {APPLICATION_STATUSES.map((s) => (
+            {APPLICATION_STATUS_CHOICES.map((s) => (
               <FilterChip
                 key={s}
                 active={statusFilter === s}
@@ -177,12 +219,13 @@ export function JobApplicationsBoard() {
                 <th className="px-4 py-3 font-medium">ติดต่อ</th>
                 <th className="px-4 py-3 font-medium">เรซูเม่</th>
                 <th className="px-4 py-3 font-medium">สถานะ</th>
+                <th className="px-4 py-3 font-medium">ดู</th>
               </tr>
             </thead>
             <tbody>
               {filtered.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="px-4 py-10 text-center text-muted">
+                  <td colSpan={6} className="px-4 py-10 text-center text-muted">
                     ไม่พบรายการตามตัวกรอง
                   </td>
                 </tr>
@@ -227,18 +270,31 @@ export function JobApplicationsBoard() {
                       <select
                         value={a.status}
                         disabled={savingId === a.id}
-                        onChange={(e) => void updateStatus(a.id, e.target.value as ApplicationStatus)}
+                        onChange={(e) =>
+                          onStatusSelect(a, e.target.value as ApplicationStatus)
+                        }
                         className={cn(
                           "rounded-lg border px-2 py-1.5 text-xs font-medium outline-none",
                           APPLICATION_STATUS_STYLES[a.status].select,
                         )}
                       >
-                        {APPLICATION_STATUSES.map((s) => (
+                        {applicationStatusChoices(a.status).map((s) => (
                           <option key={s} value={s}>
                             {APPLICATION_STATUS_LABELS[s]}
                           </option>
                         ))}
                       </select>
+                    </td>
+                    <td className="px-4 py-3">
+                      <button
+                        type="button"
+                        aria-label={`ดูรายละเอียด ${a.fullName}`}
+                        title="ดูรายละเอียดทั้งหมด"
+                        onClick={() => setSelected(a)}
+                        className="inline-flex size-11 items-center justify-center rounded-xl border border-line text-navy hover:bg-paper sm:size-9"
+                      >
+                        <Eye className="size-4" />
+                      </button>
                     </td>
                   </tr>
                 ))
@@ -249,35 +305,180 @@ export function JobApplicationsBoard() {
         {error ? <p className="text-sm text-brand-red">{error}</p> : null}
       </section>
 
+      {followup?.mode === "interview_scheduled" ? (
+        <InterviewDialog
+          application={followup.application}
+          busy={savingId === followup.application.id}
+          onClose={() => setFollowup(null)}
+          onSubmit={(payload) =>
+            void saveApplication(followup.application.id, payload)
+          }
+        />
+      ) : null}
+      {followup?.mode === "rejected" ? (
+        <RejectDialog
+          application={followup.application}
+          busy={savingId === followup.application.id}
+          onClose={() => setFollowup(null)}
+          onSubmit={(payload) =>
+            void saveApplication(followup.application.id, payload)
+          }
+        />
+      ) : null}
+
       {selected ? (
         <CmsModal
           title={selected.fullName}
-          subtitle={selected.jobTitle || "สมัครทั่วไป (Talent Pool)"}
+          subtitle={selected.jobTitle || "สมัครทั่วไป"}
           onClose={() => setSelected(null)}
+          wide
         >
-          <dl className="space-y-2 text-sm">
-            <DetailRow label="เบอร์โทร" value={selected.phone} />
-            <DetailRow label="อีเมล" value={selected.email} />
-            <DetailRow label="LINE ID" value={selected.lineId} />
-            <DetailRow label="ที่อยู่/จังหวัด" value={selected.address} />
-            <DetailRow label="ระดับการศึกษา" value={selected.education} />
-            <DetailRow label="เงินเดือนที่คาดหวัง" value={selected.expectedSalary} />
-            <DetailRow label="วันที่พร้อมเริ่มงาน" value={selected.availableFrom} />
-            <DetailRow label="ประสบการณ์ทำงาน" value={selected.experienceNote} />
-            <DetailRow label="ข้อความจากผู้สมัคร" value={selected.coverNote} />
-          </dl>
-          {selected.resumeSignedUrl ? (
-            <a
-              href={selected.resumeSignedUrl}
-              target="_blank"
-              rel="noreferrer"
-              className="mt-4 inline-flex items-center gap-1.5 rounded-xl bg-navy px-4 py-2 text-sm font-medium text-white hover:bg-navy-deep"
-            >
-              <FileDown className="size-4" />
-              ดาวน์โหลดเรซูเม่
-            </a>
-          ) : null}
+          <div className="space-y-5">
+            <section className="space-y-2">
+              <h4 className="font-display text-sm font-semibold text-navy">
+                ตำแหน่งและสถานะ
+              </h4>
+              <dl className="space-y-2 text-sm">
+                <DetailRow
+                  label="ตำแหน่งที่สนใจ"
+                  value={selected.jobTitle || "สมัครทั่วไป"}
+                />
+                <DetailRow
+                  label="ส่งใบสมัครเมื่อ"
+                  value={new Date(selected.createdAt).toLocaleString("th-TH")}
+                />
+                {selected.interviewAt ? (
+                  <DetailRow
+                    label="นัดสัมภาษณ์"
+                    value={formatInterviewAt(selected.interviewAt)}
+                  />
+                ) : null}
+                {selected.rejectReason ? (
+                  <DetailRow
+                    label="สาเหตุไม่ผ่าน"
+                    value={selected.rejectReason}
+                  />
+                ) : null}
+              </dl>
+              <label className="mt-2 block text-sm font-medium text-navy">
+                สถานะ
+                <select
+                  value={selected.status}
+                  disabled={savingId === selected.id}
+                  onChange={(e) =>
+                    onStatusSelect(
+                      selected,
+                      e.target.value as ApplicationStatus,
+                    )
+                  }
+                  className={cn(
+                    "mt-1 block min-h-11 w-full rounded-xl border px-3 text-sm font-medium outline-none sm:min-h-9",
+                    APPLICATION_STATUS_STYLES[selected.status].select,
+                  )}
+                >
+                  {applicationStatusChoices(selected.status).map((s) => (
+                    <option key={s} value={s}>
+                      {APPLICATION_STATUS_LABELS[s]}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            </section>
+
+            <section className="space-y-2">
+              <h4 className="font-display text-sm font-semibold text-navy">
+                ข้อมูลติดต่อ
+              </h4>
+              <dl className="space-y-2 text-sm">
+                <DetailRow label="ชื่อ-นามสกุล" value={selected.fullName} />
+                <DetailRow label="เบอร์โทร" value={selected.phone} />
+                <DetailRow label="อีเมล" value={selected.email} />
+                <DetailRow label="LINE ID" value={selected.lineId} />
+                <DetailRow label="ที่อยู่ / จังหวัด" value={selected.address} />
+              </dl>
+            </section>
+
+            <section className="space-y-2">
+              <h4 className="font-display text-sm font-semibold text-navy">
+                ประวัติและเงื่อนไข
+              </h4>
+              <dl className="space-y-2 text-sm">
+                <DetailRow label="ระดับการศึกษา" value={selected.education} />
+                <DetailRow
+                  label="วันที่พร้อมเริ่มงาน"
+                  value={selected.availableFrom}
+                />
+                <DetailRow
+                  label="เงินเดือนที่คาดหวัง"
+                  value={selected.expectedSalary}
+                />
+                <DetailRow
+                  label="ประสบการณ์ทำงาน"
+                  value={selected.experienceNote}
+                />
+                <DetailRow
+                  label="ข้อความถึงเรา"
+                  value={selected.coverNote}
+                />
+              </dl>
+            </section>
+
+            <section className="space-y-3">
+              <h4 className="font-display text-sm font-semibold text-navy">
+                ไฟล์แนบ / พอร์ต
+              </h4>
+              <AttachmentRow
+                label="เรซูเม่"
+                name={selected.resumeFileName}
+                href={selected.resumeSignedUrl}
+              />
+              {(selected.portfolioFiles || []).length > 0 ? (
+                selected.portfolioFiles!.map((file, index) => (
+                  <AttachmentRow
+                    key={`${file.name}-${index}`}
+                    label={`พอร์ต ${index + 1}`}
+                    name={file.name}
+                    href={file.signedUrl}
+                  />
+                ))
+              ) : (
+                <p className="text-sm text-muted">ยังไม่มีไฟล์พอร์ต</p>
+              )}
+            </section>
+          </div>
         </CmsModal>
+      ) : null}
+    </div>
+  );
+}
+
+function AttachmentRow({
+  label,
+  name,
+  href,
+}: {
+  label: string;
+  name?: string | null;
+  href?: string | null;
+}) {
+  return (
+    <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-line bg-paper/40 px-3 py-3">
+      <div className="min-w-0">
+        <p className="text-xs font-medium text-muted">{label}</p>
+        <p className="truncate text-sm text-navy">{name || "ไม่มีไฟล์"}</p>
+      </div>
+      {href ? (
+        <a
+          href={href}
+          target="_blank"
+          rel="noreferrer"
+          className="inline-flex min-h-11 items-center gap-1.5 rounded-xl border border-line bg-white px-3 text-sm font-medium text-navy hover:bg-paper sm:min-h-9"
+        >
+          <FileDown className="size-4" />
+          เปิดดู
+        </a>
+      ) : name ? (
+        <span className="text-xs text-muted">เปิดดูไม่ได้ในโหมดนี้</span>
       ) : null}
     </div>
   );
@@ -287,7 +488,9 @@ function DetailRow({ label, value }: { label: string; value?: string | null }) {
   return (
     <div className="grid grid-cols-3 gap-2 border-b border-line/70 pb-2">
       <dt className="text-muted">{label}</dt>
-      <dd className="col-span-2 text-navy">{value?.trim() ? value : "-"}</dd>
+      <dd className="col-span-2 whitespace-pre-wrap text-navy">
+        {value?.trim() ? value : "-"}
+      </dd>
     </div>
   );
 }

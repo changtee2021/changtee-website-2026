@@ -1,7 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { ChevronDown, ChevronRight, ExternalLink, Lock } from "lucide-react";
+import {
+  ChevronDown,
+  ChevronRight,
+  ExternalLink,
+  Lock,
+  PanelLeftClose,
+} from "lucide-react";
 import { useMemo, useState } from "react";
 import {
   PAGE_TREE,
@@ -166,11 +172,13 @@ export function PageTreeSidebar({
   basePath,
   dirtyPageKeys = new Set(),
   className,
+  onCollapse,
 }: {
   activeId: string;
   basePath: string;
   dirtyPageKeys?: Set<string>;
   className?: string;
+  onCollapse?: () => void;
 }) {
   const roots = useMemo(() => PAGE_TREE, []);
 
@@ -181,11 +189,24 @@ export function PageTreeSidebar({
         className,
       )}
     >
-      <div className="border-b border-line px-4 py-3">
-        <p className="text-[11px] font-semibold tracking-wider text-muted uppercase">
-          ผังเว็บ
-        </p>
-        <p className="mt-0.5 text-xs text-muted">เลือกหน้าเพื่อแก้ไข</p>
+      <div className="flex items-start justify-between gap-2 border-b border-line px-4 py-3">
+        <div className="min-w-0">
+          <p className="text-[11px] font-semibold tracking-wider text-muted uppercase">
+            ผังเว็บ
+          </p>
+          <p className="mt-0.5 text-xs text-muted">เลือกหน้าเพื่อแก้ไข</p>
+        </div>
+        {onCollapse ? (
+          <button
+            type="button"
+            onClick={onCollapse}
+            className="hidden min-h-9 min-w-9 shrink-0 items-center justify-center rounded-lg border border-line text-navy hover:bg-paper lg:inline-flex"
+            aria-label="หุบผังเว็บ"
+            title="หุบผังเว็บ"
+          >
+            <PanelLeftClose className="size-4" />
+          </button>
+        ) : null}
       </div>
       <nav className="min-h-0 flex-1 overflow-y-auto p-2">
         {roots.map((node) => (

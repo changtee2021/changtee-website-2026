@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, type ReactNode } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Plus, Trash2 } from "lucide-react";
@@ -30,6 +30,7 @@ import {
   StatusBadge,
   TextArea,
 } from "@/components/admin/cms/CmsShared";
+import { CmsImageUpload } from "@/components/admin/cms/CmsImageUpload";
 
 type StatusFilter = ContentStatus | "all";
 
@@ -240,94 +241,135 @@ export function CareersCmsBoard() {
           onClose={() => setEditing(null)}
           wide
         >
-          <div className="space-y-3">
-            <div className="grid gap-3 sm:grid-cols-2">
-              <Field label="ชื่อตำแหน่ง" value={editing.title} onChange={(v) => patch({ title: v })} />
+          <div className="space-y-6">
+            <FormGroup
+              title="ข้อมูลตำแหน่ง"
+              hint="ชื่อ แผนก สถานที่ และเงื่อนไขงานที่แสดงบนการ์ด"
+            >
+              <div className="grid gap-3 sm:grid-cols-2">
+                <Field
+                  label="ชื่อตำแหน่ง"
+                  value={editing.title}
+                  onChange={(v) => patch({ title: v })}
+                />
+                <Field
+                  label="แผนก"
+                  value={editing.department}
+                  onChange={(v) => patch({ department: v })}
+                />
+              </div>
+              <div className="grid gap-3 sm:grid-cols-2">
+                <SelectField
+                  label="ประเภทงาน"
+                  value={editing.employmentType}
+                  onChange={(v) => patch({ employmentType: v })}
+                  options={EMPLOYMENT_TYPES.map((t) => ({ value: t, label: t }))}
+                />
+                <Field
+                  label="จำนวนที่รับ"
+                  type="number"
+                  value={editing.headcount}
+                  onChange={(v) =>
+                    patch({ headcount: Math.max(1, Number(v) || 1) })
+                  }
+                />
+              </div>
+              <div className="grid gap-3 sm:grid-cols-2">
+                <Field
+                  label="สถานที่ทำงาน"
+                  value={editing.location}
+                  onChange={(v) => patch({ location: v })}
+                />
+                <Field
+                  label="เงินเดือน/ค่าตอบแทน"
+                  value={editing.salaryRange ?? ""}
+                  onChange={(v) => patch({ salaryRange: v })}
+                  placeholder="เช่น 15,000 - 20,000 บาท หรือ ตามตกลง"
+                />
+              </div>
+            </FormGroup>
+
+            <FormGroup
+              title="รูปปกการ์ด"
+              hint="อัปโหลดรูปคนทำงานในตำแหน่งนี้ — แสดงด้านบนการ์ดหน้า /careers"
+            >
+              <div>
+                <p className="mb-1.5 text-xs font-medium text-muted">รูปปก</p>
+                <CmsImageUpload
+                  value={editing.coverImage}
+                  folder="careers"
+                  aspectClassName="aspect-[16/9]"
+                  onChange={(url) => patch({ coverImage: url })}
+                />
+                {editing.coverImage ? (
+                  <button
+                    type="button"
+                    onClick={() => patch({ coverImage: "" })}
+                    className="mt-2 inline-flex min-h-11 items-center rounded-xl border border-rose-200 bg-rose-50/60 px-3 text-sm font-medium text-rose-700 hover:bg-rose-100 sm:min-h-9"
+                  >
+                    ลบรูป
+                  </button>
+                ) : null}
+              </div>
               <Field
-                label="แผนก"
-                value={editing.department}
-                onChange={(v) => patch({ department: v })}
+                label="คำอธิบายรูปปก"
+                value={editing.coverAlt}
+                onChange={(v) => patch({ coverAlt: v })}
+                placeholder="เช่น ช่างเย็บผ้าม่านกำลังเย็บผ้าบนจักรอุตสาหกรรม"
               />
-            </div>
-            <div className="grid gap-3 sm:grid-cols-2">
+            </FormGroup>
+
+            <FormGroup
+              title="รายละเอียดงาน"
+              hint="ข้อความที่ผู้สมัครอ่านก่อนกดสมัคร"
+            >
+              <Field
+                label="สรุปตำแหน่งสั้นๆ (แสดงบนการ์ด)"
+                value={editing.summary}
+                onChange={(v) => patch({ summary: v })}
+              />
+              <TextArea
+                label="หน้าที่ความรับผิดชอบ"
+                value={editing.description}
+                onChange={(v) => patch({ description: v })}
+                rows={4}
+                hint="แยกย่อหน้าด้วยการเว้นบรรทัด"
+              />
+              <TextArea
+                label="คุณสมบัติผู้สมัคร (1 บรรทัด = 1 ข้อ)"
+                value={requirementsDraft}
+                onChange={setRequirementsDraft}
+                rows={4}
+              />
+            </FormGroup>
+
+            <FormGroup title="การเผยแพร่" hint="เปิดรับสมัครแล้วตำแหน่งจะขึ้นบนเว็บทันที">
               <SelectField
-                label="ประเภทงาน"
-                value={editing.employmentType}
-                onChange={(v) => patch({ employmentType: v })}
-                options={EMPLOYMENT_TYPES.map((t) => ({ value: t, label: t }))}
+                label="สถานะ"
+                value={editing.status}
+                onChange={(v) => patch({ status: v as ContentStatus })}
+                options={(Object.keys(CONTENT_STATUS_LABELS) as ContentStatus[]).map(
+                  (s) => ({
+                    value: s,
+                    label: JOB_POSTING_STATUS_LABELS[s],
+                  }),
+                )}
               />
-              <Field
-                label="จำนวนที่รับ"
-                type="number"
-                value={editing.headcount}
-                onChange={(v) => patch({ headcount: Math.max(1, Number(v) || 1) })}
-              />
-            </div>
-            <div className="grid gap-3 sm:grid-cols-2">
-              <Field
-                label="สถานที่ทำงาน"
-                value={editing.location}
-                onChange={(v) => patch({ location: v })}
-              />
-              <Field
-                label="เงินเดือน/ค่าตอบแทน"
-                value={editing.salaryRange ?? ""}
-                onChange={(v) => patch({ salaryRange: v })}
-                placeholder="เช่น 15,000 - 20,000 บาท หรือ ตามตกลง"
-              />
-            </div>
-            <Field
-              label="สรุปตำแหน่งสั้นๆ (แสดงบนการ์ด)"
-              value={editing.summary}
-              onChange={(v) => patch({ summary: v })}
-            />
-            <Field
-              label="รูปปกการ์ด"
-              value={editing.coverImage}
-              onChange={(v) => patch({ coverImage: v })}
-              placeholder="/images/careers/sew.png"
-            />
-            <Field
-              label="คำอธิบายรูปปก"
-              value={editing.coverAlt}
-              onChange={(v) => patch({ coverAlt: v })}
-            />
-            <TextArea
-              label="หน้าที่ความรับผิดชอบ"
-              value={editing.description}
-              onChange={(v) => patch({ description: v })}
-              rows={4}
-              hint="แยกพารากราฟด้วยการเว้นบรรทัด"
-            />
-            <TextArea
-              label="คุณสมบัติผู้สมัคร (1 บรรทัด = 1 ข้อ)"
-              value={requirementsDraft}
-              onChange={setRequirementsDraft}
-              rows={4}
-            />
-            <SelectField
-              label="สถานะ"
-              value={editing.status}
-              onChange={(v) => patch({ status: v as ContentStatus })}
-              options={(Object.keys(CONTENT_STATUS_LABELS) as ContentStatus[]).map((s) => ({
-                value: s,
-                label: JOB_POSTING_STATUS_LABELS[s],
-              }))}
-            />
+            </FormGroup>
           </div>
 
-          <div className="mt-5 flex justify-end gap-2">
+          <div className="mt-6 flex flex-wrap justify-end gap-2 border-t border-line pt-4">
             <button
               type="button"
               onClick={() => setEditing(null)}
-              className="rounded-xl border border-line px-4 py-2 text-sm text-navy hover:bg-paper"
+              className="inline-flex min-h-11 items-center rounded-xl border border-line px-4 text-sm font-medium text-navy hover:bg-paper sm:min-h-9"
             >
               ยกเลิก
             </button>
             <button
               type="button"
               onClick={saveEditing}
-              className="rounded-xl bg-navy px-4 py-2 text-sm font-medium text-white hover:bg-navy-deep"
+              className="inline-flex min-h-11 items-center rounded-xl bg-navy px-4 text-sm font-medium text-white hover:bg-navy-deep sm:min-h-9"
             >
               บันทึก
             </button>
@@ -341,5 +383,25 @@ export function CareersCmsBoard() {
         </div>
       ) : null}
     </div>
+  );
+}
+
+function FormGroup({
+  title,
+  hint,
+  children,
+}: {
+  title: string;
+  hint?: string;
+  children: ReactNode;
+}) {
+  return (
+    <section className="space-y-3 rounded-2xl border border-line bg-paper/40 p-4 sm:p-5">
+      <div>
+        <h3 className="font-display text-base font-semibold text-navy">{title}</h3>
+        {hint ? <p className="mt-0.5 text-xs text-muted">{hint}</p> : null}
+      </div>
+      {children}
+    </section>
   );
 }

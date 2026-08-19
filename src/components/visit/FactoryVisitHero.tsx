@@ -3,7 +3,9 @@
 import Image from "next/image";
 import { useEffect, useRef, useState, type MouseEvent, type TouchEvent } from "react";
 import { motion, useReducedMotion } from "framer-motion";
+import { useSearchParams } from "next/navigation";
 import { revealEase } from "@/components/home/Reveal";
+import { parseVisitMode, visitModeHref } from "@/lib/visits/modes";
 import { siteConfig } from "@/lib/site-config";
 
 const SLIDES = [
@@ -34,6 +36,9 @@ const SLIDES = [
 ] as const;
 
 export function FactoryVisitHero() {
+  const searchParams = useSearchParams();
+  const mode = parseVisitMode(searchParams.get("mode"));
+  const isPresentation = mode === "product-presentation";
   const reduced = useReducedMotion();
   const [index, setIndex] = useState(0);
   const [hoverPaused, setHoverPaused] = useState(false);
@@ -114,40 +119,54 @@ export function FactoryVisitHero() {
               {...enter(0)}
               className="text-xs font-semibold tracking-[0.18em] text-white/70 uppercase"
             >
-              Factory Visit · {siteConfig.nameEn}
+              {isPresentation ? "Product Presentation" : "Factory Visit"} ·{" "}
+              {siteConfig.nameEn}
             </motion.p>
             <motion.h1
               {...enter(1)}
               className="mt-3 font-modern text-4xl font-semibold leading-[1.12] tracking-tight sm:text-5xl lg:text-[3.25rem]"
             >
-              Book a Factory Visit
+              {isPresentation ? "Book a Product Presentation" : "Book a Factory Visit"}
             </motion.h1>
             <p className="mt-2 font-sans text-lg font-normal leading-snug text-white/90 sm:text-xl">
-              นัดเยี่ยมชมโรงงาน
+              {isPresentation ? "นัดนำเสนอสินค้า" : "นัดเยี่ยมชมโรงงานเรา"}
             </p>
             <motion.p
               {...enter(2)}
               className="mt-4 max-w-lg text-sm leading-relaxed text-white/85 sm:text-base"
             >
-              ดูขั้นตอนการผลิตผ้าม่านจริง เลือกตัวอย่างเนื้อผ้า และพูดคุยกับทีมงานที่โรงงาน —
-              เลือกรอบเช้าหรือรอบเย็นที่สะดวก
+              {isPresentation
+                ? "สำหรับนิติบุคคลและองค์กร ทีมงานเข้าพบที่บริษัท หรือนัดพรีเซนต์ที่โชว์รูม — ใช้เวลาประมาณ 45–60 นาที"
+                : "ดูขั้นตอนการผลิตผ้าม่านจริง เลือกตัวอย่างเนื้อผ้า และพูดคุยกับทีมงานที่โรงงาน — เลือกรอบเช้าหรือรอบเย็นที่สะดวก"}
             </motion.p>
             <motion.div {...enter(3)} className="mt-7 flex flex-wrap gap-3">
               <a
-                href="#visit-form"
+                href={visitModeHref(mode)}
                 onClick={scrollToForm}
-                className="inline-flex items-center justify-center rounded-full bg-white px-6 py-3 text-sm font-semibold text-navy transition hover:bg-white/90"
+                className="inline-flex min-h-11 items-center justify-center rounded-full bg-white px-6 py-3 text-sm font-semibold text-navy transition hover:bg-white/90"
               >
-                ส่งคำขอนัดเยี่ยมชม
+                {isPresentation ? "ส่งคำขอนัดนำเสนอ" : "ส่งคำขอนัดเยี่ยมชม"}
               </a>
               <a
-                href={siteConfig.mapsUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center justify-center rounded-full border border-white/40 px-6 py-3 text-sm font-semibold text-white transition hover:bg-white/10"
+                href={
+                  isPresentation
+                    ? visitModeHref("factory-visit")
+                    : visitModeHref("product-presentation")
+                }
+                className="inline-flex min-h-11 items-center justify-center rounded-full border border-white/40 px-6 py-3 text-sm font-semibold text-white transition hover:bg-white/10"
               >
-                ดูแผนที่โรงงาน
+                {isPresentation ? "สลับไปนัดเยี่ยมชม" : "นัดนำเสนอสินค้า"}
               </a>
+              {isPresentation ? null : (
+                <a
+                  href={siteConfig.mapsUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex min-h-11 items-center justify-center rounded-full border border-white/40 px-6 py-3 text-sm font-semibold text-white transition hover:bg-white/10"
+                >
+                  ดูแผนที่โรงงาน
+                </a>
+              )}
             </motion.div>
           </div>
         </div>

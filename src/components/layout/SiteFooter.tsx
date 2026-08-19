@@ -1,10 +1,12 @@
 import Image from "next/image";
 import Link from "next/link";
+import { BookOpen, Factory, FileText, Presentation, Users } from "lucide-react";
 import { siteConfig } from "@/lib/site-config";
 import { LazyMapsEmbed } from "@/components/layout/LazyMapsEmbed";
 import { SocialLinks } from "@/components/layout/SocialLinks";
 import { CookieSettingsButton } from "@/components/legal/CookieSettingsButton";
 import { BrochureLink } from "@/components/catalog/BrochureLink";
+import { ThemeToggle } from "@/components/layout/ThemeToggle";
 
 export function SiteFooter() {
   const year = new Date().getFullYear();
@@ -20,7 +22,14 @@ export function SiteFooter() {
                 alt=""
                 width={48}
                 height={60}
-                className="h-12 w-auto shrink-0 object-contain sm:h-16"
+                className="h-12 w-auto shrink-0 object-contain dark:hidden sm:h-16"
+              />
+              <Image
+                src="/images/brand/logo-changtee-white.png"
+                alt=""
+                width={80}
+                height={100}
+                className="hidden h-12 w-auto shrink-0 object-contain mix-blend-screen dark:block sm:h-16"
               />
               <div className="min-w-0">
                 <div className="font-display text-lg font-bold uppercase tracking-wide text-navy sm:text-xl">
@@ -39,28 +48,39 @@ export function SiteFooter() {
               {siteConfig.description}
             </p>
             <SocialLinks className="mt-5" size={34} />
-            <div className="mt-6 flex flex-wrap gap-2">
+            <div className="mt-6 grid grid-cols-1 gap-2 sm:grid-cols-2">
               <Link
                 href="/quote"
-                className="inline-flex min-h-11 items-center rounded-md bg-brand-red px-3 py-1.5 text-xs font-semibold text-white hover:bg-brand-red-soft"
+                className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-brand-red px-3.5 text-xs font-semibold text-white transition hover:bg-brand-red-soft active:opacity-90"
               >
+                <FileText className="size-4 shrink-0" strokeWidth={2.1} aria-hidden />
                 ขอใบเสนอราคา
               </Link>
+              <BrochureLink className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-line bg-white px-3.5 text-xs font-semibold text-navy transition hover:bg-paper active:opacity-90">
+                <BookOpen className="size-4 shrink-0" strokeWidth={2.1} aria-hidden />
+                Download Brochure
+              </BrochureLink>
               <Link
                 href="/visit-factory"
-                className="inline-flex min-h-11 items-center rounded-md border border-line px-3 py-1.5 text-xs font-medium text-navy hover:bg-paper"
+                className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-line bg-white px-3.5 text-xs font-semibold text-navy transition hover:bg-paper active:opacity-90"
               >
+                <Factory className="size-4 shrink-0" strokeWidth={2.1} aria-hidden />
                 นัดเยี่ยมชมโรงงาน
               </Link>
               <Link
-                href="/careers"
-                className="inline-flex min-h-11 items-center rounded-md border border-line px-3 py-1.5 text-xs font-medium text-navy hover:bg-paper"
+                href="/visit-factory?mode=presentation"
+                className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-line bg-white px-3.5 text-xs font-semibold text-navy transition hover:bg-paper active:opacity-90"
               >
+                <Presentation className="size-4 shrink-0" strokeWidth={2.1} aria-hidden />
+                นัดนำเสนอสินค้า
+              </Link>
+              <Link
+                href="/careers"
+                className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-line bg-white px-3.5 text-xs font-semibold text-navy transition hover:bg-paper active:opacity-90 sm:col-span-2"
+              >
+                <Users className="size-4 shrink-0" strokeWidth={2.1} aria-hidden />
                 ร่วมงานกับเรา
               </Link>
-              <BrochureLink className="inline-flex min-h-11 items-center rounded-md border border-line px-3 py-1.5 text-xs font-medium text-navy hover:bg-paper">
-                Download Brochure
-              </BrochureLink>
             </div>
           </div>
 
@@ -174,9 +194,12 @@ export function SiteFooter() {
               className="text-left text-white/70 hover:text-white"
             />
           </nav>
-          <p>
-            © {year} {siteConfig.legalName}. All rights reserved.
-          </p>
+          <div className="flex flex-wrap items-center gap-2.5">
+            <ThemeToggle />
+            <p>
+              © {year} {siteConfig.legalName}. All rights reserved.
+            </p>
+          </div>
         </div>
       </div>
     </footer>

@@ -138,6 +138,7 @@ export const siteConfig = {
   ],
   brochureUrl: "/brochure/company-profile-2026.pdf",
   brochureManifestUrl: "/brochure/company-profile-2026/manifest.json",
+  brochureOnlineUrl: "https://canva.link/z3p0u8f2gcg9p61",
   brochureLabel: "Download Brochure ช่างตี๋ 2026",
 } as const;
 

@@ -16,6 +16,7 @@ export const SITE_LINK_OPTIONS: SiteLinkOption[] = [
   { group: "หลัก", value: "/learn", label: "ห้องเรียนรู้" },
   { group: "หลัก", value: "/contact", label: "เกี่ยวกับเรา" },
   { group: "หลัก", value: "/visit-factory", label: "นัดเยี่ยมชมโรงงาน" },
+  { group: "หลัก", value: "/visit-factory?mode=presentation", label: "นัดนำเสนอสินค้า" },
   { group: "หลัก", value: "/careers", label: "ร่วมงานกับเรา" },
   ...productCatalog.flatMap((cat) => [
     {

@@ -8,6 +8,39 @@ export const APPLICATION_STATUSES = [
 ] as const;
 export type ApplicationStatus = (typeof APPLICATION_STATUSES)[number];
 
+/** Statuses the admin can pick — reviewing / talent_pool are retired. */
+export const APPLICATION_STATUS_CHOICES = [
+  "new",
+  "interview_scheduled",
+  "hired",
+  "rejected",
+] as const;
+
+export function applicationStatusChoices(
+  current?: ApplicationStatus,
+): ApplicationStatus[] {
+  const choices: ApplicationStatus[] = [...APPLICATION_STATUS_CHOICES];
+  if (
+    current &&
+    !(APPLICATION_STATUS_CHOICES as readonly ApplicationStatus[]).includes(
+      current,
+    )
+  ) {
+    return [current, ...choices];
+  }
+  return choices;
+}
+
+export function formatInterviewAt(iso: string | null | undefined): string {
+  if (!iso) return "";
+  const date = new Date(iso);
+  if (Number.isNaN(date.getTime())) return iso;
+  return date.toLocaleString("th-TH", {
+    dateStyle: "medium",
+    timeStyle: "short",
+  });
+}
+
 export const APPLICATION_STATUS_LABELS: Record<ApplicationStatus, string> = {
   new: "ใบสมัครใหม่",
   reviewing: "กำลังพิจารณา",
@@ -38,6 +71,12 @@ export const EDUCATION_LEVELS = [
   "อื่นๆ",
 ] as const;
 
+export type JobApplicationFile = {
+  name: string;
+  path: string | null;
+  signedUrl?: string | null;
+};
+
 export type JobApplication = {
   id: string;
   jobPostingId?: string | null;
@@ -57,6 +96,9 @@ export type JobApplication = {
   resumeFilePath?: string | null;
   /** Time-limited signed URL, populated only for admin viewing */
   resumeSignedUrl?: string | null;
+  portfolioFiles?: JobApplicationFile[];
+  interviewAt?: string | null;
+  rejectReason?: string | null;
   status: ApplicationStatus;
   createdAt: string;
   updatedAt: string;

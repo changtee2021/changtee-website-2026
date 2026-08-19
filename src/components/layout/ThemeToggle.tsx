@@ -47,18 +47,19 @@ export function ThemeToggle({ className }: { className?: string }) {
       type="button"
       onClick={toggle}
       className={cn(
-        "inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-1.5 text-xs font-medium text-white/90 transition hover:bg-white/15 hover:text-white",
+        "inline-flex min-h-9 shrink-0 items-center gap-1 rounded-full border border-white/20 bg-white/10 px-2.5 text-[11px] font-medium leading-none text-white/85 transition hover:bg-white/16 hover:text-white active:bg-white/20",
         className,
       )}
       aria-label={mode === "dark" ? "เปลี่ยนเป็นโหมดสว่าง" : "เปลี่ยนเป็นโหมดมืด"}
+      aria-pressed={mode === "dark"}
       title={mode === "dark" ? "โหมดสว่าง" : "โหมดมืด"}
     >
       {mode === "dark" ? (
-        <Sun className="size-3.5" aria-hidden />
+        <Sun className="size-3" aria-hidden />
       ) : (
-        <Moon className="size-3.5" aria-hidden />
+        <Moon className="size-3" aria-hidden />
       )}
-      <span>{mode === "dark" ? "โหมดสว่าง" : "โหมดมืด"}</span>
+      <span>{mode === "dark" ? "สว่าง" : "มืด"}</span>
     </button>
   );
 }

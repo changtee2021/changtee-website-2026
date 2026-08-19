@@ -20,18 +20,18 @@
 }
 
 .dark {
-  --navy: #e2eaf5;
+  --navy: #f1f5fb;
   --navy-deep: #060d18;
-  --red: #e11d3a;
-  --red-soft: #f0435a;
-  --paper: #172033;
-  --ink: #e9eef5;
-  --muted: #9aabbf;
-  --line: #2c384c;
-  --background: #0b1220;
-  --foreground: #e9eef5;
-  --shell: #111927;
-  --panel: #162033;
+  --red: #ef3a52;
+  --red-soft: #f45b6e;
+  --paper: #1e2a3b;
+  --ink: #eef2f8;
+  --muted: #b7c4d4;
+  --line: #3a4a62;
+  --background: #0c121c;
+  --foreground: #eef2f8;
+  --shell: #141c28;
+  --panel: #1a2433;
   --navy-solid: #0b1f3a;
   color-scheme: dark;
 }
@@ -241,6 +241,50 @@ body {
 /* Map common light surfaces so existing bg-white cards work in dark mode */
 .dark .bg-white {
   background-color: var(--panel);
+}
+
+.dark :focus-visible {
+  outline-color: #c5d4e8;
+}
+
+.dark ::selection {
+  background: color-mix(in oklab, var(--red) 38%, transparent);
+}
+
+.dark input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="hidden"]):not([type="file"]):not([type="button"]):not([type="submit"]):not([type="reset"]),
+.dark select,
+.dark textarea {
+  color: var(--ink);
+  background-color: var(--panel);
+}
+
+.dark .bg-field {
+  background-color: #121a26;
+}
+
+.dark .bg-field::placeholder {
+  color: #8b9bb0;
+}
+
+.dark .bg-field:disabled {
+  background-color: #0e141d;
+}
+
+.dark input.bg-field:-webkit-autofill,
+.dark input.bg-field:-webkit-autofill:hover,
+.dark input.bg-field:-webkit-autofill:focus,
+.dark textarea.bg-field:-webkit-autofill,
+.dark textarea.bg-field:-webkit-autofill:hover,
+.dark textarea.bg-field:-webkit-autofill:focus,
+.dark select.bg-field:-webkit-autofill,
+.dark select.bg-field:-webkit-autofill:hover,
+.dark select.bg-field:-webkit-autofill:focus {
+  -webkit-text-fill-color: var(--ink);
+  box-shadow: 0 0 0 1000px #121a26 inset;
+}
+
+.dark .text-ink\/80 {
+  color: color-mix(in oklab, var(--ink) 88%, white);
 }
 
 /* Quote / form field surface — softer than solid shell */

@@ -94,7 +94,7 @@ export function FloatingActions() {
         aria-expanded={open}
         aria-label={open ? "ปิดเมนูด่วน" : "เปิดเมนูด่วน"}
         onClick={() => setOpen((v) => !v)}
-        className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-navy text-white shadow-lg sm:h-11 sm:w-11"
+        className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-[#0b1f3a] text-white shadow-lg dark:bg-white dark:text-[#0b1f3a] sm:h-11 sm:w-11"
       >
         {open ? <X className="h-4 w-4" /> : <DualChatIcon className="h-5 w-5" />}
       </button>

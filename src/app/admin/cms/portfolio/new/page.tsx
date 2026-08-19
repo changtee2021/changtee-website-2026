@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { NewPortfolioClient } from "./new-client";
+import { PortfolioAiWizard } from "@/components/admin/PortfolioAiWizard";
 
 export const metadata: Metadata = {
   title: "ลงผลงาน",
@@ -7,5 +7,5 @@ export const metadata: Metadata = {
 };
 
 export default function AdminPortfolioNewPage() {
-  return <NewPortfolioClient />;
+  return <PortfolioAiWizard />;
 }

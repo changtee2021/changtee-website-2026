@@ -7,5 +7,5 @@ export const metadata: Metadata = {
 };
 
 export default function AdminVisitsPage() {
-  return <VisitsBoard />;
+  return <VisitsBoard kind="factory-visit" />;
 }

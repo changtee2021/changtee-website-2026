@@ -4,7 +4,10 @@ import {
   Factory,
   Gauge,
   Home,
+  MapPin,
+  MessageCircle,
   PenTool,
+  Presentation,
   ShieldCheck,
   Users,
   Zap,
@@ -81,9 +84,15 @@ export function AboutPageView() {
             </Link>
             <Link
               href="/visit-factory"
-              className="inline-flex rounded-full border border-line px-5 py-2.5 text-sm font-semibold text-navy hover:bg-paper"
+              className="inline-flex min-h-11 items-center rounded-full border border-line px-5 py-2.5 text-sm font-semibold text-navy hover:bg-paper"
             >
               นัดเยี่ยมชมโรงงาน
+            </Link>
+            <Link
+              href="/visit-factory?mode=presentation"
+              className="inline-flex min-h-11 items-center rounded-full border border-line px-5 py-2.5 text-sm font-semibold text-navy hover:bg-paper"
+            >
+              นัดนำเสนอสินค้า
             </Link>
             <Link
               href="/careers"
@@ -141,11 +150,11 @@ export function AboutPageView() {
 
       <HomePanel className="mt-4 sm:mt-6">
         <div className="p-7 sm:p-9 md:p-12">
-          <PanelHeading title="อยากมาเยี่ยมชม หรืออยากร่วมงานกับเรา" />
+          <PanelHeading title="อยากมาเยี่ยมชม นัดนำเสนอ หรืออยากร่วมงานกับเรา" />
           <p className="mt-3 max-w-xl text-sm leading-relaxed text-muted">
-            นอกจากคุยโปรเจกต์แล้ว ลูกค้าสามารถนัดดูโรงงานผลิตจริง หรือส่งใบสมัครงานไว้กับเราได้จากหน้านี้
+            นอกจากคุยโปรเจกต์แล้ว ลูกค้าสามารถนัดดูโรงงาน นัดให้ทีมเข้าพรีเซนต์ที่บริษัท หรือส่งใบสมัครงานไว้กับเราได้จากหน้านี้
           </p>
-          <div className="mt-8 grid gap-4 sm:grid-cols-2">
+          <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             <Link
               href="/visit-factory"
               className="group flex flex-col rounded-2xl border border-line bg-white p-5 transition hover:border-navy/30 hover:shadow-sm"
@@ -161,6 +170,23 @@ export function AboutPageView() {
               </p>
               <span className="mt-4 text-sm font-semibold text-navy">
                 จองรอบเยี่ยมชม →
+              </span>
+            </Link>
+            <Link
+              href="/visit-factory?mode=presentation"
+              className="group flex flex-col rounded-2xl border border-line bg-white p-5 transition hover:border-navy/30 hover:shadow-sm"
+            >
+              <span className="flex h-11 w-11 items-center justify-center rounded-full bg-paper text-navy">
+                <Presentation className="h-5 w-5" strokeWidth={1.75} aria-hidden />
+              </span>
+              <h3 className="mt-4 font-display text-lg font-semibold text-navy group-hover:text-brand-red">
+                นัดนำเสนอสินค้า
+              </h3>
+              <p className="mt-2 text-sm leading-relaxed text-muted">
+                สำหรับนิติบุคคลเท่านั้น ทีมงานเข้าพบที่บริษัท หรือนัดพรีเซนต์ที่โชว์รูม
+              </p>
+              <span className="mt-4 text-sm font-semibold text-navy">
+                ขอนัดนำเสนอ →
               </span>
             </Link>
             <Link
@@ -224,33 +250,44 @@ export function AboutPageView() {
                   {siteConfig.emailTo}
                 </a>
               </div>
-              <div className="mt-4 flex flex-wrap gap-2">
+              <div className="mt-5 grid grid-cols-1 gap-2 sm:grid-cols-2">
                 <a
                   href={siteConfig.mapsUrl}
                   target="_blank"
                   rel="noreferrer"
-                  className="rounded-full bg-navy px-4 py-2 text-xs font-semibold text-white hover:bg-navy/90"
+                  className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-navy px-3.5 text-xs font-semibold text-white transition hover:bg-navy-deep active:opacity-90"
                 >
+                  <MapPin className="size-4 shrink-0" strokeWidth={2.1} aria-hidden />
                   ดูแผนที่โชว์รูม
                 </a>
                 <a
                   href={siteConfig.lineUrl}
                   target="_blank"
                   rel="noreferrer"
-                  className="rounded-full bg-[#06C755] px-4 py-2 text-xs font-semibold text-white"
+                  className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-[#06C755] px-3.5 text-xs font-semibold text-white transition hover:brightness-95 active:opacity-90"
                 >
+                  <MessageCircle className="size-4 shrink-0" strokeWidth={2.1} aria-hidden />
                   LINE {siteConfig.lineId}
                 </a>
                 <Link
                   href="/visit-factory"
-                  className="rounded-full border border-line px-4 py-2 text-xs font-semibold text-navy hover:bg-paper"
+                  className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-line bg-white px-3.5 text-xs font-semibold text-navy transition hover:bg-paper active:opacity-90"
                 >
+                  <Factory className="size-4 shrink-0" strokeWidth={2.1} aria-hidden />
                   นัดเยี่ยมชมโรงงาน
                 </Link>
                 <Link
-                  href="/careers"
-                  className="rounded-full border border-line px-4 py-2 text-xs font-semibold text-navy hover:bg-paper"
+                  href="/visit-factory?mode=presentation"
+                  className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-line bg-white px-3.5 text-xs font-semibold text-navy transition hover:bg-paper active:opacity-90"
                 >
+                  <Presentation className="size-4 shrink-0" strokeWidth={2.1} aria-hidden />
+                  นัดนำเสนอสินค้า
+                </Link>
+                <Link
+                  href="/careers"
+                  className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-line bg-white px-3.5 text-xs font-semibold text-navy transition hover:bg-paper active:opacity-90 sm:col-span-2"
+                >
+                  <Users className="size-4 shrink-0" strokeWidth={2.1} aria-hidden />
                   ร่วมงานกับเรา
                 </Link>
               </div>

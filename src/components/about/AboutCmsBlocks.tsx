@@ -59,9 +59,15 @@ export function AboutHeroCms() {
               </a>
               <Link
                 href="/visit-factory"
-                className="inline-flex rounded-full border border-white/35 px-5 py-3 text-sm font-semibold text-white transition hover:bg-white/10"
+                className="inline-flex min-h-11 items-center rounded-full border border-white/35 px-5 py-3 text-sm font-semibold text-white transition hover:bg-white/10"
               >
                 เยี่ยมชมโรงงาน
+              </Link>
+              <Link
+                href="/visit-factory?mode=presentation"
+                className="inline-flex min-h-11 items-center rounded-full border border-white/35 px-5 py-3 text-sm font-semibold text-white transition hover:bg-white/10"
+              >
+                นัดนำเสนอสินค้า
               </Link>
               <Link
                 href="/careers"

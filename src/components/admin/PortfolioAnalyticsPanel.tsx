@@ -1,11 +1,14 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import {
   Eye,
   MousePointerClick,
+  Pencil,
   Share2,
+  Trash2,
   TrendingUp,
 } from "lucide-react";
 import {
@@ -26,7 +29,8 @@ import {
 } from "@/lib/cms/portfolio-analytics";
 import { productLabel } from "@/lib/cms/portfolio-demo";
 import type { PortfolioItem } from "@/lib/cms/portfolio-demo";
-import { DemoBadge, StatPill } from "@/components/admin/cms/CmsShared";
+import { removePortfolioItem } from "@/lib/cms/demo-store";
+import { CmsModal, DemoBadge, StatPill } from "@/components/admin/cms/CmsShared";
 import { adminHref } from "@/lib/admin-nav";
 
 export function PortfolioAnalyticsPanel({
@@ -37,12 +41,22 @@ export function PortfolioAnalyticsPanel({
   basePath: string;
 }) {
   const store = usePortfolioAnalytics();
+  const [pendingDelete, setPendingDelete] = useState<{
+    id: string;
+    title: string;
+  } | null>(null);
 
   const ranked = useMemo(() => {
     return portfolioStatsForItems(items, store)
       .filter((i) => i.status === "published" || i.views > 0)
       .sort((a, b) => b.views - a.views);
   }, [items, store]);
+
+  const topFive = ranked.slice(0, 5);
+  const itemById = useMemo(
+    () => new Map(items.map((item) => [item.id, item])),
+    [items],
+  );
 
   const totals = useMemo(() => {
     return ranked.reduce(
@@ -61,7 +75,7 @@ export function PortfolioAnalyticsPanel({
       ? Math.round((totals.quotes / totals.views) * 1000) / 10
       : 0;
 
-  const barData = ranked.slice(0, 8).map((r) => ({
+  const barData = topFive.map((r) => ({
     name: r.title.length > 14 ? `${r.title.slice(0, 14)}…` : r.title,
     fullName: r.title,
     ชม: r.views,
@@ -157,7 +171,7 @@ export function PortfolioAnalyticsPanel({
 
         <div className="rounded-xl border border-line p-3 sm:p-4">
           <div className="mb-2 text-sm font-medium text-navy">
-            เปรียบเทียบผลงาน (ชม. / เสนอราคา / แชร์)
+            เปรียบเทียบ 5 อันดับ (ชม. / เสนอราคา / แชร์)
           </div>
           <div className="h-56 w-full">
             <ResponsiveContainer width="100%" height="100%">
@@ -182,6 +196,9 @@ export function PortfolioAnalyticsPanel({
       </div>
 
       <div className="overflow-x-auto rounded-xl border border-line">
+        <p className="border-b border-line bg-[#f8fafc] px-3 py-2 text-xs font-medium text-muted">
+          อันดับ 5 ผลงานที่คนดูเยอะสุด
+        </p>
         <table className="min-w-full text-left text-sm">
           <thead className="bg-[#f8fafc] text-muted">
             <tr>
@@ -207,20 +224,37 @@ export function PortfolioAnalyticsPanel({
             </tr>
           </thead>
           <tbody>
-            {ranked.length === 0 ? (
+            {topFive.length === 0 ? (
               <tr>
                 <td colSpan={7} className="px-3 py-8 text-center text-muted">
                   ยังไม่มีข้อมูลสถิติ
                 </td>
               </tr>
             ) : (
-              ranked.map((row, i) => (
+              topFive.map((row, i) => {
+                const thumb = itemById.get(row.id)?.image;
+                return (
                 <tr key={row.id} className="border-t border-line">
                   <td className="px-3 py-2.5 text-muted">{i + 1}</td>
                   <td className="px-3 py-2.5">
-                    <div className="font-medium text-navy">{row.title}</div>
-                    <div className="text-[11px] text-muted">
-                      {productLabel(row.productSlug)}
+                    <div className="flex items-center gap-3">
+                      <div className="relative size-12 shrink-0 overflow-hidden rounded-lg bg-paper">
+                        {thumb ? (
+                          <Image
+                            src={thumb}
+                            alt=""
+                            fill
+                            className="object-cover"
+                            sizes="48px"
+                          />
+                        ) : null}
+                      </div>
+                      <div className="min-w-0">
+                        <div className="font-medium text-navy">{row.title}</div>
+                        <div className="text-[11px] text-muted">
+                          {productLabel(row.productSlug)}
+                        </div>
+                      </div>
                     </div>
                   </td>
                   <td className="px-3 py-2.5 tabular-nums">
@@ -231,20 +265,68 @@ export function PortfolioAnalyticsPanel({
                   </td>
                   <td className="px-3 py-2.5 tabular-nums">{row.shares}</td>
                   <td className="px-3 py-2.5 tabular-nums">{row.conversionRate}%</td>
-                  <td className="px-3 py-2.5 text-right">
-                    <Link
-                      href={adminHref(basePath, `/cms/portfolio/${row.id}`)}
-                      className="text-xs font-medium text-brand-red hover:underline"
-                    >
-                      แก้ไข
-                    </Link>
+                  <td className="px-3 py-2.5">
+                    <div className="flex items-center justify-end gap-1">
+                      <Link
+                        href={adminHref(basePath, `/cms/portfolio/${row.id}`)}
+                        className="inline-flex size-11 items-center justify-center rounded-xl border border-line text-navy hover:bg-paper sm:size-9"
+                        title="แก้ไขผลงาน"
+                        aria-label={`แก้ไข ${row.title}`}
+                      >
+                        <Pencil className="size-4" />
+                      </Link>
+                      <button
+                        type="button"
+                        className="inline-flex size-11 items-center justify-center rounded-xl border border-rose-200 text-rose-700 hover:bg-rose-50 sm:size-9"
+                        title="ลบผลงาน"
+                        aria-label={`ลบ ${row.title}`}
+                        onClick={() =>
+                          setPendingDelete({ id: row.id, title: row.title })
+                        }
+                      >
+                        <Trash2 className="size-4" />
+                      </button>
+                    </div>
                   </td>
                 </tr>
-              ))
+                );
+              })
             )}
           </tbody>
         </table>
       </div>
+
+      {pendingDelete ? (
+        <CmsModal
+          title="ยืนยันการลบผลงาน"
+          subtitle={pendingDelete.title}
+          onClose={() => setPendingDelete(null)}
+        >
+          <p className="text-sm text-muted">
+            ลบแล้วจะหายจากรายการและหน้าเว็บ ต้องการลบรายการนี้ใช่ไหม
+          </p>
+          <div className="mt-5 flex flex-wrap justify-end gap-2">
+            <button
+              type="button"
+              onClick={() => setPendingDelete(null)}
+              className="inline-flex min-h-11 items-center rounded-xl border border-line px-4 text-sm font-medium text-navy hover:bg-paper sm:min-h-9"
+            >
+              ยกเลิก
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                removePortfolioItem(pendingDelete.id);
+                setPendingDelete(null);
+              }}
+              className="inline-flex min-h-11 items-center gap-1.5 rounded-xl bg-rose-600 px-4 text-sm font-medium text-white hover:bg-rose-700 sm:min-h-9"
+            >
+              <Trash2 className="size-4" />
+              ลบผลงาน
+            </button>
+          </div>
+        </CmsModal>
+      ) : null}
     </section>
   );
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useMemo, useRef, useState, type ReactNode } from "react";
 import { Check, MapPin, X } from "lucide-react";
 import { PdpaConsentField } from "@/components/forms/PdpaConsentField";
 import {
@@ -91,6 +91,8 @@ export function FactoryVisitForm() {
   return (
     <>
       <form ref={formRef} action={onSubmit} className="space-y-5">
+        <div className="divide-y divide-line">
+        <Section title="ข้อมูลผู้ติดต่อ">
         <div className="grid gap-4 sm:grid-cols-2">
           <Field label="ชื่อ-นามสกุล" name="fullName" autoComplete="name" required />
           <Field
@@ -121,7 +123,9 @@ export function FactoryVisitForm() {
           <Field label="อีเมล" name="email" type="email" autoComplete="email" required />
         </div>
         <Field label="LINE ID" name="lineId" required />
+        </Section>
 
+        <Section title="สถานที่และรอบเยี่ยมชม">
         <div>
           <span className="mb-2 flex gap-1 text-sm font-medium text-ink">
             ต้องการเยี่ยมชมสถานที่ไหน
@@ -282,7 +286,9 @@ export function FactoryVisitForm() {
           placeholder="เช่น ผ้าม่าน, ม่านม้วน, ม่านไฟฟ้า"
           required
         />
+        </Section>
 
+        <Section title="เอกสารและหมายเหตุ">
         <div className="grid gap-4 sm:grid-cols-2">
           <FileField
             label="Company Profile"
@@ -312,6 +318,8 @@ export function FactoryVisitForm() {
             className="w-full rounded-xl border border-line bg-white px-3 py-2 text-sm outline-none focus:border-navy"
           />
         </label>
+        </Section>
+        </div>
 
         <PdpaConsentField />
         <TurnstileField onToken={onTurnstile} />
@@ -323,7 +331,7 @@ export function FactoryVisitForm() {
         <button
           type="submit"
           disabled={pending}
-          className="w-full rounded-full bg-brand-red px-6 py-3 text-sm font-semibold text-white transition hover:bg-brand-red-soft disabled:opacity-60 sm:w-auto"
+          className="min-h-11 w-full rounded-full bg-brand-red px-6 py-3 text-sm font-semibold text-white transition hover:bg-brand-red-soft disabled:opacity-60 sm:w-auto"
         >
           {pending ? "กำลังส่งคำขอ..." : "ส่งคำขอนัดเยี่ยมชม"}
         </button>
@@ -394,6 +402,21 @@ export function FactoryVisitForm() {
         </div>
       ) : null}
     </>
+  );
+}
+
+function Section({
+  title,
+  children,
+}: {
+  title: string;
+  children: ReactNode;
+}) {
+  return (
+    <section className="space-y-4 py-6 first:pt-0 last:pb-0">
+      <h3 className="text-sm font-semibold text-navy">{title}</h3>
+      {children}
+    </section>
   );
 }
 

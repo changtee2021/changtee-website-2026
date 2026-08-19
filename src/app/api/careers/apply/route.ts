@@ -26,7 +26,7 @@ function notificationFailure() {
     : "email not configured";
 }
 
-async function saveResume(file: File | null) {
+async function saveCareerFile(file: File | null, fallbackName = "file") {
   if (!file || file.size === 0) return { name: null as string | null, ref: null as string | null };
   if (file.size > MAX_UPLOAD_BYTES) throw new Error("UPLOAD_TOO_LARGE");
 
@@ -51,7 +51,7 @@ async function saveResume(file: File | null) {
     file.name
       .replace(/\.[^.]+$/, "")
       .replace(/[^\w\-ก-๙]+/g, "_")
-      .replace(/^_+|_+$/g, "") || "resume";
+      .replace(/^_+|_+$/g, "") || fallbackName;
   const uploaded = await uploadPrivateFile({
     folder: "careers",
     fileName: `${baseName}${extension}`,
@@ -87,9 +87,19 @@ export async function POST(request: Request) {
     }
 
     const resumeFile = form.get("resume");
-    const resume = await saveResume(
+    const resume = await saveCareerFile(
       resumeFile instanceof File && resumeFile.size > 0 ? resumeFile : null,
+      "resume",
     );
+    const portfolioUploads = (
+      await Promise.all(
+        form
+          .getAll("portfolio")
+          .filter((item): item is File => item instanceof File && item.size > 0)
+          .slice(0, 3)
+          .map((file) => saveCareerFile(file, "portfolio")),
+      )
+    ).filter((file) => file.name);
 
     const parsed = jobApplicationSchema.safeParse({
       jobPostingId: String(form.get("jobPostingId") || ""),
@@ -131,6 +141,10 @@ export async function POST(request: Request) {
       availableFrom: data.availableFrom || null,
       resumeFileName: resume.name,
       resumeFilePath: resume.ref,
+      portfolioFiles: portfolioUploads.map((file) => ({
+        name: file.name || "portfolio",
+        path: file.ref,
+      })),
     });
 
     const resumeUrl = resume.ref
