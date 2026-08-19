@@ -188,24 +188,40 @@ function PortfolioComposer({
     setUploadError(null);
     setUploading(true);
     const added: PortfolioDraftImage[] = [];
+    const failed: string[] = [];
+    let current = facts.images;
     try {
       for (let i = 0; i < list.length; i += 1) {
         const file = list[i]!;
         const prefix =
           list.length > 1 ? `รูป ${i + 1}/${list.length} — ` : "";
-        const url = await uploadAdminFile(file, "portfolio", (status) => {
-          setUploadStatus({
-            ...status,
-            label: `${prefix}${status.label}`,
+        try {
+          const url = await uploadAdminFile(file, "portfolio", (status) => {
+            setUploadStatus({
+              ...status,
+              label: `${prefix}${status.label}`,
+            });
           });
-        });
-        const role: PortfolioImageRole =
-          facts.images.length + added.length === 0 ? "cover" : "gallery";
-        added.push(newImage(url, role));
+          const role: PortfolioImageRole =
+            current.length === 0 ? "cover" : "gallery";
+          const next = newImage(url, role);
+          added.push(next);
+          current = [...current, next];
+          setImages(current);
+        } catch (e) {
+          const reason = e instanceof Error ? e.message : "อัปโหลดไม่สำเร็จ";
+          failed.push(`${file.name} (${reason})`);
+        }
       }
-      setImages([...facts.images, ...added]);
-    } catch (e) {
-      setUploadError(e instanceof Error ? e.message : "อัปโหลดไม่สำเร็จ");
+      if (failed.length) {
+        const kept =
+          added.length > 0
+            ? `อัปได้ ${added.length} รูปแล้ว ใช้รูปที่ขึ้นไปก่อนได้ — `
+            : "";
+        setUploadError(
+          `${kept}อัปไม่ได้ ${failed.length} รูป: ${failed.join(" · ")}`,
+        );
+      }
     } finally {
       setUploading(false);
       setUploadStatus(null);
