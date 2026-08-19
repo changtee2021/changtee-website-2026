@@ -9,12 +9,15 @@ import { ArrowRight, ChevronDown, ListFilter, MapPin, Search, X } from "lucide-r
 import {
   SPACE_TYPE_LABELS,
   parseSpaceTypeParam,
+  itemCategorySlugs,
+  itemHasProduct,
+  itemProductLabels,
   productLabel,
   type PortfolioItem,
   type SpaceType,
 } from "@/lib/cms/portfolio-demo";
 import { publishedPortfolio } from "@/lib/cms/public-content";
-import { usePortfolioItems } from "@/lib/cms/demo-store";
+import { hydratePortfolioItems, usePortfolioItems } from "@/lib/cms/demo-store";
 import { getCategory, productCatalog } from "@/lib/product-catalog";
 import {
   IconAll,
@@ -99,7 +102,7 @@ function matchesQuery(item: PortfolioItem, q: string): boolean {
 
 function matchesChild(item: PortfolioItem, productSlug: string, childSlug: string) {
   if (productSlug === "all") return true;
-  if (item.productSlug !== productSlug) return false;
+  if (!itemHasProduct(item, productSlug)) return false;
   const child = getCategory(productSlug)?.children.find((c) => c.slug === childSlug);
   if (!child) return true;
   const tokens = [child.slug, child.name, child.nameEn ?? ""]
@@ -125,16 +128,37 @@ function matchesAnyChild(
   childSlugs: string[],
 ) {
   if (productSlug === "all") return true;
-  if (childSlugs.length === 0) return false;
+  if (childSlugs.length === 0) return true;
   return childSlugs.some((slug) => matchesChild(item, productSlug, slug));
 }
 
-export function PortfolioIndex() {
+export function PortfolioIndex({
+  initialItems,
+}: {
+  initialItems?: PortfolioItem[];
+}) {
   const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
   const reduced = useReducedMotion();
-  const items = usePortfolioItems();
+  const stored = usePortfolioItems();
+  useEffect(() => {
+    if (initialItems?.length) hydratePortfolioItems(initialItems);
+  }, [initialItems]);
+  const items = useMemo(() => {
+    const byId = new Map<string, PortfolioItem>();
+    for (const item of initialItems ?? []) byId.set(item.id, item);
+    for (const item of stored) {
+      const prev = byId.get(item.id);
+      if (
+        !prev ||
+        Date.parse(item.updatedAt || "0") >= Date.parse(prev.updatedAt || "0")
+      ) {
+        byId.set(item.id, item);
+      }
+    }
+    return [...byId.values()];
+  }, [initialItems, stored]);
   const published = useMemo(() => publishedPortfolio(items), [items]);
 
   const product = parseProduct(searchParams.get("product"));
@@ -233,7 +257,7 @@ export function PortfolioIndex() {
 
   const filtered = useMemo(() => {
     return published.filter((i) => {
-      if (product !== "all" && i.productSlug !== product) return false;
+      if (product !== "all" && !itemHasProduct(i, product)) return false;
       if (space !== "all" && i.spaceType !== space) return false;
       if (area !== "all" && placeArea(i.place) !== area) return false;
       if (!matchesQuery(i, qParam)) return false;
@@ -246,9 +270,11 @@ export function PortfolioIndex() {
     const order = productCatalog.map((c) => c.slug);
     const map = new Map<string, PortfolioItem[]>();
     for (const item of filtered) {
-      const list = map.get(item.productSlug) ?? [];
-      list.push(item);
-      map.set(item.productSlug, list);
+      for (const slug of itemCategorySlugs(item)) {
+        const list = map.get(slug) ?? [];
+        list.push(item);
+        map.set(slug, list);
+      }
     }
     return order
       .filter((slug) => map.has(slug))
@@ -292,7 +318,9 @@ export function PortfolioIndex() {
       if (space !== "all" && item.spaceType !== space) continue;
       if (area !== "all" && placeArea(item.place) !== area) continue;
       if (!matchesQuery(item, qParam)) continue;
-      map.set(item.productSlug, (map.get(item.productSlug) ?? 0) + 1);
+      for (const slug of itemCategorySlugs(item)) {
+        map.set(slug, (map.get(slug) ?? 0) + 1);
+      }
     }
     return productCatalog.map((c) => ({
       slug: c.slug,
@@ -304,7 +332,7 @@ export function PortfolioIndex() {
   const spaceCounts = useMemo(() => {
     const map = new Map<SpaceType, number>();
     for (const item of published) {
-      if (product !== "all" && item.productSlug !== product) continue;
+      if (product !== "all" && !itemHasProduct(item, product)) continue;
       if (area !== "all" && placeArea(item.place) !== area) continue;
       if (!matchesQuery(item, qParam)) continue;
       if (!matchesAnyChild(item, product, childSlugs)) continue;
@@ -323,7 +351,7 @@ export function PortfolioIndex() {
     if (!cat) return [];
     return cat.children.map((ch) => {
       const count = published.filter((i) => {
-        if (i.productSlug !== product) return false;
+        if (!itemHasProduct(i, product)) return false;
         if (space !== "all" && i.spaceType !== space) return false;
         if (area !== "all" && placeArea(i.place) !== area) return false;
         if (!matchesQuery(i, qParam)) return false;
@@ -953,7 +981,7 @@ function GalleryCard({
         <p className="truncate text-[11px] text-muted">
           {showProduct ? (
             <>
-              {productLabel(item.productSlug)}
+              {itemProductLabels(item)}
               <span className="mx-1.5 text-line">·</span>
               {SPACE_TYPE_LABELS[item.spaceType]}
             </>

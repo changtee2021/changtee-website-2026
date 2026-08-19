@@ -1,6 +1,5 @@
 "use client";
 
-import { notFound } from "next/navigation";
 import {
   getBlogBySlug,
   portfolioForBlog,
@@ -14,7 +13,11 @@ export function BlogDetail({ slug }: { slug: string }) {
   const works = usePortfolioItems();
   const post = getBlogBySlug(slug, posts);
   if (!post) {
-    notFound();
+    return (
+      <p className="px-4 py-16 text-center text-sm text-muted">
+        ไม่พบบทความนี้ หรือยังไม่ได้เผยแพร่ขึ้นเซิร์ฟเวอร์
+      </p>
+    );
   }
 
   return (

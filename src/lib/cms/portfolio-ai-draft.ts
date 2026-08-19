@@ -23,6 +23,12 @@ export type PortfolioDraftImage = {
   role: PortfolioImageRole;
 };
 
+export type PortfolioProductLine = {
+  id: string;
+  productSlug: string;
+  variantSlug: string;
+};
+
 export type PortfolioJobFacts = {
   /** ชื่องานที่โชว์บนเว็บ — ว่างแล้วให้ AI ตั้งจากสินค้า + ลูกค้า */
   jobTitle: string;
@@ -32,8 +38,11 @@ export type PortfolioJobFacts = {
   province: string;
   district: string;
   installDate: string;
+  /** Primary product — always mirrors productLines[0] */
   productSlug: string;
   variantSlug: string;
+  /** Installed products in order (ผ้าม่าน + ฉากกั้น ฯลฯ) */
+  productLines: PortfolioProductLine[];
   spaceType: SpaceType;
   customerLabel: string;
   showCustomerName: boolean;
@@ -110,8 +119,30 @@ export const MOCK_PORTFOLIO_IMAGES = [
   "/images/mock/film.png",
 ] as const;
 
+export function emptyProductLine(productSlug?: string): PortfolioProductLine {
+  const slug = productSlug || PRODUCT_OPTIONS[0]?.value || "curtain";
+  return {
+    id: `pl-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+    productSlug: slug,
+    variantSlug: variantOptions(slug)[0]?.value ?? "",
+  };
+}
+
+export function resolvedProductLines(
+  facts: Pick<PortfolioJobFacts, "productSlug" | "variantSlug" | "productLines">,
+): PortfolioProductLine[] {
+  if (facts.productLines?.length) return facts.productLines;
+  return [
+    {
+      id: "pl-primary",
+      productSlug: facts.productSlug,
+      variantSlug: facts.variantSlug,
+    },
+  ];
+}
+
 export function emptyJobFacts(): PortfolioJobFacts {
-  const productSlug = PRODUCT_OPTIONS[0]?.value ?? "curtain";
+  const first = emptyProductLine();
   return {
     jobTitle: "",
     place: "",
@@ -119,8 +150,9 @@ export function emptyJobFacts(): PortfolioJobFacts {
     province: "",
     district: "",
     installDate: "",
-    productSlug,
-    variantSlug: variantOptions(productSlug)[0]?.value ?? "",
+    productSlug: first.productSlug,
+    variantSlug: first.variantSlug,
+    productLines: [first],
     spaceType: "home-condo",
     customerLabel: "",
     showCustomerName: true,
@@ -132,23 +164,64 @@ export function emptyJobFacts(): PortfolioJobFacts {
   };
 }
 
+function inferCategoryFromSku(sku: string): string {
+  if (!sku) return "";
+  for (const cat of PRODUCT_OPTIONS) {
+    if (variantOptions(cat.value).some((v) => v.value === sku)) return cat.value;
+  }
+  return "";
+}
+
+function lineToProductLine(
+  item: PortfolioItem,
+  row: PortfolioItem["lineItems"][number],
+  index: number,
+): PortfolioProductLine {
+  const category =
+    row.categorySlug?.trim() ||
+    inferCategoryFromSku(row.sku.trim()) ||
+    (index === 0 ? item.productSlug : "");
+  const slug = category || item.productSlug;
+  const variants = variantOptions(slug);
+  const sku = row.sku.trim();
+  return {
+    id: `pl-${item.id}-${index}`,
+    productSlug: slug,
+    variantSlug: variants.some((v) => v.value === sku) ? sku : "",
+  };
+}
+
 export function factsFromPortfolioItem(item: PortfolioItem): PortfolioJobFacts {
   const urls = Array.from(
     new Set((item.gallery.length ? item.gallery : [item.image]).filter(Boolean)),
   );
   const cover = item.image.trim() || urls[0] || "";
-  const variants = variantOptions(item.productSlug);
-  const sku = item.lineItems[0]?.sku?.trim() ?? "";
-  const variantSlug = variants.some((v) => v.value === sku)
-    ? sku
-    : "";
+  const sourceRows = item.lineItems.filter(
+    (row, index) =>
+      index === 0 ||
+      Boolean(row.categorySlug?.trim() || row.sku.trim() || row.productName.trim()),
+  );
+  const productLines = sourceRows.length
+    ? sourceRows.map((row, index) => lineToProductLine(item, row, index))
+    : [
+        {
+          id: `pl-${item.id}-0`,
+          productSlug: item.productSlug,
+          variantSlug: variantOptions(item.productSlug).some(
+            (v) => v.value === (item.lineItems[0]?.sku?.trim() ?? ""),
+          )
+            ? (item.lineItems[0]?.sku?.trim() ?? "")
+            : "",
+        },
+      ];
 
   return {
     ...emptyJobFacts(),
     jobTitle: item.title,
     place: item.place,
-    productSlug: item.productSlug,
-    variantSlug,
+    productSlug: productLines[0]?.productSlug || item.productSlug,
+    variantSlug: productLines[0]?.variantSlug ?? "",
+    productLines,
     spaceType: item.spaceType,
     customerLabel: item.customerName,
     showCustomerName: item.showCustomerName,
@@ -169,6 +242,25 @@ function productName(slug: string) {
 function variantName(productSlug: string, variantSlug: string) {
   if (!variantSlug) return "";
   return getProduct(productSlug, variantSlug)?.product.name ?? variantSlug;
+}
+
+function lineLabel(line: PortfolioProductLine) {
+  return variantName(line.productSlug, line.variantSlug) || productName(line.productSlug);
+}
+
+function installedLabels(facts: PortfolioJobFacts): string[] {
+  const names = resolvedProductLines(facts)
+    .map(lineLabel)
+    .filter(Boolean);
+  return Array.from(new Set(names));
+}
+
+function productPhrase(facts: PortfolioJobFacts) {
+  const names = installedLabels(facts);
+  if (names.length === 0) return productName(facts.productSlug);
+  if (names.length === 1) return names[0]!;
+  if (names.length === 2) return `${names[0]}กับ${names[1]}`;
+  return `${names.slice(0, -1).join(" ")} และ${names[names.length - 1]}`;
 }
 
 function formatPlace(facts: PortfolioJobFacts) {
@@ -227,9 +319,11 @@ function orderedImages(facts: PortfolioJobFacts) {
 
 function buildTags(facts: PortfolioJobFacts) {
   const tags = new Set<string>();
-  tags.add(productName(facts.productSlug));
-  const v = variantName(facts.productSlug, facts.variantSlug);
-  if (v) tags.add(v);
+  for (const line of resolvedProductLines(facts)) {
+    tags.add(productName(line.productSlug));
+    const v = variantName(line.productSlug, line.variantSlug);
+    if (v) tags.add(v);
+  }
   tags.add(spaceLabel(facts.spaceType));
   if (facts.province) tags.add(facts.province.replace("มหานคร", "").trim());
   if (facts.patternId === "before-after") tags.add("ก่อน-หลัง");
@@ -243,9 +337,7 @@ function joinDetail(parts: string[]) {
 
 function generateTitle(facts: PortfolioJobFacts) {
   if (facts.jobTitle?.trim()) return facts.jobTitle.trim();
-  const product = productName(facts.productSlug);
-  const variant = variantName(facts.productSlug, facts.variantSlug);
-  const main = variant || product;
+  const main = productPhrase(facts);
   const who = facts.customerLabel.trim();
   const placeBit =
     facts.place?.trim() || facts.district.trim() || facts.province.trim();
@@ -255,9 +347,7 @@ function generateTitle(facts: PortfolioJobFacts) {
 }
 
 function generateSummary(facts: PortfolioJobFacts, place: string) {
-  const product = productName(facts.productSlug);
-  const variant = variantName(facts.productSlug, facts.variantSlug);
-  const item = variant || product;
+  const item = productPhrase(facts);
   const space = spaceLabel(facts.spaceType);
   const pain = facts.painPoints.trim();
   const who = facts.customerLabel.trim();
@@ -278,8 +368,10 @@ function generateSummary(facts: PortfolioJobFacts, place: string) {
 }
 
 function generateDetail(facts: PortfolioJobFacts, place: string) {
+  const lines = resolvedProductLines(facts);
   const product = productName(facts.productSlug);
   const variant = variantName(facts.productSlug, facts.variantSlug);
+  const item = productPhrase(facts);
   const cat = getCategory(facts.productSlug);
   const space = spaceLabel(facts.spaceType);
   const dateLabel = formatInstallDate(facts.installDate);
@@ -287,15 +379,18 @@ function generateDetail(facts: PortfolioJobFacts, place: string) {
   const size = facts.approxSizeNote.trim();
   const pain = facts.painPoints.trim();
   const notes = facts.notesFromStaff.trim();
-  const skuLine = variant
-    ? `รุ่น / SKU: ${variant}${facts.variantSlug ? ` (${facts.productSlug}/${facts.variantSlug})` : ""}`
-    : `สินค้า: ${product}`;
+  const skuLine =
+    lines.length > 1
+      ? `สินค้า: ${lines.map((line, index) => `${index + 1}. ${lineLabel(line)}`).join(" ")}`
+      : variant
+        ? `รุ่น / SKU: ${variant}${facts.variantSlug ? ` (${facts.productSlug}/${facts.variantSlug})` : ""}`
+        : `สินค้า: ${product}`;
 
   const introFriendly = customer
-    ? `งานติดตั้ง${variant || product} ให้${customer} ที่${place}`
-    : `งานติดตั้ง${variant || product} ที่${place}`;
+    ? `งานติดตั้ง${item} ให้${customer} ที่${place}`
+    : `งานติดตั้ง${item} ที่${place}`;
 
-  const introFormal = `รายงานผลงานติดตั้ง${variant || product} สำหรับ${space} บริเวณ${place}`;
+  const introFormal = `รายงานผลงานติดตั้ง${item} สำหรับ${space} บริเวณ${place}`;
 
   const factsBlock = [
     dateLabel ? `วันที่ติดตั้ง: ${dateLabel}` : "",
@@ -314,7 +409,7 @@ function generateDetail(facts: PortfolioJobFacts, place: string) {
       const p2 = pain
         ? `ก่อนติดตั้ง: ${pain}`
         : "ก่อนติดตั้ง: พื้นที่มีแสง/ความเป็นส่วนตัวยังไม่ตรงการใช้งาน";
-      const p3 = `หลังติดตั้ง: ใช้${variant || product}${cat ? ` ในกลุ่ม${cat.name}` : ""} ปรับบรรยากาศ${space}ให้อยู่สบายและดูแลง่ายขึ้น`;
+      const p3 = `หลังติดตั้ง: ใช้${item}${cat ? ` ในกลุ่ม${cat.name}` : ""} ปรับบรรยากาศ${space}ให้อยู่สบายและดูแลง่ายขึ้น`;
       const p4 = notes || "ช่างวัด–ติดตั้งตามหน้างานจริง เก็บงานเรียบร้อยพร้อมใช้งาน";
       return joinDetail([p1, factsBlock, p2, p3, p4]);
     }
@@ -323,7 +418,7 @@ function generateDetail(facts: PortfolioJobFacts, place: string) {
       const p2 = [
         "จุดเน้นของงานองค์กร:",
         `- มาตรฐานการติดตั้งและความตรงต่อเวลา`,
-        `- สินค้า${variant || product} เลือกให้เหมาะกับการใช้งาน${space}`,
+        `- สินค้า${item} เลือกให้เหมาะกับการใช้งาน${space}`,
         pain ? `- โจทย์จากลูกค้า: ${pain}` : "",
         size ? `- ขอบเขตงาน: ${size}` : "",
       ]
@@ -348,8 +443,8 @@ function generateDetail(facts: PortfolioJobFacts, place: string) {
     }
     default: {
       const why = pain
-        ? `${space}ที่${place} มีโจทย์${pain} เลยเลือก${variant || product} ให้ตอบการใช้งานจริง`
-        : `${space}ที่${place} เลือก${variant || product} เพราะดูแลง่าย คุมแสงได้ และเข้ากับหน้างานโดยไม่แย่งบรรยากาศ`;
+        ? `${space}ที่${place} มีโจทย์${pain} เลยเลือก${item} ให้ตอบการใช้งานจริง`
+        : `${space}ที่${place} เลือก${item} เพราะดูแลง่าย คุมแสงได้ และเข้ากับหน้างานโดยไม่แย่งบรรยากาศ`;
       const fit = cat
         ? `${cat.summary} เหมาะ${space}ที่อยากได้ทั้งฟังก์ชันและความเป็นระเบียบ`
         : `สไตล์นี้เหมาะ${space}ที่อยากคุมแสงและความเป็นส่วนตัวโดยไม่กินพื้นที่`;
@@ -378,7 +473,7 @@ export function generatePortfolioDraft(
   const image = gallery[0] || "/images/mock/curtain-living.jpg";
   const tags = buildTags(facts);
 
-  const variant = variantName(facts.productSlug, facts.variantSlug);
+  const lines = resolvedProductLines(facts);
   return {
     id: opts?.id ?? `pf-${Date.now()}`,
     title,
@@ -386,7 +481,7 @@ export function generatePortfolioDraft(
     summary,
     detail,
     place,
-    productSlug: facts.productSlug,
+    productSlug: lines[0]?.productSlug || facts.productSlug,
     spaceType: facts.spaceType,
     tags,
     image,
@@ -400,17 +495,16 @@ export function generatePortfolioDraft(
     showCustomerName: facts.showCustomerName ?? false,
     installLocation: facts.approxSizeNote?.trim() ?? "",
     installDate: facts.installDate?.trim() ?? "",
-    lineItems: [
-      {
-        productName: variant || productName(facts.productSlug),
-        sku: facts.variantSlug || "",
-        serialOrCode: "",
-        material: "",
-        color: "",
-        quantity: "",
-        notes: "",
-      },
-    ],
+    lineItems: lines.map((line) => ({
+      categorySlug: line.productSlug,
+      productName: lineLabel(line),
+      sku: line.variantSlug || "",
+      serialOrCode: "",
+      material: "",
+      color: "",
+      quantity: "",
+      notes: "",
+    })),
     internalNote: facts.notesFromStaff?.trim() ?? "",
     updatedAt: new Date().toISOString(),
   };

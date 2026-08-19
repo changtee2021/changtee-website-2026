@@ -94,7 +94,7 @@ function BlogEditorForm({
     };
   }
 
-  function submit(e: React.FormEvent) {
+  async function submit(e: React.FormEvent) {
     e.preventDefault();
     if (!form.title.trim() || !form.excerpt.trim()) {
       alert("กรอกหัวข้อและคำโปรยให้ครบ");
@@ -106,20 +106,31 @@ function BlogEditorForm({
       form.status === "published"
         ? form.publishedAt || new Date().toISOString()
         : form.publishedAt;
-    upsertBlogPost({
-      ...form,
-      title: form.title.trim(),
-      excerpt: form.excerpt.trim(),
-      body: form.body.trim(),
-      slug,
-      tags: tagText
-        .split(",")
-        .map((t) => t.trim())
-        .filter(Boolean),
-      publishedAt,
-      updatedAt: new Date().toISOString(),
-    });
-    router.push(adminHref(basePath, "/cms/blog"));
+    try {
+      const result = await upsertBlogPost({
+        ...form,
+        title: form.title.trim(),
+        excerpt: form.excerpt.trim(),
+        body: form.body.trim(),
+        slug,
+        tags: tagText
+          .split(",")
+          .map((t) => t.trim())
+          .filter(Boolean),
+        publishedAt,
+        updatedAt: new Date().toISOString(),
+      });
+      if (!result.ok) {
+        alert(
+          result.error ||
+            "บันทึกขึ้นเซิร์ฟเวอร์ไม่สำเร็จ — บทความยังอยู่บนเครื่องนี้ แต่ยังไม่ขึ้นเว็บออนไลน์",
+        );
+        return;
+      }
+      router.push(adminHref(basePath, "/cms/blog"));
+    } finally {
+      setSaving(false);
+    }
   }
 
   const listHref = adminHref(basePath, "/cms/blog");

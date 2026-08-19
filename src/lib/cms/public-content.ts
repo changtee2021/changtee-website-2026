@@ -6,10 +6,12 @@ import {
 import {
   DEMO_PORTFOLIO,
   SPACE_TYPE_LABELS,
+  itemHasProduct,
   productLabel,
   type PortfolioItem,
 } from "@/lib/cms/portfolio-demo";
 import { LEARN_SHEETS, type LearnSheet } from "@/lib/learn";
+import { normalizeContentSlug } from "@/lib/cms/content-status";
 
 export function publishedPortfolio(items: PortfolioItem[] = DEMO_PORTFOLIO) {
   return items
@@ -31,14 +33,20 @@ export function getPortfolioBySlug(
   slug: string,
   items: PortfolioItem[] = DEMO_PORTFOLIO,
 ): PortfolioItem | undefined {
-  return publishedPortfolio(items).find((i) => i.slug === slug);
+  const needle = normalizeContentSlug(slug);
+  return publishedPortfolio(items).find(
+    (i) => normalizeContentSlug(i.slug) === needle,
+  );
 }
 
 export function getBlogBySlug(
   slug: string,
   posts: BlogPost[] = DEMO_BLOG,
 ): BlogPost | undefined {
-  return publishedBlog(posts).find((p) => p.slug === slug);
+  const needle = normalizeContentSlug(slug);
+  return publishedBlog(posts).find(
+    (p) => normalizeContentSlug(p.slug) === needle,
+  );
 }
 
 export function relatedPortfolio(
@@ -47,7 +55,7 @@ export function relatedPortfolio(
   limit = 3,
 ) {
   return publishedPortfolio(items)
-    .filter((i) => i.id !== item.id && i.productSlug === item.productSlug)
+    .filter((i) => i.id !== item.id && itemHasProduct(i, item.productSlug))
     .slice(0, limit);
 }
 
@@ -59,7 +67,7 @@ export function portfolioForProduct(
   limit = 3,
 ) {
   const published = publishedPortfolio(items);
-  const byCategory = published.filter((i) => i.productSlug === categorySlug);
+  const byCategory = published.filter((i) => itemHasProduct(i, categorySlug));
   if (!productName) return byCategory.slice(0, limit);
 
   const name = productName.trim();

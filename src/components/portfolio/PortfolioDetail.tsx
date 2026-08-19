@@ -1,6 +1,5 @@
 "use client";
 
-import { notFound } from "next/navigation";
 import {
   getPortfolioBySlug,
   relatedPortfolio,
@@ -13,7 +12,11 @@ export function PortfolioDetail({ slug }: { slug: string }) {
   const item = getPortfolioBySlug(slug, items);
 
   if (!item) {
-    notFound();
+    return (
+      <p className="px-4 py-16 text-center text-sm text-muted">
+        ไม่พบผลงานนี้ หรือยังไม่ได้เผยแพร่ขึ้นเซิร์ฟเวอร์
+      </p>
+    );
   }
 
   return (

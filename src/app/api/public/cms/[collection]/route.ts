@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { isPublicCmsCollection } from "@/lib/cms/cms-collections";
 import { readCmsCollection } from "@/lib/cms/cms-server";
+import { readLocalCmsCollection } from "@/lib/cms/cms-local-store";
 
 export const runtime = "nodejs";
 
@@ -13,9 +14,14 @@ export async function GET(_request: Request, { params }: Props) {
     return NextResponse.json({ error: "Unknown collection" }, { status: 404 });
   }
 
-  const items = await readCmsCollection(collection);
+  const remote = await readCmsCollection(collection);
+  const items = remote ?? (await readLocalCmsCollection(collection));
+  const headers = { "Cache-Control": "no-store" };
   if (!items) {
-    return NextResponse.json({ items: null, source: "seed" });
+    return NextResponse.json({ items: null, source: "seed" }, { headers });
   }
-  return NextResponse.json({ items, source: "supabase" });
+  return NextResponse.json(
+    { items, source: remote ? "supabase" : "local" },
+    { headers },
+  );
 }

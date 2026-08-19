@@ -76,15 +76,55 @@ function createDemoStore<T>(
       });
   }
 
-  function pushRemote(next: T[]) {
-    if (typeof window === "undefined") return;
-    void fetch(`/api/admin/cms/${collection}`, {
-      method: "PUT",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({ items: next }),
-    }).catch(() => {
-      /* offline / not logged in — local still updated */
-    });
+  async function pushRemote(
+    next: T[],
+    deletedIds: string[] = [],
+  ): Promise<{ ok: boolean; error?: string }> {
+    if (typeof window === "undefined") {
+      return { ok: false, error: "Not in browser" };
+    }
+    try {
+      const res = await fetch(`/api/admin/cms/${collection}`, {
+        method: "PUT",
+        headers: { "content-type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ items: next, deletedIds }),
+      });
+      if (!res.ok) {
+        const json = (await res.json().catch(() => null)) as {
+          error?: string;
+        } | null;
+        return {
+          ok: false,
+          error:
+            json?.error ||
+            `บันทึกขึ้นเซิร์ฟเวอร์ไม่สำเร็จ (${res.status})`,
+        };
+      }
+      const latest = await fetch(`/api/public/cms/${collection}`, {
+        cache: "no-store",
+      })
+        .then((r) => r.json())
+        .catch(() => null);
+      if (Array.isArray(latest?.items) && latest.items.length > 0) {
+        memory = latest.items as T[];
+        try {
+          window.localStorage.setItem(localKey, JSON.stringify(latest.items));
+        } catch {
+          /* ignore quota */
+        }
+        notify();
+      }
+      return { ok: true };
+    } catch (err) {
+      return {
+        ok: false,
+        error:
+          err instanceof Error
+            ? err.message
+            : "เครือข่ายล่ม บันทึกขึ้นเซิร์ฟเวอร์ไม่ได้",
+      };
+    }
   }
 
   function getSnapshot(): T[] {
@@ -97,7 +137,19 @@ function createDemoStore<T>(
     return seed;
   }
 
-  function write(next: T[]) {
+  function write(next: T[]): Promise<{ ok: boolean; error?: string }> {
+    const prev = memory;
+    const nextIds = new Set(
+      next
+        .map((item) => (item as { id?: string }).id)
+        .filter((id): id is string => Boolean(id)),
+    );
+    const deletedIds = prev
+      .map((item) => (item as { id?: string }).id)
+      .filter(
+        (id): id is string =>
+          typeof id === "string" && id.length > 0 && !nextIds.has(id),
+      );
     memory = next;
     hydrated = true;
     if (typeof window !== "undefined") {
@@ -106,9 +158,11 @@ function createDemoStore<T>(
       } catch {
         /* ignore */
       }
-      pushRemote(next);
+      notify();
+      return pushRemote(next, deletedIds);
     }
     notify();
+    return Promise.resolve({ ok: true });
   }
 
   /**
@@ -117,6 +171,15 @@ function createDemoStore<T>(
    */
   function applyPreview(next: T[]) {
     memory = next;
+    hydrated = true;
+    notify();
+  }
+
+  /** Seed from a server-rendered CMS snapshot before the public fetch returns. */
+  function hydrateFromServer(items: T[]) {
+    if (!Array.isArray(items) || items.length === 0) return;
+    if (remoteStarted) return;
+    memory = items;
     hydrated = true;
     notify();
   }
@@ -137,6 +200,7 @@ function createDemoStore<T>(
     getServerSnapshot,
     write,
     applyPreview,
+    hydrateFromServer,
     read,
   };
 }
@@ -172,24 +236,26 @@ export function usePortfolioItems(): PortfolioItem[] {
   return raw.map((item) => normalizePortfolioItem(item));
 }
 
+export function hydratePortfolioItems(items: PortfolioItem[]) {
+  portfolioStore.hydrateFromServer(items.map((item) => normalizePortfolioItem(item)));
+}
+
 export function setPortfolioItems(items: PortfolioItem[]) {
-  portfolioStore.write(items.map((item) => normalizePortfolioItem(item)));
+  return portfolioStore.write(items.map((item) => normalizePortfolioItem(item)));
 }
 
 export function upsertPortfolioItem(item: PortfolioItem) {
   const next = normalizePortfolioItem(item);
   const prev = portfolioStore.read();
   const idx = prev.findIndex((p) => p.id === next.id);
-  if (idx === -1) setPortfolioItems([next, ...prev]);
-  else {
-    const copy = [...prev];
-    copy[idx] = next;
-    setPortfolioItems(copy);
-  }
+  if (idx === -1) return setPortfolioItems([next, ...prev]);
+  const copy = [...prev];
+  copy[idx] = next;
+  return setPortfolioItems(copy);
 }
 
 export function removePortfolioItem(id: string) {
-  setPortfolioItems(portfolioStore.read().filter((p) => p.id !== id));
+  return setPortfolioItems(portfolioStore.read().filter((p) => p.id !== id));
 }
 
 export function getPortfolioById(id: string): PortfolioItem | undefined {
@@ -205,18 +271,16 @@ export function useBlogPosts(): BlogPost[] {
 }
 
 export function setBlogPosts(posts: BlogPost[]) {
-  blogStore.write(posts);
+  return blogStore.write(posts);
 }
 
 export function upsertBlogPost(post: BlogPost) {
   const prev = blogStore.read();
   const idx = prev.findIndex((p) => p.id === post.id);
-  if (idx === -1) setBlogPosts([post, ...prev]);
-  else {
-    const copy = [...prev];
-    copy[idx] = post;
-    setBlogPosts(copy);
-  }
+  if (idx === -1) return setBlogPosts([post, ...prev]);
+  const copy = [...prev];
+  copy[idx] = post;
+  return setBlogPosts(copy);
 }
 
 export function getBlogById(id: string): BlogPost | undefined {

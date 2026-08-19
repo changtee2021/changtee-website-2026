@@ -70,6 +70,8 @@ export const PORTFOLIO_NAV_ITEMS: { href: string; label: string }[] = [
 
 /** One installed product line — for sales + SEO specs */
 export type PortfolioLineItem = {
+  /** Category slug e.g. curtain, pvc-partition — used when a job has several products */
+  categorySlug?: string;
   /** ชื่อสินค้าที่ติดจริง เช่น ม่านม้วน Sunscreen */
   productName: string;
   /** SKU / รหัสสินค้าในระบบ */
@@ -122,6 +124,7 @@ export type PortfolioItem = {
 
 export function emptyLineItem(): PortfolioLineItem {
   return {
+    categorySlug: "",
     productName: "",
     sku: "",
     serialOrCode: "",
@@ -141,10 +144,28 @@ export function productLabel(slug: string): string {
   return PRODUCT_OPTIONS.find((p) => p.value === slug)?.label ?? slug;
 }
 
+/** Every product category installed on this job (primary + extra lines). */
+export function itemCategorySlugs(item: PortfolioItem): string[] {
+  const extra = item.lineItems
+    .map((row) => row.categorySlug?.trim())
+    .filter((slug): slug is string => Boolean(slug));
+  return Array.from(new Set([item.productSlug, ...extra]));
+}
+
+export function itemHasProduct(item: PortfolioItem, productSlug: string): boolean {
+  if (!productSlug || productSlug === "all") return true;
+  return itemCategorySlugs(item).includes(productSlug);
+}
+
+export function itemProductLabels(item: PortfolioItem): string {
+  return itemCategorySlugs(item).map(productLabel).join(" · ");
+}
+
 function normalizeLineItem(
   row: Partial<PortfolioLineItem> | undefined,
 ): PortfolioLineItem {
   return {
+    categorySlug: row?.categorySlug ?? "",
     productName: row?.productName ?? "",
     sku: row?.sku ?? "",
     serialOrCode: row?.serialOrCode ?? "",

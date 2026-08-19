@@ -1,14 +1,23 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { BlogDetail } from "@/components/blog/BlogDetail";
+import { BlogDetailView } from "@/components/blog/BlogDetailView";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { getArticleJsonLd } from "@/lib/article-jsonld";
+import { normalizeContentSlug } from "@/lib/cms/content-status";
 import {
   loadBlogPosts,
+  loadPortfolioItems,
   loadPublishedBlogSlugs,
 } from "@/lib/cms/cms-public-load";
-import { getBlogBySlug } from "@/lib/cms/public-content";
+import {
+  getBlogBySlug,
+  portfolioForBlog,
+  relatedBlog,
+} from "@/lib/cms/public-content";
 import { pageMetadata } from "@/lib/seo/meta";
+
+export const dynamic = "force-dynamic";
+export const dynamicParams = true;
 
 type Props = { params: Promise<{ slug: string }> };
 
@@ -17,7 +26,7 @@ export async function generateStaticParams() {
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const { slug } = await params;
+  const slug = normalizeContentSlug((await params).slug);
   const posts = await loadBlogPosts();
   const post = getBlogBySlug(slug, posts);
   if (!post) return { title: "บทความ" };
@@ -42,15 +51,21 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 export default async function BlogDetailPage({ params }: Props) {
-  const { slug } = await params;
+  const slug = normalizeContentSlug((await params).slug);
   if (!slug) notFound();
   const posts = await loadBlogPosts();
   const post = getBlogBySlug(slug, posts);
+  if (!post) notFound();
+  const works = await loadPortfolioItems();
 
   return (
     <>
-      {post ? <JsonLd data={getArticleJsonLd(post)} /> : null}
-      <BlogDetail slug={slug} />
+      <JsonLd data={getArticleJsonLd(post)} />
+      <BlogDetailView
+        post={post}
+        related={relatedBlog(post, posts, 3)}
+        relatedWorks={portfolioForBlog(post, works, 3)}
+      />
     </>
   );
 }

@@ -1,14 +1,22 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { PortfolioDetail } from "@/components/portfolio/PortfolioDetail";
+import { PortfolioDetailView } from "@/components/portfolio/PortfolioDetailView";
 import { JsonLd } from "@/components/seo/JsonLd";
+import { normalizeContentSlug } from "@/lib/cms/content-status";
 import {
   loadPortfolioItems,
   loadPublishedPortfolioSlugs,
 } from "@/lib/cms/cms-public-load";
-import { getPortfolioBySlug } from "@/lib/cms/public-content";
+import {
+  getPortfolioBySlug,
+  relatedPortfolio,
+} from "@/lib/cms/public-content";
 import { getPortfolioJsonLd } from "@/lib/portfolio-jsonld";
 import { pageMetadata } from "@/lib/seo/meta";
+
+export const dynamic = "force-dynamic";
+export const dynamicParams = true;
 
 type Props = { params: Promise<{ slug: string }> };
 
@@ -17,7 +25,7 @@ export async function generateStaticParams() {
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const { slug } = await params;
+  const slug = normalizeContentSlug((await params).slug);
   const items = await loadPortfolioItems();
   const item = getPortfolioBySlug(slug, items);
   if (!item) return { title: "ผลงาน" };
@@ -30,15 +38,21 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 export default async function PortfolioDetailPage({ params }: Props) {
-  const { slug } = await params;
+  const slug = normalizeContentSlug((await params).slug);
   if (!slug) notFound();
   const items = await loadPortfolioItems();
   const item = getPortfolioBySlug(slug, items);
+  if (!item) {
+    return <PortfolioDetail slug={slug} />;
+  }
 
   return (
     <>
-      {item ? <JsonLd data={getPortfolioJsonLd(item)} /> : null}
-      <PortfolioDetail slug={slug} />
+      <JsonLd data={getPortfolioJsonLd(item)} />
+      <PortfolioDetailView
+        item={item}
+        related={relatedPortfolio(item, items)}
+      />
     </>
   );
 }

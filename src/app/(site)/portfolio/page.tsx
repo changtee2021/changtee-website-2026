@@ -2,7 +2,10 @@ import { Suspense } from "react";
 import type { Metadata } from "next";
 import { PortfolioIndex } from "@/components/portfolio/PortfolioIndex";
 import { PageSkeleton } from "@/components/ui/page-skeleton";
+import { loadPortfolioItems } from "@/lib/cms/cms-public-load";
 import { pageMetadata } from "@/lib/seo/meta";
+
+export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = pageMetadata({
   title: "ผลงานติดตั้ง",
@@ -11,14 +14,15 @@ export const metadata: Metadata = pageMetadata({
   path: "/portfolio",
 });
 
-export default function PortfolioPage() {
+export default async function PortfolioPage() {
+  const items = await loadPortfolioItems();
   return (
     <Suspense
       fallback={
         <PageSkeleton variant="portfolio" label="กำลังโหลดผลงาน…" />
       }
     >
-      <PortfolioIndex />
+      <PortfolioIndex initialItems={items} />
     </Suspense>
   );
 }

@@ -8,6 +8,7 @@ import { EditableSpot } from "@/components/preview/EditableSpot";
 import {
   SPACE_TYPE_LABELS,
   hasPortfolioSpecs,
+  itemCategorySlugs,
   productLabel,
   type PortfolioItem,
 } from "@/lib/cms/portfolio-demo";
@@ -144,12 +145,19 @@ export function PortfolioDetailView({
               ผลงาน
             </Link>
             <span className="mx-2 opacity-60">/</span>
-            <Link
-              href={`/portfolio?product=${encodeURIComponent(item.productSlug)}`}
-              className="hover:underline"
-            >
-              {productLabel(item.productSlug)}
-            </Link>
+            {itemCategorySlugs(item).map((slug, index) => (
+              <span key={slug}>
+                {index > 0 ? (
+                  <span className="mx-1.5 opacity-60">·</span>
+                ) : null}
+                <Link
+                  href={`/portfolio?product=${encodeURIComponent(slug)}`}
+                  className="hover:underline"
+                >
+                  {productLabel(slug)}
+                </Link>
+              </span>
+            ))}
           </p>
           <h1 className="mt-2 font-display text-2xl font-bold text-white sm:text-4xl">
             {title}
@@ -172,12 +180,15 @@ export function PortfolioDetailView({
       <div className="mx-auto max-w-5xl px-6 sm:px-10 lg:px-16 py-10">
         <div className="max-w-3xl">
           <div className="flex flex-wrap gap-2">
-            <FactPill
-              href={`/portfolio?product=${encodeURIComponent(item.productSlug)}`}
-              tone="navy"
-            >
-              {productLabel(item.productSlug)}
-            </FactPill>
+            {itemCategorySlugs(item).map((slug) => (
+              <FactPill
+                key={slug}
+                href={`/portfolio?product=${encodeURIComponent(slug)}`}
+                tone="navy"
+              >
+                {productLabel(slug)}
+              </FactPill>
+            ))}
             <FactPill
               href={`/portfolio?space=${encodeURIComponent(item.spaceType)}`}
               tone="paper"

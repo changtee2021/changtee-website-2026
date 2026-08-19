@@ -10,6 +10,7 @@ import {
   ImagePlus,
   Loader2,
   MapPin,
+  Plus,
   Sparkles,
   Star,
   Trash2,
@@ -17,8 +18,10 @@ import {
 import { slugifyTh } from "@/lib/cms/content-status";
 import {
   emptyJobFacts,
+  emptyProductLine,
   factsFromPortfolioItem,
   generatePortfolioDraft,
+  resolvedProductLines,
   variantOptions,
   type PortfolioDraftImage,
   type PortfolioImageRole,
@@ -95,10 +98,7 @@ function PortfolioComposer({
   const [confirmDelete, setConfirmDelete] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
 
-  const variants = useMemo(
-    () => variantOptions(facts.productSlug),
-    [facts.productSlug],
-  );
+  const productLines = resolvedProductLines(facts);
 
   const draft = useMemo(
     () =>
@@ -118,6 +118,41 @@ function PortfolioComposer({
 
   function patchFacts(partial: Partial<PortfolioJobFacts>) {
     setFacts((f) => ({ ...f, ...partial }));
+  }
+
+  function setProductLines(lines: PortfolioJobFacts["productLines"]) {
+    const next = lines.length ? lines : [emptyProductLine()];
+    patchFacts({
+      productLines: next,
+      productSlug: next[0]!.productSlug,
+      variantSlug: next[0]!.variantSlug,
+    });
+  }
+
+  function patchProductLine(
+    id: string,
+    partial: Partial<{ productSlug: string; variantSlug: string }>,
+  ) {
+    setProductLines(
+      productLines.map((line) => {
+        if (line.id !== id) return line;
+        const productSlug = partial.productSlug ?? line.productSlug;
+        const variantSlug =
+          partial.productSlug && partial.productSlug !== line.productSlug
+            ? (variantOptions(productSlug)[0]?.value ?? "")
+            : (partial.variantSlug ?? line.variantSlug);
+        return { ...line, productSlug, variantSlug };
+      }),
+    );
+  }
+
+  function addProductLine() {
+    const used = new Set(productLines.map((line) => line.productSlug));
+    const nextCat =
+      PRODUCT_OPTIONS.find((opt) => !used.has(opt.value))?.value ??
+      PRODUCT_OPTIONS[0]?.value ??
+      "curtain";
+    setProductLines([...productLines, emptyProductLine(nextCat)]);
   }
 
   function setImages(images: PortfolioDraftImage[]) {
@@ -176,7 +211,7 @@ function PortfolioComposer({
 
   function missingForPublish(): string | null {
     if (!facts.place.trim()) return "ใส่สถานที่ที่โชว์บนเว็บ";
-    if (!facts.productSlug) return "เลือกสินค้า";
+    if (!productLines.some((line) => line.productSlug)) return "เลือกสินค้า";
     if (facts.images.length === 0) return "ใส่รูปอย่างน้อย 1 รูป";
     if (!facts.jobTitle.trim() && !facts.customerLabel.trim()) {
       return "ใส่ชื่องาน หรือชื่อลูกค้า เพื่อตั้งหัวข้อบนเว็บ";
@@ -208,7 +243,7 @@ function PortfolioComposer({
     setGenerating(false);
   }
 
-  function save(status: "draft" | "published") {
+  async function save(status: "draft" | "published") {
     const err = missingForPublish();
     if (err) {
       alert(err);
@@ -225,17 +260,40 @@ function PortfolioComposer({
       status,
       existing,
     });
-    upsertPortfolioItem({
-      ...item,
-      updatedAt: new Date().toISOString(),
-    });
-    router.push(listHref);
+    try {
+      const result = await upsertPortfolioItem({
+        ...item,
+        updatedAt: new Date().toISOString(),
+      });
+      if (!result.ok) {
+        alert(
+          result.error ||
+            "บันทึกขึ้นเซิร์ฟเวอร์ไม่สำเร็จ — ผลงานยังอยู่บนเครื่องนี้ แต่ยังไม่ขึ้นเว็บออนไลน์",
+        );
+        return;
+      }
+      router.push(listHref);
+    } finally {
+      setSaving(false);
+    }
   }
 
-  function removeWork() {
+  async function removeWork() {
     if (!existing) return;
-    removePortfolioItem(existing.id);
-    router.push(listHref);
+    setSaving(true);
+    try {
+      const result = await removePortfolioItem(existing.id);
+      if (!result.ok) {
+        alert(
+          result.error ||
+            "ลบจากเซิร์ฟเวอร์ไม่สำเร็จ — ลองอีกครั้งหรือเช็คการล็อกอินแอดมิน",
+        );
+        return;
+      }
+      router.push(listHref);
+    } finally {
+      setSaving(false);
+    }
   }
 
   if (missingEdit) {
@@ -311,26 +369,76 @@ function PortfolioComposer({
               (k) => ({ value: k, label: SPACE_TYPE_LABELS[k] }),
             )}
           />
-          <SelectField
-            label="สินค้า *"
-            value={facts.productSlug}
-            onChange={(v) =>
-              patchFacts({
-                productSlug: v,
-                variantSlug: variantOptions(v)[0]?.value ?? "",
-              })
-            }
-            options={PRODUCT_OPTIONS}
-          />
-          <SelectField
-            label="แบบที่ติด"
-            value={facts.variantSlug}
-            onChange={(v) => patchFacts({ variantSlug: v })}
-            options={[
-              { value: "", label: "— ไม่ระบุแบบ —" },
-              ...variants,
-            ]}
-          />
+        </div>
+
+        <div className="space-y-3">
+          <div>
+            <p className="text-sm font-medium text-navy">สินค้าที่ติดตั้ง *</p>
+            <p className="mt-0.5 text-xs text-muted">
+              งานหนึ่งจุดติดตั้งได้หลายแบบ เช่น ผ้าม่านกับฉากกั้นห้อง — เรียงเป็นข้อ
+            </p>
+          </div>
+          {productLines.map((line, index) => {
+            const variants = variantOptions(line.productSlug);
+            return (
+              <div
+                key={line.id}
+                className="flex items-start gap-2 rounded-2xl border border-line bg-paper/40 p-3 sm:gap-3 sm:p-4"
+              >
+                <p className="w-8 shrink-0 pt-2 text-base font-semibold leading-none text-navy">
+                  {index + 1}:
+                </p>
+                <div className="min-w-0 flex-1">
+                  <div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] sm:items-end">
+                    <SelectField
+                      label="สินค้า *"
+                      value={line.productSlug}
+                      onChange={(v) =>
+                        patchProductLine(line.id, { productSlug: v })
+                      }
+                      options={PRODUCT_OPTIONS}
+                    />
+                    <SelectField
+                      label="แบบที่ติด"
+                      value={line.variantSlug}
+                      onChange={(v) =>
+                        patchProductLine(line.id, { variantSlug: v })
+                      }
+                      options={[
+                        { value: "", label: "— ไม่ระบุแบบ —" },
+                        ...variants,
+                      ]}
+                    />
+                    {productLines.length > 1 ? (
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setProductLines(
+                            productLines.filter((row) => row.id !== line.id),
+                          )
+                        }
+                        className="inline-flex size-11 shrink-0 items-center justify-center rounded-xl border border-rose-200 text-rose-700 hover:bg-rose-50 sm:size-9"
+                        aria-label={`ลบสินค้า ${index + 1}`}
+                        title="ลบ"
+                      >
+                        <Trash2 className="size-4" />
+                      </button>
+                    ) : (
+                      <span className="hidden sm:block sm:size-9" aria-hidden />
+                    )}
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+          <button
+            type="button"
+            onClick={addProductLine}
+            className="inline-flex min-h-11 w-full items-center justify-center gap-1.5 rounded-xl border border-dashed border-navy/30 bg-white px-4 text-sm font-medium text-navy hover:border-navy hover:bg-paper sm:min-h-9 sm:w-auto"
+          >
+            <Plus className="size-4" />
+            เพิ่มสินค้า
+          </button>
         </div>
 
         <label className="flex min-h-11 items-center gap-2 text-sm text-navy">
@@ -630,18 +738,18 @@ function buildLiveDraft(
     seoDescription: opts.existing?.seoDescription ?? "",
     installLocation: opts.existing?.installLocation ?? generated.installLocation,
     installDate: opts.existing?.installDate ?? generated.installDate,
-    lineItems: opts.existing?.lineItems?.length
-      ? opts.existing.lineItems.map((row, index) =>
-          index === 0
-            ? {
-                ...row,
-                productName:
-                  generated.lineItems[0]?.productName || row.productName,
-                sku: facts.variantSlug || row.sku,
-              }
-            : row,
-        )
-      : generated.lineItems,
+    lineItems: generated.lineItems.map((row, index) => {
+      const prev = opts.existing?.lineItems?.[index];
+      if (!prev) return row;
+      return {
+        ...row,
+        serialOrCode: prev.serialOrCode,
+        material: prev.material,
+        color: prev.color,
+        quantity: prev.quantity,
+        notes: prev.notes,
+      };
+    }),
     image: generated.image,
     gallery: generated.gallery,
     customerName: facts.customerLabel.trim(),
