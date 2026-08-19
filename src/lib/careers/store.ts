@@ -56,19 +56,19 @@ function payloadField(row: Record<string, unknown>, key: string): string {
 
 function parsePortfolioFiles(raw: unknown): JobApplicationFile[] {
   if (!Array.isArray(raw)) return [];
-  return raw
-    .map((item) => {
-      if (!item || typeof item !== "object") return null;
-      const record = item as Record<string, unknown>;
-      const name = String(record.name || "").trim();
-      if (!name) return null;
-      return {
-        name,
-        path: typeof record.path === "string" ? record.path : null,
-        signedUrl: typeof record.signedUrl === "string" ? record.signedUrl : null,
-      };
-    })
-    .filter((item): item is JobApplicationFile => Boolean(item));
+  const files: JobApplicationFile[] = [];
+  for (const item of raw) {
+    if (!item || typeof item !== "object") continue;
+    const record = item as Record<string, unknown>;
+    const name = String(record.name || "").trim();
+    if (!name) continue;
+    files.push({
+      name,
+      path: typeof record.path === "string" ? record.path : null,
+      signedUrl: typeof record.signedUrl === "string" ? record.signedUrl : null,
+    });
+  }
+  return files;
 }
 
 function mapDbApplication(row: Record<string, unknown>): JobApplication {

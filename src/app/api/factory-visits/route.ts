@@ -295,7 +295,8 @@ async function createPresentationBooking(
 
   const data = parsed.data;
   const venueLabel =
-    PRESENTATION_VENUE_LABELS[data.presentationVenue] || data.presentationVenue;
+    PRESENTATION_VENUE_LABELS[data.presentationVenue as PresentationVenueId] ||
+    data.presentationVenue;
   return createVisitBooking({
     bookingKind: "product-presentation",
     fullName: data.fullName,
