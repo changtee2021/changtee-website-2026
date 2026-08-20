@@ -6,7 +6,6 @@ import Image from "next/image";
 import Link from "next/link";
 import { CatalogCard } from "@/components/catalog/CatalogCard";
 import { ProductCtaCard } from "@/components/products/ProductCtaCard";
-import { ProductCertificates } from "@/components/products/ProductCertificates";
 import {
   ProductCompareSection,
   ProductInstallVideosSection,
@@ -30,7 +29,6 @@ import {
   productPageKey,
   seedProductSectionRecords,
 } from "@/lib/cms/page-sections";
-import type { ProductCertificate } from "@/lib/product-certificates";
 import type { ProductCategory, ProductChild, ProductPillar } from "@/lib/product-catalog";
 import { childImage, quoteProductType } from "@/lib/product-catalog";
 import type { ProductContent } from "@/lib/product-content";
@@ -51,7 +49,6 @@ type Props = {
   presentation: ProductPresentation;
   catalog: ProductCatalogFile | undefined;
   related: ProductChild[];
-  certificates: ProductCertificate[];
   portfolioWorks: PortfolioItem[];
 };
 
@@ -71,7 +68,6 @@ export function ProductDetailView({
   presentation,
   catalog,
   related,
-  certificates,
   portfolioWorks,
 }: Props) {
   const quoteHref = (() => {
@@ -345,7 +341,7 @@ export function ProductDetailView({
                       </span>
                     </span>
                   </summary>
-                  <dl className="space-y-0 pb-4">
+                  <dl className="space-y-0 pb-2">
                     {presentation.specs.map((s) => (
                       <div
                         key={s.label}
@@ -356,6 +352,15 @@ export function ProductDetailView({
                       </div>
                     ))}
                   </dl>
+                  {presentation.materials.length > 0 ? (
+                    <ul className="space-y-2 pb-4 pt-2">
+                      {presentation.materials.map((m) => (
+                        <li key={m.title} className="text-sm leading-relaxed text-muted">
+                          <span className="font-medium text-navy">{m.title}.</span> {m.body}
+                        </li>
+                      ))}
+                    </ul>
+                  ) : null}
                 </details>
                 {content.care ? (
                   <details className="group border-b border-line">
@@ -407,78 +412,7 @@ export function ProductDetailView({
           </Reveal>
           ) : null}
 
-          <Reveal delayStep={1} className="mt-16 sm:mt-20">
-          <section>
-            <div className="rounded-2xl border border-line px-5 py-8 sm:px-8">
-              <div className="flex flex-wrap items-end justify-between gap-3 border-b border-line pb-4">
-                <div>
-                  <SectionLabel>Product sheet</SectionLabel>
-                  <h2 className="mt-1 font-display text-2xl font-semibold text-navy">
-                    {product.name}
-                  </h2>
-                  <p className="text-sm text-muted">
-                    {product.nameEn || category.nameEn} · {category.name}
-                  </p>
-                </div>
-                <p className="text-xs text-muted">{siteConfig.nameEn}</p>
-              </div>
-              <div className="mt-6 grid gap-8 lg:grid-cols-2">
-                <ZoomImage
-                  src={assets.hero}
-                  alt={product.name}
-                  className="aspect-[4/3]"
-                  rounded="rounded-xl"
-                  sizes="(max-width: 1024px) 100vw, 480px"
-                />
-                <div>
-                  <dl>
-                    {presentation.specs.map((s) => (
-                      <div
-                        key={`sheet-${s.label}`}
-                        className="grid grid-cols-[8rem_1fr] gap-4 border-b border-line py-3 text-sm"
-                      >
-                        <dt className="font-semibold text-navy">{s.label}</dt>
-                        <dd className="text-muted">{s.value}</dd>
-                      </div>
-                    ))}
-                  </dl>
-                  <p className="mt-6 text-xs font-semibold uppercase tracking-wider text-muted">
-                    Materials
-                  </p>
-                  <h3 className="mt-1 text-sm font-semibold text-navy">
-                    องค์ประกอบและวัสดุ
-                  </h3>
-                  <div className="mt-3 space-y-3">
-                    {presentation.materials.map((m) => (
-                      <div
-                        key={m.title}
-                        className="flex gap-3 rounded-xl border border-line p-2.5 sm:gap-4 sm:p-3"
-                      >
-                        <ZoomImage
-                          src={m.image}
-                          alt={m.title}
-                          className="size-16 shrink-0 sm:size-20"
-                          rounded="rounded-lg"
-                          sizes="80px"
-                        />
-                        <div className="min-w-0 self-center">
-                          <h4 className="text-sm font-semibold text-navy">
-                            {m.title}
-                          </h4>
-                          <p className="mt-0.5 line-clamp-3 text-xs leading-relaxed text-muted">
-                            {m.body}
-                          </p>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                  <ProductCertificates certificates={certificates} />
-                </div>
-              </div>
-            </div>
-          </section>
-          </Reveal>
-
+          {presentation.roomStyles.length > 0 ? (
           <Reveal delayStep={1} className="mt-16 sm:mt-20">
           <section>
             <div className="grid gap-8 lg:grid-cols-[1fr_1fr] lg:items-start lg:gap-12">
@@ -592,7 +526,9 @@ export function ProductDetailView({
             </div>
           </section>
           </Reveal>
+          ) : null}
 
+          {presentation.roomStyles.length > 0 ? (
           <Reveal className="mt-16 sm:mt-20">
             <section className="rounded-2xl bg-paper/80 px-5 py-10 sm:px-10 sm:py-14">
               <div className="mx-auto max-w-2xl text-center">
@@ -601,12 +537,13 @@ export function ProductDetailView({
                   เลือกให้เข้าห้อง — ไม่ใช่แค่เลือกผ้าสวย
                 </h2>
                 <p className="mt-4 text-sm leading-relaxed text-muted sm:text-base">
-                  ช่างตี๋ช่วยจับคู่ชนิดม่าน ทิศแดด และสไตล์ห้องจากหน้างานจริง
-                  เพื่อให้คุณเห็นภาพก่อนตัดสินใจผลิตและติดตั้ง
+                  ช่างตี๋ช่วยจับคู่{product.name} กับทิศแดดและสไตล์ห้องจากหน้างานจริง
+                  เพื่อให้เห็นภาพก่อนผลิตและติดตั้ง
                 </p>
               </div>
             </section>
           </Reveal>
+          ) : null}
 
           <ProductReviewsSection
             reviews={reviews}
@@ -733,7 +670,8 @@ export function ProductDetailView({
             </Reveal>
           ) : null}
 
-          {compareTable ? (
+          {compareTable &&
+          compareTable.columns.some((col) => col.productSlug === product.slug) ? (
             <ProductCompareSection
               categorySlug={category.slug}
               currentProductSlug={product.slug}

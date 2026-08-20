@@ -19,6 +19,9 @@ function subscribeConsent(onStoreChange: () => void) {
 
 const serverConsentSnapshot: CookieConsentState | null = null;
 
+/** Live-site container; override with NEXT_PUBLIC_GTM_ID if a new one is created. */
+const DEFAULT_GTM_ID = "GTM-5JX8PGT";
+
 /** Loads GA4 / GTM / Meta Pixel only after analytics/marketing consent */
 export function ConsentAwareScripts() {
   const consent = useSyncExternalStore(
@@ -27,7 +30,7 @@ export function ConsentAwareScripts() {
     () => serverConsentSnapshot,
   );
 
-  const gtmId = process.env.NEXT_PUBLIC_GTM_ID?.trim();
+  const gtmId = process.env.NEXT_PUBLIC_GTM_ID?.trim() || DEFAULT_GTM_ID;
   const ga4Id = process.env.NEXT_PUBLIC_GA4_ID?.trim();
   const pixelId = process.env.NEXT_PUBLIC_META_PIXEL_ID?.trim();
 
@@ -36,6 +39,35 @@ export function ConsentAwareScripts() {
 
   return (
     <>
+      <Script id="consent-default" strategy="beforeInteractive">{`
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('consent', 'default', {
+          analytics_storage: 'denied',
+          ad_storage: 'denied',
+          ad_user_data: 'denied',
+          ad_personalization: 'denied',
+          wait_for_update: 500
+        });
+      `}</Script>
+
+      {allowAnalytics ? (
+        <Script id="consent-update-analytics" strategy="afterInteractive">{`
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('consent', 'update', {
+            analytics_storage: 'granted'${
+              allowMarketing
+                ? `,
+            ad_storage: 'granted',
+            ad_user_data: 'granted',
+            ad_personalization: 'granted'`
+                : ""
+            }
+          });
+        `}</Script>
+      ) : null}
+
       {allowAnalytics && gtmId ? (
         <Script id="gtm" strategy="afterInteractive">{`
           (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':

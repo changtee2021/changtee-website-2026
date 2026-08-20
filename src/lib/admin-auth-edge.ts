@@ -1,7 +1,7 @@
 /** Edge-safe auth helpers (no next/headers) for middleware. */
 
 /**
- * Admin login gate — disabled until auth is wired up for daily use.
+ * Admin login gate — parked until the team turns it on.
  * Set ADMIN_AUTH_ENFORCED=true to require login again.
  */
 export function isAdminAuthEnforced(): boolean {

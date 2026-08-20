@@ -1,6 +1,6 @@
 /**
  * Admin auth — HMAC-signed cookie session.
- * Disabled by default; set ADMIN_AUTH_ENFORCED=true to require login.
+ * Off until ADMIN_AUTH_ENFORCED=true.
  */
 
 import { cookies } from "next/headers";

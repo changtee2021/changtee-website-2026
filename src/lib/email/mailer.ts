@@ -1,9 +1,32 @@
 import nodemailer from "nodemailer";
 import type { QuoteLead } from "@/lib/leads/types";
 import { LEAD_STATUS_LABELS } from "@/lib/leads/types";
-import { isStorageRef, leadImageRefs, storagePathFromRef } from "@/lib/security/lead-media";
+import {
+  attachmentGallery,
+  escapeHtml,
+  fieldLinkRow,
+  fieldRow,
+  fieldSection,
+  isImageAttachment,
+  wrapCustomerEmail,
+  wrapNoticeEmail,
+  type EmailAttachmentView,
+} from "@/lib/email/layout";
 import { siteConfig } from "@/lib/site-config";
-import { createSignedUploadUrl } from "@/lib/storage/upload";
+import {
+  isDirectMediaUrl,
+  isStorageRef,
+  leadImageRefs,
+  storagePathFromRef,
+} from "@/lib/security/lead-media";
+import { createSignedUploadUrl, downloadStoredFile } from "@/lib/storage/upload";
+
+type QuoteMailFile = EmailAttachmentView & {
+  bytes?: Buffer;
+  contentType?: string;
+};
+
+export { escapeHtml, fieldRow };
 
 export function getTransport() {
   const user = process.env.SMTP_USER || process.env.EMAIL_FROM || "changtee2021@gmail.com";
@@ -27,120 +50,221 @@ export function getTransport() {
   };
 }
 
-export function fieldRow(label: string, value?: string | null) {
-  const v = value?.trim() ? value : "-";
-  return `<tr>
-    <td style="padding:8px 12px;border-bottom:1px solid #eee;color:#666;width:38%;vertical-align:top">${label}</td>
-    <td style="padding:8px 12px;border-bottom:1px solid #eee;color:#111;vertical-align:top">${escapeHtml(v)}</td>
-  </tr>`;
+function contactMessage(lead: QuoteLead) {
+  return (lead.note || "").replace(/^เรื่องที่ติดต่อ:[^\n]*\n*/u, "").trim();
 }
 
-export function escapeHtml(s: string) {
-  return s
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;");
+function quoteFileNames(lead: QuoteLead) {
+  return (lead.siteImageName || "")
+    .split(" · ")
+    .map((name) => name.trim())
+    .filter(Boolean);
 }
 
-export function buildAdminSummaryHtml(lead: QuoteLead) {
-  return `<!doctype html>
-<html><body style="font-family:Sarabun,Arial,sans-serif;background:#f7f7f7;padding:24px">
-  <div style="max-width:720px;margin:0 auto;background:#fff;border-radius:12px;overflow:hidden">
-    <div style="background:#c8102e;color:#fff;padding:16px 20px;font-size:20px;font-weight:700">ขอใบเสนอราคา</div>
-    <div style="padding:16px 20px">
-      <div style="font-size:14px;color:#333;margin-bottom:12px">แสดงผลจากฟอร์ม · สถานะ: ${LEAD_STATUS_LABELS[lead.status]}</div>
-      <table style="width:100%;border-collapse:collapse;font-size:14px">
-        ${fieldRow("ชื่อผู้ติดต่อ", lead.contactName)}
-        ${fieldRow("ตำแหน่งงาน", lead.jobTitle)}
-        ${fieldRow("เบอร์โทรศัพท์", lead.phone)}
-        ${fieldRow("LINE ID", lead.lineId)}
-        ${fieldRow("ประเภทผู้ติดต่อ", lead.contactType)}
-        ${fieldRow("ชื่อธุรกิจ", lead.businessName)}
-        ${fieldRow("ที่อยู่ สำหรับ ส่งของ หรือ ติดตั้ง", lead.installAddress)}
-        ${fieldRow("เลขผู้เสียภาษี", lead.taxId)}
-        ${fieldRow("E-mail", lead.email)}
-        ${fieldRow("ที่อยู่ สำหรับ ออกใบเสนอราคา", lead.billingAddress)}
-        ${fieldRow("ประเภทสินค้า", lead.productType)}
-        ${fieldRow("ขนาดที่ต้องการ (กว้างxสูง)", lead.requestedSize)}
-        ${fieldRow(
-          "แนบภาพหน้างาน",
-          lead.siteImageName ||
-            (lead.siteImageUrls?.length
-              ? `${lead.siteImageUrls.length} ไฟล์`
-              : lead.siteImageUrl
-                ? "มีไฟล์แนบ"
-                : "No File Upload"),
-        )}
-        ${fieldRow("วันที่อยากติดตั้ง", lead.callbackDate)}
-        ${fieldRow("หาเราเจอจากที่ไหน", lead.referralSource)}
-        ${fieldRow("หมายเหตุ", lead.note)}
-      </table>
-      ${
-        (lead.siteImageUrls?.length
-          ? lead.siteImageUrls
-          : lead.siteImageUrl
-            ? [lead.siteImageUrl]
-            : []
-        ).length
-          ? `<div style="margin-top:12px">${(
-              lead.siteImageUrls?.length
-                ? lead.siteImageUrls
-                : lead.siteImageUrl
-                  ? [lead.siteImageUrl]
-                  : []
-            )
-              .map(
-                (url, i) =>
-                  `<a href="${escapeHtml(url)}" style="display:inline-block;margin:0 8px 8px 0;font-size:13px;color:#c8102e">รูปที่ ${i + 1}</a>`,
-              )
-              .join("")}</div>`
-          : ""
+function absoluteMediaUrl(url: string) {
+  if (url.startsWith("http://") || url.startsWith("https://")) return url;
+  return `${siteConfig.url.replace(/\/$/, "")}${url.startsWith("/") ? url : `/${url}`}`;
+}
+
+async function readLocalUpload(url: string) {
+  if (!url.startsWith("/uploads/")) return null;
+  try {
+    const fs = await import("fs/promises");
+    const path = await import("path");
+    return await fs.readFile(path.join(process.cwd(), "public", url));
+  } catch {
+    return null;
+  }
+}
+
+export async function resolveQuoteAttachments(lead: QuoteLead): Promise<QuoteMailFile[]> {
+  const refs = leadImageRefs(lead);
+  const names = quoteFileNames(lead);
+  const files = await Promise.all(
+    refs.map(async (ref, index) => {
+      const name = names[index] || `ไฟล์ที่ ${index + 1}`;
+      if (isStorageRef(ref)) {
+        const storagePath = storagePathFromRef(ref);
+        const [url, downloaded] = await Promise.all([
+          createSignedUploadUrl(storagePath, 60 * 60 * 24 * 7),
+          downloadStoredFile(storagePath),
+        ]);
+        return {
+          name,
+          url: url || "",
+          bytes: downloaded?.bytes,
+          contentType: downloaded?.contentType,
+        };
       }
-      <p style="margin-top:16px;font-size:12px;color:#888">Lead ID: ${lead.id}</p>
-    </div>
-  </div>
-</body></html>`;
+      if (isDirectMediaUrl(ref)) {
+        const url = absoluteMediaUrl(ref);
+        const bytes = await readLocalUpload(ref);
+        return { name, url, bytes: bytes || undefined };
+      }
+      return { name, url: ref };
+    }),
+  );
+
+  return files.map((file, index) => {
+    const canInline =
+      Boolean(file.bytes) &&
+      file.bytes!.length <= 4.5 * 1024 * 1024 &&
+      isImageAttachment(file.name, file.url);
+    return {
+      ...file,
+      cid: canInline ? `site-${index}@changtee.email` : undefined,
+    };
+  });
+}
+
+function leadNoticeCopy(lead: QuoteLead) {
+  if (lead.source === "contact") {
+    return {
+      title: "ข้อความติดต่อใหม่",
+      subtitle: "จากฟอร์มติดต่อบริษัท",
+      subject: `[ติดต่อบริษัท] ${lead.contactName} · ${lead.productType}`,
+      customerSubject: "รับเรื่องติดต่อแล้ว — ช่างตี๋ ผ้าม่าน",
+      customerIntro:
+        "เราได้รับข้อความของท่านเรียบร้อยแล้ว ทีมงานจะอ่านรายละเอียดและติดต่อกลับโดยเร็วที่สุด ผ่านอีเมลหรือช่องทางที่ท่านให้ไว้",
+    };
+  }
+  if (lead.source === "fab") {
+    return {
+      title: "คำขอจากปุ่มติดต่อด่วน",
+      subtitle: "จากปุ่มติดต่อบนเว็บไซต์",
+      subject: `[ติดต่อด่วน] ${lead.contactName} · ${lead.productType}`,
+      customerSubject: "รับเรื่องติดต่อแล้ว — ช่างตี๋ ผ้าม่าน",
+      customerIntro:
+        "เราได้รับคำขอของท่านเรียบร้อยแล้ว ทีมงานจะติดต่อกลับโดยเร็วที่สุด ผ่านอีเมลหรือช่องทางที่ท่านให้ไว้",
+    };
+  }
+  return {
+    title: "ขอใบเสนอราคา",
+    subtitle: `แสดงผลจากฟอร์ม · สถานะ: ${LEAD_STATUS_LABELS[lead.status]}`,
+    subject: `[ขอใบเสนอราคา] ${lead.contactName} · ${lead.productType}`,
+    customerSubject: "รับเรื่องขอใบเสนอราคา — ช่างตี๋ ผ้าม่าน",
+    customerIntro:
+      "เราได้รับคำขอใบเสนอราคาของท่านเรียบร้อยแล้ว ทีมงานจะตรวจสอบข้อมูลและติดต่อกลับโดยเร็วที่สุด ผ่านอีเมลหรือช่องทางที่ท่านให้ไว้",
+  };
+}
+
+export function buildAdminSummaryHtml(
+  lead: QuoteLead,
+  attachments: EmailAttachmentView[] = [],
+) {
+  const copy = leadNoticeCopy(lead);
+
+  if (lead.source === "contact") {
+    return wrapNoticeEmail({
+      title: copy.title,
+      subtitle: copy.subtitle,
+      accent: "red",
+      body: `${fieldSection(
+        "ผู้ติดต่อ",
+        `${fieldRow("ชื่อผู้ติดต่อ", lead.contactName)}${fieldRow("ตำแหน่งงาน", lead.jobTitle)}${fieldRow("เบอร์โทรศัพท์", lead.phone)}${fieldRow("LINE ID", lead.lineId)}${fieldRow("E-mail", lead.email)}`,
+      )}${fieldSection(
+        "บริษัท",
+        `${fieldRow("ชื่อบริษัท / องค์กร", lead.businessName)}${fieldRow("ประเภทผู้ติดต่อ", lead.contactType)}`,
+      )}${fieldSection(
+        "เรื่องที่ติดต่อ",
+        `${fieldRow("หัวข้อ", lead.productType)}${fieldRow("ข้อความ", contactMessage(lead) || lead.note)}`,
+      )}`,
+      footer: `Lead ID: ${lead.id}`,
+    });
+  }
+
+  if (lead.source === "fab") {
+    return wrapNoticeEmail({
+      title: copy.title,
+      subtitle: copy.subtitle,
+      accent: "red",
+      body: `${fieldSection(
+        "ผู้ติดต่อ",
+        `${fieldRow("ชื่อ-นามสกุล", lead.contactName)}${fieldRow("เบอร์โทรศัพท์", lead.phone)}${fieldRow("LINE ID", lead.lineId)}${fieldRow("E-mail", lead.email)}`,
+      )}${fieldSection(
+        "สิ่งที่สนใจ",
+        `${fieldRow("สินค้าที่สนใจ", lead.productType)}${fieldRow("รายละเอียดเพิ่มเติม", lead.note)}`,
+      )}`,
+      footer: `Lead ID: ${lead.id}`,
+    });
+  }
+
+  const files = attachments.length
+    ? attachments
+    : quoteFileNames(lead).map((name) => ({ name, url: lead.siteImageUrl }));
+  return wrapNoticeEmail({
+    title: copy.title,
+    subtitle: copy.subtitle,
+    accent: "red",
+    body: `${fieldSection(
+      "ผู้ติดต่อ",
+      `${fieldRow("ชื่อผู้ติดต่อ", lead.contactName)}${fieldRow("ตำแหน่งงาน", lead.jobTitle)}${fieldRow("เบอร์โทรศัพท์", lead.phone)}${fieldRow("LINE ID", lead.lineId)}${fieldRow("E-mail", lead.email)}${fieldRow("ประเภทผู้ติดต่อ", lead.contactType)}`,
+    )}${fieldSection(
+      "ธุรกิจและที่อยู่",
+      `${fieldRow("ชื่อธุรกิจ", lead.businessName)}${fieldRow("เลขผู้เสียภาษี", lead.taxId)}${fieldRow("ที่อยู่ติดตั้ง / ส่งของ", lead.installAddress)}${fieldRow("ที่อยู่ออกใบเสนอราคา", lead.billingAddress)}`,
+    )}${fieldSection(
+      "งานที่ต้องการ",
+      `${fieldRow("ประเภทสินค้า", lead.productType)}${fieldRow("ขนาดที่ต้องการ (กว้าง×สูง)", lead.requestedSize)}${fieldRow("วันที่อยากติดตั้ง", lead.callbackDate)}${fieldLinkRow("แนบภาพหน้างาน", files)}${fieldRow("หาเราเจอจากที่ไหน", lead.referralSource)}`,
+    )}${attachmentGallery(files)}${fieldSection("หมายเหตุ", fieldRow("รายละเอียดเพิ่มเติม", lead.note))}`,
+    footer: `Lead ID: ${lead.id}`,
+  });
 }
 
 export function buildCustomerReplyHtml(lead: QuoteLead) {
-  return `<!doctype html>
-<html><body style="font-family:Sarabun,Arial,sans-serif;background:#f7f7f7;padding:24px">
-  <div style="max-width:640px;margin:0 auto;background:#fff;border-radius:12px;overflow:hidden">
-    <div style="background:#0b1f3a;color:#fff;padding:16px 20px;font-size:20px;font-weight:700">ช่างตี๋ ผ้าม่าน</div>
-    <div style="padding:20px;font-size:15px;line-height:1.7;color:#222">
-      <p>เรียนคุณ ${escapeHtml(lead.contactName)}</p>
-      <p>เราได้รับคำขอใบเสนอราคาของท่านเรียบร้อยแล้ว ทีมงานจะตรวจสอบข้อมูลและติดต่อกลับโดยเร็วที่สุด ผ่านอีเมลหรือช่องทางที่ท่านให้ไว้</p>
-      <p><strong>สรุปคำขอ</strong><br/>
-      ประเภทสินค้า: ${escapeHtml(lead.productType || "-")}<br/>
-      เบอร์โทร: ${escapeHtml(lead.phone)}<br/>
-      อีเมล: ${escapeHtml(lead.email)}</p>
-      <p>หากต้องการพูดคุยด่วน ทัก LINE ได้ที่
-      <a href="${siteConfig.lineUrl}">${siteConfig.lineId}</a>
-      หรือเปิดลิงก์ ${siteConfig.lineUrl}</p>
-      <p style="margin-top:24px">ขอบคุณที่ไว้วางใจ<br/>ทีมงานช่างตี๋ ผ้าม่าน</p>
-    </div>
-  </div>
-</body></html>`;
-}
-
-async function withSignedLeadImages(lead: QuoteLead): Promise<QuoteLead> {
-  const refs = leadImageRefs(lead);
-  if (!refs.length) return lead;
-  const urls = await Promise.all(
-    refs.map(async (ref) => {
-      if (!isStorageRef(ref)) return ref;
-      return (await createSignedUploadUrl(storagePathFromRef(ref), 60 * 60 * 24 * 7)) || "";
-    }),
+  const copy = leadNoticeCopy(lead);
+  const channels = fieldSection(
+    "ช่องทางที่ท่านให้ไว้",
+    `${fieldRow("เบอร์โทรศัพท์", lead.phone)}${fieldRow("E-mail", lead.email)}${fieldRow("LINE ID", lead.lineId)}`,
   );
-  const signed = urls.filter(Boolean);
-  return { ...lead, siteImageUrl: signed[0] ?? null, siteImageUrls: signed.length ? signed : null };
+
+  if (lead.source === "contact") {
+    return wrapCustomerEmail({
+      title: "รับข้อความของท่านแล้ว",
+      subtitle: "ทีมงานจะอ่านรายละเอียดและติดต่อกลับ",
+      greetingName: lead.contactName,
+      intro: copy.customerIntro,
+      nextStep: "ทีมงานจะติดต่อกลับผ่านอีเมล โทรศัพท์ หรือ LINE ภายใน 1 วันทำการ",
+      summary: `${fieldSection(
+        "เรื่องที่ติดต่อ",
+        `${fieldRow("หัวข้อ", lead.productType)}${fieldRow("ข้อความ", contactMessage(lead) || lead.note)}`,
+      )}${channels}`,
+      signOff: "ขอบคุณที่ติดต่อเรา<br/>ทีมงานช่างตี๋ ผ้าม่าน",
+    });
+  }
+
+  if (lead.source === "fab") {
+    return wrapCustomerEmail({
+      title: "รับคำขอติดต่อแล้ว",
+      subtitle: "จากปุ่มติดต่อบนเว็บไซต์",
+      greetingName: lead.contactName,
+      intro: copy.customerIntro,
+      nextStep: "ทีมงานจะติดต่อกลับผ่านอีเมล โทรศัพท์ หรือ LINE โดยเร็วที่สุด",
+      summary: `${fieldSection(
+        "สิ่งที่สนใจ",
+        `${fieldRow("สินค้าที่สนใจ", lead.productType)}${fieldRow("รายละเอียดเพิ่มเติม", lead.note)}`,
+      )}${channels}`,
+      signOff: "ขอบคุณที่ติดต่อเรา<br/>ทีมงานช่างตี๋ ผ้าม่าน",
+    });
+  }
+
+  return wrapCustomerEmail({
+    title: "รับเรื่องขอใบเสนอราคาแล้ว",
+    subtitle: "เราจะจัดทำใบเสนอราคาให้ท่านโดยเร็ว",
+    greetingName: lead.contactName,
+    intro: copy.customerIntro,
+    nextStep: "ทีมงานจะตรวจข้อมูลหน้างาน แล้วติดต่อกลับพร้อมใบเสนอราคา",
+    summary: `${fieldSection(
+      "งานที่ขอใบเสนอราคา",
+      `${fieldRow("ประเภทสินค้า", lead.productType)}${fieldRow("ขนาดที่ต้องการ", lead.requestedSize)}${fieldRow("วันที่อยากติดตั้ง", lead.callbackDate)}`,
+    )}${channels}`,
+    signOff: "ขอบคุณที่ไว้วางใจ<br/>ทีมงานช่างตี๋ ผ้าม่าน",
+  });
 }
 
 export async function sendQuoteEmails(lead: QuoteLead) {
   const { transporter, from, adminTo } = getTransport();
   const results: Array<{ channel: string; ok: boolean; error?: string }> = [];
-  const mailLead = await withSignedLeadImages(lead);
+  const attachments = await resolveQuoteAttachments(lead);
   const customerEmail = lead.email.trim();
 
   try {
@@ -148,8 +272,17 @@ export async function sendQuoteEmails(lead: QuoteLead) {
       from,
       to: adminTo,
       ...(customerEmail ? { replyTo: customerEmail } : {}),
-      subject: `[ขอใบเสนอราคา] ${lead.contactName} · ${lead.productType}`,
-      html: buildAdminSummaryHtml(mailLead),
+      subject: leadNoticeCopy(lead).subject,
+      html: buildAdminSummaryHtml(lead, attachments),
+      attachments: attachments
+        .filter((file) => file.bytes?.length)
+        .map((file) => ({
+          filename: file.name,
+          content: file.bytes,
+          contentType: file.contentType,
+          cid: file.cid || undefined,
+          contentDisposition: file.cid ? "inline" : "attachment",
+        })),
     });
     results.push({ channel: "admin-email", ok: true });
   } catch (err) {
@@ -167,7 +300,7 @@ export async function sendQuoteEmails(lead: QuoteLead) {
       from,
       to: customerEmail,
       replyTo: adminTo,
-      subject: "รับเรื่องขอใบเสนอราคา — ช่างตี๋ ผ้าม่าน",
+      subject: leadNoticeCopy(lead).customerSubject,
       html: buildCustomerReplyHtml(lead),
     });
     results.push({ channel: "customer-email", ok: true });

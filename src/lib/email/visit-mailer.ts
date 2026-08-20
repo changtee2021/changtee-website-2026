@@ -1,5 +1,14 @@
-import { escapeHtml, fieldRow, getTransport } from "@/lib/email/mailer";
-import { siteConfig } from "@/lib/site-config";
+import { getTransport } from "@/lib/email/mailer";
+import {
+  attachmentGallery,
+  fieldLinkRow,
+  fieldRow,
+  fieldSection,
+  wrapCustomerEmail,
+  wrapNoticeEmail,
+} from "@/lib/email/layout";
+import { isStorageRef, storagePathFromRef } from "@/lib/security/lead-media";
+import { createSignedUploadUrl } from "@/lib/storage/upload";
 import {
   formatVisitSites,
   VISIT_SESSION_LABELS,
@@ -32,71 +41,81 @@ function formatVisitDate(dateStr: string) {
   });
 }
 
-function buildAdminVisitHtml(visit: FactoryVisitBooking) {
+export function buildAdminVisitHtml(visit: FactoryVisitBooking) {
   const presentation = isPresentationKind(visit.bookingKind);
-  return `<!doctype html>
-<html><body style="font-family:Sarabun,Arial,sans-serif;background:#f7f7f7;padding:24px">
-  <div style="max-width:720px;margin:0 auto;background:#fff;border-radius:12px;overflow:hidden">
-    <div style="background:#0b1f3a;color:#fff;padding:16px 20px;font-size:20px;font-weight:700">${presentation ? "📊 คำขอนัดนำเสนอสินค้า" : "🏭 คำขอนัดเยี่ยมชมโรงงาน"}</div>
-    <div style="padding:16px 20px">
-      <table style="width:100%;border-collapse:collapse;font-size:14px">
-        ${fieldRow("ประเภท", presentation ? "นัดนำเสนอสินค้า" : "นัดเยี่ยมชมโรงงาน")}
-        ${fieldRow("วันที่ต้องการ", formatVisitDate(visit.visitDate))}
-        ${fieldRow("รอบ", VISIT_SESSION_LABELS[visit.session])}
-        ${fieldRow("ชื่อผู้ติดต่อ", visit.fullName)}
-        ${fieldRow("ตำแหน่ง", visit.contactPosition)}
-        ${fieldRow("ฝ่าย / แผนก", visit.department)}
-        ${fieldRow("ชื่อบริษัท/องค์กร", visit.businessName)}
-        ${fieldRow("ประเภทนิติบุคคล", visit.legalEntityType)}
-        ${fieldRow(presentation ? "เลขทะเบียนนิติบุคคล" : "เลขนิติบุคคล / บัตรประชาชน", visit.taxId)}
-        ${fieldRow("ประเภทธุรกิจ", visit.industry)}
-        ${fieldRow("ที่อยู่สำนักงาน", visit.officeAddress)}
-        ${fieldRow("สถานที่นัด", venueText(visit))}
-        ${fieldRow("Company Profile", visit.companyProfileName)}
-        ${fieldRow("นามบัตร", visit.businessCardName)}
-        ${fieldRow("เบอร์โทรศัพท์", visit.phone)}
-        ${fieldRow("LINE ID", visit.lineId)}
-        ${fieldRow("E-mail", visit.email)}
-        ${fieldRow("จำนวนผู้เข้าร่วม", String(visit.visitorCount))}
-        ${fieldRow("วัตถุประสงค์", visit.purpose)}
-        ${fieldRow("สินค้าที่สนใจ", visit.productInterest)}
-        ${visit.jobType ? fieldRow("ประเภทงาน", visit.jobType) : ""}
-        ${visit.estimatedScope ? fieldRow("ขอบเขตคร่าว ๆ", visit.estimatedScope) : ""}
-        ${visit.decisionTimeline ? fieldRow("ช่วงตัดสินใจ", visit.decisionTimeline) : ""}
-        ${fieldRow("หมายเหตุ", visit.note)}
-      </table>
-      <p style="margin-top:16px;font-size:12px;color:#888">Booking ID: ${visit.id}</p>
-      <p style="margin-top:4px;font-size:13px;color:#c8102e">กรุณายืนยัน/ปฏิเสธการนัดกับลูกค้าโดยเร็ว</p>
-    </div>
-  </div>
-</body></html>`;
+  return wrapNoticeEmail({
+    title: presentation ? "คำขอนัดนำเสนอสินค้า" : "คำขอนัดเยี่ยมชมโรงงาน",
+    subtitle: "กรุณายืนยันหรือปฏิเสธการนัดกับลูกค้าโดยเร็ว",
+    accent: "navy",
+    body: `${fieldSection(
+      "นัดหมาย",
+      `${fieldRow("ประเภท", presentation ? "นัดนำเสนอสินค้า" : "นัดเยี่ยมชมโรงงาน")}${fieldRow("วันที่ต้องการ", formatVisitDate(visit.visitDate))}${fieldRow("รอบ", VISIT_SESSION_LABELS[visit.session])}${fieldRow("สถานที่นัด", venueText(visit))}${fieldRow("จำนวนผู้เข้าร่วม", String(visit.visitorCount))}`,
+    )}${fieldSection(
+      "ผู้ติดต่อ",
+      `${fieldRow("ชื่อผู้ติดต่อ", visit.fullName)}${fieldRow("ตำแหน่ง", visit.contactPosition)}${fieldRow("ฝ่าย / แผนก", visit.department)}${fieldRow("เบอร์โทรศัพท์", visit.phone)}${fieldRow("LINE ID", visit.lineId)}${fieldRow("E-mail", visit.email)}`,
+    )}${fieldSection(
+      "บริษัท / องค์กร",
+      `${fieldRow("ชื่อบริษัท/องค์กร", visit.businessName)}${fieldRow("ประเภทนิติบุคคล", visit.legalEntityType)}${fieldRow(presentation ? "เลขทะเบียนนิติบุคคล" : "เลขนิติบุคคล / บัตรประชาชน", visit.taxId)}${fieldRow("ประเภทธุรกิจ", visit.industry)}${fieldRow("ที่อยู่สำนักงาน", visit.officeAddress)}`,
+    )}${fieldSection(
+      "งานที่สนใจ",
+      `${fieldRow("วัตถุประสงค์", visit.purpose)}${fieldRow("สินค้าที่สนใจ", visit.productInterest)}${visit.jobType ? fieldRow("ประเภทงาน", visit.jobType) : ""}${visit.estimatedScope ? fieldRow("ขอบเขตคร่าว ๆ", visit.estimatedScope) : ""}${visit.decisionTimeline ? fieldRow("ช่วงตัดสินใจ", visit.decisionTimeline) : ""}`,
+    )}${fieldSection(
+      "เอกสารแนบ",
+      `${fieldLinkRow("Company Profile", visit.companyProfileName ? [{ name: visit.companyProfileName, href: visit.companyProfileUrl }] : [])}${fieldLinkRow("นามบัตร", visit.businessCardName ? [{ name: visit.businessCardName, href: visit.businessCardUrl }] : [])}`,
+    )}${attachmentGallery(
+      [
+        visit.companyProfileName
+          ? { name: visit.companyProfileName, url: visit.companyProfileUrl }
+          : null,
+        visit.businessCardName
+          ? { name: visit.businessCardName, url: visit.businessCardUrl }
+          : null,
+      ].filter((file): file is { name: string; url: string | null | undefined } => Boolean(file)),
+    )}${fieldSection("หมายเหตุ", fieldRow("รายละเอียดเพิ่มเติม", visit.note))}`,
+    footer: `Booking ID: ${visit.id}`,
+  });
 }
 
-function buildCustomerVisitHtml(visit: FactoryVisitBooking) {
-  return `<!doctype html>
-<html><body style="font-family:Sarabun,Arial,sans-serif;background:#f7f7f7;padding:24px">
-  <div style="max-width:640px;margin:0 auto;background:#fff;border-radius:12px;overflow:hidden">
-    <div style="background:#0b1f3a;color:#fff;padding:16px 20px;font-size:20px;font-weight:700">ช่างตี๋ ผ้าม่าน</div>
-    <div style="padding:20px;font-size:15px;line-height:1.7;color:#222">
-      <p>เรียนคุณ ${escapeHtml(visit.fullName)}</p>
-      <p>เราได้รับ${isPresentationKind(visit.bookingKind) ? "คำขอนัดนำเสนอสินค้า" : "คำขอนัดเยี่ยมชมโรงงาน"}ของท่านแล้ว</p>
-      <p><strong>วันที่:</strong> ${escapeHtml(formatVisitDate(visit.visitDate))}<br/>
-      <strong>รอบ:</strong> ${escapeHtml(VISIT_SESSION_LABELS[visit.session])}<br/>
-      <strong>สถานที่:</strong> ${escapeHtml(venueText(visit))}<br/>
-      <strong>จำนวนผู้เข้าร่วม:</strong> ${visit.visitorCount} คน</p>
-      <p>ทีมงานจะติดต่อกลับเพื่อ<strong>ยืนยันวันเวลา</strong>ผ่านช่องทางที่ท่านให้ไว้ภายใน 1 วันทำการ</p>
-      <p>หากต้องการพูดคุยด่วน ทัก LINE ได้ที่
-      <a href="${siteConfig.lineUrl}">${siteConfig.lineId}</a></p>
-      <p style="margin-top:24px">ขอบคุณที่ให้ความสนใจ<br/>ทีมงานช่างตี๋ ผ้าม่าน</p>
-    </div>
-  </div>
-</body></html>`;
+export function buildCustomerVisitHtml(visit: FactoryVisitBooking) {
+  const presentation = isPresentationKind(visit.bookingKind);
+  const kind = presentation ? "คำขอนัดนำเสนอสินค้า" : "คำขอนัดเยี่ยมชมโรงงาน";
+  return wrapCustomerEmail({
+    title: presentation ? "รับคำขอนัดนำเสนอสินค้าแล้ว" : "รับคำขอนัดเยี่ยมชมโรงงานแล้ว",
+    subtitle: "รอทีมงานยืนยันวันเวลาให้อีกครั้ง",
+    greetingName: visit.fullName,
+    intro: `เราได้รับ${kind}ของท่านแล้ว ทีมงานจะติดต่อกลับเพื่อ<strong>ยืนยันวันเวลา</strong>ผ่านช่องทางที่ท่านให้ไว้ภายใน 1 วันทำการ`,
+    nextStep: "นัดหมายนี้ยังไม่ยืนยันจนกว่าทีมงานจะติดต่อกลับ",
+    summary: `${fieldSection(
+      "สรุปนัดหมาย",
+      `${fieldRow("วันที่ต้องการ", formatVisitDate(visit.visitDate))}${fieldRow("รอบ", VISIT_SESSION_LABELS[visit.session])}${fieldRow("สถานที่", venueText(visit))}${fieldRow("จำนวนผู้เข้าร่วม", `${visit.visitorCount} คน`)}`,
+    )}${fieldSection(
+      "ช่องทางที่ท่านให้ไว้",
+      `${fieldRow("เบอร์โทรศัพท์", visit.phone)}${fieldRow("E-mail", visit.email)}${fieldRow("LINE ID", visit.lineId)}`,
+    )}`,
+    signOff: "ขอบคุณที่ให้ความสนใจ<br/>ทีมงานช่างตี๋ ผ้าม่าน",
+  });
+}
+
+async function signVisitPath(path: string | null | undefined) {
+  if (!path) return null;
+  if (path.startsWith("http://") || path.startsWith("https://") || path.startsWith("/")) {
+    return path;
+  }
+  const storagePath = isStorageRef(path) ? storagePathFromRef(path) : path;
+  return createSignedUploadUrl(storagePath, 60 * 60 * 24 * 7);
 }
 
 export async function sendFactoryVisitEmails(visit: FactoryVisitBooking) {
   const { transporter, from, adminTo } = getTransport();
   const results: Array<{ channel: string; ok: boolean; error?: string }> = [];
   const customerEmail = visit.email?.trim();
+  const mailVisit: FactoryVisitBooking = {
+    ...visit,
+    companyProfileUrl:
+      visit.companyProfileUrl || (await signVisitPath(visit.companyProfilePath)),
+    businessCardUrl:
+      visit.businessCardUrl || (await signVisitPath(visit.businessCardPath)),
+  };
 
   try {
     await transporter.sendMail({
@@ -104,7 +123,7 @@ export async function sendFactoryVisitEmails(visit: FactoryVisitBooking) {
       to: adminTo,
       ...(customerEmail ? { replyTo: customerEmail } : {}),
       subject: `[${isPresentationKind(visit.bookingKind) ? "นัดนำเสนอสินค้า" : "นัดเยี่ยมชมโรงงาน"}] ${visit.fullName} · ${formatVisitDate(visit.visitDate)} ${VISIT_SESSION_LABELS[visit.session]}`,
-      html: buildAdminVisitHtml(visit),
+      html: buildAdminVisitHtml(mailVisit),
     });
     results.push({ channel: "admin-email", ok: true });
   } catch (err) {

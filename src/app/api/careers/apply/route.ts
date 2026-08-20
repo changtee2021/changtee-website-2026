@@ -148,7 +148,7 @@ export async function POST(request: Request) {
     });
 
     const resumeUrl = resume.ref
-      ? await createSignedUploadUrl(resume.ref.replace(/^storage:/, ""), 60 * 60 * 24 * 7)
+      ? await createSignedUploadUrl(resume.ref.replace(/^storage:/, ""), 60 * 60 * 24)
       : null;
 
     let notify: Array<{ channel: string; ok: boolean; error?: string }> = [];

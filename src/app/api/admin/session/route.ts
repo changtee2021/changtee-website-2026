@@ -6,6 +6,7 @@ import {
   recordLoginFailure,
   recordLoginSuccess,
 } from "@/lib/admin-login-rate-limit";
+import { isRateLimited } from "@/lib/security/rate-limit";
 import {
   ADMIN_SESSION_COOKIE,
   ADMIN_SESSION_USER_COOKIE,
@@ -19,6 +20,18 @@ export const runtime = "nodejs";
 
 export async function POST(request: Request) {
   const ip = getClientIp(request);
+  if (
+    await isRateLimited(request, {
+      scope: "admin-login",
+      windowMs: 15 * 60 * 1000,
+      max: 20,
+    })
+  ) {
+    return NextResponse.json(
+      { ok: false, error: "ลองเข้าสู่ระบบบ่อยเกินไป — รอสักครู่แล้วลองใหม่" },
+      { status: 429, headers: { "Retry-After": "900" } },
+    );
+  }
   const limited = assertLoginAllowed(ip);
   if (!limited.ok) {
     return NextResponse.json(

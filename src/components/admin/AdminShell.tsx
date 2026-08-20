@@ -188,24 +188,25 @@ export function AdminShell({
               <p className="truncate text-sm font-semibold text-navy">{user.fullName}</p>
               <p className="truncate text-[11px] text-muted">
                 รหัส {user.employeeCode} · {user.roleLabel}
-                {!isAdminAuthEnforced() ? " · auth ปิดอยู่" : null}
               </p>
             </div>
-            <button
-              type="button"
-              aria-label="ออกจากระบบ"
-              onClick={() => {
-                void (async () => {
-                  await fetch("/api/admin/session", { method: "DELETE" });
-                  router.replace(adminHref(basePath, "/login"));
-                  router.refresh();
-                })();
-              }}
-              className="inline-flex min-h-11 items-center gap-1.5 rounded-xl border border-line px-2.5 text-sm font-medium text-navy hover:bg-paper sm:min-h-9"
-            >
-              <LogOut className="size-4 shrink-0" />
-              <span className="hidden sm:inline">ออกจากระบบ</span>
-            </button>
+            {isAdminAuthEnforced() ? (
+              <button
+                type="button"
+                aria-label="ออกจากระบบ"
+                onClick={() => {
+                  void (async () => {
+                    await fetch("/api/admin/session", { method: "DELETE" });
+                    router.replace(adminHref(basePath, "/login"));
+                    router.refresh();
+                  })();
+                }}
+                className="inline-flex min-h-11 items-center gap-1.5 rounded-xl border border-line px-2.5 text-sm font-medium text-navy hover:bg-paper sm:min-h-9"
+              >
+                <LogOut className="size-4 shrink-0" />
+                <span className="hidden sm:inline">ออกจากระบบ</span>
+              </button>
+            ) : null}
             <a
               href={siteUrl}
               target="_blank"

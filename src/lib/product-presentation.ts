@@ -830,6 +830,25 @@ export const PRODUCT_OVERRIDES: Partial<Record<string, PresentationOverride>> = 
       "magic screen",
       "ช่างตี๋",
     ],
+    specs: [
+      { label: "ระบบ", value: "ม่านม้วนแถบโปร่งสลับทึบ (Zebra / Magic Screen)" },
+      { label: "คุมแสง", value: "เลื่อนแถบให้ตรงกันเพื่อโปร่งหรือทึบ" },
+      { label: "ควบคุม", value: "โซ่ด้านข้าง หรือมอเตอร์ตามชุด" },
+      { label: "ขนาดงาน", value: "ตัดตามบานจริง ต้องระดับแม่นเพื่อแถบขนาน" },
+      { label: "บริการ", value: "วัดหน้างานฟรี · ติดตั้งครบ" },
+    ],
+    materials: [
+      {
+        title: "ผ้าแถบ zebra",
+        body: "แถบโปร่งสลับทึบในผืนเดียว ไม่ใช่ผ้ากรองแสงผืนเรียบแบบม่านม้วนทั่วไป",
+        image: `${DETAIL}/roller-blinds/zebra.png`,
+      },
+      {
+        title: "กล่องม้วนและระดับ",
+        body: "ติดตั้งเอียงแม้เล็กน้อยจะทำให้แถบไม่ขนาน — วัดระดับหน้างานสำคัญกว่าม่านม้วนผืนเดียว",
+        image: `${TEXTURE}/roller-blinds.png`,
+      },
+    ],
     benefitStats: [
       {
         label: "ปรับแสงแบบ zebra",
@@ -850,6 +869,26 @@ export const PRODUCT_OVERRIDES: Partial<Record<string, PresentationOverride>> = 
       "ม่านกันแดดภายนอก",
       "ม่านกันฝนสาด",
       "ช่างตี๋",
+    ],
+    specs: [
+      { label: "ระบบ", value: "ม่านภายนอกขอบซิปวิ่งในราง" },
+      { label: "หน้าที่หลัก", value: "ปิดช่องด้านข้าง กันลม ฝนสาด และแมลง" },
+      { label: "ผ้า", value: "กรองแสงหรือผ้าใสถึงทึบ ตามวิวและแดด" },
+      { label: "โครงสร้าง", value: "ต้องการแนวรางตรงและจุดยึดรับลม" },
+      { label: "ควบคุม", value: "มือหรือมอเตอร์ตามชุด" },
+      { label: "บริการ", value: "สำรวจหน้างาน · ติดตั้งครบ" },
+    ],
+    materials: [
+      {
+        title: "รางซิปและขอบผ้า",
+        body: "ผ้าวิ่งในรางสองข้าง ลดช่องว่างที่ม่านม้วนภายนอกขอบอิสระปิดไม่สนิท",
+        image: `${DETAIL}/outdoor-factory/zip-blind.png`,
+      },
+      {
+        title: "โครงรับแรงลม",
+        body: "รางต้องตรงและยึดกับโครงสร้างจริง — สำรวจคาน/เสาก่อนผลิต",
+        image: `${TEXTURE}/outdoor-factory.png`,
+      },
     ],
     benefitStats: [
       {
@@ -872,6 +911,25 @@ export const PRODUCT_OVERRIDES: Partial<Record<string, PresentationOverride>> = 
       "กัน UV",
       "ช่างตี๋",
     ],
+    specs: [
+      { label: "ประเภท", value: "ฟิล์มกรองแสงติดกระจกอาคาร" },
+      { label: "หน้าที่หลัก", value: "ลดร้อน ตัดแสงจ้า กัน UV ตามรุ่น" },
+      { label: "พื้นผิวงาน", value: "กระจกเรียบ สะอาด ไม่มีฟิล์มเก่าที่ยกไม่หมด" },
+      { label: "ความเข้ม", value: "เลือกตามทิศแดด — ห้องมืดไม่ควรเข้มเกิน" },
+      { label: "บริการ", value: "สำรวจหน้างาน · ตัดติดครบ" },
+    ],
+    materials: [
+      {
+        title: "ฟิล์มกรองแสง",
+        body: "ความเข้มและชนิดฟิล์มกำหนดทั้งร้อน แสงจอ และโทนห้อง — ไม่ใช่วอลเปเปอร์",
+        image: `${DETAIL}/surface/window-film.png`,
+      },
+      {
+        title: "งานเก็บขอบกระจก",
+        body: "ขอบต้องเรียบ ไม่มีฟองอากาศ คุณภาพขึ้นกับความสะอาดกระจกตอนติด",
+        image: `${TEXTURE}/surface.png`,
+      },
+    ],
     benefitStats: [
       {
         label: "ลดร้อนและแสงจ้า",
@@ -884,14 +942,433 @@ export const PRODUCT_OVERRIDES: Partial<Record<string, PresentationOverride>> = 
     ],
     roomStyleIds: ["office-clean", "modern-minimal", "warm-classic"],
   },
+  "curtain/hospital": {
+    specs: [
+      { label: "ระบบ", value: "รางม่านโรงพยาบาล / คิวบิเคิล ตามหน้างาน" },
+      { label: "ผ้า", value: "ถอดซักได้ เน้นความสะอาด ไม่ใช่ผ้าตกแต่งบ้าน" },
+      { label: "หน้าที่หลัก", value: "แบ่งโซนผู้ป่วยและความเป็นส่วนตัวในวอร์ด" },
+      { label: "ขนาดงาน", value: "วัดระยะเตียง ทางเดิน และอุปกรณ์" },
+      { label: "บริการ", value: "สำรวจร่วมกับผู้ดูแลสถานที่ · ติดตั้งครบ" },
+    ],
+    materials: [
+      {
+        title: "ผืนม่านสถานพยาบาล",
+        body: "เลือกผ้าที่ถอดซักและเปลี่ยนผืนได้ตามรอบของสถานที่ ไม่ใช้สเปกบ้านทั่วไป",
+        image: `${DETAIL}/curtain/hospital.png`,
+      },
+      {
+        title: "รางคิวบิเคิล",
+        body: "รางต้องรับการเปิด-ปิดบ่อยและไม่ขวางการสัญจรของบุคลากร",
+        image: `${TEXTURE}/curtain.png`,
+      },
+    ],
+    benefitStats: [
+      {
+        label: "ถอดซักสะดวก",
+        detail: "ออกแบบให้เปลี่ยนผืนตามนโยบายความสะอาดของสถานพยาบาล",
+      },
+      {
+        label: "แบ่งโซนผู้ป่วย",
+        detail: "วัดระยะเตียงและทางเดินจริง ไม่ใช้ระยะรางบ้านทั่วไป",
+      },
+    ],
+    roomStyleIds: [],
+    consultantIntro: "",
+    consultantSteps: [],
+  },
+  "curtain/print": {
+    specs: [
+      { label: "ระบบ", value: "ผ้าม่านพิมพ์ลาย — ลอน / จีบ / ตามแบบที่เลือก" },
+      { label: "ลาย", value: "พิมพ์จากไฟล์ลูกค้า ตรวจพรูฟก่อนผลิตจำนวนมาก" },
+      { label: "ฐานผ้า", value: "โปร่ง · ทึบ ตามคุมแสงของห้อง" },
+      { label: "ขนาดงาน", value: "ตัดตามหน้างาน ให้ลายไม่ตัดจุดสำคัญ" },
+      { label: "บริการ", value: "ตรวจไฟล์ · วัดหน้างาน · ติดตั้งครบ" },
+    ],
+    materials: [
+      {
+        title: "ผ้าพิมพ์ลาย",
+        body: "ลายอยู่บนผืนม่าน ไม่ใช่ม่านม้วนพิมพ์ — ถ้าต้องการม้วนดูหมวดม่านม้วนพิมพ์ลาย",
+        image: `${DETAIL}/curtain/print.png`,
+      },
+      {
+        title: "รางและทรงม่าน",
+        body: "ทรงลอนหรือจีบมีผลต่อลายที่เห็นตอนปิด — วางไฟล์คู่ทรงม่านก่อนพิมพ์",
+        image: `${TEXTURE}/curtain.png`,
+      },
+    ],
+    roomStyleIds: ["cafe-retail", "modern-minimal"],
+  },
+  "curtain/motorized": {
+    specs: [
+      { label: "ระบบ", value: "ผ้าม่านมอเตอร์คู่รางผ้า" },
+      { label: "ชนิดผ้า", value: "โปร่ง · ทึบ · ชั้นคู่ ตามห้อง" },
+      { label: "ควบคุม", value: "รีโมท · แอป · สมาร์ทโฮม ตามรุ่น" },
+      { label: "แรงมอเตอร์", value: "คำนวณจากน้ำหนักผ้าและความยาวราง" },
+      { label: "บริการ", value: "วัดหน้างาน · ติดตั้งและทดสอบระบบ" },
+    ],
+    materials: [
+      {
+        title: "รางคู่มอเตอร์",
+        body: "รางผ้าม่านต้องเข้าชุดกับมอเตอร์ ไม่ใช่กล่องม่านม้วน",
+        image: `${DETAIL}/curtain/motorized.png`,
+      },
+      {
+        title: "ผืนผ้า",
+        body: "น้ำหนักผ้ากำหนดแรงมอเตอร์ — วัดก่อนจับคู่ชุด",
+        image: `${TEXTURE}/curtain.png`,
+      },
+    ],
+    roomStyleIds: ["modern-minimal", "soft-luxury"],
+  },
+  "curtain/louis": {
+    specs: [
+      { label: "ระบบ", value: "หัวม่านหลุยส์ (swag & tail) คู่ชั้นม่านล่าง" },
+      { label: "หน้าที่หลัก", value: "ตกแต่งโถง/ห้องรับแขก — คุมแสงที่ชั้นล่าง" },
+      { label: "ผ้า", value: "ผ้าทิ้งตัวดี โทนคลาสสิก ตามแบบ" },
+      { label: "ขนาดงาน", value: "ออกแบบระยะยื่นและความสูงตามฝ้า–แอร์" },
+      { label: "บริการ", value: "ออกแบบทรง · วัดหน้างาน · ติดตั้งครบ" },
+    ],
+    roomStyleIds: ["warm-classic", "soft-luxury"],
+  },
+  "roller-blinds/motorized": {
+    specs: [
+      { label: "ระบบ", value: "ม่านม้วนมอเตอร์ (ไม่ใช่รางผ้าม่าน)" },
+      { label: "ชนิดผ้า", value: "กรองแสง · ทึบ ตามห้อง" },
+      { label: "ควบคุม", value: "รีโมท · แอป · ตั้งเวลา/คุมกลุ่มตามชุด" },
+      { label: "ไฟเลี้ยง", value: "จุดไฟหรือรุ่นชาร์จ ตามกฎอาคาร" },
+      { label: "บริการ", value: "วัดหน้างาน · ติดตั้งและตั้งค่าระบบ" },
+    ],
+    materials: [
+      {
+        title: "กล่องม้วนคู่มอเตอร์",
+        body: "มอเตอร์อยู่ในระบบม้วน ไม่ใช่รางผ้า — จับคู่แรงกับความกว้าง–สูงบาน",
+        image: `${DETAIL}/roller-blinds/motorized.png`,
+      },
+      {
+        title: "ผ้าม่านม้วน",
+        body: "เลือกกรองแสงหรือทึบเช่นม่านม้วนทั่วไป ลายพิมพ์ดูรุ่นพิมพ์ลาย",
+        image: `${TEXTURE}/roller-blinds.png`,
+      },
+    ],
+  },
+  "roller-blinds/print": {
+    specs: [
+      { label: "ระบบ", value: "ม่านม้วนพิมพ์กราฟิก/โลโก้" },
+      { label: "ลาย", value: "พิมพ์จากไฟล์ ตรวจจุดสำคัญตอนม้วนขึ้น-ลง" },
+      { label: "ฐานผ้า", value: "กรองแสงหรือทึบ ตามอ่านลายและคุมแสง" },
+      { label: "ขนาดงาน", value: "ตัดตามบานจริงก่อนพิมพ์" },
+      { label: "บริการ", value: "ตรวจไฟล์ · วัดหน้างาน · ติดตั้งครบ" },
+    ],
+    roomStyleIds: ["cafe-retail", "modern-minimal"],
+  },
+  "venetian-blinds/wood": {
+    specs: [
+      { label: "ระบบ", value: "มู่ลี่ใบไม้ ปรับองศาและยกขึ้น-ลง" },
+      { label: "วัสดุใบ", value: "ไม้" },
+      { label: "คุมแสง", value: "หมุนองศาใบ — ไม่ใช่ผ้าพับ" },
+      { label: "ห้องที่ควรระวัง", value: "ครัว/ห้องน้ำชื้นจัด ควรประเมินก่อนใช้ไม้" },
+      { label: "บริการ", value: "วัดหน้างานฟรี · ติดตั้งครบ" },
+    ],
+    roomStyleIds: ["warm-classic", "office-clean"],
+  },
+  "venetian-blinds/aluminium": {
+    specs: [
+      { label: "ระบบ", value: "มู่ลี่ใบอลูมิเนียม ปรับองศาและยกขึ้น-ลง" },
+      { label: "วัสดุใบ", value: "อลูมิเนียม" },
+      { label: "จุดเด่น", value: "เบา ทนชื้น เช็ดง่าย กว่ามู่ลี่ไม้" },
+      { label: "คุมแสง", value: "หมุนองศาใบ ตัดแสงจอคอมได้ดี" },
+      { label: "บริการ", value: "วัดหน้างานฟรี · ติดตั้งครบ" },
+    ],
+    roomStyleIds: ["office-clean", "modern-minimal"],
+  },
+  "venetian-blinds/bamboo": {
+    specs: [
+      { label: "ระบบ", value: "มู่ลี่ใบไม้ไผ่ ปรับองศา" },
+      { label: "วัสดุใบ", value: "ไม้ไผ่ / โทนธรรมชาติ" },
+      { label: "คุมแสง", value: "กรองแสงนุ่ม โปร่งกว่าใบทึบ" },
+      { label: "หมายเหตุ", value: "ลายและโทนธรรมชาติคลาดเคลื่อนได้เล็กน้อย" },
+      { label: "บริการ", value: "วัดหน้างานฟรี · ติดตั้งครบ" },
+    ],
+    roomStyleIds: ["resort-natural", "warm-classic"],
+  },
+  "venetian-blinds/roman-shade": {
+    specs: [
+      { label: "ระบบ", value: "โรมันเชด — ผ้าพับขึ้นเป็นชั้น" },
+      { label: "ไม่ใช่", value: "มู่ลี่ใบไม้ / มู่ลี่อลูมิเนียมที่หมุนองศา" },
+      { label: "ชนิดผ้า", value: "โปร่ง · ทึบ ตามแสงห้อง" },
+      { label: "ขนาดงาน", value: "เผื่อระยะเก็บตอนพับขึ้น ไม่ชนบัวหรือแอร์" },
+      { label: "บริการ", value: "วัดหน้างานฟรี · ติดตั้งครบ" },
+    ],
+    materials: [
+      {
+        title: "ผืนโรมันเชด",
+        body: "ชั้นผ้าพับในแนวตั้งของบาน ต่างจากม่านพับในหมวดผ้าม่านตรงระบบยกและกล่องแนบบาน",
+        image: `${DETAIL}/venetian-blinds/roman-shade.png`,
+      },
+      {
+        title: "กลไกพับ",
+        body: "ไม่มีใบให้หมุนองศา — คุมแสงด้วยผ้าและการพับขึ้น-ลง",
+        image: `${TEXTURE}/venetian-blinds.png`,
+      },
+    ],
+    benefitStats: [
+      {
+        label: "ชั้นผ้าพับสวย",
+        detail: "ลุคซอฟต์แบบเชด เหมาะบานแคบ–ทรงสูงที่ไม่อยากได้ใบไม้",
+      },
+      {
+        label: "คุมแสงตามผ้า",
+        detail: "เลือกโปร่งหรือทึบ ไม่ได้ปรับองศาแบบมู่ลี่ไม้หรืออลูมิเนียม",
+      },
+    ],
+    roomStyleIds: ["soft-luxury", "warm-classic", "modern-minimal"],
+  },
+  "pvc-partition/japanese": {
+    specs: [
+      { label: "ระบบ", value: "ฉากกั้นพับลายญี่ปุ่น โปร่งเบา" },
+      { label: "รูปแบบ", value: "ช่องแสง/ลายญี่ปุ่น — ไม่ทึบเต็มใบ" },
+      { label: "หน้าที่หลัก", value: "แบ่งโซนโดยยังส่งแสงต่อได้" },
+      { label: "ขนาดงาน", value: "วัดความกว้าง–สูงช่องติดตั้งจริง" },
+      { label: "บริการ", value: "วัดหน้างานฟรี · ติดตั้งครบ" },
+    ],
+    roomStyleIds: ["resort-natural", "modern-minimal"],
+  },
+  "pvc-partition/euro": {
+    specs: [
+      { label: "ระบบ", value: "ฉากกั้นพับช่องอะคริลิคทั้งใบ" },
+      { label: "รูปแบบ", value: "ยูโร — แสงผ่านทั้งแผ่นมากกว่าฉากทึบ" },
+      { label: "หน้าที่หลัก", value: "แบ่งห้องโดยยังโปร่งและมีมิติ" },
+      { label: "ขนาดงาน", value: "วัดช่องติดตั้งและความสูงฝ้า" },
+      { label: "บริการ", value: "วัดหน้างานฟรี · ติดตั้งครบ" },
+    ],
+    roomStyleIds: ["modern-minimal", "cafe-retail"],
+  },
+  "pvc-partition/usa": {
+    specs: [
+      { label: "ระบบ", value: "ฉากกั้นพับช่องอะคริลิคเป็นระยะ" },
+      { label: "รูปแบบ", value: "USA — จังหวะช่องแสง ไม่ทึบเต็ม ไม่โปร่งทั้งใบ" },
+      { label: "หน้าที่หลัก", value: "แบ่งโซนและส่งแสงเป็นจังหวะ" },
+      { label: "ขนาดงาน", value: "วัดช่องติดตั้งจริง" },
+      { label: "บริการ", value: "วัดหน้างานฟรี · ติดตั้งครบ" },
+    ],
+    roomStyleIds: ["modern-minimal", "office-clean"],
+  },
+  "outdoor-factory/outdoor-roller": {
+    specs: [
+      { label: "ระบบ", value: "ม่านม้วนภายนอก ขอบอิสระ" },
+      { label: "หน้าที่หลัก", value: "กันแดด ฝนสาด ความร้อนนอกอาคาร" },
+      { label: "วัสดุ", value: "ผ้าภายนอก — ไม่ใช้ผ้าในบ้านไปติดนอก" },
+      { label: "โครงสร้าง", value: "ประเมินทิศลมและจุดยึดก่อนยืนยันรุ่น" },
+      { label: "บริการ", value: "สำรวจหน้างาน · ติดตั้งครบ" },
+    ],
+    roomStyleIds: ["resort-natural", "cafe-retail"],
+  },
+  "outdoor-factory/skylight": {
+    specs: [
+      { label: "ระบบ", value: "ม่านสกายไลท์ ตึงผ้าบนช่องแสงหลังคา" },
+      { label: "หน้าที่หลัก", value: "ลดแสงจ้าและความร้อนจากด้านบน" },
+      { label: "ผ้า", value: "sunscreen หรือทึบกว่า ตามโจทย์แสง" },
+      { label: "ควบคุม", value: "งานสูงมักแนะนำมอเตอร์" },
+      { label: "บริการ", value: "สำรวจโครงสร้างและความปลอดภัยก่อนติดตั้ง" },
+    ],
+    roomStyleIds: ["modern-minimal", "office-clean"],
+  },
+  "outdoor-factory/pvc-strip": {
+    specs: [
+      { label: "ระบบ", value: "ม่านริ้ว PVC ทางเข้าออกอุตสาหกรรม" },
+      { label: "หน้าที่หลัก", value: "กั้นฝุ่น แมลง รักษาอุณหภูมิประตูสัญจรบ่อย" },
+      { label: "วัสดุ", value: "ริ้วพลาสติก ความหนา/สีตามงานโรงงานหรือห้องเย็น" },
+      { label: "ดูแล", value: "เปลี่ยนริ้วเป็นเส้นได้ ไม่ต้องรื้อทั้งชุด" },
+      { label: "บริการ", value: "สำรวจหน้างาน · ติดตั้งครบ" },
+    ],
+    materials: [
+      {
+        title: "ริ้ว PVC",
+        body: "งานโรงงาน/คลัง/ห้องเย็น ไม่ใช่ม่านผ้าตกแต่งบ้านหรือม่านม้วนระเบียง",
+        image: `${DETAIL}/outdoor-factory/pvc-strip.png`,
+      },
+      {
+        title: "รางหัวประตู",
+        body: "ออกแบบให้เปลี่ยนริ้วเป็นจุด ลดเวลาหยุดหน้างาน",
+        image: `${TEXTURE}/outdoor-factory.png`,
+      },
+    ],
+    benefitStats: [
+      {
+        label: "ทนใช้งานหนัก",
+        detail: "ประตูสัญจรบ่อย กั้นฝุ่นและแมลงได้โดยไม่ต้องปิดบานทึบทุกครั้ง",
+      },
+      {
+        label: "คุมอุณหภูมิโซน",
+        detail: "ช่วยห้องเย็นและคลังลดการสูญเสียความเย็นตอนรถหรือคนเข้าออก",
+      },
+    ],
+    roomStyleIds: [],
+    consultantSteps: [],
+  },
+  "motorized/curtain": {
+    specs: [
+      { label: "ระบบ", value: "มอเตอร์คู่รางผ้าม่าน" },
+      { label: "ชนิดม่าน", value: "ผ้าม่าน (ลอน/จีบ/ตามแบบ) ไม่ใช่ม่านม้วน" },
+      { label: "ควบคุม", value: "รีโมท · แอป · สมาร์ทโฮม ตามชุด" },
+      { label: "แรงมอเตอร์", value: "คำนวณจากน้ำหนักผ้าและความยาวราง" },
+      { label: "บริการ", value: "วัดหน้างาน · ติดตั้งและทดสอบระบบ" },
+    ],
+  },
+  "motorized/roller": {
+    specs: [
+      { label: "ระบบ", value: "มอเตอร์คู่กล่องม่านม้วน" },
+      { label: "ชนิดม่าน", value: "ม่านม้วน กรองแสงหรือทึบ" },
+      { label: "ควบคุม", value: "รีโมท · แอป · คุมกลุ่มหลายบาน" },
+      { label: "ไฟเลี้ยง", value: "จุดไฟหรือชาร์จ ตามหน้างาน" },
+      { label: "บริการ", value: "วัดหน้างาน · ติดตั้งและตั้งค่า" },
+    ],
+  },
+  "motorized/vertical": {
+    specs: [
+      { label: "ระบบ", value: "มอเตอร์คู่ม่านปรับแสงใบแนวตั้ง" },
+      { label: "คุมแสง", value: "หมุนองศาใบและเปิด-ปิดด้านข้างด้วยมอเตอร์" },
+      { label: "เหมาะกับ", value: "บานสูงอาคาร / ออฟฟิศหลายโซน" },
+      { label: "บริการ", value: "สำรวจราง จุดไฟ จุดจอดใบ" },
+    ],
+    roomStyleIds: ["office-clean", "modern-minimal"],
+  },
+  "motorized/wood": {
+    specs: [
+      { label: "ระบบ", value: "มู่ลี่ไม้คู่มอเตอร์" },
+      { label: "วัสดุใบ", value: "ไม้ — ประเมินความชื้นห้องก่อนติดตั้ง" },
+      { label: "คุมแสง", value: "ปรับองศาหรือยกใบด้วยมอเตอร์" },
+      { label: "บริการ", value: "วัดน้ำหนักใบและจุดยึดก่อนติดตั้ง" },
+    ],
+    roomStyleIds: ["warm-classic", "soft-luxury"],
+  },
+  "motorized/aluminium": {
+    specs: [
+      { label: "ระบบ", value: "มู่ลี่อลูมิเนียมคู่มอเตอร์" },
+      { label: "วัสดุใบ", value: "อลูมิเนียม เบา เช็ดง่าย" },
+      { label: "คุมแสง", value: "ซิงก์องศาหลายชุดในออฟฟิศได้" },
+      { label: "บริการ", value: "วัดหน้างาน · ติดตั้งและตั้งค่ากลุ่ม" },
+    ],
+    roomStyleIds: ["office-clean", "modern-minimal"],
+  },
+  "print-fabric/noren": {
+    specs: [
+      { label: "รูปแบบ", value: "ม่านประตูสไตล์ญี่ปุ่น (Noren)" },
+      { label: "ลาย", value: "พิมพ์โลโก้หรือลายตามไฟล์" },
+      { label: "หน้าที่หลัก", value: "จุดทางเข้า ร้านอาหาร คาเฟ่ — ไม่ปิดบานทั้งห้อง" },
+      { label: "บริการ", value: "ตรวจไฟล์ · ตัดเย็บตามความกว้างประตู" },
+    ],
+    roomStyleIds: ["cafe-retail", "resort-natural"],
+  },
+  "print-fabric/print-roller": {
+    specs: [
+      { label: "ระบบ", value: "ม่านม้วนพิมพ์ลายตามสั่ง" },
+      { label: "ลาย", value: "กราฟิก/โลโก้บนผืนม้วน" },
+      { label: "ฐานผ้า", value: "เลือกให้ลายอ่านชัดและคุมแสงได้" },
+      { label: "บริการ", value: "ตรวจไฟล์ · วัดบาน · ติดตั้งครบ" },
+    ],
+    roomStyleIds: ["cafe-retail", "modern-minimal"],
+  },
+  "surface/wallpaper": {
+    specs: [
+      { label: "ประเภท", value: "วอลเปเปอร์ตกแต่งผนัง" },
+      { label: "หน้าที่หลัก", value: "เปลี่ยนโทนผนัง — ไม่ใช่ฟิล์มกระจก" },
+      { label: "พื้นผิวงาน", value: "ผนังเรียบ แห้ง สะอาด" },
+      { label: "ลาย", value: "ม้วนสำเร็จหรือพิมพ์ตามโปรเจกต์" },
+      { label: "บริการ", value: "วัดพื้นที่ · ติดและเก็บแนวต่อลาย" },
+    ],
+    materials: [
+      {
+        title: "วอลเปเปอร์",
+        body: "เลือกลายและเนื้อให้เข้าเฟอร์นิเจอร์ งานติดคุณภาพขึ้นกับผนังต้นทาง",
+        image: `${DETAIL}/surface/wallpaper.png`,
+      },
+      {
+        title: "แนวต่อลาย",
+        body: "วางแบบก่อนติด เพื่อลายต่อเนื่องและขอบเรียบ",
+        image: `${TEXTURE}/surface.png`,
+      },
+    ],
+    benefitStats: [
+      {
+        label: "เปลี่ยนโทนผนัง",
+        detail: "กำหนดบรรยากาศห้องโดยไม่ต้องทาสีใหม่ทั้งหลัง",
+      },
+      {
+        label: "จับคู่เฟอร์นิเจอร์",
+        detail: "เลือกโทนกลางหรือลายตามสไตล์ห้อง ไม่แข่งกับโซฟาและพื้น",
+      },
+    ],
+    roomStyleIds: ["modern-minimal", "warm-classic"],
+  },
+  "service/washing": {
+    specs: [
+      { label: "บริการ", value: "ซักผ้าม่าน ถอด–ซัก–ติดกลับตามแพ็กเกจ" },
+      { label: "ขอบเขต", value: "ประเมินชนิดผ้า คราบ และซับในก่อนลงมือ" },
+      { label: "ไม่รวม", value: "งานติดตั้งม่านใหม่ — ดูหมวดสินค้าหากต้องการเปลี่ยนผืน" },
+      { label: "ระยะเวลา", value: "แจ้งหลังประเมินสภาพผ้า" },
+      { label: "พื้นที่บริการ", value: "ตามเขตให้บริการช่างตี๋" },
+    ],
+    roomStyleIds: [],
+    consultantSteps: [],
+  },
+  "service/repair": {
+    specs: [
+      { label: "บริการ", value: "ซ่อมราง ตะขอ ปรับความยาว และกลไกเปิด-ปิด" },
+      { label: "ขอบเขต", value: "ประเมินอาการเสียจากผืนและระบบราง" },
+      { label: "ไม่รวม", value: "ซักทั้งชุด — ดูบริการซักผ้าม่านหากต้องการทำความสะอาด" },
+      { label: "ระยะเวลา", value: "แจ้งหลังตรวจหน้างาน" },
+      { label: "พื้นที่บริการ", value: "ตามเขตให้บริการช่างตี๋" },
+    ],
+    roomStyleIds: [],
+    consultantSteps: [],
+  },
 };
 
-/** Product-visible style shot: /images/products/styles/{category}/{styleId}.png */
+/** Category folders that actually have a style shot. Missing ones use the shared file. */
+const CATEGORY_STYLE_SHOTS = new Set([
+  "curtain/modern-minimal",
+  "curtain/office-clean",
+  "curtain/soft-luxury",
+  "curtain/warm-classic",
+  "motorized/modern-minimal",
+  "motorized/office-clean",
+  "motorized/soft-luxury",
+  "outdoor-factory/cafe-retail",
+  "outdoor-factory/modern-minimal",
+  "outdoor-factory/office-clean",
+  "outdoor-factory/resort-natural",
+  "print-fabric/cafe-retail",
+  "print-fabric/modern-minimal",
+  "print-fabric/resort-natural",
+  "pvc-partition/cafe-retail",
+  "pvc-partition/modern-minimal",
+  "pvc-partition/office-clean",
+  "roller-blinds/cafe-retail",
+  "roller-blinds/modern-minimal",
+  "roller-blinds/office-clean",
+  "service/modern-minimal",
+  "service/warm-classic",
+  "surface/modern-minimal",
+  "surface/office-clean",
+  "surface/warm-classic",
+  "venetian-blinds/office-clean",
+  "venetian-blinds/resort-natural",
+  "venetian-blinds/warm-classic",
+  "vertical-blinds/cafe-retail",
+  "vertical-blinds/modern-minimal",
+  "vertical-blinds/office-clean",
+]);
+
+/** Prefer /styles/{category}/{styleId}.png, else the shared /styles/{styleId}.png */
 export function categoryStyleImage(
   categorySlug: string,
   styleId: string,
 ): string {
-  return `${STYLE}/${categorySlug}/${styleId}.png`;
+  if (CATEGORY_STYLE_SHOTS.has(`${categorySlug}/${styleId}`)) {
+    return `${STYLE}/${categorySlug}/${styleId}.png`;
+  }
+  return `${STYLE}/${styleId}.png`;
 }
 
 /** Style copy tuned so tips match the product on the page (not generic curtains) */
