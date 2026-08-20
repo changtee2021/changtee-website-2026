@@ -3,6 +3,7 @@
 import { useCallback, useState, type HTMLAttributes } from "react";
 import { useRouter } from "next/navigation";
 import { PdpaConsentField } from "@/components/forms/PdpaConsentField";
+import { MarketingConsentField } from "@/components/forms/MarketingConsentField";
 import {
   isTurnstileEnabled,
   TurnstileField,
@@ -46,6 +47,7 @@ export function LeadForm({
       message: String(formData.get("message") || ""),
       productInterest: productInterest || String(formData.get("productInterest") || ""),
       pdpaAccepted: formData.get("pdpaAccepted") === "on",
+      marketingOptIn: formData.get("marketingOptIn") === "on",
       turnstileToken: turnstileToken || undefined,
     };
 
@@ -84,6 +86,7 @@ export function LeadForm({
         />
       </label>
       <PdpaConsentField />
+      <MarketingConsentField />
       <TurnstileField onToken={onTurnstile} />
       {error ? (
         <p className="text-sm text-brand-red" role="alert" aria-live="polite">

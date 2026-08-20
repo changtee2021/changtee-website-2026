@@ -20,6 +20,8 @@ import { bytesMatchDeclaredType, isPdfBytes } from "@/lib/security/file-magic";
 import { toStorageRef } from "@/lib/security/lead-media";
 import { getRequestIp, isRateLimited } from "@/lib/security/rate-limit";
 import { canUseSupabaseStorage, uploadPrivateFile } from "@/lib/storage/upload";
+import { formFlagTrue } from "@/lib/marketing/consent";
+import { subscribeIfOptedIn } from "@/lib/marketing/store";
 
 export const runtime = "nodejs";
 
@@ -127,6 +129,13 @@ export async function POST(request: Request) {
       ? await createPresentationBooking(form, companyProfile, businessCard)
       : await createFactoryVisitFromForm(form, companyProfile, businessCard);
 
+    await subscribeIfOptedIn({
+      optedIn: formFlagTrue(form.get("marketingOptIn")),
+      email: visit.email,
+      fullName: visit.fullName,
+      source: isPresentation ? "presentation" : "visit",
+    });
+
     let notify: Array<{ channel: string; ok: boolean; error?: string }> = [];
     try {
       notify = await sendFactoryVisitEmails(visit);
@@ -230,6 +239,7 @@ async function createFactoryVisitFromForm(
     note: String(form.get("note") || ""),
     pdpaAccepted:
       form.get("pdpaAccepted") === "on" || form.get("pdpaAccepted") === "true",
+    marketingOptIn: formFlagTrue(form.get("marketingOptIn")),
   });
   if (!parsed.success) {
     validationError(parsed.error.issues[0]?.message || "ข้อมูลไม่ครบ");
@@ -288,6 +298,7 @@ async function createPresentationBooking(
     note: String(form.get("note") || ""),
     pdpaAccepted:
       form.get("pdpaAccepted") === "on" || form.get("pdpaAccepted") === "true",
+    marketingOptIn: formFlagTrue(form.get("marketingOptIn")),
   });
   if (!parsed.success) {
     validationError(parsed.error.issues[0]?.message || "ข้อมูลไม่ครบ");

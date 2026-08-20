@@ -547,8 +547,8 @@ export function PortfolioIndex({
             </div>
           </div>
 
-          {/* Icon strip — products or places */}
-          <div className="mt-5 border-t border-line pt-5">
+          {/* Icon strip — swipe on phone, wrap to the card on desktop */}
+          <div className="mt-5 min-w-0 border-t border-line pt-5">
             <AnimatePresence mode="wait" initial={false}>
               <motion.div
                 key={view}
@@ -560,7 +560,7 @@ export function PortfolioIndex({
                     : { opacity: 0, x: view === "place" ? -18 : 18 }
                 }
                 transition={{ duration: reduced ? 0 : 0.28, ease: fadeEase }}
-                className="no-scrollbar flex gap-2 overflow-x-auto pb-1 sm:gap-3"
+                className="no-scrollbar flex min-w-0 gap-2 overflow-x-auto pb-1 sm:gap-3 md:flex-wrap md:justify-start md:gap-1.5 md:overflow-visible"
               >
                 <FilterIconBtn
                   active={
@@ -624,7 +624,7 @@ export function PortfolioIndex({
                   <p className="text-xs font-semibold uppercase tracking-wider text-muted">
                     หมวดย่อย · {productLabel(product)}
                   </p>
-                  <div className="no-scrollbar mt-3 flex gap-2 overflow-x-auto pb-1">
+                  <div className="no-scrollbar mt-3 flex gap-2 overflow-x-auto pb-1 md:flex-wrap md:overflow-visible">
                     {childOptions.map((ch) => {
                       const selected = childSlugs.includes(ch.slug);
                       return (
@@ -914,11 +914,11 @@ function FilterIconBtn({
       }}
       whileTap={reduced ? undefined : { scale: 0.94 }}
       className={cn(
-        "group relative flex w-[4.85rem] shrink-0 flex-col items-center gap-1.5 rounded-xl px-1 py-2",
+        "group relative flex w-[4.85rem] shrink-0 flex-col items-center gap-1.5 rounded-xl px-1 py-2 md:w-[4.2rem] md:px-0.5",
         active ? "bg-navy/[0.04]" : "hover:bg-shell",
       )}
     >
-      <span className="relative flex size-[3.6rem] items-center justify-center">
+      <span className="relative flex size-[3.6rem] items-center justify-center md:size-[3.15rem]">
         {active ? (
           <motion.span
             layoutId={layoutId}
@@ -935,7 +935,7 @@ function FilterIconBtn({
           }
           transition={springSoft}
         >
-          <Icon active={active} className="size-8" />
+          <Icon active={active} className="size-8 md:size-7" />
         </motion.span>
       </span>
       <span

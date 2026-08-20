@@ -279,7 +279,7 @@ function SiteHeaderBar({ pathname }: { pathname: string }) {
               </Link>
               <button
                 type="button"
-                className="inline-flex size-11 shrink-0 items-center justify-center rounded-md border border-white/30 text-white"
+                className="inline-flex size-11 shrink-0 items-center justify-center text-white"
                 aria-label="เมนู"
                 aria-expanded={open}
                 onClick={() => setOpen((v) => !v)}

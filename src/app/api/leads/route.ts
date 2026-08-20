@@ -13,6 +13,8 @@ import {
   canUseSupabaseStorage,
   uploadPrivateFile,
 } from "@/lib/storage/upload";
+import { formFlagTrue } from "@/lib/marketing/consent";
+import { subscribeIfOptedIn } from "@/lib/marketing/store";
 
 export const runtime = "nodejs";
 
@@ -140,6 +142,7 @@ export async function POST(request: Request) {
         referralSource: String(form.get("referralSource") || ""),
         note: String(form.get("note") || ""),
         pdpaAccepted: form.get("pdpaAccepted") === "on" || form.get("pdpaAccepted") === "true",
+        marketingOptIn: formFlagTrue(form.get("marketingOptIn")),
         siteImageName,
       });
 
@@ -171,6 +174,14 @@ export async function POST(request: Request) {
         callbackDate: data.callbackDate || null,
         referralSource: data.referralSource,
         note: data.note || null,
+      });
+
+      await subscribeIfOptedIn({
+        optedIn: Boolean(data.marketingOptIn),
+        email: data.email,
+        fullName: data.contactName,
+        source: "quote",
+        leadId: lead.id,
       });
 
       let notify: Array<{ channel: string; ok: boolean; error?: string }> = [];
@@ -232,6 +243,14 @@ export async function POST(request: Request) {
       siteImageName: null,
       siteImageUrl: null,
       callbackDate: null,
+    });
+
+    await subscribeIfOptedIn({
+      optedIn: Boolean(data.marketingOptIn),
+      email: data.email,
+      fullName: data.fullName,
+      source: data.source === "fab" ? "fab" : "contact",
+      leadId: lead.id,
     });
 
     let notify: Array<{ channel: string; ok: boolean; error?: string }> = [];
