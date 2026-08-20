@@ -125,14 +125,20 @@ export const siteConfig = {
       href: process.env.NEXT_PUBLIC_LINE_URL || "https://lin.ee/7Ul6K4n",
       icon: "/images/social/line.svg",
     },
-    {
-      label: "Instagram",
-      href: process.env.NEXT_PUBLIC_INSTAGRAM_URL || "https://www.instagram.com/",
-      icon: "/images/social/instagram.svg",
-    },
+    ...(process.env.NEXT_PUBLIC_INSTAGRAM_URL
+      ? [
+          {
+            label: "Instagram",
+            href: process.env.NEXT_PUBLIC_INSTAGRAM_URL,
+            icon: "/images/social/instagram.svg",
+          },
+        ]
+      : []),
     {
       label: "TikTok",
-      href: process.env.NEXT_PUBLIC_TIKTOK_URL || "https://www.tiktok.com/",
+      href:
+        process.env.NEXT_PUBLIC_TIKTOK_URL ||
+        "https://www.tiktok.com/@chang_tee",
       icon: "/images/social/tiktok.svg",
     },
   ],
