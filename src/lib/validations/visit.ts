@@ -37,6 +37,7 @@ export const factoryVisitSchema = z
     productInterest: z.string().trim().min(2, "กรุณากรอกสินค้าที่สนใจ").max(200),
     note: z.string().trim().max(2000).optional().or(z.literal("")),
     pdpaAccepted: z.boolean(),
+    marketingOptIn: z.boolean().optional().default(false),
     turnstileToken: z.string().optional(),
   })
   .refine((data) => data.pdpaAccepted === true, {

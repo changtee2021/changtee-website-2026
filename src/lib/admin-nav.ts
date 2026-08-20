@@ -3,6 +3,7 @@ import {
   Briefcase,
   CalendarCheck,
   ClipboardList,
+  Mail,
   Presentation,
   FileText,
   Images,
@@ -59,6 +60,7 @@ export const adminNavGroups: AdminNavGroup[] = [
         icon: Presentation,
         badgeKey: "presentations",
       },
+      { path: "/subscribers", label: "เมลลูกค้า", icon: Mail },
     ],
   },
   {

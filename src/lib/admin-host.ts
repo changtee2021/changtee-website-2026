@@ -80,6 +80,7 @@ const MARKETING_PREFIXES = [
   "/cookies",
   "/terms",
   "/thank-you",
+  "/unsubscribe",
   "/400",
   "/500",
   "/503",

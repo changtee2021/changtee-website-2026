@@ -30,6 +30,7 @@ export const quoteLeadSchema = z.object({
   referralSource: z.string().trim().min(1, "กรุณาเลือกช่องทางที่หาเราเจอ"),
   note: z.string().trim().max(4000).optional().or(z.literal("")),
   pdpaAccepted: z.boolean(),
+  marketingOptIn: z.boolean().optional().default(false),
   siteImageName: z.string().trim().max(260).optional().or(z.literal("")),
 })
 .refine((data) => data.pdpaAccepted === true, {
@@ -71,11 +72,16 @@ export const leadSchema = z
     jobTitle: z.string().trim().max(120).optional().or(z.literal("")),
     inquiryType: z.string().trim().max(200).optional().or(z.literal("")),
     pdpaAccepted: z.boolean(),
+    marketingOptIn: z.boolean().optional().default(false),
     turnstileToken: z.string().optional(),
   })
   .refine((data) => data.pdpaAccepted === true, {
     message: "กรุณายอมรับนโยบายความเป็นส่วนตัว",
     path: ["pdpaAccepted"],
+  })
+  .refine((data) => !data.marketingOptIn || Boolean(data.email?.trim()), {
+    message: "กรุณากรอกอีเมลหากต้องการรับข่าวสาร",
+    path: ["email"],
   })
   .refine((data) => Boolean(data.lineId?.trim() || data.email?.trim()), {
     message: "กรุณากรอก LINE หรืออีเมลอย่างน้อย 1 ช่อง",

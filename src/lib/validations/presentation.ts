@@ -51,6 +51,7 @@ export const productPresentationSchema = z
     decisionTimeline: z.string().trim().max(80).optional().or(z.literal("")),
     note: z.string().trim().max(2000).optional().or(z.literal("")),
     pdpaAccepted: z.boolean(),
+    marketingOptIn: z.boolean().optional().default(false),
   })
   .refine((data) => data.pdpaAccepted === true, {
     message: "กรุณายอมรับนโยบายความเป็นส่วนตัว",

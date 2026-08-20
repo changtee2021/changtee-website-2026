@@ -5,6 +5,7 @@ import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Check, Eye, ImageIcon, MapPin, Trash2, X } from "lucide-react";
 import { PdpaConsentField } from "@/components/forms/PdpaConsentField";
+import { MarketingConsentField } from "@/components/forms/MarketingConsentField";
 import {
   isTurnstileEnabled,
   TurnstileField,
@@ -665,8 +666,9 @@ export function QuoteForm() {
               onChange={(v) => update("note", v)}
             />
 
-            <div className="md:col-span-2 xl:col-span-3">
+            <div className="space-y-3 md:col-span-2 xl:col-span-3">
               <PdpaConsentField />
+              <MarketingConsentField />
               <TurnstileField onToken={onTurnstile} />
             </div>
 

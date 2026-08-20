@@ -3,6 +3,7 @@
 import { useCallback, useMemo, useRef, useState, type ReactNode } from "react";
 import { Check, X } from "lucide-react";
 import { PdpaConsentField } from "@/components/forms/PdpaConsentField";
+import { MarketingConsentField } from "@/components/forms/MarketingConsentField";
 import {
   isTurnstileEnabled,
   TurnstileField,
@@ -376,6 +377,7 @@ export function ProductPresentationForm() {
         </div>
 
         <PdpaConsentField />
+        <MarketingConsentField />
         <TurnstileField onToken={onTurnstile} />
         {error ? (
           <p className="text-sm text-brand-red" role="alert" aria-live="polite">
