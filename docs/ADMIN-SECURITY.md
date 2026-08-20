@@ -11,8 +11,8 @@ Optional / local only:
 
 | Variable | Notes |
 |---|---|
-| `ADMIN_AUTH_ENFORCED=false` | Opens `/admin` without login — **ignored on Vercel/production** |
-| `ALLOW_OPEN_ADMIN_API=true` | Opens admin APIs without cookie — **forced off on Vercel/production** |
+| `ADMIN_AUTH_ENFORCED=true` | Turn admin login back on (off by default until the team is ready). |
+| `ALLOW_OPEN_ADMIN_API=true` | Opens admin APIs without a cookie while login is off. |
 | `ADMIN_DEV_API_KEY` | Local `x-admin-dev-key` header only |
 
 Generate secrets:

@@ -75,7 +75,7 @@ export const SETTINGS_SECTIONS: SettingsSection[] = [
     title: "การเชื่อมต่อ",
     description: "GA4 · Pixel · สถานะ env (ไม่โชว์ secret)",
     icon: Plug,
-    status: "soon",
+    status: "ready",
     adminOnly: true,
   },
   {

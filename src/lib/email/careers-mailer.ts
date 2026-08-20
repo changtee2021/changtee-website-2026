@@ -1,56 +1,71 @@
-import { escapeHtml, fieldRow, getTransport } from "@/lib/email/mailer";
-import { siteConfig } from "@/lib/site-config";
+import { getTransport } from "@/lib/email/mailer";
+import {
+  attachmentGallery,
+  escapeHtml,
+  fieldLinkRow,
+  fieldRow,
+  fieldSection,
+  wrapCustomerEmail,
+  wrapNoticeEmail,
+} from "@/lib/email/layout";
 import type { JobApplication } from "@/lib/careers/types";
 
-function buildHrApplicationHtml(
+export function buildHrApplicationHtml(
   application: JobApplication,
   resumeUrl: string | null,
 ) {
-  return `<!doctype html>
-<html><body style="font-family:Sarabun,Arial,sans-serif;background:#f7f7f7;padding:24px">
-  <div style="max-width:720px;margin:0 auto;background:#fff;border-radius:12px;overflow:hidden">
-    <div style="background:#c8102e;color:#fff;padding:16px 20px;font-size:20px;font-weight:700">📄 ใบสมัครงานใหม่</div>
-    <div style="padding:16px 20px">
-      <table style="width:100%;border-collapse:collapse;font-size:14px">
-        ${fieldRow("ตำแหน่งที่สนใจ", application.jobTitle || "สมัครทั่วไป (ยังไม่มีตำแหน่งเปิดรับ)")}
-        ${fieldRow("ชื่อ-นามสกุล", application.fullName)}
-        ${fieldRow("เบอร์โทรศัพท์", application.phone)}
-        ${fieldRow("LINE ID", application.lineId)}
-        ${fieldRow("E-mail", application.email)}
-        ${fieldRow("ที่อยู่/จังหวัด", application.address)}
-        ${fieldRow("ระดับการศึกษา", application.education)}
-        ${fieldRow("ประสบการณ์ทำงาน", application.experienceNote)}
-        ${fieldRow("เงินเดือนที่คาดหวัง", application.expectedSalary)}
-        ${fieldRow("วันที่พร้อมเริ่มงาน", application.availableFrom)}
-        ${fieldRow("ข้อความจากผู้สมัคร", application.coverNote)}
-        ${fieldRow("ไฟล์เรซูเม่", application.resumeFileName || "ไม่ได้แนบไฟล์")}
-      </table>
-      ${
-        resumeUrl
-          ? `<p style="margin-top:12px"><a href="${escapeHtml(resumeUrl)}" style="color:#c8102e;font-weight:600">ดาวน์โหลดเรซูเม่ (ลิงก์หมดอายุใน 7 วัน)</a></p>`
-          : ""
-      }
-      <p style="margin-top:16px;font-size:12px;color:#888">Application ID: ${application.id}</p>
-    </div>
-  </div>
-</body></html>`;
+  const resumeFiles = application.resumeFileName
+    ? [{ name: application.resumeFileName, url: resumeUrl }]
+    : [];
+  const portfolioFiles = (application.portfolioFiles || []).map((file) => ({
+    name: file.name,
+    url: file.signedUrl || null,
+  }));
+  const files = [...resumeFiles, ...portfolioFiles];
+  return wrapNoticeEmail({
+    title: "ใบสมัครงานใหม่",
+    subtitle: application.jobTitle
+      ? `ตำแหน่ง: ${application.jobTitle}`
+      : "สมัครทั่วไป — ยังไม่มีตำแหน่งเปิดรับ",
+    accent: "red",
+    body: `${fieldSection(
+      "ตำแหน่งที่สมัคร",
+      fieldRow(
+        "ตำแหน่งที่สนใจ",
+        application.jobTitle || "สมัครทั่วไป (ยังไม่มีตำแหน่งเปิดรับ)",
+      ),
+    )}${fieldSection(
+      "ข้อมูลผู้สมัคร",
+      `${fieldRow("ชื่อ-นามสกุล", application.fullName)}${fieldRow("เบอร์โทรศัพท์", application.phone)}${fieldRow("LINE ID", application.lineId)}${fieldRow("E-mail", application.email)}${fieldRow("ที่อยู่/จังหวัด", application.address)}`,
+    )}${fieldSection(
+      "ประวัติการศึกษาและงาน",
+      `${fieldRow("ระดับการศึกษา", application.education)}${fieldRow("ประสบการณ์ทำงาน", application.experienceNote)}`,
+    )}${fieldSection(
+      "รายละเอียดเพิ่มเติม",
+      `${fieldRow("เงินเดือนที่คาดหวัง", application.expectedSalary)}${fieldRow("วันที่พร้อมเริ่มงาน", application.availableFrom)}${fieldRow("ข้อความจากผู้สมัคร", application.coverNote)}${fieldLinkRow("ไฟล์เรซูเม่", resumeFiles)}${portfolioFiles.length ? fieldLinkRow("ผลงานเพิ่มเติม", portfolioFiles) : ""}`,
+    )}${attachmentGallery(files)}`,
+    footer: `Application ID: ${application.id}`,
+  });
 }
 
-function buildCandidateReplyHtml(application: JobApplication) {
-  return `<!doctype html>
-<html><body style="font-family:Sarabun,Arial,sans-serif;background:#f7f7f7;padding:24px">
-  <div style="max-width:640px;margin:0 auto;background:#fff;border-radius:12px;overflow:hidden">
-    <div style="background:#0b1f3a;color:#fff;padding:16px 20px;font-size:20px;font-weight:700">ช่างตี๋ ผ้าม่าน</div>
-    <div style="padding:20px;font-size:15px;line-height:1.7;color:#222">
-      <p>เรียนคุณ ${escapeHtml(application.fullName)}</p>
-      <p>เราได้รับใบสมัครงานของคุณ${application.jobTitle ? ` ในตำแหน่ง <strong>${escapeHtml(application.jobTitle)}</strong>` : ""}เรียบร้อยแล้ว</p>
-      <p>ทีมงานฝ่ายบุคคลจะพิจารณาข้อมูลของคุณ และจะติดต่อกลับหากคุณสมบัติตรงกับตำแหน่งที่เปิดรับในขณะนี้หรือในอนาคต</p>
-      <p>หากต้องการสอบถามเพิ่มเติม ทัก LINE ได้ที่
-      <a href="${siteConfig.lineUrl}">${siteConfig.lineId}</a></p>
-      <p style="margin-top:24px">ขอบคุณที่สนใจร่วมงานกับเรา<br/>ฝ่ายบุคคล ช่างตี๋ ผ้าม่าน</p>
-    </div>
-  </div>
-</body></html>`;
+export function buildCandidateReplyHtml(application: JobApplication) {
+  return wrapCustomerEmail({
+    title: "รับใบสมัครงานแล้ว",
+    subtitle: application.jobTitle
+      ? `ตำแหน่ง ${application.jobTitle}`
+      : "สมัครทั่วไป — ยังไม่มีตำแหน่งเปิดรับ",
+    greetingName: application.fullName,
+    intro: `เราได้รับใบสมัครงานของคุณ${application.jobTitle ? ` ในตำแหน่ง <strong>${escapeHtml(application.jobTitle)}</strong>` : ""}เรียบร้อยแล้ว ทีมงานฝ่ายบุคคลจะพิจารณาข้อมูล และจะติดต่อกลับหากคุณสมบัติตรงกับตำแหน่งที่เปิดรับ`,
+    nextStep: "ฝ่ายบุคคลจะติดต่อกลับเฉพาะเมื่อคุณสมบัติตรงกับตำแหน่งที่เปิดรับ",
+    summary: `${fieldSection(
+      "สรุปใบสมัคร",
+      `${fieldRow("ตำแหน่ง", application.jobTitle || "สมัครทั่วไป")}${fieldRow("ระดับการศึกษา", application.education)}${fieldRow("วันที่พร้อมเริ่มงาน", application.availableFrom)}`,
+    )}${fieldSection(
+      "ช่องทางที่ท่านให้ไว้",
+      `${fieldRow("เบอร์โทรศัพท์", application.phone)}${fieldRow("E-mail", application.email)}${fieldRow("LINE ID", application.lineId)}`,
+    )}`,
+    signOff: "ขอบคุณที่สนใจร่วมงานกับเรา<br/>ฝ่ายบุคคล ช่างตี๋ ผ้าม่าน",
+  });
 }
 
 export async function sendJobApplicationEmails(

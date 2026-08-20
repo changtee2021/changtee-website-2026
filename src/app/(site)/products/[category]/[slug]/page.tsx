@@ -9,7 +9,6 @@ import {
   productCatalog,
 } from "@/lib/product-catalog";
 import { getProductContent } from "@/lib/product-content";
-import { certificatesForCategory } from "@/lib/product-certificates";
 import { portfolioForProduct } from "@/lib/cms/public-content";
 import {
   getProductJsonLd,
@@ -78,7 +77,6 @@ export default async function ProductDetailPage({ params }: Props) {
         presentation={presentation}
         catalog={catalog}
         related={related}
-        certificates={certificatesForCategory(cat.slug)}
         portfolioWorks={portfolioWorks}
       />
     </>

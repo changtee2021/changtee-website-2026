@@ -15,7 +15,7 @@ export default async function Page() {
     <SettingsSoonBoard
       basePath={basePath}
       title="ความปลอดภัย"
-      description="Login session บังคับแล้ว · ตั้ง ADMIN_SESSION_SECRET / DEMO_ADMIN_PASSWORD · ปิดฉุกเฉินด้วย ADMIN_AUTH_ENFORCED=false"
+      description="ล็อกอินแอดมินยังไม่เปิดใช้ · เปิดทีหลังด้วย ADMIN_AUTH_ENFORCED=true"
     />
   );
 }
