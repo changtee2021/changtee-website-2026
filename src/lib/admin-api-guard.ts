@@ -7,8 +7,9 @@ import {
 
 function allowOpenAdminApi(): boolean {
   if (isAdminAuthEnforced()) return false;
-  if (process.env.ALLOW_OPEN_ADMIN_API === "false") return false;
-  return true;
+  // Never leave admin APIs open on Vercel / production.
+  if (process.env.VERCEL || process.env.NODE_ENV === "production") return false;
+  return process.env.ALLOW_OPEN_ADMIN_API !== "false";
 }
 
 export async function assertAdminApiAccess(

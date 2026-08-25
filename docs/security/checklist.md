@@ -4,7 +4,7 @@
 - Guard every admin API with `assertAdminApiAccess` when login is on. Login is parked (`ADMIN_AUTH_ENFORCED` unset) until the team turns it on.
 - Use the public `/api/leads` endpoint only for validated lead intake. It rate-limits requests (Supabase-backed when configured), requires Turnstile in production, and accepts only JPEG, PNG, or WebP uploads up to 5 MB after magic-byte checks. Lead photos are stored privately (`leads/` prefix) and opened via signed URLs.
 - Keep `SUPABASE_SERVICE_ROLE_KEY` server-only. It bypasses RLS and must never appear in browser code or `NEXT_PUBLIC_*` variables.
-- Admin login stays off until `ADMIN_AUTH_ENFORCED=true`. Other controls (Turnstile, private uploads, CMS service-role writes) stay on.
+- Production requires `ADMIN_AUTH_ENFORCED=true`. Other controls (Turnstile, private uploads, CMS service-role writes) stay on.
 - CMS writes go through the service role. `changtee_upsert_site_setting` must not be executable by `anon`.
 - Lead photos, CVs, and factory-visit files go in the private `changtee-private` bucket and are opened with signed URLs only.
 - Do not grant anonymous direct inserts for leads. The server API owns validation and persistence.

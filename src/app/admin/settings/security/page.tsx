@@ -15,7 +15,7 @@ export default async function Page() {
     <SettingsSoonBoard
       basePath={basePath}
       title="ความปลอดภัย"
-      description="ล็อกอินแอดมินยังไม่เปิดใช้ · เปิดทีหลังด้วย ADMIN_AUTH_ENFORCED=true"
+      description="ล็อกอินแอดมินเปิดอยู่บน production · เข้าที่ /admin/login ด้วยรหัสพนักงาน"
     />
   );
 }

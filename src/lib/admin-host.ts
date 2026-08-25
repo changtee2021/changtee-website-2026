@@ -4,10 +4,17 @@ export const PRODUCTION_SITE_HOST = "changtee-curtain.com";
 export const PRODUCTION_ADMIN_HOST = "admin.changtee-curtain.com";
 
 export function getSiteUrl(): string {
-  return (process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000").replace(
-    /\/$/,
-    "",
-  );
+  const fromEnv = process.env.NEXT_PUBLIC_SITE_URL?.trim().replace(/\/$/, "");
+  if (fromEnv) return fromEnv;
+  const prodHost = process.env.VERCEL_PROJECT_PRODUCTION_URL?.trim();
+  if (prodHost) {
+    return `https://${prodHost.replace(/^https?:\/\//, "").replace(/\/$/, "")}`;
+  }
+  const previewHost = process.env.VERCEL_URL?.trim();
+  if (previewHost) {
+    return `https://${previewHost.replace(/^https?:\/\//, "").replace(/\/$/, "")}`;
+  }
+  return "http://localhost:3000";
 }
 
 /** Explicit admin origin; null = path mode (`/admin` on the same host). */
@@ -37,16 +44,12 @@ export function isAdminHostname(hostHeader: string): boolean {
   return host === PRODUCTION_ADMIN_HOST || host === "admin.localhost";
 }
 
-/** Where to send `/admin` traffic from the public site (subdomain mode). */
-export function resolveAdminRedirectBase(hostHeader: string): string | null {
-  const configured = getAdminUrl();
-  if (configured) return configured;
-
-  const host = normalizeHost(hostHeader);
-  if (host === PRODUCTION_SITE_HOST || host === `www.${PRODUCTION_SITE_HOST}`) {
-    return `https://${PRODUCTION_ADMIN_HOST}`;
-  }
-  return null;
+/**
+ * Redirect `/admin` to a separate host only when NEXT_PUBLIC_ADMIN_URL is set.
+ * Production stays on `/admin` until that env is configured.
+ */
+export function resolveAdminRedirectBase(_hostHeader: string): string | null {
+  return getAdminUrl();
 }
 
 export function stripAdminPrefix(pathname: string): string {

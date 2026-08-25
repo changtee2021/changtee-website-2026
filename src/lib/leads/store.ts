@@ -118,11 +118,16 @@ export async function listLeads(): Promise<QuoteLead[]> {
       .select("*")
       .order("created_at", { ascending: false });
 
-    if (!error && data) {
+    if (error) {
+      console.error("listLeads supabase", error.message);
+    } else if (data) {
       return data.map(mapDbLead);
     }
-  } catch {
-    // Use the local store only when explicitly permitted.
+  } catch (err) {
+    console.error(
+      "listLeads",
+      err instanceof Error ? err.message : "unknown error",
+    );
   }
 
   if (!allowLocalLeadFallback()) persistenceUnavailable();
