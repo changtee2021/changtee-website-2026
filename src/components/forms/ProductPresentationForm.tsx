@@ -1,8 +1,18 @@
 "use client";
 
-import { useCallback, useMemo, useRef, useState, type ReactNode } from "react";
-import { Check, X } from "lucide-react";
+import { useCallback, useMemo, useRef, useState, type FormEvent, type ReactNode } from "react";
+import {
+  Building2,
+  Check,
+  Clock,
+  Files,
+  Presentation,
+  UserRound,
+  X,
+  type LucideIcon,
+} from "lucide-react";
 import { PdpaConsentField } from "@/components/forms/PdpaConsentField";
+import { VisitDocumentsField } from "@/components/forms/VisitDocumentsField";
 import { MarketingConsentField } from "@/components/forms/MarketingConsentField";
 import {
   isTurnstileEnabled,
@@ -38,8 +48,7 @@ export function ProductPresentationForm() {
   const [session, setSession] = useState<(typeof VISIT_SESSIONS)[number]>("morning");
   const [venue, setVenue] = useState<PresentationVenueId>("company");
   const [products, setProducts] = useState<string[]>([]);
-  const [companyProfileName, setCompanyProfileName] = useState<string | null>(null);
-  const [businessCardName, setBusinessCardName] = useState<string | null>(null);
+  const [documentNames, setDocumentNames] = useState<string[]>([]);
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
   const onTurnstile = useCallback((token: string | null) => {
     setTurnstileToken(token);
@@ -91,8 +100,7 @@ export function ProductPresentationForm() {
       setSession("morning");
       setVenue("company");
       setProducts([]);
-      setCompanyProfileName(null);
-      setBusinessCardName(null);
+      setDocumentNames([]);
       setTurnstileToken(null);
       setSuccessOpen(true);
     } catch (err) {
@@ -102,9 +110,14 @@ export function ProductPresentationForm() {
     }
   }
 
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    await onSubmit(new FormData(event.currentTarget));
+  }
+
   return (
     <>
-      <form ref={formRef} action={onSubmit} className="space-y-5">
+      <form ref={formRef} onSubmit={handleSubmit} className="space-y-5">
         <div className="rounded-xl border border-navy/15 bg-paper px-4 py-3 text-sm leading-relaxed text-navy">
           ฟอร์มนี้รับเฉพาะนิติบุคคลและองค์กร หากเป็นบ้านพักอาศัยหรือคอนโดส่วนตัว
           กรุณาใช้หน้า{" "}
@@ -114,7 +127,7 @@ export function ProductPresentationForm() {
         </div>
 
         <div className="divide-y divide-line">
-        <Section title="ข้อมูลนิติบุคคล">
+        <Section title="ข้อมูลนิติบุคคล" icon={Building2}>
           <div className="grid gap-4 sm:grid-cols-2">
             <Field
               label="ชื่อบริษัทตามหนังสือรับรอง"
@@ -156,12 +169,12 @@ export function ProductPresentationForm() {
               rows={2}
               required
               placeholder="บ้านเลขที่ ถนน แขวง/ตำบล เขต/อำเภอ จังหวัด"
-              className="w-full rounded-xl border border-line bg-white px-3 py-2.5 text-sm outline-none focus:border-navy"
+              className="w-full rounded-xl border border-line bg-field px-3 py-2.5 text-sm outline-none focus:border-navy"
             />
           </label>
         </Section>
 
-        <Section title="ผู้ติดต่อจากบริษัท">
+        <Section title="ผู้ติดต่อจากบริษัท" icon={UserRound}>
           <div className="grid gap-4 sm:grid-cols-2">
             <Field label="ชื่อ-นามสกุล" name="fullName" autoComplete="name" required />
             <Field
@@ -182,7 +195,7 @@ export function ProductPresentationForm() {
           </div>
         </Section>
 
-        <Section title="นัดนำเสนอ">
+        <Section title="นัดนำเสนอ" icon={Presentation}>
           <div>
             <span className="mb-2 flex gap-1 text-sm font-medium text-ink">
               สถานที่นำเสนอ
@@ -227,13 +240,14 @@ export function ProductPresentationForm() {
                 rows={2}
                 required
                 placeholder="ถ้าต่างจากสำนักงาน ให้ระบุอาคาร / ชั้น / จุดนัดพบ"
-                className="w-full rounded-xl border border-line bg-white px-3 py-2.5 text-sm outline-none focus:border-navy"
+                className="w-full rounded-xl border border-line bg-field px-3 py-2.5 text-sm outline-none focus:border-navy"
               />
             </label>
           ) : null}
 
           <div>
-            <span className="mb-2 flex gap-1 text-sm font-medium text-ink">
+            <span className="mb-2 flex items-center gap-1.5 text-sm font-medium text-ink">
+              <Clock className="size-3.5 shrink-0 text-brand-red" aria-hidden />
               เลือกรอบเวลา
               <span className="text-brand-red">*</span>
             </span>
@@ -281,7 +295,7 @@ export function ProductPresentationForm() {
                 type="date"
                 min={minDate}
                 required
-                className="w-full rounded-xl border border-line bg-white px-3 py-2.5 text-sm outline-none focus:border-navy"
+                className="w-full rounded-xl border border-line bg-field px-3 py-2.5 text-sm outline-none focus:border-navy"
               />
             </label>
             <label className="block">
@@ -296,7 +310,7 @@ export function ProductPresentationForm() {
                 max={40}
                 defaultValue={2}
                 required
-                className="w-full rounded-xl border border-line bg-white px-3 py-2.5 text-sm outline-none focus:border-navy"
+                className="w-full rounded-xl border border-line bg-field px-3 py-2.5 text-sm outline-none focus:border-navy"
               />
             </label>
           </div>
@@ -344,23 +358,8 @@ export function ProductPresentationForm() {
           </div>
         </Section>
 
-        <Section title="เอกสารและหมายเหตุ">
-          <div className="grid gap-4 sm:grid-cols-2">
-            <FileField
-              label="Company Profile"
-              name="companyProfile"
-              fileName={companyProfileName}
-              onFileName={setCompanyProfileName}
-              required
-            />
-            <FileField
-              label="นามบัตร"
-              name="businessCard"
-              fileName={businessCardName}
-              onFileName={setBusinessCardName}
-              required
-            />
-          </div>
+        <Section title="เอกสารและหมายเหตุ" icon={Files}>
+          <VisitDocumentsField fileNames={documentNames} onFileNames={setDocumentNames} />
           <label className="block">
             <span className="mb-1 block text-sm font-medium text-ink">
               หมายเหตุเพิ่มเติม
@@ -370,7 +369,7 @@ export function ProductPresentationForm() {
               name="note"
               rows={3}
               placeholder="เช่น ห้องประชุมชั้น 12, ต้องมีใบเข้าอาคาร, จอดรถอาคาร B"
-              className="w-full rounded-xl border border-line bg-white px-3 py-2 text-sm outline-none focus:border-navy"
+              className="w-full rounded-xl border border-line bg-field px-3 py-2 text-sm outline-none focus:border-navy"
             />
           </label>
         </Section>
@@ -447,14 +446,19 @@ export function ProductPresentationForm() {
 
 function Section({
   title,
+  icon: Icon,
   children,
 }: {
   title: string;
+  icon: LucideIcon;
   children: ReactNode;
 }) {
   return (
     <section className="space-y-4 py-6 first:pt-0 last:pb-0">
-      <h3 className="text-sm font-semibold text-navy">{title}</h3>
+      <h3 className="flex items-center gap-1.5 text-sm font-semibold text-navy">
+        <Icon className="size-3.5 shrink-0 text-brand-red" aria-hidden />
+        {title}
+      </h3>
       {children}
     </section>
   );
@@ -490,7 +494,7 @@ function Field({
         autoComplete={autoComplete}
         placeholder={placeholder}
         inputMode={inputMode ?? (type === "tel" ? "tel" : undefined)}
-        className="w-full rounded-xl border border-line bg-white px-3 py-2.5 text-sm outline-none focus:border-navy"
+                className="w-full rounded-xl border border-line bg-field px-3 py-2.5 text-sm outline-none focus:border-navy"
       />
     </label>
   );
@@ -519,7 +523,7 @@ function SelectField({
         name={name}
         defaultValue=""
         required={required}
-        className="w-full rounded-xl border border-line bg-white px-3 py-2.5 text-sm outline-none focus:border-navy"
+                className="w-full rounded-xl border border-line bg-field px-3 py-2.5 text-sm outline-none focus:border-navy"
       >
         <option value="" disabled>
           {placeholder}
@@ -534,36 +538,3 @@ function SelectField({
   );
 }
 
-function FileField({
-  label,
-  name,
-  fileName,
-  onFileName,
-  required,
-}: {
-  label: string;
-  name: string;
-  fileName: string | null;
-  onFileName: (name: string | null) => void;
-  required?: boolean;
-}) {
-  return (
-    <label className="block">
-      <span className="mb-1 flex gap-1 text-sm font-medium text-ink">
-        {label}
-        {required ? <span className="text-brand-red">*</span> : null}
-      </span>
-      <input
-        name={name}
-        type="file"
-        required={required}
-        accept="application/pdf,image/jpeg,image/png"
-        onChange={(e) => onFileName(e.target.files?.[0]?.name ?? null)}
-        className="block w-full cursor-pointer rounded-xl border border-line bg-white px-3 py-2.5 text-sm outline-none file:mr-3 file:rounded-full file:border-0 file:bg-paper file:px-3 file:py-1.5 file:text-xs file:font-medium file:text-navy focus:border-navy"
-      />
-      <span className="mt-1 block text-xs text-muted">
-        {fileName ? `ไฟล์ที่เลือก: ${fileName}` : "PDF / JPG / PNG ไม่เกิน 8MB"}
-      </span>
-    </label>
-  );
-}

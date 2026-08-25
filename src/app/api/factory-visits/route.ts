@@ -46,6 +46,16 @@ function parseVisitSites(raw: FormDataEntryValue[]): VisitSiteId[] {
   return VISIT_SITE_IDS.filter((id) => values.includes(id));
 }
 
+function collectVisitDocuments(form: FormData): File[] {
+  const combined = form
+    .getAll("visitDocuments")
+    .filter((value): value is File => value instanceof File && value.size > 0);
+  if (combined.length > 0) return combined.slice(0, 2);
+  return [form.get("companyProfile"), form.get("businessCard")].filter(
+    (value): value is File => value instanceof File && value.size > 0,
+  );
+}
+
 async function saveVisitFile(file: File | null, fallbackName: string) {
   if (!file || file.size === 0) return { name: null as string | null, ref: null as string | null };
   if (file.size > MAX_UPLOAD_BYTES) throw new Error("UPLOAD_TOO_LARGE");
@@ -106,22 +116,15 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: turnstile.error }, { status: 400 });
     }
 
-    const profileFile = form.get("companyProfile");
-    const cardFile = form.get("businessCard");
-    const companyProfile = await saveVisitFile(
-      profileFile instanceof File && profileFile.size > 0 ? profileFile : null,
-      "company-profile",
-    );
-    const businessCard = await saveVisitFile(
-      cardFile instanceof File && cardFile.size > 0 ? cardFile : null,
-      "business-card",
-    );
+    const uploadFiles = collectVisitDocuments(form);
+    const companyProfile = await saveVisitFile(uploadFiles[0] ?? null, "company-profile");
+    const businessCard = await saveVisitFile(uploadFiles[1] ?? null, "business-card");
 
     if (!companyProfile.name) {
-      return NextResponse.json({ error: "กรุณาแนบ Company Profile" }, { status: 400 });
-    }
-    if (!businessCard.name) {
-      return NextResponse.json({ error: "กรุณาแนบนามบัตร" }, { status: 400 });
+      return NextResponse.json(
+        { error: "กรุณาแนบ Company Profile หรือนามบัตร" },
+        { status: 400 },
+      );
     }
 
     const isPresentation = String(form.get("bookingKind") || "") === "product-presentation";

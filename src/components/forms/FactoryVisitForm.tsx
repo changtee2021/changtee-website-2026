@@ -1,8 +1,9 @@
 "use client";
 
-import { useCallback, useMemo, useRef, useState, type ReactNode } from "react";
-import { Check, MapPin, X } from "lucide-react";
+import { useCallback, useMemo, useRef, useState, type FormEvent, type ReactNode } from "react";
+import { Check, Files, MapPin, UserRound, X, type LucideIcon } from "lucide-react";
 import { PdpaConsentField } from "@/components/forms/PdpaConsentField";
+import { VisitDocumentsField } from "@/components/forms/VisitDocumentsField";
 import { MarketingConsentField } from "@/components/forms/MarketingConsentField";
 import {
   isTurnstileEnabled,
@@ -39,8 +40,7 @@ export function FactoryVisitForm() {
   const [successOpen, setSuccessOpen] = useState(false);
   const [session, setSession] = useState<(typeof VISIT_SESSIONS)[number]>("morning");
   const [visitSites, setVisitSites] = useState<VisitSiteId[]>([]);
-  const [companyProfileName, setCompanyProfileName] = useState<string | null>(null);
-  const [businessCardName, setBusinessCardName] = useState<string | null>(null);
+  const [documentNames, setDocumentNames] = useState<string[]>([]);
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
   const onTurnstile = useCallback((token: string | null) => {
     setTurnstileToken(token);
@@ -78,8 +78,7 @@ export function FactoryVisitForm() {
       formRef.current?.reset();
       setSession("morning");
       setVisitSites([]);
-      setCompanyProfileName(null);
-      setBusinessCardName(null);
+      setDocumentNames([]);
       setTurnstileToken(null);
       setSuccessOpen(true);
     } catch (err) {
@@ -89,11 +88,16 @@ export function FactoryVisitForm() {
     }
   }
 
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    await onSubmit(new FormData(event.currentTarget));
+  }
+
   return (
     <>
-      <form ref={formRef} action={onSubmit} className="space-y-5">
+      <form ref={formRef} onSubmit={handleSubmit} className="space-y-5">
         <div className="divide-y divide-line">
-        <Section title="ข้อมูลผู้ติดต่อ">
+        <Section title="ข้อมูลผู้ติดต่อ" icon={UserRound}>
         <div className="grid gap-4 sm:grid-cols-2">
           <Field label="ชื่อ-นามสกุล" name="fullName" autoComplete="name" required />
           <Field
@@ -126,7 +130,7 @@ export function FactoryVisitForm() {
         <Field label="LINE ID" name="lineId" required />
         </Section>
 
-        <Section title="สถานที่และรอบเยี่ยมชม">
+        <Section title="สถานที่และรอบเยี่ยมชม" icon={MapPin}>
         <div>
           <span className="mb-2 flex gap-1 text-sm font-medium text-ink">
             ต้องการเยี่ยมชมสถานที่ไหน
@@ -239,7 +243,7 @@ export function FactoryVisitForm() {
               min={minDate}
               required
               defaultValue=""
-              className="w-full rounded-xl border border-line bg-white px-3 py-2.5 text-sm outline-none focus:border-navy"
+              className="w-full rounded-xl border border-line bg-field px-3 py-2.5 text-sm outline-none focus:border-navy"
             />
           </label>
           <label className="block">
@@ -254,7 +258,7 @@ export function FactoryVisitForm() {
               max={100}
               defaultValue={1}
               required
-              className="w-full rounded-xl border border-line bg-white px-3 py-2.5 text-sm outline-none focus:border-navy"
+              className="w-full rounded-xl border border-line bg-field px-3 py-2.5 text-sm outline-none focus:border-navy"
             />
           </label>
         </div>
@@ -268,7 +272,7 @@ export function FactoryVisitForm() {
             name="purpose"
             defaultValue=""
             required
-            className="w-full rounded-xl border border-line bg-white px-3 py-2.5 text-sm outline-none focus:border-navy"
+            className="w-full rounded-xl border border-line bg-field px-3 py-2.5 text-sm outline-none focus:border-navy"
           >
             <option value="" disabled>
               เลือกวัตถุประสงค์
@@ -289,23 +293,8 @@ export function FactoryVisitForm() {
         />
         </Section>
 
-        <Section title="เอกสารและหมายเหตุ">
-        <div className="grid gap-4 sm:grid-cols-2">
-          <FileField
-            label="Company Profile"
-            name="companyProfile"
-            fileName={companyProfileName}
-            onFileName={setCompanyProfileName}
-            required
-          />
-          <FileField
-            label="นามบัตร"
-            name="businessCard"
-            fileName={businessCardName}
-            onFileName={setBusinessCardName}
-            required
-          />
-        </div>
+        <Section title="เอกสารและหมายเหตุ" icon={Files}>
+        <VisitDocumentsField fileNames={documentNames} onFileNames={setDocumentNames} />
 
         <label className="block">
           <span className="mb-1 block text-sm font-medium text-ink">
@@ -316,7 +305,7 @@ export function FactoryVisitForm() {
             name="note"
             rows={3}
             placeholder="เช่น ต้องการล่ามภาษา, มีผู้สูงอายุ/ผู้พิการร่วมเยี่ยมชม ฯลฯ"
-            className="w-full rounded-xl border border-line bg-white px-3 py-2 text-sm outline-none focus:border-navy"
+            className="w-full rounded-xl border border-line bg-field px-3 py-2 text-sm outline-none focus:border-navy"
           />
         </label>
         </Section>
@@ -409,14 +398,19 @@ export function FactoryVisitForm() {
 
 function Section({
   title,
+  icon: Icon,
   children,
 }: {
   title: string;
+  icon: LucideIcon;
   children: ReactNode;
 }) {
   return (
     <section className="space-y-4 py-6 first:pt-0 last:pb-0">
-      <h3 className="text-sm font-semibold text-navy">{title}</h3>
+      <h3 className="flex items-center gap-1.5 text-sm font-semibold text-navy">
+        <Icon className="size-3.5 shrink-0 text-brand-red" aria-hidden />
+        {title}
+      </h3>
       {children}
     </section>
   );
@@ -452,42 +446,9 @@ function Field({
         autoComplete={autoComplete}
         placeholder={placeholder}
         inputMode={inputMode ?? (type === "tel" ? "tel" : undefined)}
-        className="w-full rounded-xl border border-line bg-white px-3 py-2.5 text-sm outline-none focus:border-navy"
+        className="w-full rounded-xl border border-line bg-field px-3 py-2.5 text-sm outline-none focus:border-navy"
       />
     </label>
   );
 }
 
-function FileField({
-  label,
-  name,
-  fileName,
-  onFileName,
-  required,
-}: {
-  label: string;
-  name: string;
-  fileName: string | null;
-  onFileName: (name: string | null) => void;
-  required?: boolean;
-}) {
-  return (
-    <label className="block">
-      <span className="mb-1 flex gap-1 text-sm font-medium text-ink">
-        {label}
-        {required ? <span className="text-brand-red">*</span> : null}
-      </span>
-      <input
-        name={name}
-        type="file"
-        required={required}
-        accept="application/pdf,image/jpeg,image/png"
-        onChange={(e) => onFileName(e.target.files?.[0]?.name ?? null)}
-        className="block w-full cursor-pointer rounded-xl border border-line bg-white px-3 py-2.5 text-sm outline-none file:mr-3 file:rounded-full file:border-0 file:bg-paper file:px-3 file:py-1.5 file:text-xs file:font-medium file:text-navy focus:border-navy"
-      />
-      <span className="mt-1 block text-xs text-muted">
-        {fileName ? `ไฟล์ที่เลือก: ${fileName}` : "PDF / JPG / PNG ไม่เกิน 8MB"}
-      </span>
-    </label>
-  );
-}

@@ -1,9 +1,22 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState, type HTMLAttributes } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent, type HTMLAttributes } from "react";
 import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Check, Eye, ImageIcon, MapPin, Trash2, X } from "lucide-react";
+import {
+  Building2,
+  Check,
+  Eye,
+  ImageIcon,
+  Images,
+  MapPin,
+  Package,
+  StickyNote,
+  Trash2,
+  UserRound,
+  X,
+  type LucideIcon,
+} from "lucide-react";
 import { PdpaConsentField } from "@/components/forms/PdpaConsentField";
 import { MarketingConsentField } from "@/components/forms/MarketingConsentField";
 import {
@@ -44,6 +57,8 @@ type PreviewState = {
   note: string;
   sameBilling: boolean;
   sameLineAsPhone: boolean;
+  pdpaAccepted: boolean;
+  marketingOptIn: boolean;
 };
 
 const emptyPreview: PreviewState = {
@@ -65,6 +80,8 @@ const emptyPreview: PreviewState = {
   note: "",
   sameBilling: true,
   sameLineAsPhone: false,
+  pdpaAccepted: false,
+  marketingOptIn: false,
 };
 
 function normalizeMapsUrl(value: string) {
@@ -238,10 +255,20 @@ export function QuoteForm() {
     setSheetOpen(true);
   }
 
+  function openPreviewIfValid() {
+    const form = formRef.current;
+    if (!form) return;
+    if (!form.checkValidity()) {
+      form.reportValidity();
+      return;
+    }
+    openPreview();
+  }
+
   async function onSubmit(formData: FormData) {
     // Enter key / ส่งแบบฟอร์ม → open preview first unless user confirmed
     if (!allowSubmitRef.current) {
-      openPreview();
+      openPreviewIfValid();
       return;
     }
     allowSubmitRef.current = false;
@@ -268,6 +295,8 @@ export function QuoteForm() {
     if (preview.sameBilling) {
       formData.set("billingAddress", "เดียวกับที่อยู่");
     }
+    formData.set("pdpaAccepted", preview.pdpaAccepted ? "on" : "");
+    formData.set("marketingOptIn", preview.marketingOptIn ? "on" : "");
 
     const lineId = preview.sameLineAsPhone
       ? preview.phone.trim()
@@ -311,6 +340,11 @@ export function QuoteForm() {
     form.requestSubmit();
   }
 
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    await onSubmit(new FormData(event.currentTarget));
+  }
+
   const summary = (
     <QuoteSummary
       preview={preview}
@@ -324,11 +358,12 @@ export function QuoteForm() {
 
   return (
     <>
-      <form ref={formRef} action={onSubmit} className="space-y-6">
+      <form ref={formRef} onSubmit={handleSubmit} className="space-y-6">
         <input type="hidden" name="source" value="quote" />
 
-        <div className="grid min-w-0 gap-4 md:grid-cols-2 xl:grid-cols-3">
-            <p className="text-sm font-semibold text-navy md:col-span-2 xl:col-span-3">
+        <div className="grid min-w-0 gap-4 md:grid-cols-2 xl:grid-cols-4">
+            <p className="flex items-center gap-1.5 text-sm font-semibold text-navy md:col-span-2 xl:col-span-4">
+              <HeadingIcon icon={UserRound} />
               ข้อมูลลูกค้า / ผู้ติดต่อ
             </p>
 
@@ -352,7 +387,16 @@ export function QuoteForm() {
               value={preview.phone}
               onChange={(v) => update("phone", v)}
             />
-            <div className="space-y-2">
+            <Select
+              label="ประเภทผู้ติดต่อ"
+              name="contactType"
+              required
+              options={CONTACT_TYPES}
+              value={preview.contactType}
+              onChange={(v) => update("contactType", v)}
+            />
+
+            <div className="space-y-2 xl:col-span-2">
               <Field
                 label="LINE ID"
                 name="lineId"
@@ -365,62 +409,45 @@ export function QuoteForm() {
                 value={preview.sameLineAsPhone ? "" : preview.lineId}
                 onChange={(v) => update("lineId", v)}
               />
-              <label className="flex items-start gap-2 text-sm text-muted">
+              <label className="flex min-h-11 items-start gap-2 text-sm text-muted">
                 <input
                   type="checkbox"
-                  className="mt-0.5"
+                  className="mt-0.5 size-4"
                   checked={preview.sameLineAsPhone}
                   onChange={(e) => update("sameLineAsPhone", e.target.checked)}
                 />
                 <span>ใช้แอดไลน์เดียวกับเบอร์โทร</span>
               </label>
             </div>
-
-            <Select
-              label="ประเภทผู้ติดต่อ"
-              name="contactType"
+            <Field
+              label="E-mail"
+              name="email"
+              type="email"
               required
-              options={CONTACT_TYPES}
-              value={preview.contactType}
-              onChange={(v) => update("contactType", v)}
+              placeholder="สำหรับส่งใบเสนอราคา"
+              className="xl:col-span-2"
+              value={preview.email}
+              onChange={(v) => update("email", v)}
             />
+
             <Field
               label="ชื่อธุรกิจ"
               name="businessName"
+              icon={Building2}
               placeholder="ตัวอย่าง : บริษัท ช่างตี๋ จำกัด เป็นต้น"
-              className="md:col-span-2 xl:col-span-2"
+              className="md:col-span-2 xl:col-span-4"
               value={preview.businessName}
               onChange={(v) => update("businessName", v)}
             />
 
-            <div className="space-y-2 md:col-span-2 xl:col-span-2">
-              <TextArea
-                label="ที่อยู่ สำหรับ ส่งของ หรือ ติดตั้ง"
-                name="installAddress"
-                required
-                value={preview.installAddress}
-                onChange={(v) => update("installAddress", v)}
-              />
-              <label className="block text-sm">
-                <span className="mb-1 flex items-center gap-1.5 font-medium text-ink">
-                  <MapPin className="size-3.5 text-brand-red" />
-                  ลิงก์ Google Maps
-                  <span className="font-normal text-muted">(ถ้ามี)</span>
-                </span>
-                <input
-                  type="text"
-                  inputMode="url"
-                  autoComplete="off"
-                  placeholder="https://maps.app.goo.gl/... หรือวางลิงก์จาก Google Maps"
-                  value={preview.installMapUrl}
-                  onChange={(e) => update("installMapUrl", e.target.value)}
-                  className="w-full rounded-lg border border-line bg-field px-3 py-2 outline-none focus:border-navy"
-                />
-                <span className="mt-1 block text-xs text-muted">
-                  เปิด Google Maps → แชร์ → คัดลอกลิงก์ แล้ววางที่นี่
-                </span>
-              </label>
-            </div>
+            <TextArea
+              label="ที่อยู่ สำหรับ ส่งของ หรือ ติดตั้ง"
+              name="installAddress"
+              required
+              className="xl:col-span-3"
+              value={preview.installAddress}
+              onChange={(v) => update("installAddress", v)}
+            />
             <Field
               label="เลขผู้เสียภาษี"
               name="taxId"
@@ -437,16 +464,27 @@ export function QuoteForm() {
               onChange={(v) => update("taxId", v)}
             />
 
-            <Field
-              label="E-mail"
-              name="email"
-              type="email"
-              required
-              placeholder="สำหรับส่งใบเสนอราคา"
-              value={preview.email}
-              onChange={(v) => update("email", v)}
-            />
-            <div className="space-y-2 md:col-span-2">
+            <label className="block text-sm md:col-span-2 xl:col-span-4">
+              <span className="mb-1 flex items-center gap-1.5 font-medium text-ink">
+                <MapPin className="size-3.5 text-brand-red" />
+                ลิงก์ Google Maps
+                <span className="font-normal text-muted">(ถ้ามี)</span>
+              </span>
+              <input
+                type="text"
+                inputMode="url"
+                autoComplete="off"
+                placeholder="https://maps.app.goo.gl/... หรือวางลิงก์จาก Google Maps"
+                value={preview.installMapUrl}
+                onChange={(e) => update("installMapUrl", e.target.value)}
+                className="w-full rounded-lg border border-line bg-field px-3 py-2 outline-none focus:border-navy"
+              />
+              <span className="mt-1 block text-xs text-muted">
+                เปิด Google Maps → แชร์ → คัดลอกลิงก์ แล้ววางที่นี่
+              </span>
+            </label>
+
+            <div className="space-y-2 md:col-span-2 xl:col-span-4">
               <TextArea
                 label="ที่อยู่ สำหรับ ออกใบเสนอราคา"
                 name="billingAddress"
@@ -455,16 +493,19 @@ export function QuoteForm() {
                 value={preview.sameBilling ? "" : preview.billingAddress}
                 onChange={(v) => update("billingAddress", v)}
               />
-              <label className="flex items-center gap-2 text-sm text-muted">
+              <label className="flex min-h-11 items-center gap-2 text-sm text-muted">
                 <input
                   type="checkbox"
+                  className="size-4"
                   checked={preview.sameBilling}
                   onChange={(e) => update("sameBilling", e.target.checked)}
                 />
                 ใช้ที่อยู่เดียวกับที่อยู่ติดตั้ง/ส่งของ
               </label>
             </div>
+        </div>
 
+        <div className="grid min-w-0 gap-4 md:grid-cols-2 xl:grid-cols-3">
             <div className="md:col-span-2 xl:col-span-3">
               <div className="my-1 flex items-center gap-3">
                 <div className="h-px flex-1 bg-line" />
@@ -499,6 +540,7 @@ export function QuoteForm() {
                 <Select
                   label="ประเภทสินค้า"
                   name="productType"
+                  icon={Package}
                   required
                   options={PRODUCT_TYPES}
                   value={preview.productType}
@@ -532,7 +574,8 @@ export function QuoteForm() {
 
             <div className="space-y-2 md:col-span-2 xl:col-span-1">
               <div className="flex flex-wrap items-center justify-between gap-2">
-                <span className="text-sm font-medium text-ink">
+                <span className="flex items-center gap-1.5 text-sm font-medium text-ink">
+                  <HeadingIcon icon={Images} />
                   แนบภาพหน้างาน
                   {siteImages.length > 0 ? (
                     <span className="ml-1 font-normal text-muted">
@@ -660,6 +703,7 @@ export function QuoteForm() {
             <TextArea
               label="หมายเหตุ"
               name="note"
+              icon={StickyNote}
               className="md:col-span-2 xl:col-span-3"
               rows={3}
               value={preview.note}
@@ -667,8 +711,14 @@ export function QuoteForm() {
             />
 
             <div className="space-y-3 md:col-span-2 xl:col-span-3">
-              <PdpaConsentField />
-              <MarketingConsentField />
+              <PdpaConsentField
+                checked={preview.pdpaAccepted}
+                onChange={(v) => update("pdpaAccepted", v)}
+              />
+              <MarketingConsentField
+                checked={preview.marketingOptIn}
+                onChange={(v) => update("marketingOptIn", v)}
+              />
               <TurnstileField onToken={onTurnstile} />
             </div>
 
@@ -688,8 +738,9 @@ export function QuoteForm() {
                 ดูพรีวิว
               </button>
               <button
-                type="submit"
+                type="button"
                 disabled={pending}
+                onClick={openPreviewIfValid}
                 className="inline-flex w-full items-center justify-center gap-2 rounded-md bg-brand-red px-8 py-3 text-sm font-semibold text-white hover:bg-brand-red-soft disabled:opacity-60 md:w-auto"
               >
                 <Check className="h-4 w-4" />
@@ -947,6 +998,10 @@ const FIELD_HINTS: Record<
   email: { autoComplete: "email" },
 };
 
+function HeadingIcon({ icon: Icon }: { icon: LucideIcon }) {
+  return <Icon className="size-3.5 shrink-0 text-brand-red" aria-hidden />;
+}
+
 function Field({
   label,
   name,
@@ -955,6 +1010,7 @@ function Field({
   placeholder,
   className = "",
   disabled,
+  icon,
   value,
   onChange,
 }: {
@@ -965,6 +1021,7 @@ function Field({
   placeholder?: string;
   className?: string;
   disabled?: boolean;
+  icon?: LucideIcon;
   value: string;
   onChange: (value: string) => void;
 }) {
@@ -972,7 +1029,8 @@ function Field({
   const inputType = name === "phone" ? "tel" : type;
   return (
     <label className={`block text-sm ${className}`}>
-      <span className="mb-1 flex gap-1 font-medium text-ink">
+      <span className="mb-1 flex items-center gap-1.5 font-medium text-ink">
+        {icon ? <HeadingIcon icon={icon} /> : null}
         {label}
         {required ? <span className="text-brand-red">*</span> : null}
       </span>
@@ -1000,6 +1058,7 @@ function TextArea({
   className = "",
   rows = 3,
   disabled,
+  icon,
   value,
   onChange,
 }: {
@@ -1010,12 +1069,14 @@ function TextArea({
   className?: string;
   rows?: number;
   disabled?: boolean;
+  icon?: LucideIcon;
   value: string;
   onChange: (value: string) => void;
 }) {
   return (
     <label className={`block text-sm ${className}`}>
-      <span className="mb-1 flex gap-1 font-medium text-ink">
+      <span className="mb-1 flex items-center gap-1.5 font-medium text-ink">
+        {icon ? <HeadingIcon icon={icon} /> : null}
         {label}
         {required ? <span className="text-brand-red">*</span> : null}
       </span>
@@ -1038,6 +1099,7 @@ function Select({
   name,
   required,
   options,
+  icon,
   value,
   onChange,
 }: {
@@ -1045,12 +1107,14 @@ function Select({
   name: string;
   required?: boolean;
   options: readonly string[];
+  icon?: LucideIcon;
   value: string;
   onChange: (value: string) => void;
 }) {
   return (
     <label className="block text-sm">
-      <span className="mb-1 flex gap-1 font-medium text-ink">
+      <span className="mb-1 flex items-center gap-1.5 font-medium text-ink">
+        {icon ? <HeadingIcon icon={icon} /> : null}
         {label}
         {required ? <span className="text-brand-red">*</span> : null}
       </span>
