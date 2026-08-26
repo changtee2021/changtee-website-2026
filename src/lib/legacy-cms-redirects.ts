@@ -58,6 +58,13 @@ const LEGACY_RULES: LegacyRule[] = [
   },
   {
     match: (p) =>
+      p.includes("ม่านญี่ปุ่น") ||
+      /noren/i.test(p) ||
+      p.includes("ผ้าม่านญี่ปุ่น"),
+    destination: "/products/print-fabric/noren",
+  },
+  {
+    match: (p) =>
       p.includes("610dfefb2060c70012e264c2") ||
       p.includes("ม่านพับ") ||
       (/roman/i.test(p) && /blind/i.test(p)),
