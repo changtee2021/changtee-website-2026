@@ -183,6 +183,12 @@ const nextConfig: NextConfig = {
         destination: "https://changtee-curtain.com/:path*",
         permanent: true,
       },
+      {
+        source: "/:path*",
+        has: [{ type: "host", value: "changtee-website-2026.vercel.app" }],
+        destination: "https://changtee-curtain.com/:path*",
+        permanent: true,
+      },
     ];
   },
 };

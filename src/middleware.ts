@@ -5,6 +5,8 @@ import {
   isAdminHostname,
   isMarketingPath,
   isProductionMarketingHost,
+  isProductionVercelHost,
+  PRODUCTION_SITE_HOST,
   resolveAdminRedirectBase,
   stripAdminPrefix,
   toInternalAdminPath,
@@ -158,6 +160,16 @@ export async function middleware(request: NextRequest) {
     url.pathname = legacyDest;
     url.search = search;
     return NextResponse.redirect(url, 308);
+  }
+
+  // Old Vercel production URL (e.g. Google Ads final URL) → canonical domain
+  if (
+    isProductionVercelHost(host) &&
+    !pathname.startsWith("/api/") &&
+    !isAdminHostname(host)
+  ) {
+    const dest = new URL(`${pathname}${search}`, `https://${PRODUCTION_SITE_HOST}`);
+    return NextResponse.redirect(dest, 308);
   }
 
   const sessionToken = request.cookies.get(ADMIN_SESSION_COOKIE)?.value;

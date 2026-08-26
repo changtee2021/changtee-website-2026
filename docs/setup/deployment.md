@@ -20,6 +20,8 @@ Never set `ALLOW_OPEN_ADMIN_API=true` in production. Do not enable `ALLOW_LOCAL_
 
 Production site: `https://changtee-curtain.com`. Admin stays on the same host at `/admin` (do not set `NEXT_PUBLIC_ADMIN_URL` until you intentionally add `admin.changtee-curtain.com`). Set `NEXT_PUBLIC_SITE_URL=https://changtee-curtain.com`.
 
+The Vercel hostname `changtee-website-2026.vercel.app` **301-redirects** to `changtee-curtain.com` — do not use it in ads or GSC. See [Marketing URL handoff](../seo/MARKETING-URL-HANDOFF.md).
+
 Set `ADMIN_AUTH_ENFORCED=true` and `DEMO_ADMIN_PASSWORD` on production. Never set `ALLOW_OPEN_ADMIN_API=true` on Vercel.
 
 ## Files / ไฟล์ขนาดใหญ่

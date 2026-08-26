@@ -2,6 +2,8 @@
 
 export const PRODUCTION_SITE_HOST = "changtee-curtain.com";
 export const PRODUCTION_ADMIN_HOST = "admin.changtee-curtain.com";
+/** Vercel project production hostname — 301 to PRODUCTION_SITE_HOST (ads must not use this). */
+export const PRODUCTION_VERCEL_HOST = "changtee-website-2026.vercel.app";
 
 export function getSiteUrl(): string {
   const fromEnv = process.env.NEXT_PUBLIC_SITE_URL?.trim().replace(/\/$/, "");
@@ -40,6 +42,10 @@ export function normalizeHost(hostHeader: string): string {
 /** Public marketing site on production apex (not www, not preview). */
 export function isProductionMarketingHost(hostHeader: string): boolean {
   return normalizeHost(hostHeader) === PRODUCTION_SITE_HOST;
+}
+
+export function isProductionVercelHost(hostHeader: string): boolean {
+  return normalizeHost(hostHeader) === PRODUCTION_VERCEL_HOST;
 }
 
 export function isAdminHostname(hostHeader: string): boolean {

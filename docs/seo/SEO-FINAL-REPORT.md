@@ -19,23 +19,28 @@
 | Thai H1 on `/` | Verified in production HTML |
 | OG 1536×1024 | Present on home |
 | `SearchAction` in JSON-LD | Absent |
+| Vercel hostname → apex | `changtee-website-2026.vercel.app` **308 → changtee-curtain.com** (middleware + next.config) |
+| Analytics migration | **Applied** 26 Aug 2026 — `site_page_views` + `analytics_overview()` verified (~195 visitors / 7d) |
 
-**Pending migration (apply on site Supabase project `pfwygxzwlteqjnnwiwmb`, not shared ERP):**
+**Migrations (site Supabase `pfwygxzwlteqjnnwiwmb`, not shared ERP):**
 
-- `supabase/migrations/20260825100000_site_page_views.sql` (analytics dashboard)
+- ~~`20260825100000_site_page_views.sql`~~ **Done**
 - Prior launch migrations if not yet applied: `20260820153000_*`, `20260825040000_*`
+
+**Marketing / Ads:** see [`MARKETING-URL-HANDOFF.md`](MARKETING-URL-HANDOFF.md) — Final URL = `https://changtee-curtain.com/` only.
 
 ---
 
 ## Owner Actions (NEEDS USER INPUT)
 
 1. ~~Deploy to production~~ **Done** (26 Aug 2026)
-2. **Apply analytics migration** on the Supabase project wired in Vercel (`pfwygxzwlteqjnnwiwmb` per health JSON)
+2. ~~**Apply analytics migration**~~ **Done** (26 Aug 2026)
 3. **Google Search Console** — submit `https://changtee-curtain.com/sitemap.xml`, request removal of legacy URLs, monitor coverage weekly
 4. **Google Business Profile** — NAP matches site footer, add photos, collect real reviews (no fake ratings)
 5. **Bing Webmaster Tools** — verify site + sitemap
-6. Confirm **`NEXT_PUBLIC_SITE_URL=https://changtee-curtain.com`** on Vercel production (should already be set)
-7. Optional: GA4 / Meta Pixel IDs in Vercel integrations settings
+6. **iTop Plus / Google Ads** — Final URL + sitelinks → `https://changtee-curtain.com/...` only ([handoff doc](MARKETING-URL-HANDOFF.md))
+7. Confirm **`NEXT_PUBLIC_SITE_URL=https://changtee-curtain.com`** on Vercel production (should already be set)
+8. Optional: GA4 / Meta Pixel IDs in Vercel integrations settings
 
 ---
 
@@ -43,7 +48,7 @@
 
 The SEO program delivered **8 audit/competitive documents** under `docs/seo/` and implemented **all planned P0+P1 fixes** in `changtee-website`. On-site SEO readiness improved from **~68/100 to ~82/100** (estimated; no Search Console access).
 
-Production deploy completed 26 Aug 2026. Owner actions (GSC, GBP, Bing, analytics migration) remain for full index consolidation and local/AI visibility.
+Production deploy completed 26 Aug 2026. Owner actions (GSC, GBP, Bing, iTop Plus Final URL) remain for full index consolidation and local/AI visibility.
 
 ---
 
@@ -189,13 +194,15 @@ Production deploy completed 26 Aug 2026. Owner actions (GSC, GBP, Bing, analytic
 | `docs/seo/SEARCH-TREND-RADAR.md` | ✓ |
 | `docs/seo/COMPETITIVE-SEO-ROADMAP.md` | ✓ |
 | `docs/seo/SEO-FINAL-REPORT.md` | ✓ (this file) |
+| `docs/seo/MARKETING-URL-HANDOFF.md` | ✓ |
 | `docs/README.md` | ✓ linked SEO section |
 
 ---
 
 ## Owner checklist (copy to ops)
 
-- [ ] Run migration `20260825100000_site_page_views.sql` on production Supabase
+- [x] Run migration `20260825100000_site_page_views.sql` on production Supabase
+- [ ] iTop Plus: Final URL `https://changtee-curtain.com/` + sitelinks per [`MARKETING-URL-HANDOFF.md`](MARKETING-URL-HANDOFF.md)
 - [ ] GSC: add property `changtee-curtain.com`, submit sitemap, inspect legacy URL coverage
 - [ ] GSC: URL removal or wait for 301 + recrawl on `/หน้าแรก/*`, `/ผลงาน/*`, `/ผ้าม่านไฟฟ้า/*`
 - [ ] GBP: verify phone/address/hours vs `/contact`
