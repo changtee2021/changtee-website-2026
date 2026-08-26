@@ -6,6 +6,7 @@ import { useRef, type TouchEvent } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import { Images, MessageCircle, Phone } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { trackSiteClick } from "@/lib/analytics/collect";
 import { siteConfig } from "@/lib/site-config";
 import { IconRoller } from "@/components/icons/product-line-icons";
 
@@ -98,6 +99,7 @@ export function MobileDock() {
             target="_blank"
             rel="noreferrer"
             className={itemClass}
+            onClick={() => trackSiteClick("line")}
           >
             <MessageCircle
               className="size-5 text-[#06C755]"
@@ -113,6 +115,7 @@ export function MobileDock() {
           aria-label="โทรเลย"
           title="โทรเลย"
           className="pointer-events-auto inline-flex size-14 shrink-0 items-center justify-center rounded-full bg-brand-red text-white shadow-[0_8px_24px_rgba(200,16,46,0.38)] transition hover:bg-brand-red-soft active:scale-95"
+          onClick={() => trackSiteClick("phone")}
         >
           <Phone className="size-6" strokeWidth={2.2} aria-hidden />
         </a>

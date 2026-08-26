@@ -247,7 +247,7 @@ export const DEMO_SYSTEM_LOGS: DemoLogRow[] = [
     at: hoursAgo(18),
     actor: "auth",
     action: "info",
-    detail: "ADMIN_AUTH_ENFORCED=true · บังคับ login แล้ว",
+    detail: "ล็อกอินแอดมินปิดอยู่ — เข้าหลังบ้านได้เลย",
     level: "info",
   },
   {

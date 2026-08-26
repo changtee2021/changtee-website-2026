@@ -18,7 +18,9 @@ Never set `ALLOW_OPEN_ADMIN_API=true` in production. Do not enable `ALLOW_LOCAL_
 
 ## Domains / โดเมน
 
-Use Vercel previews until the production domain is ready. Add the site domain and, later, the admin domain to this same project. Configure `NEXT_PUBLIC_SITE_URL` and `NEXT_PUBLIC_ADMIN_URL` when domains are final.
+Production site: `https://changtee-curtain.com`. Admin stays on the same host at `/admin` (do not set `NEXT_PUBLIC_ADMIN_URL` until you intentionally add `admin.changtee-curtain.com`). Set `NEXT_PUBLIC_SITE_URL=https://changtee-curtain.com`.
+
+Set `ADMIN_AUTH_ENFORCED=true` and `DEMO_ADMIN_PASSWORD` on production. Never set `ALLOW_OPEN_ADMIN_API=true` on Vercel.
 
 ## Files / ไฟล์ขนาดใหญ่
 

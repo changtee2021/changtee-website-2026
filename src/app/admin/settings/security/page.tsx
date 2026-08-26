@@ -15,7 +15,7 @@ export default async function Page() {
     <SettingsSoonBoard
       basePath={basePath}
       title="ความปลอดภัย"
-      description="ล็อกอินแอดมินยังไม่เปิดใช้ · เปิดทีหลังด้วย ADMIN_AUTH_ENFORCED=true"
+      description="ตอนนี้เข้าหลังบ้านได้โดยไม่ต้องล็อกอิน"
     />
   );
 }

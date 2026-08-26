@@ -29,7 +29,7 @@ export function downloadAnalyticsExcel(input: ExportInput) {
       ["จากวันที่", input.from],
       ["ถึงวันที่", input.to],
       ["ส่งออกเมื่อ", exportedAt],
-      ["หมายเหตุ", "ข้อมูลตัวอย่าง (demo) — จะเปลี่ยนเป็นข้อมูลจริงหลังเชื่อม analytics"],
+      ["หมายเหตุ", "ข้อมูลจริงจากเว็บช่างตี๋"],
       [],
       ["ตัวชี้วัด", "ค่า", "เปลี่ยนแปลง", "หมายเหตุ"],
       ...input.bundle.kpis.map((k) => [k.label, k.value, k.delta, k.hint]),

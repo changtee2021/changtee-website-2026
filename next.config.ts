@@ -146,6 +146,37 @@ const nextConfig: NextConfig = {
         destination: "/",
         permanent: false,
       },
+      // Legacy CMS (Mongo-style slug paths) — evidence in brand SERP Aug 2026
+      {
+        source: "/หน้าแรก/60ff6a36e68a7c5a4ca8c54e",
+        destination: "/",
+        permanent: true,
+      },
+      {
+        source: "/หน้าแรก/:path*",
+        destination: "/",
+        permanent: true,
+      },
+      {
+        source: "/ผลงาน/610e26deafee180012845be9",
+        destination: "/portfolio",
+        permanent: true,
+      },
+      {
+        source: "/ผลงาน/:path*",
+        destination: "/portfolio",
+        permanent: true,
+      },
+      {
+        source: "/ผ้าม่านไฟฟ้า/68c0e9ae557b0b00135630b4",
+        destination: "/products/motorized/curtain",
+        permanent: true,
+      },
+      {
+        source: "/ผ้าม่านไฟฟ้า/:path*",
+        destination: "/products/motorized/curtain",
+        permanent: true,
+      },
       {
         source: "/:path*",
         has: [{ type: "host", value: "www.changtee-curtain.com" }],

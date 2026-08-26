@@ -30,8 +30,30 @@ const IMAGE_SNIFF: Record<string, (bytes: Uint8Array) => boolean> = {
     b[5] === 0x61,
 };
 
+function isIsoBmff(bytes: Uint8Array) {
+  return (
+    bytes.length >= 12 &&
+    bytes[4] === 0x66 &&
+    bytes[5] === 0x74 &&
+    bytes[6] === 0x79 &&
+    bytes[7] === 0x70
+  );
+}
+
+const VIDEO_SNIFF: Record<string, (bytes: Uint8Array) => boolean> = {
+  "video/mp4": isIsoBmff,
+  "video/quicktime": isIsoBmff,
+  "video/3gpp": isIsoBmff,
+  "video/webm": (b) =>
+    b.length >= 4 &&
+    b[0] === 0x1a &&
+    b[1] === 0x45 &&
+    b[2] === 0xdf &&
+    b[3] === 0xa3,
+};
+
 export function bytesMatchDeclaredType(bytes: Uint8Array, contentType: string) {
-  const check = IMAGE_SNIFF[contentType];
+  const check = IMAGE_SNIFF[contentType] ?? VIDEO_SNIFF[contentType];
   if (!check) return false;
   return check(bytes);
 }

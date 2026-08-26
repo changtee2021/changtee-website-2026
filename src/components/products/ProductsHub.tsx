@@ -16,8 +16,8 @@ export function ProductsHub() {
       <PageHero
         image="/images/generated/ct-hero-products.webp"
         imageAlt="ผนังโชว์รูมช่างตี๋ แสดงตัวอย่างม่านม้วน มู่ลี่ไม้ ม่านปรับแสง และผ้าม่าน"
-        eyebrow="Product & Service"
-        title="Chang Tee products & services"
+        eyebrow="Product & Service · Chang Tee"
+        title="สินค้าและบริการผ้าม่าน"
         description="แบ่งเป็น 7 กลุ่มบริการ ตามการใช้งานจริง — เลือกกลุ่มแล้วดูรุ่นย่อยได้ทันที"
         aside={<ProductHeroCovers items={HERO_COVERS} />}
         align="bottom"

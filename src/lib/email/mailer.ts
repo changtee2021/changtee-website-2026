@@ -7,6 +7,8 @@ import {
   fieldLinkRow,
   fieldRow,
   fieldSection,
+  fieldSectionPair,
+  fieldStackRow,
   isImageAttachment,
   wrapCustomerEmail,
   wrapNoticeEmail,
@@ -19,6 +21,7 @@ import {
   leadImageRefs,
   storagePathFromRef,
 } from "@/lib/security/lead-media";
+import { isVideoMediaName } from "@/lib/leads/site-media";
 import { createSignedUploadUrl, downloadStoredFile } from "@/lib/storage/upload";
 
 type QuoteMailFile = EmailAttachmentView & {
@@ -85,9 +88,10 @@ export async function resolveQuoteAttachments(lead: QuoteLead): Promise<QuoteMai
       const name = names[index] || `ไฟล์ที่ ${index + 1}`;
       if (isStorageRef(ref)) {
         const storagePath = storagePathFromRef(ref);
+        const skipDownload = isVideoMediaName(name) || isVideoMediaName(storagePath);
         const [url, downloaded] = await Promise.all([
           createSignedUploadUrl(storagePath, 60 * 60 * 24 * 7),
-          downloadStoredFile(storagePath),
+          skipDownload ? Promise.resolve(null) : downloadStoredFile(storagePath),
         ]);
         return {
           name,
@@ -196,12 +200,17 @@ export function buildAdminSummaryHtml(
     title: copy.title,
     subtitle: copy.subtitle,
     accent: "red",
-    body: `${fieldSection(
-      "ผู้ติดต่อ",
-      `${fieldRow("ชื่อผู้ติดต่อ", lead.contactName)}${fieldRow("ตำแหน่งงาน", lead.jobTitle)}${fieldRow("เบอร์โทรศัพท์", lead.phone)}${fieldRow("LINE ID", lead.lineId)}${fieldRow("E-mail", lead.email)}${fieldRow("ประเภทผู้ติดต่อ", lead.contactType)}`,
-    )}${fieldSection(
-      "ธุรกิจและที่อยู่",
-      `${fieldRow("ชื่อธุรกิจ", lead.businessName)}${fieldRow("เลขผู้เสียภาษี", lead.taxId)}${fieldRow("ที่อยู่ติดตั้ง / ส่งของ", lead.installAddress)}${fieldRow("ที่อยู่ออกใบเสนอราคา", lead.billingAddress)}`,
+    body: `${fieldSectionPair(
+      fieldSection(
+        "ผู้ติดต่อ",
+        `${fieldStackRow("ชื่อผู้ติดต่อ", lead.contactName)}${fieldStackRow("ตำแหน่งงาน", lead.jobTitle)}${fieldStackRow("เบอร์โทรศัพท์", lead.phone)}${fieldStackRow("LINE ID", lead.lineId)}${fieldStackRow("E-mail", lead.email)}${fieldStackRow("ประเภทผู้ติดต่อ", lead.contactType)}`,
+        { flush: true },
+      ),
+      fieldSection(
+        "ธุรกิจและที่อยู่",
+        `${fieldStackRow("ชื่อธุรกิจ", lead.businessName)}${fieldStackRow("เลขผู้เสียภาษี", lead.taxId)}${fieldStackRow("ที่อยู่ติดตั้ง / ส่งของ", lead.installAddress)}${fieldStackRow("ที่อยู่ออกใบเสนอราคา", lead.billingAddress)}`,
+        { flush: true },
+      ),
     )}${fieldSection(
       "งานที่ต้องการ",
       `${fieldRow("ประเภทสินค้า", lead.productType)}${fieldRow("ขนาดที่ต้องการ (กว้าง×สูง)", lead.requestedSize)}${fieldRow("วันที่อยากติดตั้ง", lead.callbackDate)}${fieldLinkRow("แนบภาพหน้างาน", files)}${fieldRow("หาเราเจอจากที่ไหน", lead.referralSource)}`,

@@ -17,7 +17,7 @@ import {
 } from "@/lib/visits/presentation";
 import { verifyTurnstileToken } from "@/lib/security/turnstile";
 import { bytesMatchDeclaredType, isPdfBytes } from "@/lib/security/file-magic";
-import { toStorageRef } from "@/lib/security/lead-media";
+import { parseVisitStorageRef, toStorageRef } from "@/lib/security/lead-media";
 import { getRequestIp, isRateLimited } from "@/lib/security/rate-limit";
 import { canUseSupabaseStorage, uploadPrivateFile } from "@/lib/storage/upload";
 import { formFlagTrue } from "@/lib/marketing/consent";
@@ -44,6 +44,39 @@ function parseVisitSites(raw: FormDataEntryValue[]): VisitSiteId[] {
   const values = raw.map(String);
   if (values.includes("all")) return [...VISIT_SITE_IDS];
   return VISIT_SITE_IDS.filter((id) => values.includes(id));
+}
+
+function collectVisitDocuments(form: FormData): File[] {
+  const combined = form
+    .getAll("visitDocuments")
+    .filter((value): value is File => value instanceof File && value.size > 0);
+  if (combined.length > 0) return combined.slice(0, 2);
+  return [form.get("companyProfile"), form.get("businessCard")].filter(
+    (value): value is File => value instanceof File && value.size > 0,
+  );
+}
+
+async function collectVisitUploads(form: FormData): Promise<SavedFile[]> {
+  const uploads: SavedFile[] = [];
+  const refs = form.getAll("visitDocumentRef").map(String);
+  const names = form.getAll("visitDocumentName").map(String);
+  for (let i = 0; i < refs.length && uploads.length < 2; i += 1) {
+    const ref = parseVisitStorageRef(refs[i] || "");
+    if (!ref) throw new Error("UPLOAD_TYPE_NOT_ALLOWED");
+    uploads.push({
+      name: names[i]?.trim() || `ไฟล์ที่ ${uploads.length + 1}`,
+      ref,
+    });
+  }
+  const leftover = collectVisitDocuments(form).slice(0, Math.max(0, 2 - uploads.length));
+  for (const file of leftover) {
+    const saved = await saveVisitFile(
+      file,
+      uploads.length === 0 ? "company-profile" : "business-card",
+    );
+    if (saved.name) uploads.push(saved);
+  }
+  return uploads;
 }
 
 async function saveVisitFile(file: File | null, fallbackName: string) {
@@ -106,22 +139,15 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: turnstile.error }, { status: 400 });
     }
 
-    const profileFile = form.get("companyProfile");
-    const cardFile = form.get("businessCard");
-    const companyProfile = await saveVisitFile(
-      profileFile instanceof File && profileFile.size > 0 ? profileFile : null,
-      "company-profile",
-    );
-    const businessCard = await saveVisitFile(
-      cardFile instanceof File && cardFile.size > 0 ? cardFile : null,
-      "business-card",
-    );
+    const uploads = await collectVisitUploads(form);
+    const companyProfile = uploads[0] ?? { name: null, ref: null };
+    const businessCard = uploads[1] ?? { name: null, ref: null };
 
     if (!companyProfile.name) {
-      return NextResponse.json({ error: "กรุณาแนบ Company Profile" }, { status: 400 });
-    }
-    if (!businessCard.name) {
-      return NextResponse.json({ error: "กรุณาแนบนามบัตร" }, { status: 400 });
+      return NextResponse.json(
+        { error: "กรุณาแนบ Company Profile หรือนามบัตร" },
+        { status: 400 },
+      );
     }
 
     const isPresentation = String(form.get("bookingKind") || "") === "product-presentation";

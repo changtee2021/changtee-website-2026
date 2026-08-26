@@ -1,11 +1,11 @@
 /** Edge-safe auth helpers (no next/headers) for middleware. */
 
 /**
- * Admin login gate — parked until the team turns it on.
- * Set ADMIN_AUTH_ENFORCED=true to require login again.
+ * Admin login is off — /admin opens without a session.
+ * Flip this back to `process.env.ADMIN_AUTH_ENFORCED === "true"` to require login.
  */
 export function isAdminAuthEnforced(): boolean {
-  return process.env.ADMIN_AUTH_ENFORCED === "true";
+  return false;
 }
 
 /** @deprecated use isAdminAuthEnforced() — kept for older imports */

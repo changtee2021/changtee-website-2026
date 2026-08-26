@@ -15,7 +15,7 @@ import {
 import { getPortfolioJsonLd } from "@/lib/portfolio-jsonld";
 import { pageMetadata } from "@/lib/seo/meta";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 120;
 export const dynamicParams = true;
 
 type Props = { params: Promise<{ slug: string }> };

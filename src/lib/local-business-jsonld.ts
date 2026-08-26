@@ -70,14 +70,6 @@ export function getLocalBusinessJsonLd(): Record<string, unknown> {
         name: siteConfig.name,
         publisher: { "@id": `${base}/#organization` },
         inLanguage: "th-TH",
-        potentialAction: {
-          "@type": "SearchAction",
-          target: {
-            "@type": "EntryPoint",
-            urlTemplate: `${base}/search?q={search_term_string}`,
-          },
-          "query-input": "required name=search_term_string",
-        },
       },
     ],
   };

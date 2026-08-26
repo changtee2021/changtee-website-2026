@@ -116,6 +116,28 @@ export async function downloadStoredFile(path: string) {
   return null;
 }
 
+/** One-time PUT URL so the browser can upload without going through Vercel. */
+export async function createPrivateSignedPutUrl(opts: {
+  folder: string;
+  fileName: string;
+}): Promise<{ path: string; token: string; signedUrl: string } | null> {
+  if (!canUseSupabaseStorage()) return null;
+  const path = objectPath(opts.folder, opts.fileName);
+  const supabase = createServiceSupabase();
+  const { data, error } = await supabase.storage
+    .from(PRIVATE_UPLOAD_BUCKET)
+    .createSignedUploadUrl(path);
+  if (error || !data?.signedUrl || !data.token) {
+    console.error("createPrivateSignedPutUrl", error?.message);
+    return null;
+  }
+  return {
+    path: data.path || path,
+    token: data.token,
+    signedUrl: data.signedUrl,
+  };
+}
+
 export async function createSignedUploadUrl(path: string, expiresSec = 60 * 60) {
   if (!canUseSupabaseStorage()) return null;
   const supabase = createServiceSupabase();

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { MessageCircle, Phone, FileText, X } from "lucide-react";
+import { trackSiteClick } from "@/lib/analytics/collect";
 import { siteConfig } from "@/lib/site-config";
 
 function DualChatIcon({ className }: { className?: string }) {
@@ -59,6 +60,7 @@ export function FloatingActions() {
               variants={item}
               transition={{ duration: 0.24, ease: [0.22, 1, 0.36, 1] }}
               className="inline-flex max-w-full items-center gap-2 rounded-full bg-[#06C755] px-3 py-2 text-xs font-semibold text-white sm:px-4 sm:text-sm"
+              onClick={() => trackSiteClick("line")}
             >
               <MessageCircle className="h-4 w-4 shrink-0" />
               <span className="truncate">LINE {siteConfig.lineId}</span>
@@ -70,7 +72,10 @@ export function FloatingActions() {
               <Link
                 href="/quote"
                 className="inline-flex items-center gap-2 rounded-full border border-line bg-white px-3 py-2 text-xs font-medium text-navy shadow sm:px-4 sm:text-sm"
-                onClick={() => setOpen(false)}
+                onClick={() => {
+                  trackSiteClick("quote");
+                  setOpen(false);
+                }}
               >
                 <FileText className="h-4 w-4 shrink-0" />
                 ใบเสนอราคา
@@ -81,6 +86,7 @@ export function FloatingActions() {
               variants={item}
               transition={{ duration: 0.24, ease: [0.22, 1, 0.36, 1] }}
               className="inline-flex items-center gap-2 rounded-full bg-brand-red px-3 py-2 text-xs font-semibold text-white sm:px-4 sm:text-sm"
+              onClick={() => trackSiteClick("phone")}
             >
               <Phone className="h-4 w-4 shrink-0" />
               โทรเลย

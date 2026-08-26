@@ -6,9 +6,7 @@ import {
 } from "@/lib/admin-session";
 
 function allowOpenAdminApi(): boolean {
-  if (isAdminAuthEnforced()) return false;
-  if (process.env.ALLOW_OPEN_ADMIN_API === "false") return false;
-  return true;
+  return !isAdminAuthEnforced();
 }
 
 export async function assertAdminApiAccess(

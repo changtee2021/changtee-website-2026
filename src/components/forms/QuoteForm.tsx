@@ -1,9 +1,24 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState, type HTMLAttributes } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent, type HTMLAttributes } from "react";
 import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Check, Eye, ImageIcon, MapPin, Trash2, X } from "lucide-react";
+import {
+  Building2,
+  Check,
+  Eye,
+  Film,
+  Loader2,
+  ImageIcon,
+  Images,
+  MapPin,
+  Package,
+  StickyNote,
+  Trash2,
+  UserRound,
+  X,
+  type LucideIcon,
+} from "lucide-react";
 import { PdpaConsentField } from "@/components/forms/PdpaConsentField";
 import { MarketingConsentField } from "@/components/forms/MarketingConsentField";
 import {
@@ -16,13 +31,25 @@ import {
   REFERRAL_SOURCES,
   productTypeThumb,
 } from "@/lib/leads/types";
+import {
+  MAX_SITE_FILES,
+  MAX_SITE_VIDEOS,
+  prepareSiteFile,
+  putToSignedUrl,
+  readJsonResponse,
+  requestSiteUploadTicket,
+  siteMediaAccept,
+  siteMediaKind,
+  normalizeSiteMediaType,
+  type SiteMediaKind,
+} from "@/lib/leads/site-media";
+import { toStorageRef } from "@/lib/security/lead-media";
 
-const MAX_SITE_IMAGES = 10;
-
-type SiteImageItem = {
+type SiteMediaItem = {
   id: string;
   file: File;
   previewUrl: string;
+  kind: SiteMediaKind;
 };
 
 type PreviewState = {
@@ -44,6 +71,8 @@ type PreviewState = {
   note: string;
   sameBilling: boolean;
   sameLineAsPhone: boolean;
+  pdpaAccepted: boolean;
+  marketingOptIn: boolean;
 };
 
 const emptyPreview: PreviewState = {
@@ -65,6 +94,8 @@ const emptyPreview: PreviewState = {
   note: "",
   sameBilling: true,
   sameLineAsPhone: false,
+  pdpaAccepted: false,
+  marketingOptIn: false,
 };
 
 function normalizeMapsUrl(value: string) {
@@ -111,6 +142,8 @@ export function QuoteForm() {
   const allowSubmitRef = useRef(false);
   const dragDepthRef = useRef(0);
   const [pending, setPending] = useState(false);
+  const [pendingLabel, setPendingLabel] = useState("กำลังส่ง...");
+  const [mediaBusy, setMediaBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [sheetOpen, setSheetOpen] = useState(false);
   const [dragActive, setDragActive] = useState(false);
@@ -118,7 +151,7 @@ export function QuoteForm() {
   const onTurnstile = useCallback((token: string | null) => {
     setTurnstileToken(token);
   }, []);
-  const [siteImages, setSiteImages] = useState<SiteImageItem[]>([]);
+  const [siteImages, setSiteImages] = useState<SiteMediaItem[]>([]);
   const [preview, setPreview] = useState<PreviewState>(() => {
     const product = resolveProductType(searchParams.get("product"));
     const item = searchParams.get("item")?.trim() ?? "";
@@ -155,41 +188,58 @@ export function QuoteForm() {
     : preview.lineId;
   const billingDisplay = preview.sameBilling
     ? preview.installAddress
-      ? "เดียวกับที่อยู่ติดตั้ง"
-      : ""
     : preview.billingAddress;
 
   function update<K extends keyof PreviewState>(key: K, value: PreviewState[K]) {
     setPreview((prev) => ({ ...prev, [key]: value }));
   }
 
-  function addSiteFiles(fileList: FileList | File[] | null) {
+  async function addSiteFiles(fileList: FileList | File[] | null) {
     if (!fileList) return;
     const files = Array.from(fileList);
     if (!files.length) return;
 
-    const room = MAX_SITE_IMAGES - siteImages.length;
+    const room = MAX_SITE_FILES - siteImages.length;
     if (room <= 0) {
-      setError(`แนบได้สูงสุด ${MAX_SITE_IMAGES} ภาพ`);
+      setError(`แนบได้สูงสุด ${MAX_SITE_FILES} ไฟล์`);
       return;
     }
 
-    const next: SiteImageItem[] = [];
-    for (const file of files.slice(0, room)) {
-      if (!/^image\/(jpeg|png|webp)$/.test(file.type)) continue;
-      next.push({
-        id: `site-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
-        file,
-        previewUrl: URL.createObjectURL(file),
-      });
-    }
-    if (!next.length) {
-      setError("รองรับเฉพาะไฟล์ JPG, PNG หรือ WebP");
-      return;
-    }
+    setMediaBusy(true);
     setError(null);
-    setSiteImages((prev) => [...prev, ...next]);
-    if (siteFileRef.current) siteFileRef.current.value = "";
+    const next: SiteMediaItem[] = [];
+    let videoCount = siteImages.filter((item) => item.kind === "video").length;
+    try {
+      for (const file of files.slice(0, room)) {
+        const kind = siteMediaKind(normalizeSiteMediaType(file));
+        if (!kind) {
+          setError("รองรับรูป JPG, PNG, WebP และคลิป MP4, MOV, WebM");
+          continue;
+        }
+        if (kind === "video" && videoCount >= MAX_SITE_VIDEOS) {
+          setError(`แนบวิดีโอได้สูงสุด ${MAX_SITE_VIDEOS} คลิป`);
+          continue;
+        }
+        try {
+          const prepared = await prepareSiteFile(file);
+          next.push({
+            id: `site-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+            file: prepared,
+            previewUrl: URL.createObjectURL(prepared),
+            kind,
+          });
+          if (kind === "video") videoCount += 1;
+        } catch (err) {
+          setError(err instanceof Error ? err.message : "แนบไฟล์ไม่สำเร็จ");
+        }
+      }
+      if (next.length) {
+        setSiteImages((prev) => [...prev, ...next]);
+      }
+    } finally {
+      setMediaBusy(false);
+      if (siteFileRef.current) siteFileRef.current.value = "";
+    }
   }
 
   function onSiteDragEnter(e: React.DragEvent) {
@@ -238,15 +288,26 @@ export function QuoteForm() {
     setSheetOpen(true);
   }
 
+  function openPreviewIfValid() {
+    const form = formRef.current;
+    if (!form) return;
+    if (!form.checkValidity()) {
+      form.reportValidity();
+      return;
+    }
+    openPreview();
+  }
+
   async function onSubmit(formData: FormData) {
     // Enter key / ส่งแบบฟอร์ม → open preview first unless user confirmed
     if (!allowSubmitRef.current) {
-      openPreview();
+      openPreviewIfValid();
       return;
     }
     allowSubmitRef.current = false;
 
     setPending(true);
+    setPendingLabel("กำลังส่ง...");
     setError(null);
 
     if (isTurnstileEnabled() && !turnstileToken) {
@@ -266,8 +327,10 @@ export function QuoteForm() {
     }
 
     if (preview.sameBilling) {
-      formData.set("billingAddress", "เดียวกับที่อยู่");
+      formData.set("billingAddress", preview.installAddress.trim());
     }
+    formData.set("pdpaAccepted", preview.pdpaAccepted ? "on" : "");
+    formData.set("marketingOptIn", preview.marketingOptIn ? "on" : "");
 
     const lineId = preview.sameLineAsPhone
       ? preview.phone.trim()
@@ -281,16 +344,37 @@ export function QuoteForm() {
     formData.set("installAddress", installWithMap);
 
     formData.delete("siteImage");
-    for (const item of siteImages) {
-      formData.append("siteImage", item.file, item.file.name);
-    }
+    formData.delete("siteMediaRef");
+    formData.delete("siteMediaName");
 
     try {
+      if (siteImages.length) {
+        setPendingLabel("กำลังอัปโหลดไฟล์...");
+        const leftover: File[] = [];
+        for (const item of siteImages) {
+          const ticket = await requestSiteUploadTicket({
+            file: item.file,
+            turnstileToken,
+          });
+          if (ticket.mode === "direct") {
+            leftover.push(item.file);
+            continue;
+          }
+          await putToSignedUrl(ticket, item.file);
+          formData.append("siteMediaRef", toStorageRef(ticket.path));
+          formData.append("siteMediaName", item.file.name);
+        }
+        for (const file of leftover) {
+          formData.append("siteImage", file, file.name);
+        }
+      }
+
+      setPendingLabel("กำลังส่ง...");
       const res = await fetch("/api/leads", {
         method: "POST",
         body: formData,
       });
-      const json = (await res.json()) as { error?: string };
+      const json = await readJsonResponse<{ error?: string }>(res);
       if (!res.ok) throw new Error(json.error || "ส่งแบบฟอร์มไม่สำเร็จ");
       router.push("/thank-you");
     } catch (err) {
@@ -311,6 +395,11 @@ export function QuoteForm() {
     form.requestSubmit();
   }
 
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    await onSubmit(new FormData(event.currentTarget));
+  }
+
   const summary = (
     <QuoteSummary
       preview={preview}
@@ -324,11 +413,12 @@ export function QuoteForm() {
 
   return (
     <>
-      <form ref={formRef} action={onSubmit} className="space-y-6">
+      <form ref={formRef} onSubmit={handleSubmit} className="space-y-6">
         <input type="hidden" name="source" value="quote" />
 
-        <div className="grid min-w-0 gap-4 md:grid-cols-2 xl:grid-cols-3">
-            <p className="text-sm font-semibold text-navy md:col-span-2 xl:col-span-3">
+        <div className="grid min-w-0 gap-4 md:grid-cols-2 xl:grid-cols-4">
+            <p className="flex items-center gap-1.5 text-sm font-semibold text-navy md:col-span-2 xl:col-span-4">
+              <HeadingIcon icon={UserRound} />
               ข้อมูลลูกค้า / ผู้ติดต่อ
             </p>
 
@@ -352,7 +442,16 @@ export function QuoteForm() {
               value={preview.phone}
               onChange={(v) => update("phone", v)}
             />
-            <div className="space-y-2">
+            <Select
+              label="ประเภทผู้ติดต่อ"
+              name="contactType"
+              required
+              options={CONTACT_TYPES}
+              value={preview.contactType}
+              onChange={(v) => update("contactType", v)}
+            />
+
+            <div className="space-y-2 xl:col-span-2">
               <Field
                 label="LINE ID"
                 name="lineId"
@@ -365,62 +464,50 @@ export function QuoteForm() {
                 value={preview.sameLineAsPhone ? "" : preview.lineId}
                 onChange={(v) => update("lineId", v)}
               />
-              <label className="flex items-start gap-2 text-sm text-muted">
+              <label className="flex min-h-11 items-start gap-2 text-sm text-muted">
                 <input
                   type="checkbox"
-                  className="mt-0.5"
+                  className="mt-0.5 size-4"
                   checked={preview.sameLineAsPhone}
                   onChange={(e) => update("sameLineAsPhone", e.target.checked)}
                 />
                 <span>ใช้แอดไลน์เดียวกับเบอร์โทร</span>
               </label>
             </div>
-
-            <Select
-              label="ประเภทผู้ติดต่อ"
-              name="contactType"
+            <Field
+              label="E-mail"
+              name="email"
+              type="email"
               required
-              options={CONTACT_TYPES}
-              value={preview.contactType}
-              onChange={(v) => update("contactType", v)}
+              placeholder="สำหรับส่งใบเสนอราคา"
+              className="xl:col-span-2"
+              value={preview.email}
+              onChange={(v) => update("email", v)}
             />
+
             <Field
               label="ชื่อธุรกิจ"
               name="businessName"
-              placeholder="ตัวอย่าง : บริษัท ช่างตี๋ จำกัด เป็นต้น"
-              className="md:col-span-2 xl:col-span-2"
+              icon={Building2}
+              required={preview.contactType === "นิติบุคคล"}
+              placeholder={
+                preview.contactType === "นิติบุคคล"
+                  ? "กรอกชื่อบริษัทตามหนังสือรับรอง"
+                  : "ตัวอย่าง : บริษัท ช่างตี๋ จำกัด เป็นต้น"
+              }
+              className="md:col-span-2 xl:col-span-4"
               value={preview.businessName}
               onChange={(v) => update("businessName", v)}
             />
 
-            <div className="space-y-2 md:col-span-2 xl:col-span-2">
-              <TextArea
-                label="ที่อยู่ สำหรับ ส่งของ หรือ ติดตั้ง"
-                name="installAddress"
-                required
-                value={preview.installAddress}
-                onChange={(v) => update("installAddress", v)}
-              />
-              <label className="block text-sm">
-                <span className="mb-1 flex items-center gap-1.5 font-medium text-ink">
-                  <MapPin className="size-3.5 text-brand-red" />
-                  ลิงก์ Google Maps
-                  <span className="font-normal text-muted">(ถ้ามี)</span>
-                </span>
-                <input
-                  type="text"
-                  inputMode="url"
-                  autoComplete="off"
-                  placeholder="https://maps.app.goo.gl/... หรือวางลิงก์จาก Google Maps"
-                  value={preview.installMapUrl}
-                  onChange={(e) => update("installMapUrl", e.target.value)}
-                  className="w-full rounded-lg border border-line bg-field px-3 py-2 outline-none focus:border-navy"
-                />
-                <span className="mt-1 block text-xs text-muted">
-                  เปิด Google Maps → แชร์ → คัดลอกลิงก์ แล้ววางที่นี่
-                </span>
-              </label>
-            </div>
+            <TextArea
+              label="ที่อยู่ สำหรับ ส่งของ หรือ ติดตั้ง"
+              name="installAddress"
+              required
+              className="xl:col-span-3"
+              value={preview.installAddress}
+              onChange={(v) => update("installAddress", v)}
+            />
             <Field
               label="เลขผู้เสียภาษี"
               name="taxId"
@@ -437,34 +524,65 @@ export function QuoteForm() {
               onChange={(v) => update("taxId", v)}
             />
 
-            <Field
-              label="E-mail"
-              name="email"
-              type="email"
-              required
-              placeholder="สำหรับส่งใบเสนอราคา"
-              value={preview.email}
-              onChange={(v) => update("email", v)}
-            />
-            <div className="space-y-2 md:col-span-2">
+            <label className="block text-sm md:col-span-2 xl:col-span-4">
+              <span className="mb-1 flex items-center gap-1.5 font-medium text-ink">
+                <MapPin className="size-3.5 text-brand-red" />
+                ลิงก์ Google Maps
+                <span className="font-normal text-muted">(ถ้ามี)</span>
+              </span>
+              <input
+                type="text"
+                inputMode="url"
+                autoComplete="off"
+                placeholder="https://maps.app.goo.gl/... หรือวางลิงก์จาก Google Maps"
+                value={preview.installMapUrl}
+                onChange={(e) => update("installMapUrl", e.target.value)}
+                className="w-full rounded-lg border border-line bg-field px-3 py-2 outline-none focus:border-navy"
+              />
+              <span className="mt-1 block text-xs text-muted">
+                เปิด Google Maps → แชร์ → คัดลอกลิงก์ แล้ววางที่นี่
+              </span>
+            </label>
+
+            <div className="space-y-2 md:col-span-2 xl:col-span-4">
               <TextArea
                 label="ที่อยู่ สำหรับ ออกใบเสนอราคา"
                 name="billingAddress"
                 disabled={preview.sameBilling}
-                placeholder={preview.sameBilling ? "เดียวกับที่อยู่" : undefined}
-                value={preview.sameBilling ? "" : preview.billingAddress}
+                placeholder={
+                  preview.sameBilling
+                    ? "กรอกที่อยู่ติดตั้งด้านบน จะคัดลอกมาให้อัตโนมัติ"
+                    : undefined
+                }
+                value={
+                  preview.sameBilling
+                    ? preview.installAddress
+                    : preview.billingAddress
+                }
                 onChange={(v) => update("billingAddress", v)}
               />
-              <label className="flex items-center gap-2 text-sm text-muted">
+              <label className="flex min-h-11 items-center gap-2 text-sm text-muted">
                 <input
                   type="checkbox"
+                  className="size-4"
                   checked={preview.sameBilling}
-                  onChange={(e) => update("sameBilling", e.target.checked)}
+                  onChange={(e) => {
+                    const checked = e.target.checked;
+                    setPreview((prev) => ({
+                      ...prev,
+                      sameBilling: checked,
+                      billingAddress: checked
+                        ? prev.billingAddress
+                        : prev.billingAddress.trim() || prev.installAddress,
+                    }));
+                  }}
                 />
                 ใช้ที่อยู่เดียวกับที่อยู่ติดตั้ง/ส่งของ
               </label>
             </div>
+        </div>
 
+        <div className="grid min-w-0 gap-4 md:grid-cols-2 xl:grid-cols-3">
             <div className="md:col-span-2 xl:col-span-3">
               <div className="my-1 flex items-center gap-3">
                 <div className="h-px flex-1 bg-line" />
@@ -499,6 +617,7 @@ export function QuoteForm() {
                 <Select
                   label="ประเภทสินค้า"
                   name="productType"
+                  icon={Package}
                   required
                   options={PRODUCT_TYPES}
                   value={preview.productType}
@@ -532,30 +651,31 @@ export function QuoteForm() {
 
             <div className="space-y-2 md:col-span-2 xl:col-span-1">
               <div className="flex flex-wrap items-center justify-between gap-2">
-                <span className="text-sm font-medium text-ink">
-                  แนบภาพหน้างาน
+                <span className="flex items-center gap-1.5 text-sm font-medium text-ink">
+                  <HeadingIcon icon={Images} />
+                  แนบภาพ / วิดีโอหน้างาน
                   {siteImages.length > 0 ? (
                     <span className="ml-1 font-normal text-muted">
-                      ({siteImages.length}/{MAX_SITE_IMAGES})
+                      ({siteImages.length}/{MAX_SITE_FILES})
                     </span>
                   ) : null}
                 </span>
                 <button
                   type="button"
-                  disabled={siteImages.length >= MAX_SITE_IMAGES}
+                  disabled={mediaBusy || siteImages.length >= MAX_SITE_FILES}
                   onClick={() => siteFileRef.current?.click()}
                   className="rounded-lg border border-line bg-white px-3 py-1.5 text-xs font-medium text-navy hover:bg-paper disabled:opacity-50"
                 >
-                  เพิ่มรูป
+                  {mediaBusy ? "กำลังย่อไฟล์..." : "เพิ่มไฟล์"}
                 </button>
               </div>
               <input
                 ref={siteFileRef}
                 type="file"
-                accept="image/jpeg,image/png,image/webp"
+                accept={siteMediaAccept()}
                 multiple
                 className="hidden"
-                onChange={(e) => addSiteFiles(e.target.files)}
+                onChange={(e) => void addSiteFiles(e.target.files)}
               />
               <div
                 onDragEnter={onSiteDragEnter}
@@ -571,6 +691,7 @@ export function QuoteForm() {
                 {siteImages.length === 0 ? (
                   <button
                     type="button"
+                    disabled={mediaBusy}
                     onClick={() => siteFileRef.current?.click()}
                     className={`flex w-full flex-col items-center justify-center gap-1 rounded-xl border border-dashed px-3 py-6 text-xs transition ${
                       dragActive
@@ -581,11 +702,13 @@ export function QuoteForm() {
                     <ImageIcon className="size-5 opacity-60" />
                     <span>
                       {dragActive
-                        ? "ปล่อยเพื่อแนบรูป"
-                        : "ลากรูปมาวาง หรือคลิกเลือก (หลายรูปได้)"}
+                        ? "ปล่อยเพื่อแนบไฟล์"
+                        : mediaBusy
+                          ? "กำลังย่อรูปให้ส่งได้..."
+                          : "ลากไฟล์มาวาง หรือคลิกเลือก (หลายไฟล์ได้)"}
                     </span>
                     <span className="text-[11px] opacity-70">
-                      JPG, PNG, WebP
+                      รูปย่ออัตโนมัติ · คลิปไม่เกิน 40 MB · สูงสุด {MAX_SITE_VIDEOS} คลิป
                     </span>
                   </button>
                 ) : (
@@ -602,29 +725,46 @@ export function QuoteForm() {
                           key={item.id}
                           className="relative aspect-square overflow-hidden rounded-lg border border-line bg-paper"
                         >
-                          {/* eslint-disable-next-line @next/next/no-img-element */}
-                          <img
-                            src={item.previewUrl}
-                            alt={item.file.name}
-                            className="size-full object-cover"
-                          />
+                          {item.kind === "video" ? (
+                            <video
+                              src={item.previewUrl}
+                              className="size-full object-cover"
+                              muted
+                              playsInline
+                              preload="metadata"
+                            />
+                          ) : (
+                            // eslint-disable-next-line @next/next/no-img-element
+                            <img
+                              src={item.previewUrl}
+                              alt={item.file.name}
+                              className="size-full object-cover"
+                            />
+                          )}
+                          {item.kind === "video" ? (
+                            <span className="absolute left-1 bottom-1 rounded bg-black/65 px-1 py-0.5 text-[10px] text-white">
+                              <Film className="mr-0.5 inline size-3" />
+                              คลิป
+                            </span>
+                          ) : null}
                           <button
                             type="button"
                             onClick={() => removeSiteImage(item.id)}
                             className="absolute right-1 top-1 rounded-md bg-black/60 p-1 text-white hover:bg-brand-red"
                             aria-label={`ลบ ${item.file.name}`}
-                            title="ลบรูป"
+                            title="ลบไฟล์"
                           >
                             <Trash2 className="size-3.5" />
                           </button>
                         </li>
                       ))}
-                      {siteImages.length < MAX_SITE_IMAGES ? (
+                      {siteImages.length < MAX_SITE_FILES ? (
                         <li>
                           <button
                             type="button"
+                            disabled={mediaBusy}
                             onClick={() => siteFileRef.current?.click()}
-                            className="flex aspect-square w-full flex-col items-center justify-center gap-0.5 rounded-lg border border-dashed border-line bg-paper/50 text-[10px] text-muted hover:border-navy/40 hover:text-navy"
+                            className="flex aspect-square w-full flex-col items-center justify-center gap-0.5 rounded-lg border border-dashed border-line bg-paper/50 text-[10px] text-muted hover:border-navy/40 hover:text-navy disabled:opacity-50"
                           >
                             <ImageIcon className="size-4 opacity-60" />
                             เพิ่ม / ลากวาง
@@ -634,7 +774,7 @@ export function QuoteForm() {
                     </ul>
                     {dragActive ? (
                       <p className="mt-2 text-center text-xs font-medium text-navy">
-                        ปล่อยเพื่อแนบรูปเพิ่ม
+                        ปล่อยเพื่อแนบไฟล์เพิ่ม
                       </p>
                     ) : null}
                   </div>
@@ -645,6 +785,7 @@ export function QuoteForm() {
               label="วันที่อยากติดตั้ง"
               name="callbackDate"
               type="date"
+              required
               value={preview.callbackDate}
               onChange={(v) => update("callbackDate", v)}
             />
@@ -660,6 +801,7 @@ export function QuoteForm() {
             <TextArea
               label="หมายเหตุ"
               name="note"
+              icon={StickyNote}
               className="md:col-span-2 xl:col-span-3"
               rows={3}
               value={preview.note}
@@ -667,8 +809,14 @@ export function QuoteForm() {
             />
 
             <div className="space-y-3 md:col-span-2 xl:col-span-3">
-              <PdpaConsentField />
-              <MarketingConsentField />
+              <PdpaConsentField
+                checked={preview.pdpaAccepted}
+                onChange={(v) => update("pdpaAccepted", v)}
+              />
+              <MarketingConsentField
+                checked={preview.marketingOptIn}
+                onChange={(v) => update("marketingOptIn", v)}
+              />
               <TurnstileField onToken={onTurnstile} />
             </div>
 
@@ -688,12 +836,18 @@ export function QuoteForm() {
                 ดูพรีวิว
               </button>
               <button
-                type="submit"
+                type="button"
                 disabled={pending}
+                aria-busy={pending}
+                onClick={openPreviewIfValid}
                 className="inline-flex w-full items-center justify-center gap-2 rounded-md bg-brand-red px-8 py-3 text-sm font-semibold text-white hover:bg-brand-red-soft disabled:opacity-60 md:w-auto"
               >
-                <Check className="h-4 w-4" />
-                {pending ? "กำลังส่ง..." : "ส่งแบบฟอร์ม"}
+                {pending ? (
+                  <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
+                ) : (
+                  <Check className="h-4 w-4" aria-hidden />
+                )}
+                {pending ? pendingLabel : "ส่งแบบฟอร์ม"}
               </button>
               <p className="text-center text-xs text-muted md:text-left">
                 กดส่งแล้วจะขึ้นพรีวิวให้ตรวจก่อนยืนยัน
@@ -751,11 +905,16 @@ export function QuoteForm() {
               <button
                 type="button"
                 disabled={pending}
+                aria-busy={pending}
                 onClick={requestFormSubmit}
                 className="inline-flex w-full items-center justify-center gap-2 rounded-md bg-brand-red px-6 py-3 text-sm font-semibold text-white hover:bg-brand-red-soft disabled:opacity-60 sm:flex-1"
               >
-                <Check className="h-4 w-4" />
-                {pending ? "กำลังส่ง..." : "ยืนยันส่งแบบฟอร์ม"}
+                {pending ? (
+                  <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
+                ) : (
+                  <Check className="h-4 w-4" aria-hidden />
+                )}
+                {pending ? pendingLabel : "ยืนยันส่งแบบฟอร์ม"}
               </button>
               <button
                 type="button"
@@ -785,7 +944,7 @@ function QuoteSummary({
   lineDisplay: string;
   billingDisplay: string;
   sizeLines: string[];
-  siteImages: SiteImageItem[];
+  siteImages: SiteMediaItem[];
 }) {
   return (
     <div className="space-y-3 text-sm">
@@ -831,7 +990,7 @@ function QuoteSummary({
 
         <div>
           <p className="text-[11px] text-muted">
-            แนบภาพหน้างาน
+            แนบภาพ / วิดีโอหน้างาน
             {siteImages.length > 0 ? (
               <span className="ml-1 text-ink">({siteImages.length} ไฟล์)</span>
             ) : null}
@@ -845,12 +1004,22 @@ function QuoteSummary({
                   key={item.id}
                   className="relative aspect-square overflow-hidden rounded-lg border border-line bg-paper"
                 >
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={item.previewUrl}
-                    alt=""
-                    className="size-full object-cover"
-                  />
+                  {item.kind === "video" ? (
+                    <video
+                      src={item.previewUrl}
+                      className="size-full object-cover"
+                      muted
+                      playsInline
+                      preload="metadata"
+                    />
+                  ) : (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={item.previewUrl}
+                      alt=""
+                      className="size-full object-cover"
+                    />
+                  )}
                 </div>
               ))}
             </div>
@@ -947,6 +1116,10 @@ const FIELD_HINTS: Record<
   email: { autoComplete: "email" },
 };
 
+function HeadingIcon({ icon: Icon }: { icon: LucideIcon }) {
+  return <Icon className="size-3.5 shrink-0 text-brand-red" aria-hidden />;
+}
+
 function Field({
   label,
   name,
@@ -955,6 +1128,7 @@ function Field({
   placeholder,
   className = "",
   disabled,
+  icon,
   value,
   onChange,
 }: {
@@ -965,6 +1139,7 @@ function Field({
   placeholder?: string;
   className?: string;
   disabled?: boolean;
+  icon?: LucideIcon;
   value: string;
   onChange: (value: string) => void;
 }) {
@@ -972,7 +1147,8 @@ function Field({
   const inputType = name === "phone" ? "tel" : type;
   return (
     <label className={`block text-sm ${className}`}>
-      <span className="mb-1 flex gap-1 font-medium text-ink">
+      <span className="mb-1 flex items-center gap-1.5 font-medium text-ink">
+        {icon ? <HeadingIcon icon={icon} /> : null}
         {label}
         {required ? <span className="text-brand-red">*</span> : null}
       </span>
@@ -1000,6 +1176,7 @@ function TextArea({
   className = "",
   rows = 3,
   disabled,
+  icon,
   value,
   onChange,
 }: {
@@ -1010,12 +1187,14 @@ function TextArea({
   className?: string;
   rows?: number;
   disabled?: boolean;
+  icon?: LucideIcon;
   value: string;
   onChange: (value: string) => void;
 }) {
   return (
     <label className={`block text-sm ${className}`}>
-      <span className="mb-1 flex gap-1 font-medium text-ink">
+      <span className="mb-1 flex items-center gap-1.5 font-medium text-ink">
+        {icon ? <HeadingIcon icon={icon} /> : null}
         {label}
         {required ? <span className="text-brand-red">*</span> : null}
       </span>
@@ -1038,6 +1217,7 @@ function Select({
   name,
   required,
   options,
+  icon,
   value,
   onChange,
 }: {
@@ -1045,12 +1225,14 @@ function Select({
   name: string;
   required?: boolean;
   options: readonly string[];
+  icon?: LucideIcon;
   value: string;
   onChange: (value: string) => void;
 }) {
   return (
     <label className="block text-sm">
-      <span className="mb-1 flex gap-1 font-medium text-ink">
+      <span className="mb-1 flex items-center gap-1.5 font-medium text-ink">
+        {icon ? <HeadingIcon icon={icon} /> : null}
         {label}
         {required ? <span className="text-brand-red">*</span> : null}
       </span>

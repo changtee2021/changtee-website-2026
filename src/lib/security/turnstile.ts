@@ -9,17 +9,20 @@ function isProductionRuntime() {
   return process.env.NODE_ENV === "production" || Boolean(process.env.VERCEL);
 }
 
-/** Verify Turnstile when keys exist. Production requires keys; local may skip. */
+/**
+ * Verify Turnstile when both keys exist.
+ * If keys are not set yet, accept the request and rely on rate-limiting
+ * so live quote/contact forms are not blocked.
+ */
 export async function verifyTurnstileToken(
   token: string | undefined | null,
   ip?: string,
 ): Promise<{ ok: true } | { ok: false; error: string }> {
   if (!turnstileConfigured()) {
     if (isProductionRuntime()) {
-      return {
-        ok: false,
-        error: "ระบบป้องกันสแปมยังไม่พร้อม กรุณาลองใหม่หรือติดต่อทาง LINE",
-      };
+      console.warn(
+        "Turnstile keys missing; accepting form with rate-limit only",
+      );
     }
     return { ok: true };
   }

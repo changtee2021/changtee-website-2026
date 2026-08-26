@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { isVideoMediaName } from "@/lib/leads/site-media";
 import { isDirectMediaUrl, isStorageRef } from "@/lib/security/lead-media";
 
 export function LeadSiteImages({ refs }: { refs: string[] }) {
@@ -46,7 +47,7 @@ export function LeadSiteImages({ refs }: { refs: string[] }) {
               key={`${ref}-${i}`}
               className="flex size-20 items-center justify-center rounded-lg border border-line bg-paper text-[10px] text-muted"
             >
-              กำลังเปิดรูป
+              กำลังเปิดไฟล์
             </div>
           );
         }
@@ -57,10 +58,20 @@ export function LeadSiteImages({ refs }: { refs: string[] }) {
             target="_blank"
             rel="noopener noreferrer"
             className="relative block size-20 overflow-hidden rounded-lg border border-line bg-paper"
-            title={`รูปที่ ${i + 1}`}
+            title={isVideoMediaName(ref) || isVideoMediaName(href) ? `คลิปที่ ${i + 1}` : `รูปที่ ${i + 1}`}
           >
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={href} alt={`แนบ ${i + 1}`} className="size-full object-cover" />
+            {isVideoMediaName(ref) || isVideoMediaName(href) ? (
+              <video
+                src={href}
+                className="size-full object-cover"
+                muted
+                playsInline
+                preload="metadata"
+              />
+            ) : (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={href} alt={`แนบ ${i + 1}`} className="size-full object-cover" />
+            )}
           </a>
         );
       })}

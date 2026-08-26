@@ -64,7 +64,7 @@ export function BlogIndex() {
         image="/images/generated/ct-hero-blog.webp"
         imageAlt="มุมนั่งอ่านข้างหน้าต่างผ้าม่านช่างตี๋ พร้อมตัวอย่างผ้าและสมุดบันทึก"
         eyebrow="Knowledge · อ่านก่อนตัดสินใจ"
-        title="Articles"
+        title="บทความผ้าม่าน"
         description="ความรู้เรื่องม่าน ไอเดียแต่งบ้าน และเคล็ดลับดูแล"
         copyClassName="lg:self-end lg:pb-6"
         aside={

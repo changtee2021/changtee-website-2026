@@ -5,7 +5,7 @@ import { PageSkeleton } from "@/components/ui/page-skeleton";
 import { loadPortfolioItems } from "@/lib/cms/cms-public-load";
 import { pageMetadata } from "@/lib/seo/meta";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 120;
 
 export const metadata: Metadata = pageMetadata({
   title: "ผลงานติดตั้ง",

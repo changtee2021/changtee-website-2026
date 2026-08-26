@@ -1,3 +1,4 @@
+import { isVideoMediaName } from "@/lib/leads/site-media";
 import { siteConfig } from "@/lib/site-config";
 
 export function escapeHtml(s: string) {
@@ -24,6 +25,17 @@ export function fieldRow(label: string, value?: string | null) {
   return `<tr>
     <td style="padding:9px 0;border-bottom:1px solid #f0eee9;color:#6b7280;width:38%;vertical-align:top;font-size:13px">${escapeHtml(label)}</td>
     <td style="padding:9px 0 9px 12px;border-bottom:1px solid #f0eee9;color:#111827;vertical-align:top;font-size:14px;font-weight:600">${formatFieldValue(v)}</td>
+  </tr>`;
+}
+
+/** Label above value — fits the two-column quote cards. */
+export function fieldStackRow(label: string, value?: string | null) {
+  const v = value?.trim() ? value.trim() : "-";
+  return `<tr>
+    <td style="padding:8px 0 0;color:#6b7280;font-size:12px;line-height:1.4">${escapeHtml(label)}</td>
+  </tr>
+  <tr>
+    <td style="padding:2px 0 8px;border-bottom:1px solid #f0eee9;color:#111827;font-size:14px;font-weight:600;line-height:1.5;word-break:break-word">${formatFieldValue(v)}</td>
   </tr>`;
 }
 
@@ -63,7 +75,7 @@ export function attachmentGallery(files: EmailAttachmentView[]) {
     const src = file.cid ? `cid:${file.cid}` : file.url || "";
     const preview = isImageAttachment(file.name, file.url) && src
       ? `<img src="${escapeHtml(src)}" alt="${escapeHtml(file.name)}" width="260" style="display:block;width:100%;max-width:260px;height:auto;border-radius:8px;border:1px solid #ece7df" />`
-      : `<div style="padding:22px 12px;background:#fff;border:1px dashed #d6d3cd;border-radius:8px;text-align:center;color:#6b7280;font-size:13px">ไฟล์แนบ</div>`;
+      : `<div style="padding:22px 12px;background:#fff;border:1px dashed #d6d3cd;border-radius:8px;text-align:center;color:#6b7280;font-size:13px">${isVideoMediaName(file.name) ? "คลิปหน้างาน" : "ไฟล์แนบ"}</div>`;
     const link = file.url
       ? `<a href="${escapeHtml(file.url)}" style="color:#c8102e;font-weight:700;font-size:13px;text-decoration:underline">ดาวน์โหลด ${escapeHtml(file.name)}</a>`
       : `<span style="color:#111827;font-size:13px">${escapeHtml(file.name)}</span>`;
@@ -87,9 +99,14 @@ export function attachmentGallery(files: EmailAttachmentView[]) {
   </table>`;
 }
 
-export function fieldSection(title: string, rows: string) {
+export function fieldSection(
+  title: string,
+  rows: string,
+  opts?: { flush?: boolean },
+) {
   if (!rows.trim()) return "";
-  return `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 16px;background:#faf9f7;border:1px solid #efeae3;border-radius:10px">
+  const margin = opts?.flush ? "0" : "0 0 16px";
+  return `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:${margin};background:#faf9f7;border:1px solid #efeae3;border-radius:10px">
     <tr>
       <td style="padding:12px 16px 4px;font-size:12px;letter-spacing:.04em;color:#0b1f3a;font-weight:800;border-bottom:1px solid #efeae3">
         <span style="display:inline-block;width:8px;height:8px;background:#c8102e;border-radius:99px;margin-right:8px;vertical-align:middle"></span>${escapeHtml(title)}
@@ -103,6 +120,19 @@ export function fieldSection(title: string, rows: string) {
   </table>`;
 }
 
+/** Two cards on one row. Stacks on narrow mail clients that honor the media query. */
+export function fieldSectionPair(left: string, right: string) {
+  if (!left && !right) return "";
+  if (!right) return left;
+  if (!left) return right;
+  return `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 16px">
+    <tr>
+      <td class="ct-col" width="50%" valign="top" style="width:50%;padding:0 8px 0 0">${left}</td>
+      <td class="ct-col" width="50%" valign="top" style="width:50%;padding:0 0 0 8px">${right}</td>
+    </tr>
+  </table>`;
+}
+
 export function wrapNoticeEmail(opts: {
   title: string;
   subtitle?: string;
@@ -112,7 +142,18 @@ export function wrapNoticeEmail(opts: {
 }) {
   const accent = opts.accent === "navy" ? "#0b1f3a" : "#c8102e";
   return `<!doctype html>
-<html><body style="margin:0;padding:0;background:#f3f1ec;font-family:Sarabun,Tahoma,Arial,sans-serif">
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <style>
+    @media only screen and (max-width: 560px) {
+      .ct-col { display:block !important; width:100% !important; padding-left:0 !important; padding-right:0 !important; }
+      .ct-col + .ct-col { padding-top:12px !important; }
+    }
+  </style>
+</head>
+<body style="margin:0;padding:0;background:#f3f1ec;font-family:Sarabun,Tahoma,Arial,sans-serif">
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f3f1ec;padding:28px 12px">
     <tr>
       <td align="center">
@@ -140,7 +181,8 @@ export function wrapNoticeEmail(opts: {
       </td>
     </tr>
   </table>
-</body></html>`;
+</body>
+</html>`;
 }
 
 export function nextStepBanner(text: string) {

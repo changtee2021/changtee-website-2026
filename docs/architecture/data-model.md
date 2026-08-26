@@ -5,6 +5,7 @@ The `changtee_web` schema in Supabase project `pfwygxzwlteqjnnwiwmb` holds the w
 | Table | Purpose |
 |---|---|
 | `leads` | Quote, estimate, and contact requests |
+| `site_page_views` | Anonymous public-site page / ping / CTA hits for the admin dashboard |
 | `portfolio` | Installed-work portfolio content |
 | `posts` | Blog and advice articles |
 | `reviews` | Customer reviews |

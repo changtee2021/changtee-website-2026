@@ -4,6 +4,7 @@ import {
   getSiteUrl,
   isAdminHostname,
   isMarketingPath,
+  isProductionMarketingHost,
   resolveAdminRedirectBase,
   stripAdminPrefix,
   toInternalAdminPath,
@@ -72,6 +73,22 @@ function previewFrameAncestors(): string {
   return [...origins].join(" ");
 }
 
+/** Block indexing on preview/staging hosts that canonicalize to production. */
+function applyPublicHostRobots(
+  res: NextResponse,
+  host: string,
+  pathname: string,
+): NextResponse {
+  if (
+    !isProductionMarketingHost(host) &&
+    !pathname.startsWith("/admin") &&
+    !pathname.startsWith("/api/")
+  ) {
+    res.headers.set("X-Robots-Tag", "noindex, nofollow");
+  }
+  return res;
+}
+
 async function withPreviewHeaders(
   request: NextRequest,
   previewOk: boolean,
@@ -118,7 +135,8 @@ export async function middleware(request: NextRequest) {
   const previewToken = request.nextUrl.searchParams.get(PREVIEW_QUERY);
   if (previewToken && !isAdminHostname(host) && !pathname.startsWith("/api/")) {
     const verified = await verifyPreviewToken(previewToken);
-    return withPreviewHeaders(request, verified !== null);
+    const res = await withPreviewHeaders(request, verified !== null);
+    return applyPublicHostRobots(res, host, pathname);
   }
 
   if (authOn && isAdminApiPath(pathname) && !isAdminSessionApiPath(pathname)) {
@@ -178,7 +196,8 @@ export async function middleware(request: NextRequest) {
     return withAdminHeaders(request, pathname);
   }
 
-  return NextResponse.next();
+  const res = NextResponse.next();
+  return applyPublicHostRobots(res, host, pathname);
 }
 
 export const config = {

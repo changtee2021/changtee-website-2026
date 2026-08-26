@@ -26,12 +26,16 @@ export const quoteLeadSchema = z.object({
     .trim()
     .min(1, "กรุณากรอกขนาดที่ต้องการ (กว้างxสูง เซ็นติเมตร)")
     .max(4000),
-  callbackDate: z.string().trim().max(40).optional().or(z.literal("")),
+  callbackDate: z
+    .string()
+    .trim()
+    .min(1, "กรุณาเลือกวันที่อยากติดตั้ง")
+    .max(40),
   referralSource: z.string().trim().min(1, "กรุณาเลือกช่องทางที่หาเราเจอ"),
   note: z.string().trim().max(4000).optional().or(z.literal("")),
   pdpaAccepted: z.boolean(),
   marketingOptIn: z.boolean().optional().default(false),
-  siteImageName: z.string().trim().max(260).optional().or(z.literal("")),
+  siteImageName: z.string().trim().max(800).optional().or(z.literal("")),
 })
 .refine((data) => data.pdpaAccepted === true, {
   message: "กรุณายอมรับนโยบายความเป็นส่วนตัว",
@@ -43,6 +47,14 @@ export const quoteLeadSchema = z.object({
   {
     message: "กรุณากรอกเลขผู้เสียภาษี",
     path: ["taxId"],
+  },
+)
+.refine(
+  (data) =>
+    data.contactType !== "นิติบุคคล" || Boolean(data.businessName?.trim()),
+  {
+    message: "กรุณากรอกชื่อธุรกิจ",
+    path: ["businessName"],
   },
 );
 

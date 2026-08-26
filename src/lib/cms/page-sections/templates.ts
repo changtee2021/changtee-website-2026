@@ -158,8 +158,8 @@ export const PORTFOLIO_ITEM_SECTION_DEFS: SectionDef[] = [
 
 export const ABOUT_SECTION_DEFAULTS: Record<string, Record<string, string>> = {
   hero: {
-    eyebrow: "เกี่ยวกับเรา",
-    title: "A curtain maker who understands you",
+    eyebrow: "เกี่ยวกับเรา · Chang Tee Curtain",
+    title: "ช่างม่านที่เข้าใจคุณ",
     lead:
       "เราเชื่อว่าผ้าม่านไม่ใช่แค่ของตกแต่ง แต่คือองค์ประกอบสำคัญที่สะท้อนตัวตนและไลฟ์สไตล์ของเจ้าของบ้าน",
     body:

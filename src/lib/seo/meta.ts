@@ -6,6 +6,10 @@ export function siteOrigin(): string {
   return siteConfig.url.replace(/\/$/, "");
 }
 
+/** Default share image dimensions (public/images/generated/ct-hero-living.webp). */
+export const DEFAULT_OG_IMAGE_WIDTH = 1536;
+export const DEFAULT_OG_IMAGE_HEIGHT = 1024;
+
 /** Path for Open Graph / Twitter when a page has no own image. */
 export function defaultOgImagePath(): string {
   return siteConfig.ogImage;
@@ -48,6 +52,15 @@ export function pageMetadata({
   const canonical = canonicalPath(path);
   const ogImage = image?.trim() || defaultOgImagePath();
   const url = absoluteUrl(canonical === "/" ? "/" : canonical);
+  const isDefaultOg = ogImage === defaultOgImagePath() || ogImage.endsWith(defaultOgImagePath());
+  const ogImageEntry = isDefaultOg
+    ? {
+        url: ogImage,
+        alt: title,
+        width: DEFAULT_OG_IMAGE_WIDTH,
+        height: DEFAULT_OG_IMAGE_HEIGHT,
+      }
+    : { url: ogImage, alt: title };
 
   return {
     title,
@@ -61,7 +74,7 @@ export function pageMetadata({
       type,
       locale: "th_TH",
       siteName: siteConfig.name,
-      images: [{ url: ogImage, alt: title }],
+      images: [ogImageEntry],
     },
     twitter: {
       card: "summary_large_image",

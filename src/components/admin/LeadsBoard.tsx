@@ -925,7 +925,7 @@ export function LeadsBoard() {
               <Item label="ขนาดที่ต้องการ" value={selected.requestedSize} wide />
               <Item label="หมายเหตุ" value={selected.note} wide />
               <Item
-                label="แนบภาพหน้างาน"
+                label="แนบภาพ / วิดีโอหน้างาน"
                 value={
                   selected.siteImageUrls?.length || selected.siteImageUrl
                     ? selected.siteImageName ||
