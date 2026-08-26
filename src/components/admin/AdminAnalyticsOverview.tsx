@@ -9,9 +9,12 @@ import {
   CalendarRange,
   Clock3,
   Download,
+  Monitor,
   MonitorSmartphone,
   MousePointerClick,
   Radio,
+  Smartphone,
+  Tablet,
   Users,
   X,
 } from "lucide-react";
@@ -33,18 +36,10 @@ import {
   DEVICE_COLORS,
   RANGE_OPTIONS,
   defaultCustomRange,
-  demoAnalytics,
-  demoClicks,
-  demoDevices,
-  demoFunnel,
-  demoLiveSeed,
-  demoSources,
-  demoTopPages,
-  getAnalyticsBundle,
   resolvePresetRangeDates,
   type DateRangeKey,
-  type LiveViewer,
 } from "@/lib/admin-analytics-demo";
+import type { AdminAnalyticsPayload } from "@/lib/analytics/server";
 import { downloadAnalyticsExcel } from "@/lib/export-analytics-excel";
 import { adminHref } from "@/lib/admin-nav";
 import { cn } from "@/lib/utils";
@@ -59,6 +54,12 @@ const deviceIconLabel = {
   tablet: "แท็บเล็ต",
 } as const;
 
+async function fetchAdminAnalytics(from: string, to: string) {
+  const res = await fetch(`/api/admin/analytics?from=${from}&to=${to}`);
+  if (!res.ok) throw new Error("analytics");
+  return (await res.json()) as AdminAnalyticsPayload;
+}
+
 export function AdminAnalyticsOverview({ basePath }: Props) {
   const initialCustom = defaultCustomRange();
   const [range, setRange] = useState<DateRangeKey>("7d");
@@ -71,18 +72,50 @@ export function AdminAnalyticsOverview({ basePath }: Props) {
   const [excelStep, setExcelStep] = useState<"pick" | "custom">("pick");
   const [excelFrom, setExcelFrom] = useState(initialCustom.from);
   const [excelTo, setExcelTo] = useState(initialCustom.to);
-  const [online, setOnline] = useState<number>(demoAnalytics["7d"].onlineBase);
-  const [liveRows, setLiveRows] = useState<LiveViewer[]>(demoLiveSeed);
-
-  const bundle = useMemo(
-    () => getAnalyticsBundle(range, customFrom, customTo),
-    [range, customFrom, customTo],
-  );
+  const [payload, setPayload] = useState<AdminAnalyticsPayload | null>(null);
+  const [loadState, setLoadState] = useState<"loading" | "ok" | "error">("loading");
 
   const activeDates = useMemo(() => {
     if (range === "custom") return { from: customFrom, to: customTo };
     return resolvePresetRangeDates(range);
   }, [range, customFrom, customTo]);
+
+  useEffect(() => {
+    let cancelled = false;
+    async function load(silent = false) {
+      if (!silent) setLoadState((prev) => (prev === "ok" ? "ok" : "loading"));
+      try {
+        const next = await fetchAdminAnalytics(activeDates.from, activeDates.to);
+        if (cancelled) return;
+        setPayload(next);
+        setLoadState("ok");
+      } catch {
+        if (cancelled) return;
+        setLoadState((prev) => (prev === "ok" ? "ok" : "error"));
+      }
+    }
+    void load(false);
+    const timer = window.setInterval(() => {
+      void load(true);
+    }, 15_000);
+    return () => {
+      cancelled = true;
+      window.clearInterval(timer);
+    };
+  }, [activeDates.from, activeDates.to]);
+
+  const bundle = payload;
+  const devices = payload?.devices ?? [
+    { name: "Mobile", value: 0 },
+    { name: "Desktop", value: 0 },
+    { name: "Tablet", value: 0 },
+  ];
+  const topPages = payload?.topPages ?? [];
+  const clicks = payload?.clicks ?? [];
+  const sources = payload?.sources ?? [];
+  const funnel = payload?.funnel ?? [];
+  const online = payload?.live.online ?? 0;
+  const liveRows = payload?.live.rows ?? [];
 
   const rangeLabel = useMemo(() => {
     if (range === "custom") return `กำหนดเอง ${customFrom} – ${customTo}`;
@@ -90,29 +123,9 @@ export function AdminAnalyticsOverview({ basePath }: Props) {
     return `${opt?.label ?? range} (${activeDates.from} – ${activeDates.to})`;
   }, [range, customFrom, customTo, activeDates]);
 
-  useEffect(() => {
-    const id = window.setInterval(() => {
-      setOnline((n) => {
-        const next = n + (Math.random() > 0.55 ? 1 : -1);
-        return Math.min(28, Math.max(4, next));
-      });
-      setLiveRows((rows) =>
-        rows.map((row, i) => ({
-          ...row,
-          secondsAgo: Math.min(90, row.secondsAgo + 2 + (i % 3)),
-          path:
-            Math.random() > 0.9
-              ? demoTopPages[Math.floor(Math.random() * 5)]!.name
-              : row.path,
-        })),
-      );
-    }, 4000);
-    return () => window.clearInterval(id);
-  }, []);
-
   const funnelMax = useMemo(
-    () => Math.max(...demoFunnel.map((f) => f.value)),
-    [],
+    () => Math.max(1, ...funnel.map((f) => f.value)),
+    [funnel],
   );
 
   function normalizeDatePair(from: string, to: string) {
@@ -143,7 +156,7 @@ export function AdminAnalyticsOverview({ basePath }: Props) {
     setExcelModalOpen(true);
   }
 
-  function exportExcelFor(
+  async function exportExcelFor(
     key: DateRangeKey,
     fromInput?: string,
     toInput?: string,
@@ -151,34 +164,39 @@ export function AdminAnalyticsOverview({ basePath }: Props) {
     let from = activeDates.from;
     let to = activeDates.to;
     let label = rangeLabel;
-    let exportBundle = bundle;
 
     if (key === "custom") {
       const pair = normalizeDatePair(fromInput ?? excelFrom, toInput ?? excelTo);
       from = pair.from;
       to = pair.to;
       label = `กำหนดเอง ${from} – ${to}`;
-      exportBundle = getAnalyticsBundle("custom", from, to);
     } else {
       const dates = resolvePresetRangeDates(key);
       from = dates.from;
       to = dates.to;
       const opt = RANGE_OPTIONS.find((o) => o.key === key);
       label = `${opt?.label ?? key} (${from} – ${to})`;
-      exportBundle = getAnalyticsBundle(key, from, to);
     }
 
-    downloadAnalyticsExcel({
-      rangeLabel: label,
-      from,
-      to,
-      bundle: exportBundle,
-      devices: demoDevices,
-      topPages: demoTopPages,
-      clicks: demoClicks,
-      sources: demoSources,
-      funnel: demoFunnel,
-    });
+    try {
+      const data =
+        from === activeDates.from && to === activeDates.to && payload
+          ? payload
+          : await fetchAdminAnalytics(from, to);
+      downloadAnalyticsExcel({
+        rangeLabel: label,
+        from,
+        to,
+        bundle: { kpis: data.kpis, traffic: data.traffic, onlineBase: data.live.online },
+        devices: data.devices,
+        topPages: data.topPages,
+        clicks: data.clicks,
+        sources: data.sources,
+        funnel: data.funnel,
+      });
+    } catch {
+      /* keep modal open if export fails */
+    }
     setExcelModalOpen(false);
     setExcelStep("pick");
   }
@@ -197,10 +215,20 @@ export function AdminAnalyticsOverview({ basePath }: Props) {
               ภาพรวมสถิติเว็บ
             </h2>
             <p className="mt-1 max-w-2xl text-sm text-muted">
-              สถิติการเข้าชม · คลิก · อุปกรณ์ · หน้าฮิต · คนออนไลน์แบบ realtime
-              <span className="ml-1 rounded bg-amber-50 px-1.5 py-0.5 text-[11px] font-medium text-amber-800">
-                ข้อมูลตัวอย่าง (demo)
-              </span>
+              สถิติการเข้าชมจริงจากเว็บช่างตี๋ · อัปเดตทุก 15 วินาที
+              {loadState === "loading" && !payload ? (
+                <span className="ml-1 rounded bg-paper px-1.5 py-0.5 text-[11px] font-medium text-muted">
+                  กำลังโหลด
+                </span>
+              ) : loadState === "error" && !payload ? (
+                <span className="ml-1 rounded bg-red-50 px-1.5 py-0.5 text-[11px] font-medium text-red-700">
+                  โหลดสถิติไม่ได้
+                </span>
+              ) : (
+                <span className="ml-1 rounded bg-emerald-50 px-1.5 py-0.5 text-[11px] font-medium text-emerald-800">
+                  ข้อมูลจริง
+                </span>
+              )}
             </p>
             <p className="mt-2 text-xs text-muted">
               ช่วงที่แสดง: <span className="font-medium text-navy">{rangeLabel}</span>
@@ -390,7 +418,7 @@ export function AdminAnalyticsOverview({ basePath }: Props) {
 
       {/* KPI strip */}
       <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-6">
-        {bundle.kpis.map((kpi) => (
+        {(bundle?.kpis ?? []).map((kpi) => (
           <div
             key={kpi.label}
             className="rounded-2xl border border-line bg-white p-4 shadow-sm"
@@ -436,15 +464,24 @@ export function AdminAnalyticsOverview({ basePath }: Props) {
             {online}
           </div>
           <p className="mt-1 text-sm text-white/60">
-            active ใน 90 วินาทีล่าสุด · อัปเดตทุก 4 วินาที
+            active ใน 90 วินาทีล่าสุด · อัปเดตทุก 15 วินาที
           </p>
           <div className="mt-6 grid grid-cols-3 gap-2 text-center">
-            {demoDevices.map((d) => (
-              <div key={d.name} className="rounded-xl bg-white/10 px-2 py-3">
-                <div className="text-lg font-semibold">{d.value}%</div>
-                <div className="text-[11px] text-white/55">{d.name}</div>
-              </div>
-            ))}
+            {devices.map((d) => {
+              const Icon =
+                d.name === "Mobile"
+                  ? Smartphone
+                  : d.name === "Tablet"
+                    ? Tablet
+                    : Monitor;
+              return (
+                <div key={d.name} className="rounded-xl bg-white/10 px-2 py-3">
+                  <div className="text-lg font-semibold">{d.value}%</div>
+                  <Icon className="mx-auto mt-1.5 size-5 text-white/80" aria-hidden />
+                  <div className="mt-1 text-[11px] text-white/55">{d.name}</div>
+                </div>
+              );
+            })}
           </div>
         </div>
 
@@ -461,23 +498,31 @@ export function AdminAnalyticsOverview({ basePath }: Props) {
                 <tr>
                   <th className="px-3 py-2 font-medium">หน้า</th>
                   <th className="px-3 py-2 font-medium">อุปกรณ์</th>
-                  <th className="px-3 py-2 font-medium">พื้นที่</th>
+                  <th className="px-3 py-2 font-medium">มาจาก</th>
                   <th className="px-3 py-2 font-medium">ล่าสุด</th>
                 </tr>
               </thead>
               <tbody>
-                {liveRows.slice(0, 6).map((row, i) => (
-                  <tr key={`${row.path}-${i}`} className="border-t border-line">
-                    <td className="max-w-[220px] truncate px-3 py-2.5 font-medium text-navy">
-                      {row.path}
+                {liveRows.length === 0 ? (
+                  <tr>
+                    <td colSpan={4} className="px-3 py-6 text-center text-sm text-muted">
+                      ยังไม่มีคนดูเว็บในช่วง 90 วินาทีนี้
                     </td>
-                    <td className="px-3 py-2.5 text-muted">
-                      {deviceIconLabel[row.device]}
-                    </td>
-                    <td className="px-3 py-2.5 text-muted">{row.city}</td>
-                    <td className="px-3 py-2.5 text-muted">{row.secondsAgo}s</td>
                   </tr>
-                ))}
+                ) : (
+                  liveRows.slice(0, 6).map((row, i) => (
+                    <tr key={`${row.path}-${i}`} className="border-t border-line">
+                      <td className="max-w-[220px] truncate px-3 py-2.5 font-medium text-navy">
+                        {row.path}
+                      </td>
+                      <td className="px-3 py-2.5 text-muted">
+                        {deviceIconLabel[row.device]}
+                      </td>
+                      <td className="px-3 py-2.5 text-muted">{row.city}</td>
+                      <td className="px-3 py-2.5 text-muted">{row.secondsAgo}s</td>
+                    </tr>
+                  ))
+                )}
               </tbody>
             </table>
           </div>
@@ -498,7 +543,7 @@ export function AdminAnalyticsOverview({ basePath }: Props) {
           </div>
           <div className="h-64 w-full">
             <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={bundle.traffic}>
+              <AreaChart data={bundle?.traffic ?? []}>
                 <defs>
                   <linearGradient id="pv" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="0%" stopColor="#0b1f3a" stopOpacity={0.35} />
@@ -554,14 +599,14 @@ export function AdminAnalyticsOverview({ basePath }: Props) {
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
                 <Pie
-                  data={demoDevices}
+                  data={devices}
                   dataKey="value"
                   nameKey="name"
                   innerRadius={48}
                   outerRadius={78}
                   paddingAngle={3}
                 >
-                  {demoDevices.map((entry) => (
+                  {devices.map((entry) => (
                     <Cell
                       key={entry.name}
                       fill={
@@ -582,7 +627,7 @@ export function AdminAnalyticsOverview({ basePath }: Props) {
             </ResponsiveContainer>
           </div>
           <ul className="mt-1 space-y-1.5 text-sm">
-            {demoDevices.map((d) => (
+            {devices.map((d) => (
               <li key={d.name} className="flex items-center justify-between">
                 <span className="flex items-center gap-2 text-muted">
                   <span
@@ -605,7 +650,7 @@ export function AdminAnalyticsOverview({ basePath }: Props) {
       <section className="grid gap-4 xl:grid-cols-3">
         <Panel title="หน้าฮิต" subtitle="Top pages">
           <RankList
-            rows={demoTopPages.map((p) => ({
+            rows={topPages.map((p) => ({
               primary: p.name,
               secondary: p.meta,
               value: p.value.toLocaleString("th-TH"),
@@ -619,7 +664,7 @@ export function AdminAnalyticsOverview({ basePath }: Props) {
         >
           <div className="h-56">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={demoClicks} layout="vertical" margin={{ left: 8 }}>
+              <BarChart data={clicks} layout="vertical" margin={{ left: 8 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#e5eaf1" horizontal={false} />
                 <XAxis type="number" tick={{ fontSize: 11 }} stroke="#94a3b8" />
                 <YAxis
@@ -643,7 +688,7 @@ export function AdminAnalyticsOverview({ basePath }: Props) {
         </Panel>
         <Panel title="แหล่งที่มา" subtitle="Traffic sources">
           <RankList
-            rows={demoSources.map((s) => ({
+            rows={sources.map((s) => ({
               primary: s.name,
               value: `${s.value}%`,
             }))}
@@ -664,7 +709,7 @@ export function AdminAnalyticsOverview({ basePath }: Props) {
             <Clock3 className="size-4 text-muted" />
           </div>
           <div className="space-y-3">
-            {demoFunnel.map((step, i) => {
+            {funnel.map((step, i) => {
               const width = Math.max(12, Math.round((step.value / funnelMax) * 100));
               return (
                 <div key={step.step}>
@@ -725,69 +770,6 @@ export function AdminAnalyticsOverview({ basePath }: Props) {
                 </div>
               ),
             )}
-          </div>
-        </div>
-      </section>
-
-      {/* Website build status — keep in sync with public site */}
-      <section className="rounded-2xl border border-line bg-white p-5 shadow-sm sm:p-6">
-        <div className="flex flex-wrap items-end justify-between gap-3">
-          <div>
-            <h3 className="font-display text-base font-semibold text-navy">
-              สถานะเว็บไซต์ (อัปเดตล่าสุด)
-            </h3>
-            <p className="mt-1 text-xs text-muted">
-              สิ่งที่ออนไลน์บนหน้าเว็บแล้ว และส่วนที่แก้จากแอดมินได้
-            </p>
-          </div>
-          <span className="rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-800">
-            Visual CMS + ยืนยันการเปลี่ยน
-          </span>
-        </div>
-
-        <div className="mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-          <div className="rounded-xl border border-line bg-paper/40 p-4">
-            <p className="text-xs font-semibold uppercase tracking-wider text-muted">
-              หน้าสาธารณะ
-            </p>
-            <ul className="mt-3 space-y-2 text-sm text-navy/90">
-              <li>· หน้าแรก — Hero, สินค้า, ผลงาน, ขั้นตอน, รีวิว, สถิติ, CTA</li>
-              <li>· แคตตาล็อกสินค้า 7 เสา + หน้ารายละเอียดรุ่น</li>
-              <li>
-                · หน้ารายละเอียด: จุดเด่น, สเปก, สไตล์ห้อง, คลิปติดตั้ง, ผลงาน,
-                รุ่นอื่น, ตารางเทียบ, FAQ, CTA
-              </li>
-              <li>· ผลงาน / บทความ / ขอใบเสนอราคา / เกี่ยวกับเรา</li>
-            </ul>
-          </div>
-          <div className="rounded-xl border border-line bg-paper/40 p-4">
-            <p className="text-xs font-semibold uppercase tracking-wider text-muted">
-              แก้ในแอดมินได้แล้ว
-            </p>
-            <ul className="mt-3 space-y-2 text-sm text-navy/90">
-              <li>
-                ·{" "}
-                <Link
-                  href={adminHref(basePath, "/editor/home")}
-                  className="font-medium text-brand-red hover:underline"
-                >
-                  Page Editor
-                </Link>{" "}
-                — หน้าแรก / เกี่ยวกับเรา / ติดต่อ / เทมเพลตสินค้า·บทความ·ผลงาน
-              </li>
-              <li>· สไลด์หน้าแรก / ผลงาน / บทความ / รีวิว (รายการ)</li>
-              <li>· Lead คำขอใบเสนอราคา + ตั้งค่าบริษัท</li>
-            </ul>
-          </div>
-          <div className="rounded-xl border border-line bg-paper/40 p-4">
-            <p className="text-xs font-semibold uppercase tracking-wider text-muted">
-              ยังล็อกในโค้ด / แผนถัดไป
-            </p>
-            <ul className="mt-3 space-y-2 text-sm text-navy/90">
-              <li>· เลย์เอาต์ทุก section (ไม่ให้ลากย้ายโครง)</li>
-              <li>· รูปสไตล์ห้อง / คลิปวิดีโอ / ตารางเทียบ / FAQ ต่อรุ่น</li>
-              <li>· Feature strip, Services, Catalog บนหน้าแรก</li>
-            </ul>
           </div>
         </div>
       </section>
@@ -865,6 +847,9 @@ function RankList({
 }) {
   return (
     <ul className="divide-y divide-line">
+      {rows.length === 0 ? (
+        <li className="py-6 text-center text-sm text-muted">ยังไม่มีข้อมูลในช่วงนี้</li>
+      ) : null}
       {rows.map((row, i) => (
         <li key={row.primary} className="flex items-center gap-3 py-2.5 text-sm">
           <span className="flex size-6 shrink-0 items-center justify-center rounded-md bg-paper text-[11px] font-semibold text-muted">

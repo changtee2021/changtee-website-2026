@@ -27,3 +27,30 @@ export function isDirectMediaUrl(value: string) {
     value.startsWith("/uploads/")
   );
 }
+
+export function parsePrivateStorageRef(
+  value: string,
+  folder: "leads" | "factory-visits",
+): string | null {
+  const trimmed = value.trim();
+  if (!isStorageRef(trimmed)) return null;
+  const storagePath = storagePathFromRef(trimmed);
+  if (!storagePath.startsWith(`${folder}/`)) return null;
+  if (storagePath.includes("..") || storagePath.includes("\\") || storagePath.includes("//")) {
+    return null;
+  }
+  if (!/^[a-zA-Z0-9._/-]+$/.test(storagePath) || storagePath.length > 240) {
+    return null;
+  }
+  return toStorageRef(storagePath);
+}
+
+/** Only accept leads/ objects minted by /api/leads/upload. */
+export function parseLeadStorageRef(value: string): string | null {
+  return parsePrivateStorageRef(value, "leads");
+}
+
+/** Only accept factory-visits/ objects minted by /api/factory-visits/upload. */
+export function parseVisitStorageRef(value: string): string | null {
+  return parsePrivateStorageRef(value, "factory-visits");
+}

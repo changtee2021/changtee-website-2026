@@ -37,6 +37,11 @@ export function normalizeHost(hostHeader: string): string {
   return hostHeader.split(":")[0]?.toLowerCase() || "";
 }
 
+/** Public marketing site on production apex (not www, not preview). */
+export function isProductionMarketingHost(hostHeader: string): boolean {
+  return normalizeHost(hostHeader) === PRODUCTION_SITE_HOST;
+}
+
 export function isAdminHostname(hostHeader: string): boolean {
   const host = normalizeHost(hostHeader);
   const configured = hostnameFromUrl(getAdminUrl());

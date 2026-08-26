@@ -17,7 +17,7 @@ import {
 } from "@/lib/visits/presentation";
 import { verifyTurnstileToken } from "@/lib/security/turnstile";
 import { bytesMatchDeclaredType, isPdfBytes } from "@/lib/security/file-magic";
-import { toStorageRef } from "@/lib/security/lead-media";
+import { parseVisitStorageRef, toStorageRef } from "@/lib/security/lead-media";
 import { getRequestIp, isRateLimited } from "@/lib/security/rate-limit";
 import { canUseSupabaseStorage, uploadPrivateFile } from "@/lib/storage/upload";
 import { formFlagTrue } from "@/lib/marketing/consent";
@@ -54,6 +54,29 @@ function collectVisitDocuments(form: FormData): File[] {
   return [form.get("companyProfile"), form.get("businessCard")].filter(
     (value): value is File => value instanceof File && value.size > 0,
   );
+}
+
+async function collectVisitUploads(form: FormData): Promise<SavedFile[]> {
+  const uploads: SavedFile[] = [];
+  const refs = form.getAll("visitDocumentRef").map(String);
+  const names = form.getAll("visitDocumentName").map(String);
+  for (let i = 0; i < refs.length && uploads.length < 2; i += 1) {
+    const ref = parseVisitStorageRef(refs[i] || "");
+    if (!ref) throw new Error("UPLOAD_TYPE_NOT_ALLOWED");
+    uploads.push({
+      name: names[i]?.trim() || `ไฟล์ที่ ${uploads.length + 1}`,
+      ref,
+    });
+  }
+  const leftover = collectVisitDocuments(form).slice(0, Math.max(0, 2 - uploads.length));
+  for (const file of leftover) {
+    const saved = await saveVisitFile(
+      file,
+      uploads.length === 0 ? "company-profile" : "business-card",
+    );
+    if (saved.name) uploads.push(saved);
+  }
+  return uploads;
 }
 
 async function saveVisitFile(file: File | null, fallbackName: string) {
@@ -116,9 +139,9 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: turnstile.error }, { status: 400 });
     }
 
-    const uploadFiles = collectVisitDocuments(form);
-    const companyProfile = await saveVisitFile(uploadFiles[0] ?? null, "company-profile");
-    const businessCard = await saveVisitFile(uploadFiles[1] ?? null, "business-card");
+    const uploads = await collectVisitUploads(form);
+    const companyProfile = uploads[0] ?? { name: null, ref: null };
+    const businessCard = uploads[1] ?? { name: null, ref: null };
 
     if (!companyProfile.name) {
       return NextResponse.json(

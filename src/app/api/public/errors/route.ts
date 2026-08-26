@@ -5,14 +5,14 @@ export const runtime = "nodejs";
 
 export async function POST(request: Request) {
   if (await isRateLimited(request, { scope: "errors", windowMs: 10 * 60 * 1000, max: 20 })) {
-    return NextResponse.json({ ok: true }, { status: 204 });
+    return NextResponse.json({ ok: true });
   }
 
   let payload: { message?: string; digest?: string | null; path?: string } = {};
   try {
     payload = (await request.json()) as typeof payload;
   } catch {
-    return NextResponse.json({ ok: true }, { status: 204 });
+    return NextResponse.json({ ok: true });
   }
 
   const message = String(payload.message || "").slice(0, 300);

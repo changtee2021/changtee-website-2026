@@ -1,9 +1,15 @@
 "use client";
 
 import { useCallback, useMemo, useRef, useState, type FormEvent, type ReactNode } from "react";
-import { Check, Files, MapPin, UserRound, X, type LucideIcon } from "lucide-react";
+import { Check, Files, Loader2, MapPin, UserRound, X, type LucideIcon } from "lucide-react";
 import { PdpaConsentField } from "@/components/forms/PdpaConsentField";
-import { VisitDocumentsField } from "@/components/forms/VisitDocumentsField";
+import {
+  VisitDocumentsField,
+  revokeVisitDocs,
+  type VisitDocItem,
+} from "@/components/forms/VisitDocumentsField";
+import { readJsonResponse } from "@/lib/leads/site-media";
+import { attachVisitDocuments } from "@/lib/visits/visit-media";
 import { MarketingConsentField } from "@/components/forms/MarketingConsentField";
 import {
   isTurnstileEnabled,
@@ -36,11 +42,12 @@ export function FactoryVisitForm() {
   const formRef = useRef<HTMLFormElement>(null);
   const minDate = useMemo(() => todayInputValue(), []);
   const [pending, setPending] = useState(false);
+  const [pendingLabel, setPendingLabel] = useState("กำลังส่งคำขอ...");
   const [error, setError] = useState<string | null>(null);
   const [successOpen, setSuccessOpen] = useState(false);
   const [session, setSession] = useState<(typeof VISIT_SESSIONS)[number]>("morning");
   const [visitSites, setVisitSites] = useState<VisitSiteId[]>([]);
-  const [documentNames, setDocumentNames] = useState<string[]>([]);
+  const [documents, setDocuments] = useState<VisitDocItem[]>([]);
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
   const onTurnstile = useCallback((token: string | null) => {
     setTurnstileToken(token);
@@ -48,6 +55,7 @@ export function FactoryVisitForm() {
 
   async function onSubmit(formData: FormData) {
     setPending(true);
+    setPendingLabel("กำลังส่งคำขอ...");
     setError(null);
 
     if (isTurnstileEnabled() && !turnstileToken) {
@@ -62,6 +70,12 @@ export function FactoryVisitForm() {
       return;
     }
 
+    if (documents.length === 0) {
+      setError("กรุณาแนบ Company Profile หรือนามบัตร");
+      setPending(false);
+      return;
+    }
+
     formData.set("session", session);
     formData.set("pdpaAccepted", formData.get("pdpaAccepted") === "on" ? "true" : "false");
     if (turnstileToken) formData.set("turnstileToken", turnstileToken);
@@ -69,16 +83,23 @@ export function FactoryVisitForm() {
     for (const id of visitSites) formData.append("visitSites", id);
 
     try {
+      setPendingLabel("กำลังอัปโหลดไฟล์...");
+      await attachVisitDocuments(
+        formData,
+        documents.map((item) => item.file),
+      );
+      setPendingLabel("กำลังส่งคำขอ...");
       const res = await fetch("/api/factory-visits", {
         method: "POST",
         body: formData,
       });
-      const json = (await res.json()) as { error?: string };
+      const json = await readJsonResponse<{ error?: string }>(res);
       if (!res.ok) throw new Error(json.error || "ส่งคำขอไม่สำเร็จ");
       formRef.current?.reset();
       setSession("morning");
       setVisitSites([]);
-      setDocumentNames([]);
+      revokeVisitDocs(documents);
+      setDocuments([]);
       setTurnstileToken(null);
       setSuccessOpen(true);
     } catch (err) {
@@ -294,7 +315,7 @@ export function FactoryVisitForm() {
         </Section>
 
         <Section title="เอกสารและหมายเหตุ" icon={Files}>
-        <VisitDocumentsField fileNames={documentNames} onFileNames={setDocumentNames} />
+        <VisitDocumentsField files={documents} onFiles={setDocuments} />
 
         <label className="block">
           <span className="mb-1 block text-sm font-medium text-ink">
@@ -322,9 +343,11 @@ export function FactoryVisitForm() {
         <button
           type="submit"
           disabled={pending}
-          className="min-h-11 w-full rounded-full bg-brand-red px-6 py-3 text-sm font-semibold text-white transition hover:bg-brand-red-soft disabled:opacity-60 sm:w-auto"
+          aria-busy={pending}
+          className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-full bg-brand-red px-6 py-3 text-sm font-semibold text-white transition hover:bg-brand-red-soft disabled:opacity-60 sm:w-auto"
         >
-          {pending ? "กำลังส่งคำขอ..." : "ส่งคำขอนัดเยี่ยมชม"}
+          {pending ? <Loader2 className="size-4 animate-spin" aria-hidden /> : null}
+          {pending ? pendingLabel : "ส่งคำขอนัดเยี่ยมชม"}
         </button>
         <p className="text-xs text-muted">
           ทีมงานจะติดต่อกลับเพื่อยืนยันวันเวลาก่อนวันเยี่ยมชมจริง — คำขอนี้ยังไม่ใช่การยืนยันการนัด

@@ -7,8 +7,13 @@ import { sendQuoteEmails } from "@/lib/email/mailer";
 import type { QuoteLead } from "@/lib/leads/types";
 import { verifyTurnstileToken } from "@/lib/security/turnstile";
 import { bytesMatchDeclaredType } from "@/lib/security/file-magic";
-import { toStorageRef } from "@/lib/security/lead-media";
+import { parseLeadStorageRef, toStorageRef } from "@/lib/security/lead-media";
 import { getRequestIp, isRateLimited } from "@/lib/security/rate-limit";
+import {
+  MAX_SITE_FILES,
+  siteMediaKind,
+  normalizeSiteMediaType,
+} from "@/lib/leads/site-media";
 import {
   canUseSupabaseStorage,
   uploadPrivateFile,
@@ -104,12 +109,29 @@ export async function POST(request: Request) {
       if (!turnstile.ok) {
         return NextResponse.json({ error: turnstile.error }, { status: 400 });
       }
+      const mediaRefs = form.getAll("siteMediaRef").map(String);
+      const mediaNames = form.getAll("siteMediaName").map(String);
+      const uploads: Array<{ name: string; url: string }> = [];
+      for (let i = 0; i < mediaRefs.length && uploads.length < MAX_SITE_FILES; i += 1) {
+        const ref = parseLeadStorageRef(mediaRefs[i] || "");
+        if (!ref) {
+          throw new Error("UPLOAD_TYPE_NOT_ALLOWED");
+        }
+        uploads.push({
+          name: mediaNames[i]?.trim() || `ไฟล์ที่ ${uploads.length + 1}`,
+          url: ref,
+        });
+      }
+
       const siteFiles = form
         .getAll("siteImage")
         .filter((f): f is File => f instanceof File && f.size > 0)
-        .slice(0, 10);
-      const uploads: Array<{ name: string; url: string }> = [];
+        .slice(0, Math.max(0, MAX_SITE_FILES - uploads.length));
       for (const file of siteFiles) {
+        const kind = siteMediaKind(normalizeSiteMediaType(file));
+        if (kind === "video") {
+          throw new Error("UPLOAD_VIDEO_MUST_BE_SIGNED");
+        }
         const upload = await saveUpload(file);
         if (upload.name && upload.url) {
           uploads.push({ name: upload.name, url: upload.url });
@@ -282,9 +304,15 @@ export async function POST(request: Request) {
         { status: 400 },
       );
     }
+    if (err instanceof Error && err.message === "UPLOAD_VIDEO_MUST_BE_SIGNED") {
+      return NextResponse.json(
+        { error: "คลิปต้องอัปโหลดผ่านระบบไฟล์ — กรุณาลองส่งอีกครั้ง" },
+        { status: 400 },
+      );
+    }
     if (err instanceof Error && err.message === "UPLOAD_TYPE_NOT_ALLOWED") {
       return NextResponse.json(
-        { error: "รองรับเฉพาะไฟล์รูป JPG, PNG หรือ WebP" },
+        { error: "รองรับรูป JPG, PNG, WebP และคลิป MP4, MOV, WebM" },
         { status: 400 },
       );
     }

@@ -98,9 +98,6 @@ export function ThankYouCard() {
                 </li>
               ))}
             </ol>
-            <p className="mt-5 text-center text-xs text-muted">
-              เวลาทำการ: {siteConfig.hours}
-            </p>
           </div>
 
           <div className="mt-8 flex flex-wrap items-center justify-center gap-3">

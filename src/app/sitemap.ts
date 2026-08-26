@@ -68,8 +68,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ),
   ]);
 
-  const remotePortfolio = await readCmsCollection<PortfolioItem>("portfolio");
-  const remoteBlog = await readCmsCollection<BlogPost>("blog");
+  let remotePortfolio: PortfolioItem[] | null = null;
+  let remoteBlog: BlogPost[] | null = null;
+  try {
+    remotePortfolio = await readCmsCollection<PortfolioItem>("portfolio");
+    remoteBlog = await readCmsCollection<BlogPost>("blog");
+  } catch (err) {
+    console.error("sitemap: CMS read failed, using demo fallback", err);
+  }
   const portfolioItems = publishedPortfolio(remotePortfolio ?? DEMO_PORTFOLIO);
   const blogItems = publishedBlog(remoteBlog ?? DEMO_BLOG);
 

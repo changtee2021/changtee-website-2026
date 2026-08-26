@@ -4,6 +4,7 @@ import { FloatingActions } from "@/components/layout/FloatingActions";
 import { MobileDock } from "@/components/layout/MobileDock";
 import { CookieBanner } from "@/components/layout/CookieBanner";
 import { ConsentAwareScripts } from "@/components/layout/ConsentAwareScripts";
+import { SiteAnalyticsBeacon } from "@/components/layout/SiteAnalyticsBeacon";
 import { SitePreviewRoot } from "@/components/preview/SitePreviewRoot";
 
 export default function SiteLayout({
@@ -15,6 +16,7 @@ export default function SiteLayout({
     <SitePreviewRoot>
       <div className="flex min-h-full flex-col pb-[calc(5.5rem+env(safe-area-inset-bottom,0px))] lg:pb-0">
         <ConsentAwareScripts />
+        <SiteAnalyticsBeacon />
         <a
           href="#main-content"
           className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-[80] focus:rounded-md focus:bg-navy focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-white"

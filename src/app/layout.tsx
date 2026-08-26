@@ -2,7 +2,7 @@ import type { Metadata, Viewport } from "next";
 import Script from "next/script";
 import { Bai_Jamjuree, IBM_Plex_Sans_Thai, Outfit } from "next/font/google";
 import { loadSeoDefaults } from "@/lib/seo/seo-defaults";
-import { absoluteUrl, defaultOgImagePath } from "@/lib/seo/meta";
+import { absoluteUrl, defaultOgImagePath, DEFAULT_OG_IMAGE_HEIGHT, DEFAULT_OG_IMAGE_WIDTH } from "@/lib/seo/meta";
 import { siteConfig } from "@/lib/site-config";
 import { themeInitScript } from "@/lib/theme";
 import "./globals.css";
@@ -47,7 +47,14 @@ export async function generateMetadata(): Promise<Metadata> {
       locale: "th_TH",
       type: "website",
       siteName: siteConfig.name,
-      images: [{ url: ogImage, alt: siteConfig.name }],
+      images: [
+        {
+          url: ogImage,
+          alt: siteConfig.name,
+          width: DEFAULT_OG_IMAGE_WIDTH,
+          height: DEFAULT_OG_IMAGE_HEIGHT,
+        },
+      ],
     },
     twitter: {
       card: "summary_large_image",

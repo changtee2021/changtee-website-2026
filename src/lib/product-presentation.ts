@@ -1836,8 +1836,7 @@ export function getProductPresentation(
   ];
 
   const seoTitle =
-    override?.seoTitle ??
-    `${product.name} ${category.name} | ${siteConfig.name}`;
+    override?.seoTitle ?? `${product.name} ${category.name}`;
 
   const seoDescription =
     override?.seoDescription ??

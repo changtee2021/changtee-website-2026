@@ -134,13 +134,12 @@ export function Hero() {
 
               <motion.h1
                 {...enter(1)}
-                className="mt-3 font-modern text-4xl font-semibold leading-[1.12] tracking-tight sm:text-5xl lg:text-[3.25rem]"
+                className="mt-3 font-display text-4xl font-semibold leading-[1.12] tracking-tight sm:text-5xl lg:text-[3.25rem]"
               >
-                A beautiful home
-                <span className="block">starts with the right curtains</span>
-              </motion.h1>
-              <p className="mt-2 font-sans text-lg font-normal leading-snug text-white/90 sm:text-xl">
                 แต่งบ้านให้สวย เริ่มที่ผ้าม่านที่ใช่
+              </motion.h1>
+              <p className="mt-2 font-modern text-lg font-normal leading-snug text-white/85 sm:text-xl">
+                A beautiful home starts with the right curtains
               </p>
 
               <motion.div {...enter(2)} className="mt-6 flex flex-wrap gap-3">

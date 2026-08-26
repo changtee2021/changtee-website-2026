@@ -413,7 +413,7 @@ export function PortfolioIndex({
         image="/images/generated/ct-hero-portfolio.webp"
         imageAlt="ห้องนั่งเล่นคอนโดพร้อมผ้าม่านทึบแสงและผ้าโปร่งที่ติดตั้งโดยช่างตี๋"
         eyebrow={`${siteConfig.nameEn} · Install gallery`}
-        title="Portfolio Gallery"
+        title="ผลงานติดตั้งผ้าม่าน"
         description="รวมงานติดตั้งลูกค้า — ค้นหาตามสินค้า สถานที่ หรือม่านตรงกับใจคุณ"
         aside={<PortfolioHeroCovers items={published} />}
         align="bottom"

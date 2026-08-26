@@ -23,6 +23,17 @@
 
 - [Lead operations](operations/leads.md)
 
+## SEO / การค้นหาและคู่แข่ง
+
+- [SEO audit](seo/SEO-AUDIT.md) — scores, indexing strategy, P0–P3 issues
+- [Implementation plan](seo/SEO-IMPLEMENTATION-PLAN.md) — phased fixes and verification
+- [Website health](seo/WEBSITE-HEALTH.md) — performance, reliability, CWV risks
+- [Competitor SEO gap](seo/COMPETITOR-SEO-GAP.md)
+- [AI search competitive analysis](seo/AI-SEARCH-COMPETITIVE-ANALYSIS.md)
+- [Search trend radar](seo/SEARCH-TREND-RADAR.md)
+- [Competitive SEO roadmap (90 days)](seo/COMPETITIVE-SEO-ROADMAP.md)
+- [Final report (before/after)](seo/SEO-FINAL-REPORT.md) — updated after implementation
+
 ## Decisions and brand / ข้อตกลงและแบรนด์
 
 - [Decision sheet](decisions/DECISION-SHEET.md)

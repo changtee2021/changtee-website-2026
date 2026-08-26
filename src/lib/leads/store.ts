@@ -98,8 +98,14 @@ export async function createLead(
       });
       return lead;
     }
-  } catch {
-    // Use the local store only when explicitly permitted.
+    if (error) {
+      console.error("createLead supabase", error.message, error.code);
+    }
+  } catch (err) {
+    console.error(
+      "createLead",
+      err instanceof Error ? err.message : "unknown error",
+    );
   }
 
   if (!allowLocalLeadFallback()) persistenceUnavailable();

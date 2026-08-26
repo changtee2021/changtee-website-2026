@@ -6,13 +6,20 @@ import {
   Check,
   Clock,
   Files,
+  Loader2,
   Presentation,
   UserRound,
   X,
   type LucideIcon,
 } from "lucide-react";
 import { PdpaConsentField } from "@/components/forms/PdpaConsentField";
-import { VisitDocumentsField } from "@/components/forms/VisitDocumentsField";
+import {
+  VisitDocumentsField,
+  revokeVisitDocs,
+  type VisitDocItem,
+} from "@/components/forms/VisitDocumentsField";
+import { readJsonResponse } from "@/lib/leads/site-media";
+import { attachVisitDocuments } from "@/lib/visits/visit-media";
 import { MarketingConsentField } from "@/components/forms/MarketingConsentField";
 import {
   isTurnstileEnabled,
@@ -43,12 +50,13 @@ export function ProductPresentationForm() {
   const formRef = useRef<HTMLFormElement>(null);
   const minDate = useMemo(() => todayInputValue(), []);
   const [pending, setPending] = useState(false);
+  const [pendingLabel, setPendingLabel] = useState("กำลังส่งคำขอ...");
   const [error, setError] = useState<string | null>(null);
   const [successOpen, setSuccessOpen] = useState(false);
   const [session, setSession] = useState<(typeof VISIT_SESSIONS)[number]>("morning");
   const [venue, setVenue] = useState<PresentationVenueId>("company");
   const [products, setProducts] = useState<string[]>([]);
-  const [documentNames, setDocumentNames] = useState<string[]>([]);
+  const [documents, setDocuments] = useState<VisitDocItem[]>([]);
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
   const onTurnstile = useCallback((token: string | null) => {
     setTurnstileToken(token);
@@ -68,6 +76,7 @@ export function ProductPresentationForm() {
 
   async function onSubmit(formData: FormData) {
     setPending(true);
+    setPendingLabel("กำลังส่งคำขอ...");
     setError(null);
 
     if (isTurnstileEnabled() && !turnstileToken) {
@@ -81,6 +90,12 @@ export function ProductPresentationForm() {
       return;
     }
 
+    if (documents.length === 0) {
+      setError("กรุณาแนบ Company Profile หรือนามบัตร");
+      setPending(false);
+      return;
+    }
+
     formData.set("bookingKind", "product-presentation");
     formData.set("session", session);
     formData.set("presentationVenue", venue);
@@ -90,17 +105,24 @@ export function ProductPresentationForm() {
     for (const name of products) formData.append("products", name);
 
     try {
+      setPendingLabel("กำลังอัปโหลดไฟล์...");
+      await attachVisitDocuments(
+        formData,
+        documents.map((item) => item.file),
+      );
+      setPendingLabel("กำลังส่งคำขอ...");
       const res = await fetch("/api/factory-visits", {
         method: "POST",
         body: formData,
       });
-      const json = (await res.json()) as { error?: string };
+      const json = await readJsonResponse<{ error?: string }>(res);
       if (!res.ok) throw new Error(json.error || "ส่งคำขอไม่สำเร็จ");
       formRef.current?.reset();
       setSession("morning");
       setVenue("company");
       setProducts([]);
-      setDocumentNames([]);
+      revokeVisitDocs(documents);
+      setDocuments([]);
       setTurnstileToken(null);
       setSuccessOpen(true);
     } catch (err) {
@@ -359,7 +381,7 @@ export function ProductPresentationForm() {
         </Section>
 
         <Section title="เอกสารและหมายเหตุ" icon={Files}>
-          <VisitDocumentsField fileNames={documentNames} onFileNames={setDocumentNames} />
+          <VisitDocumentsField files={documents} onFiles={setDocuments} />
           <label className="block">
             <span className="mb-1 block text-sm font-medium text-ink">
               หมายเหตุเพิ่มเติม
@@ -386,9 +408,11 @@ export function ProductPresentationForm() {
         <button
           type="submit"
           disabled={pending}
-          className="min-h-11 w-full rounded-full bg-brand-red px-6 py-3 text-sm font-semibold text-white transition hover:bg-brand-red-soft disabled:opacity-60 sm:w-auto"
+          aria-busy={pending}
+          className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-full bg-brand-red px-6 py-3 text-sm font-semibold text-white transition hover:bg-brand-red-soft disabled:opacity-60 sm:w-auto"
         >
-          {pending ? "กำลังส่งคำขอ..." : "ส่งคำขอนัดนำเสนอ"}
+          {pending ? <Loader2 className="size-4 animate-spin" aria-hidden /> : null}
+          {pending ? pendingLabel : "ส่งคำขอนัดนำเสนอ"}
         </button>
         <p className="text-xs text-muted">
           ทีมงานจะโทรยืนยันวันเวลาก่อนเข้าพบ — คำขอนี้ยังไม่ใช่การยืนยันการนัด

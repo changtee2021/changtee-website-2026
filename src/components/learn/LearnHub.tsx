@@ -46,12 +46,12 @@ export function LearnHub() {
       <PageHero
         image="/images/generated/ct-hero-learn.webp"
         imageAlt="ทีมช่างตี๋สอนลูกค้าเลือกผ้าม่านและตัวอย่างวัสดุในโชว์รูม"
-        eyebrow="ใหม่ · คัมภีร์ช่างตี๋"
+        eyebrow="ใหม่ · คัมภีร์ช่างตี๋ · Learning Room"
         title={
           <>
-            Learning Room
+            ห้องเรียนรู้ผ้าม่าน
             <span className="mt-1 block text-brand-red-soft">
-              Curtain know-how the shop really uses
+              ความรู้ที่ร้านใช้คุยกับลูกค้าจริง
             </span>
           </>
         }
