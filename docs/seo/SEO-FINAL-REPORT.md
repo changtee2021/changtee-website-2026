@@ -3,7 +3,39 @@
 **Date:** 26 Aug 2026  
 **Scope:** Documentation + P0/P1 code changes only (per program plan)  
 **Domain:** `https://changtee-curtain.com`  
-**Verification environment:** `npm run dev` on `http://localhost:3000` (changes **not deployed** to production yet)
+**Verification environment:** Production deployed 26 Aug 2026 → `https://changtee-curtain.com`
+
+---
+
+## Production Deploy (26 Aug 2026)
+
+| Check | Result |
+| ----- | ------ |
+| PR merged | [#8](https://github.com/changtee2021/changtee-website-2026/pull/8) → `master` |
+| Vercel production | `https://changtee-curtain.com` (alias OK) |
+| `GET /api/public/health` | `{"ok":true,...}` |
+| `GET /sitemap.xml` | HTTP 200 (~157 URLs) |
+| Legacy URL 301 | Fixed via **middleware** (next.config Unicode paths returned 404 on Vercel) |
+| Thai H1 on `/` | Verified in production HTML |
+| OG 1536×1024 | Present on home |
+| `SearchAction` in JSON-LD | Absent |
+
+**Pending migration (apply on site Supabase project `pfwygxzwlteqjnnwiwmb`, not shared ERP):**
+
+- `supabase/migrations/20260825100000_site_page_views.sql` (analytics dashboard)
+- Prior launch migrations if not yet applied: `20260820153000_*`, `20260825040000_*`
+
+---
+
+## Owner Actions (NEEDS USER INPUT)
+
+1. ~~Deploy to production~~ **Done** (26 Aug 2026)
+2. **Apply analytics migration** on the Supabase project wired in Vercel (`pfwygxzwlteqjnnwiwmb` per health JSON)
+3. **Google Search Console** — submit `https://changtee-curtain.com/sitemap.xml`, request removal of legacy URLs, monitor coverage weekly
+4. **Google Business Profile** — NAP matches site footer, add photos, collect real reviews (no fake ratings)
+5. **Bing Webmaster Tools** — verify site + sitemap
+6. Confirm **`NEXT_PUBLIC_SITE_URL=https://changtee-curtain.com`** on Vercel production (should already be set)
+7. Optional: GA4 / Meta Pixel IDs in Vercel integrations settings
 
 ---
 
@@ -11,7 +43,7 @@
 
 The SEO program delivered **8 audit/competitive documents** under `docs/seo/` and implemented **all planned P0+P1 fixes** in `changtee-website`. On-site SEO readiness improved from **~68/100 to ~82/100** (estimated; no Search Console access).
 
-Production deploy + owner actions (GSC, GBP, Bing) are still required for full index consolidation and local/AI visibility.
+Production deploy completed 26 Aug 2026. Owner actions (GSC, GBP, Bing, analytics migration) remain for full index consolidation and local/AI visibility.
 
 ---
 
@@ -161,14 +193,14 @@ Production deploy + owner actions (GSC, GBP, Bing) are still required for full i
 
 ---
 
-## Owner Actions (NEEDS USER INPUT)
+## Owner checklist (copy to ops)
 
-1. **Deploy** this branch to production (`ขึ้น master` / Vercel prod when ready)
-2. **Google Search Console** — submit sitemap, request removal of legacy URLs, monitor coverage
-3. **Google Business Profile** — NAP consistency, photos, real reviews
-4. **Bing Webmaster Tools**
-5. Confirm **`NEXT_PUBLIC_SITE_URL=https://changtee-curtain.com`** on Vercel production
-6. Optional: GA4 / Meta Pixel IDs in Vercel if not already set
+- [ ] Run migration `20260825100000_site_page_views.sql` on production Supabase
+- [ ] GSC: add property `changtee-curtain.com`, submit sitemap, inspect legacy URL coverage
+- [ ] GSC: URL removal or wait for 301 + recrawl on `/หน้าแรก/*`, `/ผลงาน/*`, `/ผ้าม่านไฟฟ้า/*`
+- [ ] GBP: verify phone/address/hours vs `/contact`
+- [ ] Bing Webmaster: verify + sitemap
+- [ ] After 2 weeks: compare brand SERP vs baseline in `SEO-AUDIT.md`
 
 ---
 
@@ -203,4 +235,4 @@ src/lib/admin-host.ts
 src/middleware.ts
 ```
 
-**Hold:** No commit, push, or production deploy unless explicitly requested.
+**Shipped:** PR #8 merged; production deploy 26 Aug 2026.
