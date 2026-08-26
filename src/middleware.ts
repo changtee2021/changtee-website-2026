@@ -22,6 +22,29 @@ import {
 import { PREVIEW_QUERY } from "@/lib/editor/protocol";
 import { verifyPreviewToken } from "@/lib/editor/preview-token";
 
+/** Legacy CMS paths (Unicode) — next.config redirects miss some hosts; middleware is authoritative. */
+function legacyMarketingRedirect(pathname: string): string | null {
+  if (
+    pathname === "/หน้าแรก/60ff6a36e68a7c5a4ca8c54e" ||
+    pathname.startsWith("/หน้าแรก/")
+  ) {
+    return "/";
+  }
+  if (
+    pathname === "/ผลงาน/610e26deafee180012845be9" ||
+    pathname.startsWith("/ผลงาน/")
+  ) {
+    return "/portfolio";
+  }
+  if (
+    pathname === "/ผ้าม่านไฟฟ้า/68c0e9ae557b0b00135630b4" ||
+    pathname.startsWith("/ผ้าม่านไฟฟ้า/")
+  ) {
+    return "/products/motorized/curtain";
+  }
+  return null;
+}
+
 function withAdminHeaders(
   request: NextRequest,
   pathname: string,
@@ -127,6 +150,15 @@ async function withPreviewHeaders(
 export async function middleware(request: NextRequest) {
   const host = request.headers.get("host") || "";
   const { pathname, search } = request.nextUrl;
+
+  const legacyDest = legacyMarketingRedirect(pathname);
+  if (legacyDest && !pathname.startsWith("/api/") && !isAdminHostname(host)) {
+    const url = request.nextUrl.clone();
+    url.pathname = legacyDest;
+    url.search = search;
+    return NextResponse.redirect(url, 308);
+  }
+
   const sessionToken = request.cookies.get(ADMIN_SESSION_COOKIE)?.value;
   const sessionOk = (await verifyAdminSessionToken(sessionToken)) !== null;
   const authOn = isAdminAuthEnforced();
