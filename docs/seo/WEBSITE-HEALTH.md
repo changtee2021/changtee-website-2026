@@ -82,7 +82,7 @@
 ## Top Problems (ranked)
 
 1. **Client-rendered hub H1/content** — crawlers see SSR shell then hydrate (acceptable but not ideal)
-2. **CMS-dependent sitemap** — fixed with fallback (P0)
+2. **CMS-dependent sitemap** — fixed with fallback (P0) + ISR/timeout after an intermittent 500 on 26 Aug (see SEO-FINAL-REPORT.md)
 3. **Preview deployment index leak** — fixed with middleware noindex (P1)
 4. **Legacy URL equity split** — fixed with 301 table (P0)
 

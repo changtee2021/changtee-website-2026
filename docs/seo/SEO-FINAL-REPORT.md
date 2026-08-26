@@ -94,6 +94,22 @@ Production deploy completed 26 Aug 2026. Owner actions (GSC, GBP, Bing, iTop Plu
 - Falls back to `DEMO_BLOG` / `DEMO_PORTFOLIO` on CMS failure
 - **Verified:** `GET /sitemap.xml` → HTTP 200, **157 URLs**
 
+#### Follow-up 26 Aug 2026 (evening) — intermittent 500 fixed
+
+`GET /sitemap.xml` returned HTTP 500 for several minutes with no deploy in between,
+then recovered on its own. The route was dynamic (`Cache-Control: max-age=0,
+must-revalidate`), so every CDN cache miss did two live Supabase reads. `try/catch`
+covers a CMS *error* but not a hanging call, which runs to the function timeout and
+reaches crawlers as 5xx.
+
+- `export const revalidate = 600` — sitemap is now prerendered and refreshed in the
+  background, so a crawler request never waits on the CMS
+- CMS reads run in parallel behind a 3 s timeout (`readCmsWithinTimeout`) and fall
+  back to seed content
+- **Verified in production:** build reports `/sitemap.xml` as static (`10m` revalidate);
+  10 cache-busted requests → 200 in ~0.15 s each, even on `X-Vercel-Cache: MISS`;
+  all **157** sitemap URLs return 200
+
 ---
 
 ## P1 — Completed
