@@ -22,23 +22,24 @@ import {
 import { PREVIEW_QUERY } from "@/lib/editor/protocol";
 import { verifyPreviewToken } from "@/lib/editor/preview-token";
 
-/** Legacy CMS paths (Unicode) — next.config redirects miss some hosts; middleware is authoritative. */
+/** Legacy CMS paths — match Mongo-style IDs (ASCII-safe) plus Unicode prefixes. */
 function legacyMarketingRedirect(pathname: string): string | null {
-  if (
-    pathname === "/หน้าแรก/60ff6a36e68a7c5a4ca8c54e" ||
-    pathname.startsWith("/หน้าแรก/")
-  ) {
+  let path = pathname;
+  try {
+    if (path.includes("%")) path = decodeURIComponent(path);
+  } catch {
+    /* keep pathname */
+  }
+
+  if (path.includes("60ff6a36e68a7c5a4ca8c54e") || path.startsWith("/หน้าแรก/")) {
     return "/";
   }
-  if (
-    pathname === "/ผลงาน/610e26deafee180012845be9" ||
-    pathname.startsWith("/ผลงาน/")
-  ) {
+  if (path.includes("610e26deafee180012845be9") || path.startsWith("/ผลงาน/")) {
     return "/portfolio";
   }
   if (
-    pathname === "/ผ้าม่านไฟฟ้า/68c0e9ae557b0b00135630b4" ||
-    pathname.startsWith("/ผ้าม่านไฟฟ้า/")
+    path.includes("68c0e9ae557b0b00135630b4") ||
+    path.startsWith("/ผ้าม่านไฟฟ้า/")
   ) {
     return "/products/motorized/curtain";
   }
