@@ -34,6 +34,7 @@
 - [Competitive SEO roadmap (90 days)](seo/COMPETITIVE-SEO-ROADMAP.md)
 - [Final report (before/after)](seo/SEO-FINAL-REPORT.md) — updated after implementation
 - [Marketing URL handoff (Ads / iTop Plus)](seo/MARKETING-URL-HANDOFF.md) — Final URL, sitelinks, NAP
+- [Legacy URL + keyword map](seo/LEGACY-URL-MAP.md) — old CMS paths → new pages
 
 ## Decisions and brand / ข้อตกลงและแบรนด์
 

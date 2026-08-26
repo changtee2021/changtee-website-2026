@@ -39,6 +39,9 @@ Base: `https://changtee-curtain.com`
 | Label (TH) | Path | When to use |
 | ---------- | ---- | ----------- |
 | สินค้าและบริการ | `/products` | Generic brand / awareness |
+| ม่านญี่ปุ่น | `/products/print-fabric/noren` | Japanese / noren campaigns |
+| ม่านพับ | `/products/curtain/roman` | Roman blind campaigns |
+| ฉากกั้นห้อง / กั้นแอร์ | `/products/pvc-partition` | PVC partition campaigns |
 | ผ้าม่าน | `/products/curtain` | Curtain campaigns |
 | ม่านม้วน | `/products/roller-blinds` | Roller / sunscreen |
 | มู่ลี่ | `/products/venetian-blinds` | Venetian |

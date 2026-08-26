@@ -32,6 +32,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     description: cat.summary,
     path: `/products/${cat.slug}`,
     image: cat.children[0] ? childImage(cat, cat.children[0]) : undefined,
+    keywords: [cat.name, cat.nameEn, ...cat.children.map((c) => c.name)],
   });
 }
 

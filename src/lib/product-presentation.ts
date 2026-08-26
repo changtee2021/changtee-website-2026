@@ -800,6 +800,17 @@ type PresentationOverride = Partial<
 
 /** Richer copy / SEO for a few flagship SKUs */
 export const PRODUCT_OVERRIDES: Partial<Record<string, PresentationOverride>> = {
+  "curtain/roman": {
+    seoTitle: "ม่านพับโรมัน",
+    seoKeywords: [
+      "ม่านพับ",
+      "ม่านพับโรมัน",
+      "roman blinds",
+      "ม่านโรมัน",
+      "ติดตั้งม่านพับ",
+      "ช่างตี๋ ผ้าม่าน",
+    ],
+  },
   "curtain/s-wave": {
     seoKeywords: [
       "ม่านลอน",
@@ -1252,6 +1263,15 @@ export const PRODUCT_OVERRIDES: Partial<Record<string, PresentationOverride>> = 
     roomStyleIds: ["office-clean", "modern-minimal"],
   },
   "print-fabric/noren": {
+    seoTitle: "ม่านญี่ปุ่น",
+    seoKeywords: [
+      "ม่านญี่ปุ่น",
+      "ผ้าม่านญี่ปุ่น",
+      "noren",
+      "ม่านหน้าร้าน",
+      "ม่านพิมพ์โลโก้",
+      "ช่างตี๋ ผ้าม่าน",
+    ],
     specs: [
       { label: "รูปแบบ", value: "ม่านประตูสไตล์ญี่ปุ่น (Noren)" },
       { label: "ลาย", value: "พิมพ์โลโก้หรือลายตามไฟล์" },
