@@ -11,6 +11,32 @@ import type { PortfolioItem } from "@/lib/cms/portfolio-demo";
 
 type SitemapEntry = MetadataRoute.Sitemap[number];
 
+/** Serve cached XML and refresh in the background — crawlers must never wait on the CMS. */
+export const revalidate = 600;
+
+const CMS_READ_TIMEOUT_MS = 3000;
+
+/**
+ * A hanging CMS read runs the route to its function timeout, which crawlers see
+ * as a 5xx sitemap. Give up early and fall back to the seed content instead.
+ */
+async function readCmsWithinTimeout<T>(
+  collection: "portfolio" | "blog",
+): Promise<T[] | null> {
+  return Promise.race([
+    readCmsCollection<T>(collection).catch((err) => {
+      console.error("sitemap: CMS read failed, using seed fallback", {
+        collection,
+        err,
+      });
+      return null;
+    }),
+    new Promise<null>((resolve) =>
+      setTimeout(() => resolve(null), CMS_READ_TIMEOUT_MS),
+    ),
+  ]);
+}
+
 function entry(
   base: string,
   path: string,
@@ -68,14 +94,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ),
   ]);
 
-  let remotePortfolio: PortfolioItem[] | null = null;
-  let remoteBlog: BlogPost[] | null = null;
-  try {
-    remotePortfolio = await readCmsCollection<PortfolioItem>("portfolio");
-    remoteBlog = await readCmsCollection<BlogPost>("blog");
-  } catch (err) {
-    console.error("sitemap: CMS read failed, using demo fallback", err);
-  }
+  const [remotePortfolio, remoteBlog] = await Promise.all([
+    readCmsWithinTimeout<PortfolioItem>("portfolio"),
+    readCmsWithinTimeout<BlogPost>("blog"),
+  ]);
   const portfolioItems = publishedPortfolio(remotePortfolio ?? DEMO_PORTFOLIO);
   const blogItems = publishedBlog(remoteBlog ?? DEMO_BLOG);
 
