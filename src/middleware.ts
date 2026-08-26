@@ -23,30 +23,7 @@ import {
 } from "@/lib/admin-session";
 import { PREVIEW_QUERY } from "@/lib/editor/protocol";
 import { verifyPreviewToken } from "@/lib/editor/preview-token";
-
-/** Legacy CMS paths — match Mongo-style IDs (ASCII-safe) plus Unicode prefixes. */
-function legacyMarketingRedirect(pathname: string): string | null {
-  let path = pathname;
-  try {
-    if (path.includes("%")) path = decodeURIComponent(path);
-  } catch {
-    /* keep pathname */
-  }
-
-  if (path.includes("60ff6a36e68a7c5a4ca8c54e") || path.startsWith("/หน้าแรก/")) {
-    return "/";
-  }
-  if (path.includes("610e26deafee180012845be9") || path.startsWith("/ผลงาน/")) {
-    return "/portfolio";
-  }
-  if (
-    path.includes("68c0e9ae557b0b00135630b4") ||
-    path.startsWith("/ผ้าม่านไฟฟ้า/")
-  ) {
-    return "/products/motorized/curtain";
-  }
-  return null;
-}
+import { legacyCmsRedirect } from "@/lib/legacy-cms-redirects";
 
 function withAdminHeaders(
   request: NextRequest,
@@ -154,7 +131,7 @@ export async function middleware(request: NextRequest) {
   const host = request.headers.get("host") || "";
   const { pathname, search } = request.nextUrl;
 
-  const legacyDest = legacyMarketingRedirect(pathname);
+  const legacyDest = legacyCmsRedirect(pathname);
   if (legacyDest && !pathname.startsWith("/api/") && !isAdminHostname(host)) {
     const url = request.nextUrl.clone();
     url.pathname = legacyDest;

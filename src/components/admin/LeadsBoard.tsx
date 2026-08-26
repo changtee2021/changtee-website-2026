@@ -35,6 +35,7 @@ import {
   LEAD_STATUS_LABELS,
   LEAD_STATUS_STYLES,
   PRODUCT_TYPES,
+  REFERRAL_SOURCES,
   type LeadStatus,
   type QuoteLead,
 } from "@/lib/leads/types";
@@ -65,6 +66,17 @@ const PRODUCT_CHART_COLORS = [
   "#7c3aed",
   "#0891b2",
   "#be185d",
+];
+
+const REFERRAL_CHART_COLORS = [
+  "#4285f4",
+  "#1877f2",
+  "#e1306c",
+  "#06c755",
+  "#f59e0b",
+  "#6366f1",
+  "#64748b",
+  "#94a3b8",
 ];
 
 function dayKey(iso: string): string {
@@ -179,6 +191,15 @@ export function LeadsBoard() {
     return map;
   }, [dateScoped]);
 
+  const referralCounts = useMemo(() => {
+    const map = new Map<string, number>();
+    for (const lead of dateScoped) {
+      const key = lead.referralSource?.trim() || "ไม่ระบุ";
+      map.set(key, (map.get(key) || 0) + 1);
+    }
+    return map;
+  }, [dateScoped]);
+
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
     return dateScoped.filter((l) => {
@@ -225,6 +246,24 @@ export function LeadsBoard() {
         .sort((a, b) => b.value - a.value),
     [productCounts],
   );
+
+  const referralChart = useMemo(() => {
+    const known = new Set<string>(REFERRAL_SOURCES);
+    const rows: { name: string; value: number }[] = REFERRAL_SOURCES.map((name) => ({
+      name,
+      value: referralCounts.get(name) || 0,
+    }));
+    for (const [name, value] of referralCounts) {
+      if (!known.has(name) && name !== "ไม่ระบุ") {
+        rows.push({ name, value });
+      }
+    }
+    const unspecified = referralCounts.get("ไม่ระบุ") || 0;
+    if (unspecified > 0) {
+      rows.push({ name: "ไม่ระบุ", value: unspecified });
+    }
+    return rows.filter((x) => x.value > 0).sort((a, b) => b.value - a.value);
+  }, [referralCounts]);
 
   const wonThisMonth = useMemo(() => {
     const now = new Date();
@@ -575,7 +614,7 @@ export function LeadsBoard() {
 
       {/* Charts */}
       <section className="space-y-4">
-        <div className="grid gap-4 md:grid-cols-2">
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
           <div className="rounded-2xl border border-line bg-white p-5 shadow-sm">
             <h3 className="font-display text-base font-semibold text-navy">ตามสถานะ</h3>
             <p className="text-xs text-muted">จำนวนคำขอในแต่ละสถานะ</p>
@@ -627,6 +666,50 @@ export function LeadsBoard() {
                   />
                 </PieChart>
               </ResponsiveContainer>
+            </div>
+          </div>
+
+          <div className="rounded-2xl border border-line bg-white p-5 shadow-sm md:col-span-2 xl:col-span-1">
+            <h3 className="font-display text-base font-semibold text-navy">
+              หาเราเจอจากที่ไหน
+            </h3>
+            <p className="text-xs text-muted">ช่องทางที่ลูกค้าเลือกในฟอร์มขอใบเสนอราคา</p>
+            <div className="mt-3 h-52">
+              {referralChart.length === 0 ? (
+                <p className="flex h-full items-center justify-center text-sm text-muted">
+                  ยังไม่มีข้อมูลในช่วงที่เลือก
+                </p>
+              ) : (
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={referralChart} layout="vertical" margin={{ left: 4, right: 8 }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#e5eaf1" horizontal={false} />
+                    <XAxis
+                      type="number"
+                      allowDecimals={false}
+                      tick={{ fontSize: 11 }}
+                      stroke="#94a3b8"
+                    />
+                    <YAxis
+                      type="category"
+                      dataKey="name"
+                      width={108}
+                      tick={{ fontSize: 10 }}
+                      stroke="#94a3b8"
+                    />
+                    <Tooltip
+                      contentStyle={{ borderRadius: 12, borderColor: "#d7dee8", fontSize: 12 }}
+                    />
+                    <Bar dataKey="value" name="จำนวน" radius={[0, 6, 6, 0]}>
+                      {referralChart.map((entry, i) => (
+                        <Cell
+                          key={entry.name}
+                          fill={REFERRAL_CHART_COLORS[i % REFERRAL_CHART_COLORS.length]}
+                        />
+                      ))}
+                    </Bar>
+                  </BarChart>
+                </ResponsiveContainer>
+              )}
             </div>
           </div>
         </div>
