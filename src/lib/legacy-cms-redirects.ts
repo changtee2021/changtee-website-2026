@@ -121,11 +121,14 @@ const LEGACY_RULES: LegacyRule[] = [
 export function legacyCmsRedirect(pathname: string): string | null {
   const path = decodePathname(pathname);
 
+  // Never rewrite valid App Router marketing URLs (e.g. /products/curtain/roman).
+  if (isKnownAppPath(path)) return null;
+
   for (const rule of LEGACY_RULES) {
     if (rule.match(path)) return rule.destination;
   }
 
-  if (MONGO_ID_SUFFIX.test(path) && !isKnownAppPath(path)) {
+  if (MONGO_ID_SUFFIX.test(path)) {
     return "/products";
   }
 
