@@ -15,6 +15,7 @@ import {
   quoteProductType,
 } from "@/lib/product-catalog";
 import { getCategoryHighlights } from "@/lib/product-content";
+import { CATEGORY_DEFAULTS } from "@/lib/product-presentation";
 import { pageMetadata } from "@/lib/seo/meta";
 
 type Props = { params: Promise<{ category: string }> };
@@ -32,7 +33,14 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     description: cat.summary,
     path: `/products/${cat.slug}`,
     image: cat.children[0] ? childImage(cat, cat.children[0]) : undefined,
-    keywords: [cat.name, cat.nameEn, ...cat.children.map((c) => c.name)],
+    keywords: Array.from(
+      new Set([
+        cat.name,
+        cat.nameEn,
+        ...cat.children.map((c) => c.name),
+        ...(CATEGORY_DEFAULTS[cat.slug]?.baseKeywords ?? []),
+      ]),
+    ),
   });
 }
 
