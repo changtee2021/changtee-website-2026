@@ -17,7 +17,7 @@ export function ChangteeWordmark({
         x="0"
         y="28"
         fill="currentColor"
-        fontFamily="var(--font-display), Bai Jamjuree, IBM Plex Sans Thai, sans-serif"
+        fontFamily="var(--font-display), Prompt, IBM Plex Sans Thai, sans-serif"
         fontSize="28"
         fontWeight="700"
         letterSpacing="0.02em"

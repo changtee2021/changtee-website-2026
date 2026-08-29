@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 import Link from "next/link";
-import { Bai_Jamjuree, IBM_Plex_Sans_Thai } from "next/font/google";
+import { IBM_Plex_Sans_Thai, Prompt } from "next/font/google";
 import { reportClientError } from "@/lib/security/report-client-error";
 
 const sans = IBM_Plex_Sans_Thai({
@@ -10,7 +10,7 @@ const sans = IBM_Plex_Sans_Thai({
   weight: ["400", "500", "600", "700"],
 });
 
-const display = Bai_Jamjuree({
+const display = Prompt({
   subsets: ["thai", "latin"],
   weight: ["500", "600", "700"],
 });

@@ -7,12 +7,13 @@ import {
   sanitizeAnalyticsPath,
   sanitizeId,
 } from "@/lib/analytics/server";
+import { ANALYTICS_CLICK_LABELS } from "@/lib/analytics/labels";
 import { isRateLimited } from "@/lib/security/rate-limit";
 import { createServiceSupabase } from "@/lib/supabase/server";
 
 export const runtime = "nodejs";
 
-const CLICK_NAMES = new Set(["quote", "line", "phone", "catalog"]);
+const CLICK_NAMES = new Set(Object.keys(ANALYTICS_CLICK_LABELS));
 
 export async function POST(request: Request) {
   if (

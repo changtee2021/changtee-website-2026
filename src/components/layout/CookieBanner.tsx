@@ -86,7 +86,7 @@ export function CookieBanner() {
   return (
     <div
       data-print-hide
-      className="pointer-events-none fixed inset-x-0 bottom-[calc(5.5rem+env(safe-area-inset-bottom,0px))] z-50 flex justify-start p-3 lg:bottom-5 lg:left-5 lg:right-auto lg:p-0"
+      className="pointer-events-none fixed inset-x-0 bottom-[max(1rem,env(safe-area-inset-bottom,0px))] z-40 flex justify-start p-3 pr-20 lg:bottom-5 lg:left-5 lg:right-auto lg:p-0"
     >
       <div className="pointer-events-auto w-full max-w-md rounded-2xl border border-white/50 bg-white/60 p-4 shadow-lg shadow-navy/10 backdrop-blur-xl sm:w-[24rem]">
         {view === "banner" ? (

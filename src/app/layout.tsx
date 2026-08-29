@@ -1,6 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import Script from "next/script";
-import { Bai_Jamjuree, IBM_Plex_Sans_Thai, Outfit } from "next/font/google";
+import { IBM_Plex_Sans_Thai, Outfit, Prompt } from "next/font/google";
 import { loadSeoDefaults } from "@/lib/seo/seo-defaults";
 import { absoluteUrl, defaultOgImagePath, DEFAULT_OG_IMAGE_HEIGHT, DEFAULT_OG_IMAGE_WIDTH } from "@/lib/seo/meta";
 import { siteConfig } from "@/lib/site-config";
@@ -13,7 +13,7 @@ const sans = IBM_Plex_Sans_Thai({
   weight: ["400", "500", "600", "700"],
 });
 
-const display = Bai_Jamjuree({
+const display = Prompt({
   variable: "--font-display-family",
   subsets: ["thai", "latin"],
   weight: ["500", "600", "700"],
