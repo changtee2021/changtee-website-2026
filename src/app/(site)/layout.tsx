@@ -1,7 +1,6 @@
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { SiteFooter } from "@/components/layout/SiteFooter";
 import { FloatingActions } from "@/components/layout/FloatingActions";
-import { MobileDock } from "@/components/layout/MobileDock";
 import { CookieBanner } from "@/components/layout/CookieBanner";
 import { ConsentAwareScripts } from "@/components/layout/ConsentAwareScripts";
 import { SiteAnalyticsBeacon } from "@/components/layout/SiteAnalyticsBeacon";
@@ -14,7 +13,7 @@ export default function SiteLayout({
 }>) {
   return (
     <SitePreviewRoot>
-      <div className="flex min-h-full flex-col pb-[calc(5.5rem+env(safe-area-inset-bottom,0px))] lg:pb-0">
+      <div className="flex min-h-full flex-col">
         <ConsentAwareScripts />
         <SiteAnalyticsBeacon />
         <a
@@ -29,7 +28,6 @@ export default function SiteLayout({
         </main>
         <SiteFooter />
         <FloatingActions />
-        <MobileDock />
         <CookieBanner />
       </div>
     </SitePreviewRoot>

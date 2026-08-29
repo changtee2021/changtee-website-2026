@@ -123,7 +123,7 @@ export function Hero() {
 
           <div className="pointer-events-none absolute inset-0 z-[2] bg-gradient-to-b from-navy/55 via-navy/15 to-navy/80 sm:bg-gradient-to-r sm:from-navy/75 sm:via-navy/30 sm:to-navy/20" />
 
-          <div className="absolute inset-0 z-[3] flex flex-col justify-end px-6 pb-28 pt-28 sm:justify-center sm:px-10 sm:pb-16 sm:pt-32 lg:px-16">
+          <div className="absolute inset-0 z-[3] flex flex-col justify-end px-6 pb-16 pt-28 sm:justify-center sm:px-10 sm:pb-16 sm:pt-32 lg:px-16">
             <div className="max-w-2xl">
               <motion.p
                 {...enter(0)}
@@ -186,7 +186,7 @@ export function Hero() {
           ) : null}
 
           {len > 1 ? (
-            <div className="absolute bottom-20 left-6 z-[4] flex items-center sm:bottom-6 sm:left-10 lg:left-16">
+            <div className="absolute bottom-6 left-6 z-[4] flex items-center sm:left-10 lg:left-16">
               {slides.map((slide, i) => (
                 <button
                   key={slide.id}

@@ -110,7 +110,7 @@ export const siteConfig = {
       label: "Facebook",
       href:
         process.env.NEXT_PUBLIC_FACEBOOK_URL ||
-        "https://www.facebook.com/ChangTeeCurtain",
+        "https://www.facebook.com/changteecurtains",
       icon: "/images/social/facebook.svg",
     },
     {
