@@ -9,7 +9,7 @@ import {
   Tablet,
   X,
 } from "lucide-react";
-import { useEffect, useState, type ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 import { EditorInspector } from "@/components/admin/editor/inspector/EditorInspector";
 import { EditorTopBar } from "@/components/admin/editor/EditorTopBar";
 import { PageTreeSidebar } from "@/components/admin/editor/PageTreeSidebar";
@@ -37,7 +37,13 @@ export function PageEditorShell({
 }) {
   const { dirty, fieldDirty, pageKey, selected } = useSectionDraft();
   const [treeOpen, setTreeOpen] = useState(false);
-  const [treeCollapsed, setTreeCollapsed] = useState(false);
+  const [treeCollapsed, setTreeCollapsed] = useState(() => {
+    try {
+      return window.localStorage.getItem("ctc-editor-tree-collapsed") === "1";
+    } catch {
+      return false;
+    }
+  });
   const [inspectorOpen, setInspectorOpen] = useState(true);
   const [closedWhileSelected, setClosedWhileSelected] = useState<string | null>(
     null,
@@ -49,16 +55,6 @@ export function PageEditorShell({
   const inspectorVisible = selectedKey
     ? closedWhileSelected !== selectedKey
     : inspectorOpen;
-
-  useEffect(() => {
-    try {
-      setTreeCollapsed(
-        window.localStorage.getItem("ctc-editor-tree-collapsed") === "1",
-      );
-    } catch {
-      /* ignore */
-    }
-  }, []);
 
   function persistTreeCollapsed(next: boolean) {
     setTreeCollapsed(next);

@@ -27,7 +27,9 @@ export function useAdminInboxBadges() {
   }, []);
 
   useEffect(() => {
-    void load();
+    const boot = window.setTimeout(() => {
+      void load();
+    }, 0);
     const onRefresh = () => {
       void load();
     };
@@ -40,6 +42,7 @@ export function useAdminInboxBadges() {
       void load();
     }, 60_000);
     return () => {
+      window.clearTimeout(boot);
       window.removeEventListener(ADMIN_INBOX_REFRESH_EVENT, onRefresh);
       window.removeEventListener("focus", onFocus);
       window.clearInterval(timer);

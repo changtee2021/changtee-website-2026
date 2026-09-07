@@ -31,10 +31,11 @@ export function InterviewDialog({
   onClose: () => void;
   onSubmit: (payload: { status: "interview_scheduled"; interviewAt: string }) => void;
 }) {
-  const [date, setDate] = useState(
-    toDateInput(application.interviewAt) ||
-      new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString().slice(0, 10),
-  );
+  const [date, setDate] = useState(() => {
+    const saved = toDateInput(application.interviewAt);
+    if (saved) return saved;
+    return new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
+  });
   const [time, setTime] = useState(toTimeInput(application.interviewAt));
   const [error, setError] = useState<string | null>(null);
 
