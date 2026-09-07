@@ -6,6 +6,7 @@ import { HomePanel } from "@/components/home/HomePanel";
 import { EditableSpot } from "@/components/preview/EditableSpot";
 import { useSectionValues } from "@/lib/cms/demo-store";
 import { HOME_SECTION_DEFAULTS } from "@/lib/cms/page-sections";
+import { useCmsText } from "@/lib/i18n/use-cms-text";
 
 export function ProductGrid() {
   const { values, enabled } = useSectionValues(
@@ -13,11 +14,12 @@ export function ProductGrid() {
     "products",
     HOME_SECTION_DEFAULTS.products,
   );
+  const { field } = useCmsText("products", values);
   if (!enabled) return null;
 
   const tiles = [1, 2, 3, 4, 5, 6, 7, 8].map((n) => ({
     n,
-    name: values[`tile${n}Name`] ?? "",
+    name: field(`tile${n}Name`),
     href: values[`tile${n}Href`] ?? "/products",
     image:
       values[`tile${n}Image`] ??
@@ -78,7 +80,7 @@ export function ProductGrid() {
                 }
               }}
             >
-              {values.allLinkLabel}
+              {field("allLinkLabel")}
             </Link>
           </EditableSpot>
         </div>

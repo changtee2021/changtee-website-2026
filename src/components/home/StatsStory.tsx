@@ -10,6 +10,8 @@ import { EditableSpot } from "@/components/preview/EditableSpot";
 import { useSectionValues } from "@/lib/cms/demo-store";
 import { HOME_SECTION_DEFAULTS } from "@/lib/cms/page-sections";
 import { siteConfig } from "@/lib/site-config";
+import { useCmsText } from "@/lib/i18n/use-cms-text";
+import { useI18n } from "@/lib/i18n/use-i18n";
 
 /** Logos + stats/story + how-it-works — one combined home panel. */
 export function StatsStory() {
@@ -23,28 +25,30 @@ export function StatsStory() {
     "howItWorks",
     HOME_SECTION_DEFAULTS.howItWorks,
   );
+  const { field } = useCmsText("stats", values);
+  const { t } = useI18n();
 
   const stats = [
     {
       valueKey: "stat1Value",
       labelKey: "stat1Label",
       value: values.stat1Value,
-      label: values.stat1Label,
+      label: field("stat1Label"),
     },
     {
       valueKey: "stat2Value",
       labelKey: "stat2Label",
       value: values.stat2Value,
-      label: values.stat2Label,
+      label: field("stat2Label"),
     },
     {
       valueKey: "stat3Value",
       labelKey: "stat3Label",
       value: values.stat3Value,
-      label: values.stat3Label,
+      label: field("stat3Label"),
     },
   ];
-  const showroomLabel = values.showroomLabel?.trim() || "โชว์รูม";
+  const showroomLabel = field("showroomLabel") || t("common.showroomAlt");
   // Always show the real shop showroom asset (stale CMS/localStorage often kept the old placeholder).
   const imageSrc = siteConfig.showroomImage;
 
@@ -84,7 +88,7 @@ export function StatsStory() {
                     <Image
                       key={imageSrc}
                       src={imageSrc}
-                      alt="โชว์รูมช่างตี๋ ผ้าม่าน พร้อมตัวอย่างผ้าให้เลือก"
+                      alt={t("common.showroomAlt")}
                       fill
                       className="object-cover"
                       sizes="(max-width: 768px) 100vw, 320px"
@@ -96,17 +100,17 @@ export function StatsStory() {
               <Reveal delayStep={2}>
                 <EditableSpot sectionId="stats" fieldKey="storyTitle">
                   <h2 className="font-display text-2xl font-semibold leading-snug text-navy md:text-3xl">
-                    {values.storyTitle}
+                    {field("storyTitle")}
                   </h2>
                 </EditableSpot>
                 <EditableSpot sectionId="stats" fieldKey="storyP1">
                   <p className="mt-4 text-sm leading-relaxed text-muted">
-                    {values.storyP1}
+                    {field("storyP1")}
                   </p>
                 </EditableSpot>
                 <EditableSpot sectionId="stats" fieldKey="storyP2">
                   <p className="mt-4 text-sm leading-relaxed text-muted">
-                    {values.storyP2}
+                    {field("storyP2")}
                   </p>
                 </EditableSpot>
                 <EditableSpot

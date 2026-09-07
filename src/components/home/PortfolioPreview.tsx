@@ -8,19 +8,21 @@ import { ChevronLeft, ChevronRight, MapPin } from "lucide-react";
 import { HomePanel } from "@/components/home/HomePanel";
 import { revealEase } from "@/components/home/Reveal";
 import { usePortfolioItems } from "@/lib/cms/demo-store";
-import { SPACE_TYPE_LABELS, type SpaceType } from "@/lib/cms/portfolio-demo";
+import { type SpaceType } from "@/lib/cms/portfolio-demo";
+import { useI18n } from "@/lib/i18n/use-i18n";
+import type { MessageKey } from "@/lib/i18n/messages";
 import { publishedPortfolio } from "@/lib/cms/public-content";
 
-const TABS: { key: "all" | SpaceType; label: string }[] = [
-  { key: "all", label: "ทั้งหมด" },
-  { key: "restaurant-cafe", label: SPACE_TYPE_LABELS["restaurant-cafe"] },
-  { key: "home-condo", label: SPACE_TYPE_LABELS["home-condo"] },
-  { key: "hotel-resort", label: SPACE_TYPE_LABELS["hotel-resort"] },
-  { key: "office-corp", label: SPACE_TYPE_LABELS["office-corp"] },
-  { key: "government", label: SPACE_TYPE_LABELS.government },
-  { key: "education", label: SPACE_TYPE_LABELS.education },
-  { key: "hospital", label: SPACE_TYPE_LABELS.hospital },
-  { key: "pharmacy", label: SPACE_TYPE_LABELS.pharmacy },
+const TABS: { key: "all" | SpaceType; labelKey: MessageKey }[] = [
+  { key: "all", labelKey: "portfolio.all" },
+  { key: "restaurant-cafe", labelKey: "space.restaurant-cafe" },
+  { key: "home-condo", labelKey: "space.home-condo" },
+  { key: "hotel-resort", labelKey: "space.hotel-resort" },
+  { key: "office-corp", labelKey: "space.office-corp" },
+  { key: "government", labelKey: "space.government" },
+  { key: "education", labelKey: "space.education" },
+  { key: "hospital", labelKey: "space.hospital" },
+  { key: "pharmacy", labelKey: "space.pharmacy" },
 ];
 
 export function PortfolioPreview({
@@ -30,6 +32,7 @@ export function PortfolioPreview({
   title?: ReactNode;
   subtitle?: ReactNode;
 } = {}) {
+  const { t } = useI18n();
   const stored = usePortfolioItems();
   const items = useMemo(() => publishedPortfolio(stored), [stored]);
   const [tab, setTab] = useState<(typeof TABS)[number]["key"]>("all");
@@ -63,16 +66,16 @@ export function PortfolioPreview({
         ) : null}
 
         <div className="flex flex-wrap gap-1.5 py-1 sm:gap-2">
-          {TABS.map((t) => (
+          {TABS.map((item) => (
             <button
-              key={t.key}
+              key={item.key}
               type="button"
-              onClick={() => setTab(t.key)}
+              onClick={() => setTab(item.key)}
               className={`relative rounded-full px-3 py-1.5 text-xs font-medium transition-colors sm:px-3.5 sm:py-2 sm:text-sm ${
-                tab === t.key ? "text-white" : "text-muted hover:text-navy"
+                tab === item.key ? "text-white" : "text-muted hover:text-navy"
               }`}
             >
-              {tab === t.key ? (
+              {tab === item.key ? (
                 <motion.span
                   layoutId="portfolio-tab"
                   className="absolute inset-0 rounded-full bg-navy"
@@ -83,7 +86,7 @@ export function PortfolioPreview({
                   }
                 />
               ) : null}
-              <span className="relative whitespace-nowrap">{t.label}</span>
+              <span className="relative whitespace-nowrap">{t(item.labelKey)}</span>
             </button>
           ))}
         </div>
@@ -131,7 +134,7 @@ export function PortfolioPreview({
                           <span className="truncate">{item.place}</span>
                         </span>
                         <span className="shrink-0 rounded-full bg-navy px-4 py-1.5 text-xs font-semibold text-white transition group-hover:bg-brand-red">
-                          ดูผลงาน
+                          {t("home.seeWorkShort")}
                         </span>
                       </div>
                     </div>
@@ -146,7 +149,7 @@ export function PortfolioPreview({
           <div className="flex gap-2">
             <button
               type="button"
-              aria-label="เลื่อนซ้าย"
+              aria-label={t("common.prev")}
               onClick={() => scrollBy(-1)}
               className="rounded-full bg-paper p-2.5 text-navy transition hover:bg-navy hover:text-white"
             >
@@ -154,7 +157,7 @@ export function PortfolioPreview({
             </button>
             <button
               type="button"
-              aria-label="เลื่อนขวา"
+              aria-label={t("common.next")}
               onClick={() => scrollBy(1)}
               className="rounded-full bg-navy p-2.5 text-white transition hover:bg-navy-deep"
             >
@@ -165,7 +168,7 @@ export function PortfolioPreview({
             href="/portfolio"
             className="text-sm font-semibold text-brand-red hover:underline"
           >
-            ดูผลงานทั้งหมด
+            {t("home.seeAllWork")}
           </Link>
         </div>
       </div>

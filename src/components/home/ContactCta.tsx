@@ -8,6 +8,8 @@ import { EditableSpot } from "@/components/preview/EditableSpot";
 import { useSectionValues } from "@/lib/cms/demo-store";
 import { HOME_SECTION_DEFAULTS } from "@/lib/cms/page-sections";
 import { siteConfig } from "@/lib/site-config";
+import { useCmsText } from "@/lib/i18n/use-cms-text";
+import { useI18n } from "@/lib/i18n/use-i18n";
 
 export function ContactCta() {
   const { values, enabled } = useSectionValues(
@@ -15,6 +17,8 @@ export function ContactCta() {
     "contactCta",
     HOME_SECTION_DEFAULTS.contactCta,
   );
+  const { field } = useCmsText("contactCta", values);
+  const { t } = useI18n();
   if (!enabled) return null;
 
   return (
@@ -23,15 +27,15 @@ export function ContactCta() {
         <Reveal>
           <h2 className="font-display text-2xl font-semibold leading-snug md:text-3xl">
             <EditableSpot sectionId="contactCta" fieldKey="titleLine1">
-              <span className="block">{values.titleLine1}</span>
+              <span className="block">{field("titleLine1")}</span>
             </EditableSpot>
             <EditableSpot sectionId="contactCta" fieldKey="titleLine2">
-              <span className="block">{values.titleLine2}</span>
+              <span className="block">{field("titleLine2")}</span>
             </EditableSpot>
           </h2>
           <EditableSpot sectionId="contactCta" fieldKey="body">
             <p className="mt-4 max-w-md text-sm leading-relaxed text-white/70">
-              {values.body}
+              {field("body")}
             </p>
           </EditableSpot>
 
@@ -50,7 +54,7 @@ export function ContactCta() {
                   }
                 }}
               >
-                {values.quoteLabel}
+                {field("quoteLabel")}
               </Link>
             </EditableSpot>
             <EditableSpot
@@ -69,19 +73,19 @@ export function ContactCta() {
                   }
                 }}
               >
-                {values.lineLabel}
+                {field("lineLabel")}
               </a>
             </EditableSpot>
           </div>
 
           <div className="mt-8 space-y-1.5 text-sm text-white/70">
             <p>
-              {siteConfig.address.line1} {siteConfig.address.line2}{" "}
-              {siteConfig.address.city}
+              {t("footer.address1")} {t("footer.address2")}{" "}
+              {t("footer.address3")}
             </p>
-            <p>{siteConfig.hours}</p>
+            <p>{t("footer.hours")}</p>
             <p>
-              โทร{" "}
+              {t("common.call")}{" "}
               <a
                 href={`tel:${siteConfig.phoneTel}`}
                 className="font-semibold text-white"
@@ -101,7 +105,7 @@ export function ContactCta() {
               <Image
                 key={siteConfig.showroomImage}
                 src={siteConfig.showroomImage}
-                alt="โชว์รูมช่างตี๋ ผ้าม่าน"
+                alt={t("common.showroomAlt")}
                 fill
                 className="object-cover"
                 sizes="(max-width: 768px) 100vw, 520px"

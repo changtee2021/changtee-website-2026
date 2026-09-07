@@ -4,6 +4,7 @@ import { IBM_Plex_Sans_Thai, Outfit, Prompt } from "next/font/google";
 import { loadSeoDefaults } from "@/lib/seo/seo-defaults";
 import { absoluteUrl, defaultOgImagePath, DEFAULT_OG_IMAGE_HEIGHT, DEFAULT_OG_IMAGE_WIDTH } from "@/lib/seo/meta";
 import { siteConfig } from "@/lib/site-config";
+import { localeInitScript } from "@/lib/i18n/locale";
 import { themeInitScript } from "@/lib/theme";
 import "./globals.css";
 
@@ -93,6 +94,9 @@ export default function RootLayout({
       <body className="min-h-full bg-background text-ink antialiased">
         <Script id="changtee-theme" strategy="beforeInteractive">
           {themeInitScript}
+        </Script>
+        <Script id="changtee-locale" strategy="beforeInteractive">
+          {localeInitScript}
         </Script>
         {children}
       </body>

@@ -50,16 +50,6 @@ export function PageEditorShell({
     ? closedWhileSelected !== selectedKey
     : inspectorOpen;
 
-  useEffect(() => {
-    try {
-      setTreeCollapsed(
-        window.localStorage.getItem("ctc-editor-tree-collapsed") === "1",
-      );
-    } catch {
-      /* ignore */
-    }
-  }, []);
-
   function persistTreeCollapsed(next: boolean) {
     setTreeCollapsed(next);
     try {
@@ -68,6 +58,19 @@ export function PageEditorShell({
       /* ignore */
     }
   }
+
+  useEffect(() => {
+    const id = window.setTimeout(() => {
+      try {
+        setTreeCollapsed(
+          window.localStorage.getItem("ctc-editor-tree-collapsed") === "1",
+        );
+      } catch {
+        /* ignore */
+      }
+    }, 0);
+    return () => window.clearTimeout(id);
+  }, []);
 
   useEffect(() => {
     const onBeforeUnload = (e: BeforeUnloadEvent) => {

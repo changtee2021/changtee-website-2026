@@ -9,6 +9,7 @@ import { publishedHeroSlides } from "@/lib/cms/hero-slides-demo";
 import { revealEase } from "@/components/home/Reveal";
 import { siteConfig } from "@/lib/site-config";
 import { heroCategoryIcon } from "@/components/home/hero-category-icons";
+import { useI18n } from "@/lib/i18n/use-i18n";
 
 function categorySlugFromSlide(href: string, title: string, subtitle: string) {
   const parts = href.split("/").filter(Boolean);
@@ -50,6 +51,7 @@ const FALLBACK = {
 };
 
 export function Hero() {
+  const { t } = useI18n();
   const stored = useHeroSlides();
   const slides = useMemo(() => publishedHeroSlides(stored), [stored]);
   const reduced = useReducedMotion();
@@ -129,17 +131,17 @@ export function Hero() {
                 {...enter(0)}
                 className="text-xs font-semibold tracking-[0.18em] text-white/70 uppercase"
               >
-                {siteConfig.nameEn} · ผลิตเอง ติดตั้งเอง
+                {siteConfig.nameEn} · {t("home.kicker")}
               </motion.p>
 
               <motion.h1
                 {...enter(1)}
                 className="mt-3 font-display text-4xl font-semibold leading-[1.12] tracking-tight sm:text-5xl lg:text-[3.25rem]"
               >
-                แต่งบ้านให้สวย เริ่มที่ผ้าม่านที่ใช่
+                {t("home.title")}
               </motion.h1>
               <p className="mt-2 font-modern text-lg font-normal leading-snug text-white/85 sm:text-xl">
-                A beautiful home starts with the right curtains
+                {t("home.subtitle")}
               </p>
 
               <motion.div {...enter(2)} className="mt-6 flex flex-wrap gap-3">
@@ -147,13 +149,13 @@ export function Hero() {
                   href="/portfolio"
                   className="inline-flex items-center justify-center rounded-full bg-white px-6 py-3 text-sm font-semibold text-navy transition hover:bg-white/90"
                 >
-                  ดูผลงานติดตั้ง
+                  {t("home.seeWork")}
                 </Link>
                 <Link
                   href="/quote"
                   className="inline-flex items-center justify-center rounded-full border border-white/50 px-6 py-3 text-sm font-semibold text-white transition hover:border-brand-red/50 hover:bg-brand-red/35"
                 >
-                  ขอใบเสนอราคา
+                  {t("home.quote")}
                 </Link>
               </motion.div>
             </div>

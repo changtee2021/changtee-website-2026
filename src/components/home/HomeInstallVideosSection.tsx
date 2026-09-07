@@ -8,6 +8,7 @@ import { Reveal } from "@/components/home/Reveal";
 import { EditableSpot } from "@/components/preview/EditableSpot";
 import { useSectionValues } from "@/lib/cms/demo-store";
 import { HOME_SECTION_DEFAULTS } from "@/lib/cms/page-sections";
+import { useCmsText } from "@/lib/i18n/use-cms-text";
 import {
   YOUTUBE_CHANNEL_URL,
   clipYoutubeId,
@@ -45,6 +46,7 @@ export function HomeInstallVideosSection() {
   const [activeId, setActiveId] = useState(clips[0]?.id ?? "");
   const [playing, setPlaying] = useState(false);
   const stripRef = useRef<HTMLDivElement>(null);
+  const { field } = useCmsText("installVideos", values);
 
   if (!enabled || clips.length === 0) return null;
 
@@ -129,7 +131,7 @@ export function HomeInstallVideosSection() {
                   fieldKey="eyebrow"
                   label="ป้ายเล็ก"
                 >
-                  <span>{values.eyebrow || "Youtube Channel"}</span>
+                  <span>{field("eyebrow") || "YouTube Channel"}</span>
                 </EditableSpot>
               </div>
 
@@ -139,7 +141,7 @@ export function HomeInstallVideosSection() {
                 label="ชื่อช่อง"
               >
                 <h2 className="mt-2 font-display text-2xl font-bold leading-snug text-white sm:text-3xl">
-                  {values.title}
+                  {field("title")}
                 </h2>
               </EditableSpot>
 
@@ -149,7 +151,7 @@ export function HomeInstallVideosSection() {
                 label="คำโปรย"
               >
                 <p className="mt-2 max-w-sm text-sm leading-relaxed text-white/70">
-                  {values.subtitle}
+                  {field("subtitle")}
                 </p>
               </EditableSpot>
 
@@ -166,7 +168,7 @@ export function HomeInstallVideosSection() {
                 >
                   <path d="M12 22a2.5 2.5 0 0 0 2.45-2h-4.9A2.5 2.5 0 0 0 12 22Zm7-6V11a7 7 0 1 0-14 0v5l-2 2v1h18v-1l-2-2Z" />
                 </svg>
-                {values.channelLabel || "ติดตาม"}
+                {field("channelLabel")}
               </a>
             </div>
           </div>

@@ -8,10 +8,13 @@ import { useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
 import { ArrowRight, Search, X } from "lucide-react";
 import { useBlogPosts, usePortfolioItems } from "@/lib/cms/demo-store";
-import { buildSearchIndex, entryTypeLabel, searchSite } from "@/lib/site-search";
+import { buildSearchIndex, searchSite } from "@/lib/site-search";
 import { useLockBodyScroll } from "@/lib/use-lock-body-scroll";
+import { useI18n } from "@/lib/i18n/use-i18n";
+import type { MessageKey } from "@/lib/i18n/messages";
 
 export function SiteSearch({ className = "" }: { className?: string }) {
+  const { t } = useI18n();
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
@@ -85,7 +88,7 @@ export function SiteSearch({ className = "" }: { className?: string }) {
         ref={triggerRef}
         type="button"
         onClick={() => setOpen(true)}
-        aria-label="ค้นหา"
+        aria-label={t("nav.search")}
         aria-haspopup="dialog"
         aria-expanded={open}
         className={className}
@@ -107,7 +110,7 @@ export function SiteSearch({ className = "" }: { className?: string }) {
               ref={dialogRef}
               role="dialog"
               aria-modal="true"
-              aria-label="ค้นหาในเว็บไซต์"
+              aria-label={t("search.dialog")}
               className="relative w-full max-w-xl"
               initial={{ opacity: 0, y: -12, scale: 0.98 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
@@ -119,7 +122,7 @@ export function SiteSearch({ className = "" }: { className?: string }) {
                 <button
                   type="button"
                   onClick={() => close()}
-                  aria-label="ปิดการค้นหา"
+                  aria-label={t("search.close")}
                   className="inline-flex size-10 items-center justify-center rounded-full bg-brand-red text-white shadow-lg transition hover:bg-brand-red-soft"
                 >
                   <X className="size-5" aria-hidden />
@@ -140,7 +143,7 @@ export function SiteSearch({ className = "" }: { className?: string }) {
                     type="search"
                     value={query}
                     onChange={(e) => setQuery(e.target.value)}
-                    placeholder="ค้นหาสินค้า ผลงาน หรือบทความ…"
+                    placeholder={t("search.placeholder")}
                     className="min-w-0 flex-1 bg-transparent py-4 pl-2 pr-1 text-sm text-ink outline-none placeholder:text-muted [&::-webkit-search-cancel-button]:appearance-none [&::-webkit-search-decoration]:appearance-none"
                   />
                   {query.trim() ? (
@@ -150,7 +153,7 @@ export function SiteSearch({ className = "" }: { className?: string }) {
                         setQuery("");
                         inputRef.current?.focus();
                       }}
-                      aria-label="ล้างคำค้นหา"
+                      aria-label={t("search.clear")}
                       className="mr-1 inline-flex size-9 shrink-0 items-center justify-center rounded-full text-muted transition hover:bg-shell hover:text-navy"
                     >
                       <X className="size-4" aria-hidden />
@@ -161,26 +164,25 @@ export function SiteSearch({ className = "" }: { className?: string }) {
                 <div className="max-h-[60vh] overflow-y-auto p-2">
                   {query.trim() === "" ? (
                     <p className="px-3 py-6 text-center text-sm text-muted">
-                      พิมพ์ชื่อสินค้า สถานที่ หรือคำที่สนใจ เช่น &ldquo;ม่านม้วน&rdquo; หรือ
-                      &ldquo;คอนโด สุขุมวิท&rdquo;
+                      {t("search.empty")}
                     </p>
                   ) : results.length === 0 ? (
                     <p className="px-3 py-6 text-center text-sm text-muted">
-                      ไม่พบผลลัพธ์ที่ตรงกับ &ldquo;{query}&rdquo; ลองคำอื่น ดู{" "}
+                      {t("search.nonePrefix")} &ldquo;{query}&rdquo; {t("search.noneSuffix")}{" "}
                       <Link
                         href={`/search?q=${encodeURIComponent(query)}`}
                         onClick={() => close()}
                         className="font-semibold text-navy hover:underline"
                       >
-                        หน้าค้นหา
+                        {t("search.page")}
                       </Link>{" "}
-                      หรือ{" "}
+                      {t("search.or")}{" "}
                       <Link
                         href="/quote"
                         onClick={() => close()}
                         className="font-semibold text-brand-red hover:underline"
                       >
-                        ทักแอดมิน
+                        {t("search.ask")}
                       </Link>
                     </p>
                   ) : (
@@ -216,7 +218,7 @@ export function SiteSearch({ className = "" }: { className?: string }) {
                               ) : null}
                             </span>
                             <span className="shrink-0 rounded-full bg-navy/5 px-2 py-0.5 text-[10px] font-semibold text-navy">
-                              {entryTypeLabel(r.type)}
+                              {t(`search.type.${r.type}` as MessageKey)}
                             </span>
                             <ArrowRight className="size-3.5 shrink-0 text-muted" aria-hidden />
                           </Link>
