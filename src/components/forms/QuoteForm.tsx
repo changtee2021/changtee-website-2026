@@ -13,6 +13,7 @@ import {
   Images,
   MapPin,
   Package,
+  Plus,
   StickyNote,
   Trash2,
   UserRound,
@@ -98,6 +99,22 @@ const emptyPreview: PreviewState = {
   marketingOptIn: false,
 };
 
+const DEFAULT_SIZE_ROWS = 5;
+const MAX_SIZE_ROWS = 20;
+
+function joinSizeRows(rows: string[]): string {
+  return rows.map((row) => row.trim()).filter(Boolean).join("\n");
+}
+
+function initialSizeRows(requestedSize: string): string[] {
+  if (!requestedSize.trim()) {
+    return Array.from({ length: DEFAULT_SIZE_ROWS }, () => "");
+  }
+  const lines = requestedSize.split(/\r?\n/).map((line) => line.trim());
+  while (lines.length < DEFAULT_SIZE_ROWS) lines.push("");
+  return lines;
+}
+
 function normalizeMapsUrl(value: string) {
   const v = value.trim();
   if (!v) return "";
@@ -120,10 +137,18 @@ function looksLikeMapsUrl(value: string) {
   );
 }
 
-function resolveProductType(raw: string | null): string {
+function resolveProductType(raw: string | null, item?: string | null): string {
   if (!raw) return "";
   const trimmed = raw.trim();
   if ((PRODUCT_TYPES as readonly string[]).includes(trimmed)) return trimmed;
+  if (trimmed === "มู่ลี่" || trimmed.includes("มู่ลี่")) {
+    const hint = (item ?? "").toLowerCase();
+    if (hint.includes("อลูมิเนียม") || hint.includes("aluminium")) {
+      return "มู่ลี่อลูมิเนียม";
+    }
+    if (hint.includes("ไม้") || hint.includes("wood")) return "มู่ลี่ไม้";
+    return "";
+  }
   if (trimmed.includes("ภายนอก") || trimmed.includes("อุตสาหกรรม")) {
     return "ม่านภายนอก/อุตสาหกรรม";
   }
@@ -153,8 +178,8 @@ export function QuoteForm() {
   }, []);
   const [siteImages, setSiteImages] = useState<SiteMediaItem[]>([]);
   const [preview, setPreview] = useState<PreviewState>(() => {
-    const product = resolveProductType(searchParams.get("product"));
     const item = searchParams.get("item")?.trim() ?? "";
+    const product = resolveProductType(searchParams.get("product"), item);
     return {
       ...emptyPreview,
       callbackDate: new Date().toISOString().slice(0, 10),
@@ -163,6 +188,9 @@ export function QuoteForm() {
       note: item ? `สนใจ: ${item}` : "",
     };
   });
+  const [sizeRows, setSizeRows] = useState<string[]>(() =>
+    initialSizeRows(""),
+  );
 
   useEffect(() => {
     return () => {
@@ -192,6 +220,22 @@ export function QuoteForm() {
 
   function update<K extends keyof PreviewState>(key: K, value: PreviewState[K]) {
     setPreview((prev) => ({ ...prev, [key]: value }));
+  }
+
+  function patchSizeRows(rows: string[]) {
+    setSizeRows(rows);
+    setPreview((prev) => ({ ...prev, requestedSize: joinSizeRows(rows) }));
+  }
+
+  function updateSizeRow(index: number, value: string) {
+    const next = [...sizeRows];
+    next[index] = value;
+    patchSizeRows(next);
+  }
+
+  function addSizeRow() {
+    if (sizeRows.length >= MAX_SIZE_ROWS) return;
+    patchSizeRows([...sizeRows, ""]);
   }
 
   async function addSiteFiles(fileList: FileList | File[] | null) {
@@ -291,6 +335,10 @@ export function QuoteForm() {
   function openPreviewIfValid() {
     const form = formRef.current;
     if (!form) return;
+    if (!preview.requestedSize.trim()) {
+      setError("กรุณากรอกอย่างน้อย 1 ขนาด");
+      return;
+    }
     if (!form.checkValidity()) {
       form.reportValidity();
       return;
@@ -342,6 +390,7 @@ export function QuoteForm() {
       ? `${address}\nGoogle Maps: ${mapUrl}`
       : address;
     formData.set("installAddress", installWithMap);
+    formData.set("requestedSize", preview.requestedSize.trim());
 
     formData.delete("siteImage");
     formData.delete("siteMediaRef");
@@ -627,26 +676,53 @@ export function QuoteForm() {
             </div>
 
             <div className="md:col-span-2 xl:col-span-2">
-              <label className="block text-sm">
-                <span className="mb-1 flex flex-wrap items-center gap-x-2 gap-y-1 font-medium text-ink">
+              <div className="block text-sm">
+                <span className="mb-2 flex flex-wrap items-center gap-x-2 gap-y-1 font-medium text-ink">
                   <span className="flex gap-1">
                     ขนาดที่ต้องการ (กว้างxสูง เซ็นติเมตร)
                     <span className="text-brand-red">*</span>
                   </span>
                   <span className="rounded bg-paper px-2 py-0.5 text-[11px] font-normal text-brand-red">
-                    1 ขนาด ต่อ 1 บรรทัด
+                    1 ขนาด ต่อ 1 ช่อง
                   </span>
                 </span>
-                <textarea
+                <input
+                  type="hidden"
                   name="requestedSize"
-                  required
-                  rows={5}
                   value={preview.requestedSize}
-                  onChange={(e) => update("requestedSize", e.target.value)}
-                  placeholder={"ตัวอย่าง\n150x200\n180x220\n300x250"}
-                  className="w-full rounded-lg border border-line bg-field px-3 py-2 outline-none focus:border-navy"
+                  required
                 />
-              </label>
+                <ol className="space-y-2">
+                  {sizeRows.map((row, index) => (
+                    <li key={`size-row-${index}`} className="flex items-center gap-2">
+                      <span
+                        className="w-6 shrink-0 text-right text-xs tabular-nums text-muted"
+                        aria-hidden
+                      >
+                        {index + 1}.
+                      </span>
+                      <input
+                        type="text"
+                        value={row}
+                        onChange={(e) => updateSizeRow(index, e.target.value)}
+                        placeholder="150x200"
+                        aria-label={`ขนาดที่ ${index + 1}`}
+                        className="min-h-11 w-full rounded-lg border border-line bg-field px-3 py-2 outline-none focus:border-navy"
+                      />
+                    </li>
+                  ))}
+                </ol>
+                {sizeRows.length < MAX_SIZE_ROWS ? (
+                  <button
+                    type="button"
+                    onClick={addSizeRow}
+                    className="mt-2 inline-flex min-h-11 items-center gap-1.5 rounded-lg border border-dashed border-line px-3 py-2 text-sm font-medium text-navy transition hover:border-navy hover:bg-paper"
+                  >
+                    <Plus className="size-4" aria-hidden />
+                    เพิ่มขนาด
+                  </button>
+                ) : null}
+              </div>
             </div>
 
             <div className="space-y-2 md:col-span-2 xl:col-span-1">

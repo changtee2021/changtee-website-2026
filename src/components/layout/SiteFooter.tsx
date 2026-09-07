@@ -1,3 +1,5 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
 import { BookOpen, Factory, FileText, Presentation, Users } from "lucide-react";
@@ -6,10 +8,17 @@ import { LazyMapsEmbed } from "@/components/layout/LazyMapsEmbed";
 import { SocialLinks } from "@/components/layout/SocialLinks";
 import { CookieSettingsButton } from "@/components/legal/CookieSettingsButton";
 import { BrochureLink } from "@/components/catalog/BrochureLink";
+import { LanguageToggle } from "@/components/layout/LanguageToggle";
 import { ThemeToggle } from "@/components/layout/ThemeToggle";
+import { useI18n } from "@/lib/i18n/use-i18n";
 
 export function SiteFooter() {
   const year = new Date().getFullYear();
+  const { t, locale } = useI18n();
+  const mapsSrc =
+    locale === "en"
+      ? siteConfig.mapsEmbedUrl.replace("hl=th", "hl=en")
+      : siteConfig.mapsEmbedUrl;
 
   return (
     <footer className="mt-auto border-t border-line bg-panel">
@@ -45,7 +54,7 @@ export function SiteFooter() {
             </div>
             <div className="mt-4 h-px w-16 bg-brand-red" />
             <p className="mt-4 max-w-sm text-sm leading-6 text-muted">
-              {siteConfig.description}
+              {t("footer.description")}
             </p>
             <SocialLinks className="mt-5" size={34} />
             <div className="mt-6 grid grid-cols-1 gap-2 sm:grid-cols-2">
@@ -54,39 +63,39 @@ export function SiteFooter() {
                 className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-brand-red px-3.5 text-xs font-semibold text-white transition hover:bg-brand-red-soft active:opacity-90"
               >
                 <FileText className="size-4 shrink-0" strokeWidth={2.1} aria-hidden />
-                ขอใบเสนอราคา
+                {t("footer.quote")}
               </Link>
               <BrochureLink className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-line bg-white px-3.5 text-xs font-semibold text-navy transition hover:bg-paper active:opacity-90">
                 <BookOpen className="size-4 shrink-0" strokeWidth={2.1} aria-hidden />
-                Download Brochure
+                {t("footer.brochure")}
               </BrochureLink>
               <Link
                 href="/visit-factory"
                 className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-line bg-white px-3.5 text-xs font-semibold text-navy transition hover:bg-paper active:opacity-90"
               >
                 <Factory className="size-4 shrink-0" strokeWidth={2.1} aria-hidden />
-                นัดเยี่ยมชมโรงงาน
+                {t("footer.factory")}
               </Link>
               <Link
                 href="/visit-factory?mode=presentation"
                 className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-line bg-white px-3.5 text-xs font-semibold text-navy transition hover:bg-paper active:opacity-90"
               >
                 <Presentation className="size-4 shrink-0" strokeWidth={2.1} aria-hidden />
-                นัดนำเสนอสินค้า
+                {t("footer.presentation")}
               </Link>
               <Link
                 href="/careers"
                 className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-line bg-white px-3.5 text-xs font-semibold text-navy transition hover:bg-paper active:opacity-90 sm:col-span-2"
               >
                 <Users className="size-4 shrink-0" strokeWidth={2.1} aria-hidden />
-                ร่วมงานกับเรา
+                {t("footer.careers")}
               </Link>
             </div>
           </div>
 
           <div>
             <h3 className="text-sm font-bold uppercase tracking-wide text-navy">
-              Contact
+              {t("footer.contact")}
             </h3>
             <div className="mt-1 h-0.5 w-10 bg-brand-red" />
 
@@ -134,25 +143,25 @@ export function SiteFooter() {
                 </a>
               </p>
               <p className="leading-6 text-ink/80">
-                {siteConfig.address.line1}
+                {t("footer.address1")}
                 <br />
-                {siteConfig.address.line2}
+                {t("footer.address2")}
                 <br />
-                {siteConfig.address.city}
+                {t("footer.address3")}
               </p>
-              <p className="text-muted">{siteConfig.hours}</p>
+              <p className="text-muted">{t("footer.hours")}</p>
             </div>
           </div>
 
           <div className="md:col-span-2 lg:col-span-1">
             <h3 className="text-sm font-bold uppercase tracking-wide text-navy">
-              Location
+              {t("footer.location")}
             </h3>
             <div className="mt-1 h-0.5 w-10 bg-brand-red" />
             <div className="mt-4 overflow-hidden rounded-xl border border-line bg-paper">
               <LazyMapsEmbed
-                title="แผนที่โชว์รูมช่างตี๋ ผ้าม่าน"
-                src={siteConfig.mapsEmbedUrl}
+                title={t("footer.mapsTitle")}
+                src={mapsSrc}
                 className="aspect-[4/3] w-full lg:aspect-square"
               />
             </div>
@@ -162,7 +171,7 @@ export function SiteFooter() {
               rel="noreferrer"
               className="mt-3 inline-flex min-h-11 items-center text-sm font-semibold text-navy hover:text-brand-red"
             >
-              เปิดใน Google Maps →
+              {t("footer.openMaps")}
             </a>
           </div>
         </div>
@@ -172,32 +181,33 @@ export function SiteFooter() {
         <div className="mx-auto flex max-w-5xl flex-col gap-3 px-4 py-4 text-xs text-white/70 sm:px-10 md:flex-row md:items-center md:justify-between lg:px-16">
           <nav className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center sm:gap-x-0 sm:gap-y-1">
             <Link href="/privacy" className="hover:text-white">
-              Privacy Policy
+              {t("footer.privacy")}
             </Link>
             <span className="mx-3 hidden text-white/30 sm:inline" aria-hidden>
               |
             </span>
             <Link href="/cookies" className="hover:text-white">
-              Cookie Policy
+              {t("footer.cookies")}
             </Link>
             <span className="mx-3 hidden text-white/30 sm:inline" aria-hidden>
               |
             </span>
             <Link href="/terms" className="hover:text-white">
-              Terms of Service
+              {t("footer.terms")}
             </Link>
             <span className="mx-3 hidden text-white/30 sm:inline" aria-hidden>
               |
             </span>
             <CookieSettingsButton
-              label="Cookie Settings"
+              label={t("footer.cookieSettings")}
               className="text-left text-white/70 hover:text-white"
             />
           </nav>
           <div className="flex flex-wrap items-center gap-2.5">
+            <LanguageToggle />
             <ThemeToggle />
             <p>
-              © {year} {siteConfig.legalName}. All rights reserved.
+              © {year} {siteConfig.legalName}. {t("footer.rights")}
             </p>
           </div>
         </div>

@@ -23,14 +23,15 @@ import {
   AboutNavPanel,
 } from "@/components/about/AboutNavMenu";
 import { BrochureLink } from "@/components/catalog/BrochureLink";
+import { useI18n } from "@/lib/i18n/use-i18n";
 
 const mainNav = [
-  { href: "/", label: "หน้าแรก", home: true },
-  { href: "/products", label: "สินค้า/บริการ", mega: true },
-  { href: "/portfolio", label: "ผลงาน", portfolio: true },
-  { href: "/learn", label: "ห้องเรียนรู้" },
-  { href: "/blog", label: "บทความ" },
-  { href: "/contact", label: "เกี่ยวกับเรา", about: true },
+  { href: "/", labelKey: "nav.home", home: true },
+  { href: "/products", labelKey: "nav.products", mega: true },
+  { href: "/portfolio", labelKey: "nav.portfolio", portfolio: true },
+  { href: "/learn", labelKey: "nav.learn" },
+  { href: "/blog", labelKey: "nav.blog" },
+  { href: "/contact", labelKey: "nav.about", about: true },
 ] as const;
 
 /** Match HomePanel / page content column */
@@ -55,6 +56,7 @@ export function SiteHeader() {
 }
 
 function SiteHeaderBar({ pathname }: { pathname: string }) {
+  const { t } = useI18n();
   const hasFullBleedHero = FULL_BLEED_HERO_PATHS.has(pathname);
   const [open, setOpen] = useState(false);
   const [productsOpen, setProductsOpen] = useState(false);
@@ -194,7 +196,7 @@ function SiteHeaderBar({ pathname }: { pathname: string }) {
               <Link
                 href="/"
                 className="mr-2 shrink-0 py-2 pr-2"
-                aria-label={`${siteConfig.name} หน้าแรก`}
+                aria-label={`${siteConfig.name} ${t("nav.homeAria")}`}
               >
                 <Image
                   src="/images/brand/logo-mark-nav.png"
@@ -210,7 +212,7 @@ function SiteHeaderBar({ pathname }: { pathname: string }) {
                 <DesktopDisclosure
                   key={item.href}
                   href={item.href}
-                  label={item.label}
+                  label={t(item.labelKey)}
                   panelClassName="w-[min(40rem,calc(100vw-2rem))] p-4"
                 >
                   {(close) => <ProductsMegaPanel onNavigate={close} />}
@@ -219,7 +221,7 @@ function SiteHeaderBar({ pathname }: { pathname: string }) {
                 <DesktopDisclosure
                   key={item.href}
                   href={item.href}
-                  label={item.label}
+                  label={t(item.labelKey)}
                 >
                   {(close) => <PortfolioNavPanel onNavigate={close} />}
                 </DesktopDisclosure>
@@ -227,7 +229,7 @@ function SiteHeaderBar({ pathname }: { pathname: string }) {
                 <DesktopDisclosure
                   key={item.href}
                   href={item.href}
-                  label={item.label}
+                  label={t(item.labelKey)}
                 >
                   {(close) => <AboutNavPanel onNavigate={close} />}
                 </DesktopDisclosure>
@@ -240,7 +242,7 @@ function SiteHeaderBar({ pathname }: { pathname: string }) {
                   {"home" in item && item.home ? (
                     <Home className="h-4 w-4" />
                   ) : null}
-                  {item.label}
+                  {t(item.labelKey)}
                 </Link>
               ),
             )}
@@ -251,7 +253,7 @@ function SiteHeaderBar({ pathname }: { pathname: string }) {
                   href="/quote"
                   className="rounded-md bg-brand-red px-3 py-1.5 text-sm font-semibold hover:bg-brand-red-soft"
                 >
-                  ขอใบเสนอราคา
+                  {t("nav.quote")}
                 </Link>
               )}
             </div>
@@ -266,7 +268,7 @@ function SiteHeaderBar({ pathname }: { pathname: string }) {
               <Link
                 href="/"
                 className="shrink-0"
-                aria-label={`${siteConfig.name} หน้าแรก`}
+                aria-label={`${siteConfig.name} ${t("nav.homeAria")}`}
               >
                 <Image
                   src="/images/brand/logo-mark-nav.png"
@@ -280,7 +282,7 @@ function SiteHeaderBar({ pathname }: { pathname: string }) {
               <button
                 type="button"
                 className="inline-flex size-11 shrink-0 items-center justify-center text-white"
-                aria-label="เมนู"
+                aria-label={t("nav.menu")}
                 aria-expanded={open}
                 onClick={() => setOpen((v) => !v)}
               >
@@ -294,7 +296,7 @@ function SiteHeaderBar({ pathname }: { pathname: string }) {
                   href="/quote"
                   className="inline-flex min-h-11 items-center rounded-md bg-brand-red px-3 text-sm font-semibold hover:bg-brand-red-soft"
                 >
-                  ขอราคา
+                  {t("nav.quoteShort")}
                 </Link>
               )}
             </div>
@@ -326,7 +328,7 @@ function SiteHeaderBar({ pathname }: { pathname: string }) {
                         onClick={() => setProductsOpen((v) => !v)}
                         aria-expanded={productsOpen}
                       >
-                        {item.label}
+                        {t(item.labelKey)}
                         <ChevronDown
                           className={`h-4 w-4 transition ${productsOpen ? "rotate-180" : ""}`}
                         />
@@ -343,7 +345,7 @@ function SiteHeaderBar({ pathname }: { pathname: string }) {
                         onClick={() => setPortfolioOpen((v) => !v)}
                         aria-expanded={portfolioOpen}
                       >
-                        {item.label}
+                        {t(item.labelKey)}
                         <ChevronDown
                           className={`h-4 w-4 transition ${portfolioOpen ? "rotate-180" : ""}`}
                         />
@@ -360,7 +362,7 @@ function SiteHeaderBar({ pathname }: { pathname: string }) {
                         onClick={() => setAboutOpen((v) => !v)}
                         aria-expanded={aboutOpen}
                       >
-                        {item.label}
+                        {t(item.labelKey)}
                         <ChevronDown
                           className={`h-4 w-4 transition ${aboutOpen ? "rotate-180" : ""}`}
                         />
@@ -376,7 +378,7 @@ function SiteHeaderBar({ pathname }: { pathname: string }) {
                       className="flex min-h-12 items-center py-3 text-sm font-medium text-white"
                       onClick={() => setOpen(false)}
                     >
-                      {item.label}
+                      {t(item.labelKey)}
                     </Link>
                   ),
                 )}
@@ -385,7 +387,7 @@ function SiteHeaderBar({ pathname }: { pathname: string }) {
                   className="flex min-h-12 items-center py-3 text-sm font-semibold text-white"
                   onClick={() => setOpen(false)}
                 >
-                  ขอใบเสนอราคา
+                  {t("nav.quote")}
                 </Link>
               </div>
             </div>
@@ -409,6 +411,7 @@ function DesktopDisclosure({
   children: (close: () => void) => React.ReactNode;
   panelClassName?: string;
 }) {
+  const { t } = useI18n();
   const [open, setOpen] = useState(false);
   const wrapRef = useRef<HTMLDivElement>(null);
 
@@ -442,7 +445,7 @@ function DesktopDisclosure({
           className="inline-flex items-center pr-3 hover:bg-white/10"
           aria-expanded={open}
           aria-haspopup="true"
-          aria-label={`เปิดเมนู${label}`}
+          aria-label={`${t("nav.openMenu")} ${label}`}
           onClick={() => setOpen((v) => !v)}
         >
           <ChevronDown className={`h-3.5 w-3.5 opacity-80 transition ${open ? "rotate-180" : ""}`} />

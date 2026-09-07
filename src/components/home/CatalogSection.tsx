@@ -5,8 +5,10 @@ import { Reveal } from "@/components/home/Reveal";
 import { CatalogCard } from "@/components/catalog/CatalogCard";
 import { isPublishedCatalog } from "@/lib/catalogs";
 import { useCatalogs } from "@/lib/cms/demo-store";
+import { useI18n } from "@/lib/i18n/use-i18n";
 
 export function CatalogSection() {
+  const { t } = useI18n();
   const catalogs = useCatalogs()
     .filter(isPublishedCatalog)
     .sort((a, b) => (a.sortOrder ?? 99) - (b.sortOrder ?? 99));
@@ -16,7 +18,7 @@ export function CatalogSection() {
   return (
     <HomePanel tone="clear">
       <div className="py-7 sm:py-9 md:py-12">
-        <PanelHeading title="แคตตาล็อกสินค้า" align="start" />
+        <PanelHeading title={t("home.catalog")} align="start" />
 
         <div className="no-scrollbar mt-6 flex gap-4 overflow-x-auto pb-1">
           {catalogs.map((catalog, i) => (

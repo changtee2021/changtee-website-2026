@@ -5,6 +5,7 @@ import { Reveal } from "@/components/home/Reveal";
 import { EditableSpot } from "@/components/preview/EditableSpot";
 import { useSectionValues } from "@/lib/cms/demo-store";
 import { HOME_SECTION_DEFAULTS } from "@/lib/cms/page-sections";
+import { useCmsText } from "@/lib/i18n/use-cms-text";
 
 const STEP_ICONS = [MessageCircle, Ruler, Truck] as const;
 
@@ -15,26 +16,27 @@ export function HowItWorks() {
     "howItWorks",
     HOME_SECTION_DEFAULTS.howItWorks,
   );
+  const { field } = useCmsText("howItWorks", values);
   if (!enabled) return null;
 
   const steps = [
     {
       titleKey: "step1Title",
       descKey: "step1Desc",
-      title: values.step1Title,
-      desc: values.step1Desc,
+      title: field("step1Title"),
+      desc: field("step1Desc"),
     },
     {
       titleKey: "step2Title",
       descKey: "step2Desc",
-      title: values.step2Title,
-      desc: values.step2Desc,
+      title: field("step2Title"),
+      desc: field("step2Desc"),
     },
     {
       titleKey: "step3Title",
       descKey: "step3Desc",
-      title: values.step3Title,
-      desc: values.step3Desc,
+      title: field("step3Title"),
+      desc: field("step3Desc"),
     },
   ];
 
@@ -49,15 +51,15 @@ export function HowItWorks() {
         </span>
         <h2 className="mt-4 font-display text-3xl font-semibold leading-tight text-navy md:text-4xl">
           <EditableSpot sectionId="howItWorks" fieldKey="titleLine1">
-            <span className="block">{values.titleLine1}</span>
+            <span className="block">{field("titleLine1")}</span>
           </EditableSpot>
           <EditableSpot sectionId="howItWorks" fieldKey="titleLine2">
-            <span className="block">{values.titleLine2}</span>
+            <span className="block">{field("titleLine2")}</span>
           </EditableSpot>
         </h2>
         <EditableSpot sectionId="howItWorks" fieldKey="intro">
           <p className="mt-4 max-w-sm text-sm leading-relaxed text-muted">
-            {values.intro}
+            {field("intro")}
           </p>
         </EditableSpot>
       </Reveal>

@@ -2,6 +2,7 @@
 
 import { useSyncExternalStore } from "react";
 import { Moon, Sun } from "lucide-react";
+import { useI18n } from "@/lib/i18n/use-i18n";
 import {
   THEME_STORAGE_KEY,
   applyTheme,
@@ -30,6 +31,7 @@ function getThemeSnapshot(): ThemeMode {
 }
 
 export function ThemeToggle({ className }: { className?: string }) {
+  const { t } = useI18n();
   const mode = useSyncExternalStore(
     subscribeTheme,
     getThemeSnapshot,
@@ -50,16 +52,16 @@ export function ThemeToggle({ className }: { className?: string }) {
         "inline-flex min-h-9 shrink-0 items-center gap-1 rounded-full border border-white/20 bg-white/10 px-2.5 text-[11px] font-medium leading-none text-white/85 transition hover:bg-white/16 hover:text-white active:bg-white/20",
         className,
       )}
-      aria-label={mode === "dark" ? "เปลี่ยนเป็นโหมดสว่าง" : "เปลี่ยนเป็นโหมดมืด"}
+      aria-label={mode === "dark" ? t("theme.toLight") : t("theme.toDark")}
       aria-pressed={mode === "dark"}
-      title={mode === "dark" ? "โหมดสว่าง" : "โหมดมืด"}
+      title={mode === "dark" ? t("theme.light") : t("theme.dark")}
     >
       {mode === "dark" ? (
         <Sun className="size-3" aria-hidden />
       ) : (
         <Moon className="size-3" aria-hidden />
       )}
-      <span>{mode === "dark" ? "สว่าง" : "มืด"}</span>
+      <span>{mode === "dark" ? t("theme.light") : t("theme.dark")}</span>
     </button>
   );
 }

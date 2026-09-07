@@ -54,7 +54,8 @@ export const CONTACT_TYPES = [
 export const PRODUCT_TYPES = [
   "ผ้าม่าน",
   "ม่านม้วน",
-  "มู่ลี่",
+  "มู่ลี่ไม้",
+  "มู่ลี่อลูมิเนียม",
   "ม่านปรับแสง",
   "ฉากกั้นห้อง",
   "ม่านไฟฟ้า",
@@ -68,7 +69,8 @@ export const PRODUCT_TYPES = [
 export const PRODUCT_TYPE_THUMBS: Record<(typeof PRODUCT_TYPES)[number], string> = {
   ผ้าม่าน: "/images/products/quote/curtain.webp",
   ม่านม้วน: "/images/products/quote/roller-blind.webp",
-  มู่ลี่: "/images/products/quote/wooden-venetian.webp",
+  มู่ลี่ไม้: "/images/products/quote/wooden-venetian.png",
+  มู่ลี่อลูมิเนียม: "/images/products/quote/aluminum-venetian.png",
   ม่านปรับแสง: "/images/products/quote/vertical-blind.webp",
   ฉากกั้นห้อง: "/images/products/quote/pvc-folding-door.webp",
   ม่านไฟฟ้า: "/images/products/quote/motorized.webp",
@@ -81,6 +83,10 @@ export const PRODUCT_TYPE_THUMBS: Record<(typeof PRODUCT_TYPES)[number], string>
 export function productTypeThumb(productType: string): string | null {
   if ((PRODUCT_TYPES as readonly string[]).includes(productType)) {
     return PRODUCT_TYPE_THUMBS[productType as (typeof PRODUCT_TYPES)[number]];
+  }
+  /** Legacy leads submitted before wood/aluminium split */
+  if (productType === "มู่ลี่") {
+    return PRODUCT_TYPE_THUMBS["มู่ลี่ไม้"];
   }
   return null;
 }

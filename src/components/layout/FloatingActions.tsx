@@ -7,6 +7,7 @@ import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { Check, Copy, FileText, MessageCircle, Phone, X } from "lucide-react";
 import { trackSiteClick } from "@/lib/analytics/collect";
 import { siteConfig } from "@/lib/site-config";
+import { useI18n } from "@/lib/i18n/use-i18n";
 
 type PhoneContact = {
   name: string;
@@ -28,18 +29,16 @@ function uniquePhones(): PhoneContact[] {
   return list;
 }
 
-function DualChatIcon({ className }: { className?: string }) {
+function MessengerIcon({ className }: { className?: string }) {
   return (
-    <span className={`relative inline-block ${className ?? "h-5 w-5"}`} aria-hidden>
-      <MessageCircle
-        className="absolute left-0 top-0 h-[72%] w-[72%] opacity-80"
-        strokeWidth={2.25}
-      />
-      <MessageCircle
-        className="absolute bottom-0 right-0 h-[78%] w-[78%]"
-        strokeWidth={2.25}
-      />
-    </span>
+    <svg
+      viewBox="0 0 24 24"
+      className={className}
+      fill="currentColor"
+      aria-hidden
+    >
+      <path d="M12 2C6.48 2 2 6.13 2 11.7c0 2.84 1.16 5.32 3.07 7.1V22l2.97-1.63c1.14.32 2.36.5 3.63.5 5.52 0 10-4.13 10-9.7S17.52 2 12 2zm.96 11.64-2.53-2.7-4.91 2.7 5.42-5.77 2.58 2.7 4.86-2.7-5.42 5.77z" />
+    </svg>
   );
 }
 
@@ -70,10 +69,12 @@ function PhoneList({
     }
   }
 
+  const { t } = useI18n();
+
   return (
     <div
       role="dialog"
-      aria-label="เบอร์โทรทั้งหมด"
+      aria-label={t("fab.phones")}
       className="w-[min(20rem,calc(100vw-2rem))] rounded-2xl border border-white/70 bg-white p-3 text-navy shadow-[0_12px_40px_rgba(11,31,58,0.22)] dark:border-line dark:bg-[#1a2433] dark:text-white"
     >
       <div className="flex items-center justify-between gap-2 px-1">
@@ -85,7 +86,7 @@ function PhoneList({
           className="min-h-9 rounded-full px-2.5 text-xs font-semibold text-navy hover:bg-paper dark:text-white dark:hover:bg-white/8"
           onClick={onBack}
         >
-          กลับ
+          {t("fab.back")}
         </button>
       </div>
       <ul className="mt-1 max-h-[min(22rem,calc(100dvh-8rem))] overflow-y-auto">
@@ -108,7 +109,7 @@ function PhoneList({
               <button
                 type="button"
                 className="inline-flex size-11 shrink-0 items-center justify-center rounded-xl text-muted hover:bg-paper hover:text-navy dark:hover:bg-white/8 dark:hover:text-white"
-                aria-label={`คัดลอกเบอร์ ${contact.name}`}
+                aria-label={`${t("fab.copy")} ${contact.name}`}
                 onClick={() => void copyNumber(contact.phoneTel)}
               >
                 {copied === contact.phoneTel ? (
@@ -126,6 +127,7 @@ function PhoneList({
 }
 
 export function FloatingActions() {
+  const { t } = useI18n();
   const [open, setOpen] = useState(false);
   const [phonesOpen, setPhonesOpen] = useState(false);
   const reduced = useReducedMotion();
@@ -291,7 +293,7 @@ export function FloatingActions() {
                   }}
                 >
                   <FileText className="size-4 shrink-0" />
-                  ใบเสนอราคา
+                  {t("fab.quote")}
                 </Link>
               </motion.div>
               <motion.button
@@ -305,41 +307,47 @@ export function FloatingActions() {
                 }}
               >
                 <Phone className="size-4 shrink-0" />
-                โทรเลย
+                {t("fab.call")}
               </motion.button>
             </motion.div>
           ) : null}
         </AnimatePresence>
 
-        <button
-          type="button"
-          aria-expanded={open}
-          aria-label={open ? "ปิดเมนูด่วน" : "เปิดเมนูด่วน"}
-          onClick={() => {
-            if (open) closeAll();
-            else setOpen(true);
-          }}
-          className="fab-aura inline-flex size-14 items-center justify-center rounded-full bg-[#0b1f3a] text-white shadow-lg transition hover:bg-navy-deep active:scale-95 dark:bg-white dark:text-[#0b1f3a] lg:size-16"
-        >
-          {open ? (
-            <X className="size-5 lg:size-6" />
-          ) : (
-            <DualChatIcon className="size-6 lg:size-7" />
-          )}
-        </button>
+        <div className="relative isolate overflow-visible">
+          <span className="fab-glow" aria-hidden />
+          <button
+            type="button"
+            aria-expanded={open}
+            aria-label={open ? t("fab.close") : t("fab.open")}
+            onClick={() => {
+              if (open) closeAll();
+              else setOpen(true);
+            }}
+            className="relative z-10 inline-flex size-14 items-center justify-center rounded-full bg-[#0b1f3a] text-white shadow-lg transition hover:bg-navy-deep active:scale-95 dark:bg-white dark:text-[#0b1f3a] lg:size-16"
+          >
+            {open ? (
+              <X className="size-5 lg:size-6" />
+            ) : (
+              <MessengerIcon className="size-7 lg:size-8" />
+            )}
+          </button>
+        </div>
 
-        <a
-          href={`tel:${siteConfig.phoneTel}`}
-          aria-label="โทรเลย"
-          title="โทรเลย"
-          className="fab-aura fab-aura-red inline-flex size-14 items-center justify-center rounded-full bg-brand-red text-white shadow-[0_8px_24px_rgba(200,16,46,0.38)] transition hover:bg-brand-red-soft active:scale-95 lg:hidden"
-          onClick={() => {
-            trackSiteClick("phone");
-            closeAll();
-          }}
-        >
-          <Phone className="size-6" strokeWidth={2.2} aria-hidden />
-        </a>
+        <div className="relative isolate overflow-visible lg:hidden">
+          <span className="fab-glow fab-glow-red" aria-hidden />
+          <a
+            href={`tel:${siteConfig.phoneTel}`}
+            aria-label={t("fab.call")}
+            title={t("fab.call")}
+            className="relative z-10 inline-flex size-14 items-center justify-center rounded-full bg-brand-red text-white shadow-[0_8px_24px_rgba(200,16,46,0.38)] transition hover:bg-brand-red-soft active:scale-95"
+            onClick={() => {
+              trackSiteClick("phone");
+              closeAll();
+            }}
+          >
+            <Phone className="size-6" strokeWidth={2.2} aria-hidden />
+          </a>
+        </div>
       </div>
     </>
   );

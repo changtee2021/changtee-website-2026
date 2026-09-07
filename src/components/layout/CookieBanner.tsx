@@ -8,6 +8,7 @@ import {
   hasAnsweredConsent,
   writeConsent,
 } from "@/lib/cookie-consent";
+import { useI18n } from "@/lib/i18n/use-i18n";
 
 type View = "banner" | "settings" | "hidden";
 
@@ -46,6 +47,7 @@ function getSettingsEpoch() {
 }
 
 export function CookieBanner() {
+  const { t } = useI18n();
   const answered = useSyncExternalStore(
     subscribeConsent,
     hasAnsweredConsent,
@@ -93,17 +95,16 @@ export function CookieBanner() {
           <>
             <p className="flex items-center gap-2 text-sm font-semibold text-navy">
               <Cookie className="size-4 shrink-0" aria-hidden />
-              คุกกี้และความเป็นส่วนตัว
+              {t("cookie.title")}
             </p>
             <p className="mt-2 text-sm leading-relaxed text-muted">
-              เราใช้คุกกี้ที่จำเป็นเพื่อให้เว็บไซต์ทำงาน และขอความยินยอมสำหรับคุกกี้วิเคราะห์/การตลาด
-              อ่านเพิ่มที่{" "}
+              {t("cookie.bodyBefore")}{" "}
               <Link href="/cookies" className="font-medium text-navy underline underline-offset-2">
-                นโยบายคุกกี้
+                {t("cookie.policy")}
               </Link>{" "}
-              และ{" "}
+              {t("cookie.and")}{" "}
               <Link href="/privacy" className="font-medium text-navy underline underline-offset-2">
-                นโยบายความเป็นส่วนตัว
+                {t("cookie.privacy")}
               </Link>
             </p>
             <div className="mt-4 flex flex-wrap justify-end gap-2">
@@ -112,21 +113,21 @@ export function CookieBanner() {
                 className="min-h-11 rounded-full border border-line px-3 py-2 text-xs font-medium text-muted hover:bg-paper"
                 onClick={() => setForceSettings(true)}
               >
-                ตั้งค่า
+                {t("cookie.settings")}
               </button>
               <button
                 type="button"
                 className="min-h-11 rounded-full border border-navy px-3 py-2 text-xs font-semibold text-navy hover:bg-paper"
                 onClick={() => save({ analytics: false, marketing: false })}
               >
-                ใช้เท่าที่จำเป็น
+                {t("cookie.necessaryOnly")}
               </button>
               <button
                 type="button"
                 className="min-h-11 rounded-full bg-navy px-3 py-2 text-xs font-semibold text-white hover:bg-navy-deep"
                 onClick={() => save({ analytics: true, marketing: true })}
               >
-                ยอมรับทั้งหมด
+                {t("cookie.acceptAll")}
               </button>
             </div>
           </>
@@ -134,26 +135,26 @@ export function CookieBanner() {
           <>
             <p className="flex items-center gap-2 text-sm font-semibold text-navy">
               <Cookie className="size-4 shrink-0" aria-hidden />
-              ตั้งค่าคุกกี้
+              {t("cookie.settingsTitle")}
             </p>
             <p className="mt-1 text-xs text-muted">
-              คุกกี้ที่จำเป็นเปิดเสมอ — เลือกประเภทอื่นได้ตามต้องการ
+              {t("cookie.settingsHint")}
             </p>
             <div className="mt-4 space-y-3 text-sm">
               <label className="flex items-start justify-between gap-3 rounded-lg border border-line bg-paper px-3 py-2">
                 <span>
-                  <span className="font-medium text-navy">จำเป็น</span>
+                  <span className="font-medium text-navy">{t("cookie.necessary")}</span>
                   <span className="mt-0.5 block text-xs text-muted">
-                    ความปลอดภัย และการจำการตั้งค่าความยินยอม
+                    {t("cookie.necessaryHint")}
                   </span>
                 </span>
                 <input type="checkbox" checked disabled className="mt-1" />
               </label>
               <label className="flex items-start justify-between gap-3 rounded-lg border border-line px-3 py-2">
                 <span>
-                  <span className="font-medium text-navy">วิเคราะห์</span>
+                  <span className="font-medium text-navy">{t("cookie.analytics")}</span>
                   <span className="mt-0.5 block text-xs text-muted">
-                    สถิติการเข้าชม เช่น GA4 / GTM
+                    {t("cookie.analyticsHint")}
                   </span>
                 </span>
                 <input
@@ -165,9 +166,9 @@ export function CookieBanner() {
               </label>
               <label className="flex items-start justify-between gap-3 rounded-lg border border-line px-3 py-2">
                 <span>
-                  <span className="font-medium text-navy">การตลาด</span>
+                  <span className="font-medium text-navy">{t("cookie.marketing")}</span>
                   <span className="mt-0.5 block text-xs text-muted">
-                    วัดผลโฆษณา เช่น Meta Pixel
+                    {t("cookie.marketingHint")}
                   </span>
                 </span>
                 <input
@@ -184,14 +185,14 @@ export function CookieBanner() {
                 className="min-h-11 rounded-full border border-line px-3 py-2 text-xs font-medium text-muted hover:bg-paper"
                 onClick={closeSettings}
               >
-                ยกเลิก
+                {t("cookie.cancel")}
               </button>
               <button
                 type="button"
                 className="min-h-11 rounded-full bg-navy px-3 py-2 text-xs font-semibold text-white hover:bg-navy-deep"
                 onClick={() => save({ analytics, marketing })}
               >
-                บันทึกการตั้งค่า
+                {t("cookie.save")}
               </button>
             </div>
           </>

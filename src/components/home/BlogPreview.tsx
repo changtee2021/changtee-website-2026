@@ -5,18 +5,19 @@ import Link from "next/link";
 import { useMemo } from "react";
 import { HomePanel, PanelHeading } from "@/components/home/HomePanel";
 import {
-  BLOG_CATEGORY_LABELS,
   type BlogCategory,
   type BlogPost,
 } from "@/lib/cms/blog-demo";
 import { publishedBlog } from "@/lib/cms/public-content";
 import { useBlogPosts } from "@/lib/cms/demo-store";
+import { useI18n } from "@/lib/i18n/use-i18n";
+import type { MessageKey } from "@/lib/i18n/messages";
 
 const STARTER_COUNT = 5;
 
-function formatDate(iso: string | null) {
+function formatDate(iso: string | null, locale: string) {
   if (!iso) return null;
-  return new Date(iso).toLocaleDateString("th-TH", {
+  return new Date(iso).toLocaleDateString(locale === "en" ? "en-GB" : "th-TH", {
     year: "numeric",
     month: "short",
     day: "numeric",
@@ -24,6 +25,7 @@ function formatDate(iso: string | null) {
 }
 
 export function BlogPreview() {
+  const { t, locale } = useI18n();
   const posts = useBlogPosts();
   const published = useMemo(() => publishedBlog(posts), [posts]);
 
@@ -42,14 +44,14 @@ export function BlogPreview() {
     <HomePanel tone="clear">
       <div className="py-7 sm:py-9 md:py-12">
         <PanelHeading
-          title="บทความจากทีมช่างตี๋"
+          title={t("home.blog")}
           align="start"
           action={
             <Link
               href="/blog"
               className="text-sm font-semibold text-brand-red hover:underline"
             >
-              อ่านทั้งหมด →
+              {t("home.blogMore")}
             </Link>
           }
         />
@@ -70,7 +72,7 @@ export function BlogPreview() {
             </div>
             <div className="flex flex-1 flex-col p-5 sm:p-6">
               <span className="text-xs font-medium text-brand-red">
-                {BLOG_CATEGORY_LABELS[featured.category]}
+                {t(`blog.cat.${featured.category}` as MessageKey)}
               </span>
               <h3 className="mt-2 font-display text-xl font-semibold text-navy sm:text-2xl">
                 {featured.title}
@@ -79,9 +81,9 @@ export function BlogPreview() {
                 {featured.excerpt}
               </p>
               <div className="mt-auto flex items-end justify-between gap-3 pt-4">
-                {formatDate(featured.publishedAt) ? (
+                {formatDate(featured.publishedAt, locale) ? (
                   <p className="text-xs text-muted">
-                    {formatDate(featured.publishedAt)}
+                    {formatDate(featured.publishedAt, locale)}
                   </p>
                 ) : (
                   <span />
@@ -101,7 +103,7 @@ export function BlogPreview() {
 
           <aside className="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-line lg:col-span-3">
             <h3 className="font-display text-sm font-semibold tracking-wide text-navy">
-              เริ่มจากตรงนี้
+              {t("home.blogStart")}
             </h3>
             <ol className="mt-5 space-y-4">
               {starter.map((post, i) => (
@@ -115,7 +117,7 @@ export function BlogPreview() {
                     </span>
                     <span className="min-w-0">
                       <span className="block text-[11px] font-medium text-brand-red">
-                        {BLOG_CATEGORY_LABELS[post.category]}
+                        {t(`blog.cat.${post.category}` as MessageKey)}
                       </span>
                       <span className="mt-0.5 block text-sm font-semibold leading-snug text-navy group-hover:underline">
                         {post.title}
@@ -133,6 +135,7 @@ export function BlogPreview() {
 }
 
 function HorizontalCard({ post }: { post: BlogPost }) {
+  const { t } = useI18n();
   return (
     <Link
       href={`/blog/${post.slug}`}
@@ -149,7 +152,7 @@ function HorizontalCard({ post }: { post: BlogPost }) {
       </div>
       <div className="flex min-w-0 flex-1 flex-col">
         <span className="text-[11px] font-medium text-brand-red">
-          {BLOG_CATEGORY_LABELS[post.category]}
+          {t(`blog.cat.${post.category}` as MessageKey)}
         </span>
         <h3 className="mt-0.5 line-clamp-2 text-sm font-semibold leading-snug text-navy">
           {post.title}

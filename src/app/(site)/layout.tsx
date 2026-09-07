@@ -1,3 +1,4 @@
+import { T } from "@/components/i18n/T";
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { SiteFooter } from "@/components/layout/SiteFooter";
 import { FloatingActions } from "@/components/layout/FloatingActions";
@@ -20,7 +21,7 @@ export default function SiteLayout({
           href="#main-content"
           className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-[80] focus:rounded-md focus:bg-navy focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-white"
         >
-          ข้ามไปเนื้อหา
+          <T k="skip.content" />
         </a>
         <SiteHeader />
         <main id="main-content" tabIndex={-1} className="flex-1 overflow-x-clip outline-none">

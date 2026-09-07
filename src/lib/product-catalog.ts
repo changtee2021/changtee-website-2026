@@ -337,7 +337,9 @@ export function quoteProductType(
     case "roller-blinds":
       return "ม่านม้วน";
     case "venetian-blinds":
-      return "มู่ลี่";
+      if (child?.slug === "aluminium") return "มู่ลี่อลูมิเนียม";
+      if (child?.slug === "wood") return "มู่ลี่ไม้";
+      return "";
     case "vertical-blinds":
       return "ม่านปรับแสง";
     case "pvc-partition":
