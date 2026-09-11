@@ -1,7 +1,7 @@
 "use client";
 
 import Script from "next/script";
-import { useSyncExternalStore } from "react";
+import { useEffect, useSyncExternalStore } from "react";
 import {
   COOKIE_CONSENT_EVENT,
   type CookieConsentState,
@@ -33,16 +33,41 @@ export function ConsentAwareScripts() {
   const gtmId = process.env.NEXT_PUBLIC_GTM_ID?.trim() || DEFAULT_GTM_ID;
   const ga4Id = process.env.NEXT_PUBLIC_GA4_ID?.trim();
   const pixelId = process.env.NEXT_PUBLIC_META_PIXEL_ID?.trim();
+  const googleAdsId = process.env.NEXT_PUBLIC_GOOGLE_ADS_ID?.trim();
 
   const allowAnalytics = Boolean(consent?.analytics);
   const allowMarketing = Boolean(consent?.marketing);
 
+  // Update Google Consent Mode when consent is loaded or changed
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      window.dataLayer = window.dataLayer || [];
+      const gtag = (window as any).gtag || function() {
+        window.dataLayer.push(arguments);
+      };
+      (window as any).gtag = gtag;
+
+      gtag("consent", "update", {
+        analytics_storage: allowAnalytics ? "granted" : "denied",
+        ad_storage: allowMarketing ? "granted" : "denied",
+        ad_user_data: allowMarketing ? "granted" : "denied",
+        ad_personalization: allowMarketing ? "granted" : "denied",
+      });
+    }
+  }, [allowAnalytics, allowMarketing]);
+
+  const mainGoogleId = googleAdsId || ga4Id;
+
   return (
     <>
+      {/* 1. Initialize Google Consent Mode with default (denied) states */}
       <Script id="consent-default" strategy="beforeInteractive">{`
         window.dataLayer = window.dataLayer || [];
         function gtag(){dataLayer.push(arguments);}
-        gtag('consent', 'default', {
+        if (typeof window.gtag !== 'function') {
+          window.gtag = gtag;
+        }
+        window.gtag('consent', 'default', {
           analytics_storage: 'denied',
           ad_storage: 'denied',
           ad_user_data: 'denied',
@@ -51,24 +76,8 @@ export function ConsentAwareScripts() {
         });
       `}</Script>
 
-      {allowAnalytics ? (
-        <Script id="consent-update-analytics" strategy="afterInteractive">{`
-          window.dataLayer = window.dataLayer || [];
-          function gtag(){dataLayer.push(arguments);}
-          gtag('consent', 'update', {
-            analytics_storage: 'granted'${
-              allowMarketing
-                ? `,
-            ad_storage: 'granted',
-            ad_user_data: 'granted',
-            ad_personalization: 'granted'`
-                : ""
-            }
-          });
-        `}</Script>
-      ) : null}
-
-      {allowAnalytics && gtmId ? (
+      {/* 2. Load GTM unconditionally so it can run in Consent Mode */}
+      {gtmId ? (
         <Script id="gtm" strategy="afterInteractive">{`
           (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
           new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
@@ -78,7 +87,8 @@ export function ConsentAwareScripts() {
         `}</Script>
       ) : null}
 
-      {allowAnalytics && ga4Id ? (
+      {/* 3. Load GA4 unconditionally so it can run in Consent Mode */}
+      {ga4Id ? (
         <>
           <Script
             src={`https://www.googletagmanager.com/gtag/js?id=${ga4Id}`}
@@ -87,12 +97,35 @@ export function ConsentAwareScripts() {
           <Script id="ga4" strategy="afterInteractive">{`
             window.dataLayer = window.dataLayer || [];
             function gtag(){dataLayer.push(arguments);}
-            gtag('js', new Date());
-            gtag('config', '${ga4Id}', { anonymize_ip: true });
+            if (typeof window.gtag !== 'function') {
+              window.gtag = gtag;
+            }
+            window.gtag('js', new Date());
+            window.gtag('config', '${ga4Id}', { anonymize_ip: true });
           `}</Script>
         </>
       ) : null}
 
+      {/* 4. Load Google Ads unconditionally so it can run in Consent Mode and be detected by Google Ads crawler */}
+      {googleAdsId ? (
+        <>
+          <Script
+            src={`https://www.googletagmanager.com/gtag/js?id=${googleAdsId}`}
+            strategy="afterInteractive"
+          />
+          <Script id="google-ads" strategy="afterInteractive">{`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            if (typeof window.gtag !== 'function') {
+              window.gtag = gtag;
+            }
+            window.gtag('js', new Date());
+            window.gtag('config', '${googleAdsId}');
+          `}</Script>
+        </>
+      ) : null}
+
+      {/* 5. Load Meta Pixel conditionally since it does not support Google Consent Mode */}
       {allowMarketing && pixelId ? (
         <Script id="meta-pixel" strategy="afterInteractive">{`
           !function(f,b,e,v,n,t,s)
