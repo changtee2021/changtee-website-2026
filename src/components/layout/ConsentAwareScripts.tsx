@@ -41,11 +41,12 @@ export function ConsentAwareScripts() {
   // Update Google Consent Mode when consent is loaded or changed
   useEffect(() => {
     if (typeof window !== "undefined") {
-      window.dataLayer = window.dataLayer || [];
-      const gtag = (window as any).gtag || function() {
-        window.dataLayer.push(arguments);
+      const win = window as any;
+      win.dataLayer = win.dataLayer || [];
+      const gtag = win.gtag || function() {
+        win.dataLayer.push(arguments);
       };
-      (window as any).gtag = gtag;
+      win.gtag = gtag;
 
       gtag("consent", "update", {
         analytics_storage: allowAnalytics ? "granted" : "denied",
@@ -63,7 +64,7 @@ export function ConsentAwareScripts() {
       {/* 1. Initialize Google Consent Mode with default (denied) states */}
       <Script id="consent-default" strategy="beforeInteractive">{`
         window.dataLayer = window.dataLayer || [];
-        function gtag(){dataLayer.push(arguments);}
+        function gtag(){window.dataLayer.push(arguments);}
         if (typeof window.gtag !== 'function') {
           window.gtag = gtag;
         }
