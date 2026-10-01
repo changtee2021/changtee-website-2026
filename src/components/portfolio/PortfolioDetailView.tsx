@@ -632,7 +632,7 @@ function JobFactsCard({
             {specs.map((row, i) => (
               <li
                 key={`${row.sku}-${row.productName}-${i}`}
-                className="rounded-xl bg-shell px-3.5 py-3"
+                className="rounded-xl bg-paper px-3.5 py-3"
               >
                 <p className="font-semibold text-navy">
                   {row.productName.trim() || "สินค้า (ยังไม่ตั้งชื่อ)"}

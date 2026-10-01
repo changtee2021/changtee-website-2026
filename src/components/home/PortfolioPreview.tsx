@@ -112,9 +112,9 @@ export function PortfolioPreview({
                   <Link
                     key={item.slug}
                     href={`/portfolio/${item.slug}`}
-                    className="group flex w-[78vw] shrink-0 flex-col rounded-[1.25rem] bg-paper p-3 transition hover:bg-line/40 sm:w-[300px]"
+                    className="group flex w-[78vw] shrink-0 flex-col rounded-md bg-paper p-3 transition hover:bg-line/40 sm:w-[300px]"
                   >
-                    <div className="relative aspect-[4/3] overflow-hidden rounded-[1rem] bg-line/40">
+                    <div className="relative aspect-[4/3] overflow-hidden rounded-sm bg-line/40">
                       <Image
                         src={item.image}
                         alt={item.title}

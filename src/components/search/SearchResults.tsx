@@ -55,7 +55,7 @@ export function SearchResults() {
             <li key={`${r.type}-${r.href}`}>
               <Link
                 href={r.href}
-                className="flex items-center gap-3 rounded-xl border border-line bg-panel px-3 py-3 hover:bg-shell"
+                className="flex items-center gap-3 rounded-xl border border-line bg-panel px-3 py-3 hover:bg-paper"
               >
                 <span className="relative size-14 shrink-0 overflow-hidden rounded-lg bg-line/40">
                   {r.image ? (

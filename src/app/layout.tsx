@@ -17,13 +17,13 @@ const sans = IBM_Plex_Sans_Thai({
 const display = Prompt({
   variable: "--font-display-family",
   subsets: ["thai", "latin"],
-  weight: ["500", "600", "700"],
+  weight: ["400", "500", "600", "700"],
 });
 
 const modern = Outfit({
   variable: "--font-modern-family",
   subsets: ["latin"],
-  weight: ["500", "600", "700"],
+  weight: ["400", "500", "600", "700"],
 });
 
 export async function generateMetadata(): Promise<Metadata> {

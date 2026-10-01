@@ -3,10 +3,12 @@ import type { ReactNode } from "react";
 export function HomePanel({
   children,
   className = "",
+  sectionClassName = "",
   tone = "panel",
 }: {
   children: ReactNode;
   className?: string;
+  sectionClassName?: string;
   tone?: "panel" | "navy" | "clear";
 }) {
   const toneClass =
@@ -17,7 +19,7 @@ export function HomePanel({
         : "rounded-[var(--radius-panel)] bg-panel text-ink";
 
   return (
-    <section className="px-6 pb-3 sm:px-10 sm:pb-4 lg:px-16">
+    <section className={`relative px-6 pb-3 sm:px-10 sm:pb-4 lg:px-16 ${sectionClassName}`}>
       <div className={`mx-auto w-full max-w-5xl ${toneClass} ${className}`}>
         {children}
       </div>

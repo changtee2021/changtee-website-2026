@@ -154,7 +154,7 @@ export function SiteSearch({ className = "" }: { className?: string }) {
                         inputRef.current?.focus();
                       }}
                       aria-label={t("search.clear")}
-                      className="mr-1 inline-flex size-9 shrink-0 items-center justify-center rounded-full text-muted transition hover:bg-shell hover:text-navy"
+                      className="mr-1 inline-flex size-9 shrink-0 items-center justify-center rounded-full text-muted transition hover:bg-paper hover:text-navy"
                     >
                       <X className="size-4" aria-hidden />
                     </button>
@@ -192,8 +192,8 @@ export function SiteSearch({ className = "" }: { className?: string }) {
                           <Link
                             href={r.href}
                             onClick={() => close()}
-                            className={`flex items-center gap-3 rounded-xl px-3 py-2.5 transition hover:bg-shell ${
-                              i === 0 ? "bg-shell/70" : ""
+                            className={`flex items-center gap-3 rounded-xl px-3 py-2.5 transition hover:bg-paper ${
+                              i === 0 ? "bg-paper" : ""
                             }`}
                           >
                             <span className="relative size-11 shrink-0 overflow-hidden rounded-lg bg-line/40">

@@ -3,7 +3,7 @@ import { factoryVisitSchema } from "@/lib/validations/visit";
 import { productPresentationSchema } from "@/lib/validations/presentation";
 import { createVisitBooking } from "@/lib/visits/store";
 import { sendFactoryVisitEmails } from "@/lib/email/visit-mailer";
-import { pushLineMessage, visitLineTarget } from "@/lib/outbound/line";
+import { pushLineCard, visitLineTarget } from "@/lib/outbound/line";
 import {
   formatVisitSites,
   VISIT_SESSION_LABELS,
@@ -177,17 +177,23 @@ export async function POST(request: Request) {
         ? PRESENTATION_VENUE_LABELS[visit.presentationVenue as PresentationVenueId] ||
           visit.presentationVenue
         : formatVisitSites(visit.visitSites);
-    const line = await pushLineMessage(
-      [
-        isPresentationLine
-          ? "📊 มีคำขอนัดนำเสนอสินค้าใหม่"
-          : "📅 มีคำขอนัดเยี่ยมชมโรงงานใหม่",
-        `ชื่อ: ${visit.fullName}${visit.contactPosition ? ` · ${visit.contactPosition}` : ""}${visit.businessName ? ` (${visit.businessName})` : ""}`,
-        `สถานที่: ${venueLabel}`,
-        `วันที่: ${visit.visitDate} · ${VISIT_SESSION_LABELS[visit.session]}`,
-        `จำนวน: ${visit.visitorCount} คน`,
-        `โทร: ${visit.phone}`,
-      ].join("\n"),
+    const line = await pushLineCard(
+      {
+        title: isPresentationLine ? "มีคำขอนัดนำเสนอสินค้าใหม่" : "มีคำขอนัดเยี่ยมชมโรงงานใหม่",
+        fields: [
+          {
+            label: "ชื่อ",
+            value: `${visit.fullName}${visit.contactPosition ? ` · ${visit.contactPosition}` : ""}${visit.businessName ? ` (${visit.businessName})` : ""}`,
+          },
+          { label: "สถานที่", value: venueLabel },
+          {
+            label: "วันที่",
+            value: `${visit.visitDate} · ${VISIT_SESSION_LABELS[visit.session]}`,
+          },
+          { label: "จำนวน", value: `${visit.visitorCount} คน` },
+          { label: "โทร", value: visit.phone },
+        ],
+      },
       visitLineTarget(),
     );
     notify.push({ channel: "line", ...line });

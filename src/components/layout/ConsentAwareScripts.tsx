@@ -41,11 +41,16 @@ export function ConsentAwareScripts() {
   // Update Google Consent Mode when consent is loaded or changed
   useEffect(() => {
     if (typeof window !== "undefined") {
-      const win = window as any;
-      win.dataLayer = win.dataLayer || [];
-      const gtag = win.gtag || function() {
-        win.dataLayer.push(arguments);
+      const win = window as Window & {
+        dataLayer?: unknown[];
+        gtag?: (...args: unknown[]) => void;
       };
+      win.dataLayer = win.dataLayer || [];
+      const gtag =
+        win.gtag ||
+        function gtag(...args: unknown[]) {
+          win.dataLayer?.push(args);
+        };
       win.gtag = gtag;
 
       gtag("consent", "update", {

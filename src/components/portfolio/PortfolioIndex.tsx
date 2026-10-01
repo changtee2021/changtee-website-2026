@@ -19,12 +19,6 @@ import {
 import { publishedPortfolio } from "@/lib/cms/public-content";
 import { hydratePortfolioItems, usePortfolioItems } from "@/lib/cms/demo-store";
 import { getCategory, productCatalog } from "@/lib/product-catalog";
-import {
-  IconAll,
-  productFilterIcon,
-  spaceFilterIcon,
-  type FilterGraphicIcon,
-} from "@/components/portfolio/portfolio-filter-icons";
 import { siteConfig } from "@/lib/site-config";
 import { cn } from "@/lib/utils";
 import { PageHero } from "@/components/ui/page-hero";
@@ -361,51 +355,18 @@ export function PortfolioIndex({
     });
   }, [product, published, space, area, qParam]);
 
+  // Hide sub-categories with no work yet (keep any already-selected one so it can be un-picked).
+  const visibleChildOptions = useMemo(
+    () => childOptions.filter((ch) => ch.count > 0 || childSlugs.includes(ch.slug)),
+    [childOptions, childSlugs],
+  );
+
   const hasFilters =
     product !== "all" ||
     space !== "all" ||
     area !== "all" ||
     childSlugs.length > 0 ||
     qParam.length > 0;
-
-  const activePills: { key: string; label: string; clear: () => void }[] = [];
-  if (qParam)
-    activePills.push({
-      key: "q",
-      label: `ค้นหา: ${qParam}`,
-      clear: () => {
-        setQDraft("");
-        updateQuery({ q: "" });
-      },
-    });
-  if (product !== "all")
-    activePills.push({
-      key: "product",
-      label: productLabel(product),
-      clear: () => updateQuery({ product: "all", child: [] }),
-    });
-  for (const slug of childSlugs) {
-    const childName =
-      getCategory(product)?.children.find((c) => c.slug === slug)?.name ?? slug;
-    activePills.push({
-      key: `child-${slug}`,
-      label: childName,
-      clear: () =>
-        updateQuery({ child: childSlugs.filter((s) => s !== slug) }),
-    });
-  }
-  if (space !== "all")
-    activePills.push({
-      key: "space",
-      label: SPACE_TYPE_LABELS[space],
-      clear: () => updateQuery({ space: "all" }),
-    });
-  if (area !== "all")
-    activePills.push({
-      key: "area",
-      label: area,
-      clear: () => updateQuery({ area: "all" }),
-    });
 
   return (
     <div className="bg-shell pb-16">
@@ -417,274 +378,257 @@ export function PortfolioIndex({
         description="รวมงานติดตั้งลูกค้า — ค้นหาตามสินค้า สถานที่ หรือม่านตรงกับใจคุณ"
         aside={<PortfolioHeroCovers items={published} />}
         align="bottom"
+        compact
       />
 
-      <div className="mx-auto max-w-5xl px-6 sm:px-10 lg:px-16 pt-8 sm:pt-10">
-        <div className="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-line sm:p-5">
-          <div className="flex items-center gap-2">
-            <div className="inline-flex shrink-0 rounded-full bg-shell p-1 ring-1 ring-line">
-              <ModeBtn
-                active={view === "product"}
-                reduced={!!reduced}
-                onClick={() => updateQuery({ view: "product" })}
-              >
-                สินค้า
-              </ModeBtn>
-              <ModeBtn
-                active={view === "place"}
-                reduced={!!reduced}
-                onClick={() => updateQuery({ view: "place" })}
-              >
-                สถานที่
-              </ModeBtn>
-            </div>
-
-            <label className="relative min-w-0 flex-1">
-              <span className="sr-only">ค้นหาผลงาน</span>
-              <Search
-                className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-muted"
-                aria-hidden
-              />
-              <input
-                type="search"
-                value={qDraft}
-                onChange={(e) => setQDraft(e.target.value)}
-                placeholder="ค้นหา เช่น ม่านม้วน สุขุมวิท คอนโด ทึบแสง"
-                className="w-full rounded-full border border-line bg-shell py-2.5 pl-10 pr-10 text-sm text-ink outline-none ring-navy/20 placeholder:text-muted focus:border-navy/40 focus:ring-2"
-              />
-              {qDraft ? (
-                <button
-                  type="button"
-                  onClick={() => {
-                    setQDraft("");
-                    updateQuery({ q: "" });
-                  }}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full p-1 text-muted hover:bg-white hover:text-navy"
-                  aria-label="ล้างคำค้น"
-                >
-                  <X className="size-4" />
-                </button>
-              ) : null}
-            </label>
-
-            <div className="relative shrink-0" ref={filterRef}>
-              <button
-                type="button"
-                aria-label="ตัวกรอง"
-                aria-expanded={filterOpen}
-                onClick={() => setFilterOpen((o) => !o)}
-                className={cn(
-                  "relative flex size-11 items-center justify-center rounded-full border border-line bg-shell text-navy transition hover:border-navy/30",
-                  filterOpen && "border-navy/40 ring-2 ring-navy/15",
-                )}
-              >
-                <ListFilter className="size-4" strokeWidth={1.75} />
-                {dropdownFiltersOn ? (
-                  <span className="absolute right-2 top-2 size-1.5 rounded-full bg-brand-red" />
-                ) : null}
-              </button>
-              {filterOpen ? (
-                <div className="absolute right-0 z-20 mt-2 w-[min(18rem,calc(100vw-2.5rem))] space-y-2 rounded-2xl bg-white p-3 shadow-lg ring-1 ring-line">
-                  {view === "product" ? (
-                    <FilterSelect
-                      label="ประเภทสถานที่"
-                      value={space}
-                      onChange={(v) => updateQuery({ space: v as SpaceFilter })}
-                      options={[
-                        { value: "all", label: `ทุกประเภท (${published.length})` },
-                        ...spaceCounts.map((s) => ({
-                          value: s.key,
-                          label: `${s.label} (${s.count})`,
-                        })),
-                      ]}
-                    />
-                  ) : (
-                    <FilterSelect
-                      label="หมวดสินค้า"
-                      value={product}
-                      onChange={(v) => updateQuery({ product: v })}
-                      options={[
-                        { value: "all", label: `ทุกสินค้า (${published.length})` },
-                        ...productCounts.map((c) => ({
-                          value: c.slug,
-                          label: `${c.name} (${c.count})`,
-                        })),
-                      ]}
-                    />
-                  )}
-                  <FilterSelect
-                    label="พื้นที่"
-                    value={area}
-                    onChange={(v) => updateQuery({ area: v })}
-                    options={[
-                      { value: "all", label: "ทุกพื้นที่" },
-                      ...areaOptions.map((a) => ({
-                        value: a.key,
-                        label: `${a.key} (${a.count})`,
-                      })),
-                    ]}
-                  />
-                  {hasFilters ? (
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setQDraft("");
-                        updateQuery({
-                          product: "all",
-                          space: "all",
-                          area: "all",
-                          child: [],
-                          q: "",
-                        });
-                      }}
-                      className="w-full pt-1 text-center text-sm font-semibold text-brand-red hover:underline"
-                    >
-                      ล้างตัวกรอง
-                    </button>
-                  ) : null}
-                </div>
-              ) : null}
-            </div>
-          </div>
-
-          {/* Icon strip — swipe on phone, wrap to the card on desktop */}
-          <div className="mt-5 min-w-0 border-t border-line pt-5">
-            <AnimatePresence mode="wait" initial={false}>
-              <motion.div
-                key={view}
-                initial={reduced ? false : { opacity: 0, x: view === "place" ? 18 : -18 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={
-                  reduced
-                    ? undefined
-                    : { opacity: 0, x: view === "place" ? -18 : 18 }
-                }
-                transition={{ duration: reduced ? 0 : 0.28, ease: fadeEase }}
-                className="no-scrollbar flex min-w-0 gap-2 overflow-x-auto pb-1 sm:gap-3 md:flex-wrap md:justify-start md:gap-1.5 md:overflow-visible"
-              >
-                <FilterIconBtn
-                  active={
-                    view === "product" ? product === "all" : space === "all"
-                  }
-                  label="ทั้งหมด"
-                  icon={IconAll}
-                  layoutId={`pf-active-${view}`}
-                  reduced={!!reduced}
-                  onClick={() =>
-                    view === "product"
-                      ? updateQuery({ product: "all", child: [] })
-                      : updateQuery({ space: "all" })
-                  }
+      <div className="mx-auto max-w-6xl px-6 sm:px-10 lg:px-16 pt-8 sm:pt-10">
+        <div className="lg:grid lg:grid-cols-[14.5rem_minmax(0,1fr)] lg:items-start lg:gap-12">
+          <aside className="mb-6 lg:sticky lg:top-24 lg:mb-0">
+            <div className="flex flex-col gap-2">
+              <label className="relative min-w-0">
+                <span className="sr-only">ค้นหาผลงาน</span>
+                <Search
+                  className="pointer-events-none absolute left-3 top-1/2 size-3.5 -translate-y-1/2 text-muted"
+                  aria-hidden
                 />
-                {view === "product"
-                  ? productCounts.map((c, i) => (
-                      <FilterIconBtn
-                        key={c.slug}
-                        active={product === c.slug}
-                        label={c.name}
-                        icon={productFilterIcon(c.slug)}
-                        muted={c.count === 0}
-                        layoutId={`pf-active-${view}`}
-                        reduced={!!reduced}
-                        delay={reduced ? 0 : i * 0.02}
-                        onClick={() => updateQuery({ product: c.slug })}
-                      />
-                    ))
-                  : spaceCounts.map((s, i) => (
-                      <FilterIconBtn
-                        key={s.key}
-                        active={space === s.key}
-                        label={s.label}
-                        icon={spaceFilterIcon(s.key)}
-                        muted={s.count === 0}
-                        layoutId={`pf-active-${view}`}
-                        reduced={!!reduced}
-                        delay={reduced ? 0 : i * 0.03}
-                        onClick={() => updateQuery({ space: s.key })}
-                      />
-                    ))}
-              </motion.div>
-            </AnimatePresence>
-          </div>
+                <input
+                  type="search"
+                  value={qDraft}
+                  onChange={(e) => setQDraft(e.target.value)}
+                  placeholder="ค้นหา เช่น ม่านม้วน สุขุมวิท"
+                  className="min-h-9 w-full rounded-full border border-line bg-white py-1.5 pl-8 pr-8 text-[13px] text-ink outline-none ring-navy/20 placeholder:text-muted focus:border-navy/40 focus:ring-2"
+                />
+                {qDraft ? (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setQDraft("");
+                      updateQuery({ q: "" });
+                    }}
+                    className="absolute right-2 top-1/2 flex size-8 -translate-y-1/2 items-center justify-center rounded-full text-muted hover:bg-paper hover:text-navy"
+                    aria-label="ล้างคำค้น"
+                  >
+                    <X className="size-4" />
+                  </button>
+                ) : null}
+              </label>
 
-          {/* Sub-categories when a product is selected */}
-          <AnimatePresence initial={false}>
-            {view === "product" &&
-            product !== "all" &&
-            childOptions.length > 0 ? (
-              <motion.div
-                key={`child-${product}`}
-                initial={reduced ? false : { opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: "auto" }}
-                exit={reduced ? undefined : { opacity: 0, height: 0 }}
-                transition={{ duration: reduced ? 0 : 0.28, ease: fadeEase }}
-                className="overflow-hidden"
-              >
-                <div className="mt-4 border-t border-line pt-4">
-                  <p className="text-xs font-semibold uppercase tracking-wider text-muted">
-                    หมวดย่อย · {productLabel(product)}
-                  </p>
-                  <div className="no-scrollbar mt-3 flex gap-2 overflow-x-auto pb-1 md:flex-wrap md:overflow-visible">
-                    {childOptions.map((ch) => {
-                      const selected = childSlugs.includes(ch.slug);
-                      return (
-                        <button
-                          key={ch.slug}
-                          type="button"
-                          onClick={() => {
-                            const next = selected
-                              ? childSlugs.filter((s) => s !== ch.slug)
-                              : [...childSlugs, ch.slug];
-                            updateQuery({ child: next });
-                          }}
-                          className={cn(
-                            "relative shrink-0 rounded-full px-3.5 py-1.5 text-xs font-medium transition",
-                            selected
-                              ? "bg-navy text-white"
-                              : "bg-shell text-navy ring-1 ring-line hover:ring-navy/30",
-                            ch.count === 0 && !selected && "opacity-45",
-                          )}
-                        >
-                          {ch.name}
-                          <span className="ml-1 opacity-70">{ch.count}</span>
-                        </button>
-                      );
-                    })}
+              <div ref={filterRef}>
+                <div className="flex items-center gap-2">
+                  <div className="inline-flex min-w-0 flex-1 rounded-full bg-white p-0.5 ring-1 ring-line">
+                    <ModeBtn
+                      active={view === "product"}
+                      reduced={!!reduced}
+                      onClick={() => updateQuery({ view: "product" })}
+                    >
+                      สินค้า
+                    </ModeBtn>
+                    <ModeBtn
+                      active={view === "place"}
+                      reduced={!!reduced}
+                      onClick={() => updateQuery({ view: "place" })}
+                    >
+                      สถานที่
+                    </ModeBtn>
                   </div>
+                  <button
+                    type="button"
+                    aria-label="ตัวกรอง"
+                    aria-expanded={filterOpen}
+                    onClick={() => setFilterOpen((o) => !o)}
+                    className={cn(
+                      "relative flex size-9 shrink-0 items-center justify-center rounded-full border border-line bg-white text-navy transition hover:border-navy/30",
+                      filterOpen && "border-navy/40 ring-2 ring-navy/15",
+                    )}
+                  >
+                    <ListFilter className="size-3.5" strokeWidth={1.75} />
+                    {dropdownFiltersOn ? (
+                      <span className="absolute right-1.5 top-1.5 size-1.5 rounded-full bg-brand-red" />
+                    ) : null}
+                  </button>
                 </div>
-              </motion.div>
-            ) : null}
-          </AnimatePresence>
-
-          {activePills.length > 0 ? (
-            <div className="mt-4 flex flex-wrap gap-2 border-t border-line pt-4">
-              {activePills.map((p) => (
-                <button
-                  key={p.key}
-                  type="button"
-                  onClick={p.clear}
-                  className="inline-flex items-center gap-1.5 rounded-full bg-navy/5 px-3 py-1 text-xs font-medium text-navy hover:bg-navy/10"
-                >
-                  {p.label}
-                  <X className="size-3 opacity-60" />
-                </button>
-              ))}
+                {filterOpen ? (
+                  <div className="mt-2 space-y-2 rounded-2xl bg-white p-3 shadow-lg ring-1 ring-line">
+                    {view === "product" ? (
+                      <FilterSelect
+                        label="ประเภทสถานที่"
+                        value={space}
+                        onChange={(v) => updateQuery({ space: v as SpaceFilter })}
+                        options={[
+                          { value: "all", label: `ทุกประเภท (${published.length})` },
+                          ...spaceCounts.map((s) => ({
+                            value: s.key,
+                            label: `${s.label} (${s.count})`,
+                          })),
+                        ]}
+                      />
+                    ) : (
+                      <FilterSelect
+                        label="หมวดสินค้า"
+                        value={product}
+                        onChange={(v) => updateQuery({ product: v })}
+                        options={[
+                          { value: "all", label: `ทุกสินค้า (${published.length})` },
+                          ...productCounts.map((c) => ({
+                            value: c.slug,
+                            label: `${c.name} (${c.count})`,
+                          })),
+                        ]}
+                      />
+                    )}
+                    <FilterSelect
+                      label="พื้นที่"
+                      value={area}
+                      onChange={(v) => updateQuery({ area: v })}
+                      options={[
+                        { value: "all", label: "ทุกพื้นที่" },
+                        ...areaOptions.map((a) => ({
+                          value: a.key,
+                          label: `${a.key} (${a.count})`,
+                        })),
+                      ]}
+                    />
+                    {hasFilters ? (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setQDraft("");
+                          updateQuery({
+                            product: "all",
+                            space: "all",
+                            area: "all",
+                            child: [],
+                            q: "",
+                          });
+                        }}
+                        className="min-h-11 w-full text-center text-sm font-semibold text-brand-red hover:underline"
+                      >
+                        ล้างตัวกรอง
+                      </button>
+                    ) : null}
+                  </div>
+                ) : null}
+              </div>
             </div>
-          ) : null}
-        </div>
 
-        {product !== "all" ? (
-          <div className="mt-6 flex items-baseline justify-end gap-3">
-            <Link
-              href={`/products/${product}`}
-              className="inline-flex items-center gap-1 text-sm font-semibold text-navy hover:text-brand-red"
+            <nav
+              aria-label={view === "product" ? "หมวดสินค้า" : "ประเภทสถานที่"}
+              className="mt-2.5"
             >
-              ดูสินค้าหมวดนี้
-              <ArrowRight className="size-3.5" />
-            </Link>
-          </div>
-        ) : null}
+              <AnimatePresence mode="wait" initial={false}>
+                <motion.div
+                  key={view}
+                  initial={reduced ? false : { opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={reduced ? undefined : { opacity: 0, y: -8 }}
+                  transition={{ duration: reduced ? 0 : 0.22, ease: fadeEase }}
+                  className="flex flex-col"
+                >
+                  <FilterIconBtn
+                    active={
+                      view === "product" ? product === "all" : space === "all"
+                    }
+                    label="ทั้งหมด"
+                    reduced={!!reduced}
+                    onClick={() =>
+                      view === "product"
+                        ? updateQuery({ product: "all", child: [] })
+                        : updateQuery({ space: "all" })
+                    }
+                  />
+                  {view === "product"
+                    ? productCounts.map((c) => {
+                        const open =
+                          product === c.slug && visibleChildOptions.length > 0;
+                        return (
+                          <div key={c.slug}>
+                            <FilterIconBtn
+                              active={product === c.slug}
+                              expanded={open}
+                              label={c.name}
+                              muted={c.count === 0}
+                              reduced={!!reduced}
+                              onClick={() =>
+                                product === c.slug
+                                  ? updateQuery({ product: "all", child: [] })
+                                  : updateQuery({ product: c.slug })
+                              }
+                            />
+                            <AnimatePresence initial={false}>
+                              {open ? (
+                                <motion.div
+                                  key={`child-${c.slug}`}
+                                  initial={
+                                    reduced ? false : { opacity: 0, height: 0 }
+                                  }
+                                  animate={{ opacity: 1, height: "auto" }}
+                                  exit={
+                                    reduced
+                                      ? undefined
+                                      : { opacity: 0, height: 0 }
+                                  }
+                                  transition={{
+                                    duration: reduced ? 0 : 0.22,
+                                    ease: fadeEase,
+                                  }}
+                                  className="overflow-hidden"
+                                >
+                                  <div className="mb-1 ml-3 border-l border-line py-1 pl-2">
+                                    <div className="flex flex-col gap-0.5">
+                                      {visibleChildOptions.map((ch) => {
+                                        const selected = childSlugs.includes(
+                                          ch.slug,
+                                        );
+                                        return (
+                                          <button
+                                            key={ch.slug}
+                                            type="button"
+                                            onClick={() => {
+                                              // One sub-category at a time: show only that page's works.
+                                              updateQuery({
+                                                child: selected ? [] : [ch.slug],
+                                              });
+                                            }}
+                                            className={cn(
+                                              "flex min-h-8 w-full items-center justify-between gap-2 rounded-md px-2.5 text-left text-[13px] font-medium transition",
+                                              selected
+                                                ? "bg-navy text-white"
+                                                : "text-navy hover:bg-paper",
+                                              ch.count === 0 &&
+                                                !selected &&
+                                                "opacity-45",
+                                            )}
+                                          >
+                                            <span className="min-w-0 truncate">
+                                              {ch.name}
+                                            </span>
+                                          </button>
+                                        );
+                                      })}
+                                    </div>
+                                  </div>
+                                </motion.div>
+                              ) : null}
+                            </AnimatePresence>
+                          </div>
+                        );
+                      })
+                    : spaceCounts.map((s) => (
+                        <FilterIconBtn
+                          key={s.key}
+                          active={space === s.key}
+                          label={s.label}
+                          muted={s.count === 0}
+                          reduced={!!reduced}
+                          onClick={() => updateQuery({ space: s.key })}
+                        />
+                      ))}
+                </motion.div>
+              </AnimatePresence>
+            </nav>
+          </aside>
 
+          <div className="min-w-0">
         <AnimatePresence mode="wait" initial={false}>
           {filtered.length === 0 ? (
             <motion.div
@@ -697,12 +641,12 @@ export function PortfolioIndex({
             >
               {view === "product" &&
               product !== "all" &&
-              childOptions.length > 0 &&
+              visibleChildOptions.length > 0 &&
               childSlugs.length === 0 ? (
                 <>
                   <p className="font-medium text-navy">เลือกหมวดย่อยเพื่อดูผลงาน</p>
                   <p className="mt-2 text-sm text-muted">
-                    กดหมวดย่อยด้านบนได้มากกว่าหนึ่งรายการ
+                    กดหมวดย่อยทางซ้ายเพื่อดูผลงานของหมวดนั้น
                   </p>
                 </>
               ) : (
@@ -737,7 +681,7 @@ export function PortfolioIndex({
               animate={{ opacity: 1, y: 0 }}
               exit={reduced ? undefined : { opacity: 0, y: -10 }}
               transition={{ duration: reduced ? 0 : 0.32, ease: fadeEase }}
-              className="mt-8 space-y-12"
+              className="space-y-12"
             >
               {groups.map((g, gi) => (
                 <motion.section
@@ -750,16 +694,32 @@ export function PortfolioIndex({
                     ease: fadeEase,
                   }}
                 >
-                  <div className="mb-4 flex items-end justify-between gap-3 border-b border-line pb-3">
-                    <div>
-                      <h2 className="font-display text-xl font-semibold text-navy">
+                  <div
+                    className={cn(
+                      "mb-4 flex justify-between gap-3 border-b border-line pb-3",
+                      product !== "all" && gi === 0 ? "items-start" : "items-end",
+                    )}
+                  >
+                    <div className="min-w-0">
+                      <h2 className="font-display text-3xl font-normal tracking-tight text-navy sm:text-4xl">
                         {g.title}
                       </h2>
-                      <p className="mt-0.5 text-xs text-muted">{g.subtitle}</p>
+                      <p className="mt-1 text-lg font-normal text-muted">{g.subtitle}</p>
                     </div>
-                    <p className="text-sm text-muted">{g.items.length} งาน</p>
+                    <div className="flex shrink-0 items-center gap-3">
+                      {product !== "all" && gi === 0 ? (
+                        <Link
+                          href={`/products/${product}`}
+                          className="inline-flex min-h-11 items-center gap-1 text-sm font-semibold text-navy hover:text-brand-red"
+                        >
+                          ดูสินค้าหมวดนี้
+                          <ArrowRight className="size-3.5" />
+                        </Link>
+                      ) : null}
+                      <p className="text-sm text-muted">{g.items.length} งาน</p>
+                    </div>
                   </div>
-                  <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                  <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
                     {g.items.map((item, ii) => (
                       <motion.div
                         key={item.id}
@@ -783,6 +743,8 @@ export function PortfolioIndex({
             </motion.div>
           )}
         </AnimatePresence>
+          </div>
+        </div>
 
         <section className="mt-16 rounded-[1.5rem] bg-navy px-6 py-8 text-white sm:px-10 sm:py-10">
           <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
@@ -833,7 +795,7 @@ function ModeBtn({
       type="button"
       onClick={onClick}
       className={cn(
-        "relative rounded-full px-3 py-1.5 text-sm font-semibold transition sm:px-4",
+        "relative min-h-9 flex-1 rounded-full px-2.5 py-1 text-[13px] font-semibold transition",
         active ? "text-white" : "text-muted hover:text-navy",
       )}
     >
@@ -866,7 +828,7 @@ function FilterSelect({
       <select
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="w-full appearance-none rounded-full border border-line bg-shell py-2.5 pl-4 pr-9 text-sm font-medium text-navy outline-none focus:border-navy/40 focus:ring-2 focus:ring-navy/15"
+        className="w-full appearance-none rounded-full border border-line bg-shell py-1.5 pl-3 pr-8 text-[13px] font-medium text-navy outline-none focus:border-navy/40 focus:ring-2 focus:ring-navy/15"
       >
         {options.map((o) => (
           <option key={o.value} value={o.value}>
@@ -884,68 +846,35 @@ function FilterSelect({
 
 function FilterIconBtn({
   active,
+  expanded,
   label,
-  icon: Icon,
   muted,
-  layoutId,
   reduced,
-  delay = 0,
   onClick,
 }: {
   active: boolean;
+  expanded?: boolean;
   label: string;
-  icon: FilterGraphicIcon;
   muted?: boolean;
-  layoutId: string;
   reduced: boolean;
-  delay?: number;
   onClick: () => void;
 }) {
   return (
     <motion.button
       type="button"
       onClick={onClick}
-      initial={reduced ? false : { opacity: 0, y: 8 }}
+      aria-current={active ? "true" : undefined}
+      aria-expanded={expanded}
+      initial={reduced ? false : { opacity: 0, y: 6 }}
       animate={{ opacity: muted && !active ? 0.42 : 1, y: 0 }}
-      transition={{
-        duration: reduced ? 0 : 0.28,
-        delay,
-        ease: fadeEase,
-      }}
-      whileTap={reduced ? undefined : { scale: 0.94 }}
+      transition={{ duration: reduced ? 0 : 0.22, ease: fadeEase }}
+      whileTap={reduced ? undefined : { scale: 0.98 }}
       className={cn(
-        "group relative flex w-[4.85rem] shrink-0 flex-col items-center gap-1.5 rounded-xl px-1 py-2 md:w-[4.2rem] md:px-0.5",
-        active ? "bg-navy/[0.04]" : "hover:bg-shell",
+        "flex min-h-9 w-full items-center rounded-lg px-2.5 py-1 text-left text-[13px] font-medium leading-tight",
+        active ? "bg-navy/[0.06] text-navy" : "text-muted hover:bg-paper",
       )}
     >
-      <span className="relative flex size-[3.6rem] items-center justify-center md:size-[3.15rem]">
-        {active ? (
-          <motion.span
-            layoutId={layoutId}
-            className="absolute inset-0 rounded-2xl bg-white shadow-sm ring-2 ring-brand-red"
-            transition={reduced ? { duration: 0 } : springSoft}
-          />
-        ) : (
-          <span className="absolute inset-0 rounded-2xl bg-shell ring-2 ring-line transition group-hover:ring-navy/25" />
-        )}
-        <motion.span
-          className="relative"
-          animate={
-            reduced ? undefined : active ? { scale: 1.06 } : { scale: 1 }
-          }
-          transition={springSoft}
-        >
-          <Icon active={active} className="size-8 md:size-7" />
-        </motion.span>
-      </span>
-      <span
-        className={cn(
-          "line-clamp-2 text-center text-[11px] font-medium leading-tight",
-          active ? "text-navy" : "text-muted",
-        )}
-      >
-        {label}
-      </span>
+      <span className="min-w-0 flex-1 truncate">{label}</span>
     </motion.button>
   );
 }
@@ -957,6 +886,9 @@ function GalleryCard({
   item: PortfolioItem;
   showProduct: boolean;
 }) {
+  /** Second photo of this job (first gallery image that differs from the cover). */
+  const secondImage = item.gallery.find((src) => src && src !== item.image);
+
   return (
     <Link
       href={`/portfolio/${item.slug}`}
@@ -967,9 +899,24 @@ function GalleryCard({
           src={item.image}
           alt={item.title}
           fill
-          className="object-cover transition duration-500 group-hover:scale-[1.03]"
+          className={cn(
+            "object-cover transition duration-500 ease-out motion-reduce:transition-none",
+            secondImage
+              ? "group-hover:-translate-x-full"
+              : "group-hover:scale-[1.03]",
+          )}
           sizes="(max-width: 640px) 100vw, 360px"
         />
+        {secondImage ? (
+          <Image
+            src={secondImage}
+            alt=""
+            aria-hidden
+            fill
+            className="translate-x-full object-cover transition duration-500 ease-out group-hover:translate-x-0 motion-reduce:transition-none"
+            sizes="(max-width: 640px) 100vw, 360px"
+          />
+        ) : null}
         <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-navy/70 to-transparent p-3 pt-10">
           <p className="flex items-center gap-1 text-[11px] font-medium text-white/90">
             <MapPin className="size-3 shrink-0 opacity-80" aria-hidden />

@@ -8,7 +8,6 @@ import { useEffect, useRef, useState } from "react";
 import { ChevronDown, Home, Menu, X } from "lucide-react";
 import { siteConfig } from "@/lib/site-config";
 import { useLockBodyScroll } from "@/lib/use-lock-body-scroll";
-import { SocialLinks } from "@/components/layout/SocialLinks";
 import { SiteSearch } from "@/components/layout/SiteSearch";
 import {
   ProductsMegaPanel,
@@ -23,22 +22,76 @@ import {
   AboutNavPanel,
 } from "@/components/about/AboutNavMenu";
 import { BrochureLink } from "@/components/catalog/BrochureLink";
+import { QuotePill } from "@/components/layout/QuotePill";
 import { useI18n } from "@/lib/i18n/use-i18n";
+import type { MessageKey } from "@/lib/i18n/index";
 
 const mainNav = [
   { href: "/", labelKey: "nav.home", home: true },
   { href: "/products", labelKey: "nav.products", mega: true },
   { href: "/portfolio", labelKey: "nav.portfolio", portfolio: true },
-  { href: "/learn", labelKey: "nav.learn" },
-  { href: "/blog", labelKey: "nav.blog" },
+  { href: "/blog", labelKey: "nav.blog", stories: true },
   { href: "/contact", labelKey: "nav.about", about: true },
 ] as const;
+
+const STORIES_NAV = [
+  { href: "/blog", labelKey: "nav.blog" },
+  { href: "/learn", labelKey: "nav.learn" },
+] as const;
+
+function desktopNavItems(translate: (key: MessageKey) => string) {
+  return mainNav.map((item) =>
+    "mega" in item && item.mega ? (
+      <DesktopDisclosure
+        key={item.href}
+        href={item.href}
+        label={translate(item.labelKey)}
+        panelClassName="w-[min(40rem,calc(100vw-2rem))] p-4"
+      >
+        {(close) => <ProductsMegaPanel onNavigate={close} />}
+      </DesktopDisclosure>
+    ) : "portfolio" in item && item.portfolio ? (
+      <DesktopDisclosure
+        key={item.href}
+        href={item.href}
+        label={translate(item.labelKey)}
+      >
+        {(close) => <PortfolioNavPanel onNavigate={close} />}
+      </DesktopDisclosure>
+    ) : "about" in item && item.about ? (
+      <DesktopDisclosure
+        key={item.href}
+        href={item.href}
+        label={translate(item.labelKey)}
+      >
+        {(close) => <AboutNavPanel onNavigate={close} />}
+      </DesktopDisclosure>
+    ) : "stories" in item && item.stories ? (
+      <DesktopDisclosure
+        key={item.href}
+        href={item.href}
+        label={translate(item.labelKey)}
+      >
+        {(close) => <StoriesNavPanel onNavigate={close} />}
+      </DesktopDisclosure>
+    ) : (
+      <Link
+        key={item.href}
+        href={item.href}
+        className="inline-flex items-center gap-1.5 px-4 py-3 text-sm font-normal hover:bg-white/10"
+      >
+        {"home" in item && item.home ? <Home className="h-4 w-4" /> : null}
+        {translate(item.labelKey)}
+      </Link>
+    ),
+  );
+}
 
 /** Match HomePanel / page content column */
 const shellPad = "px-6 sm:px-10 lg:px-16";
 const contentCol = "mx-auto w-full max-w-5xl";
 
-/** Pages whose hero is a full-bleed image — header floats transparently on top, like the homepage */
+/** Pages whose hero is a full-bleed image — header floats transparently on top */
 const FULL_BLEED_HERO_PATHS = new Set([
   "/",
   "/learn",
@@ -62,38 +115,26 @@ function SiteHeaderBar({ pathname }: { pathname: string }) {
   const [productsOpen, setProductsOpen] = useState(false);
   const [portfolioOpen, setPortfolioOpen] = useState(false);
   const [aboutOpen, setAboutOpen] = useState(false);
+  const [storiesOpen, setStoriesOpen] = useState(false);
   const [stuck, setStuck] = useState(false);
   const [navHeight, setNavHeight] = useState(0);
   const reducedMotion = useReducedMotion();
-  const sentinelRef = useRef<HTMLDivElement>(null);
   const navRef = useRef<HTMLDivElement>(null);
   const floatHeader = hasFullBleedHero && !stuck;
   const overlay = floatHeader && !open;
   const pinNav = stuck;
 
   useEffect(() => {
-    if (!hasFullBleedHero) return;
     const onScroll = () => {
       const y = window.scrollY;
-      setStuck((prev) => (prev ? y > 20 : y > 64));
+      const enter = 48;
+      const exit = 16;
+      setStuck((prev) => (prev ? y > exit : y > enter));
     };
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
-  }, [hasFullBleedHero]);
-
-  useEffect(() => {
-    if (hasFullBleedHero) return;
-    const sentinel = sentinelRef.current;
-    if (!sentinel) return;
-
-    const io = new IntersectionObserver(
-      ([entry]) => setStuck(!entry.isIntersecting),
-      { threshold: 0 },
-    );
-    io.observe(sentinel);
-    return () => io.disconnect();
-  }, [hasFullBleedHero]);
+  }, []);
 
   useEffect(() => {
     const nav = navRef.current;
@@ -116,66 +157,41 @@ function SiteHeaderBar({ pathname }: { pathname: string }) {
           : undefined
       }
     >
-      {/* Top utility row — scrolls away */}
-      <div
-        className={`pointer-events-auto hidden lg:block ${
-          overlay
-            ? "border-b border-white/15 bg-transparent"
-            : hasFullBleedHero
-              ? "hidden"
-              : "border-b border-line bg-panel"
-        }`}
-      >
-        <div className={shellPad}>
-          <div
-            className={`${overlay ? "w-full" : contentCol} flex items-center justify-between gap-2 py-1.5 sm:py-2`}
-          >
-            <SocialLinks className="flex" size={28} />
-
-            <Link
-              href="/"
-              className="flex min-w-0 items-center justify-center"
-            >
-              <Image
-                src="/images/brand/logo.png"
-                alt={`${siteConfig.name} ออกแบบ-ติดตั้ง ผ้าม่าน`}
-                width={200}
-                height={200}
-                className="h-16 w-16 object-contain drop-shadow-md md:h-20 md:w-20"
-                priority
-              />
-            </Link>
-
-            <div
-              className={`flex flex-col items-end gap-1 text-right text-sm ${
-                overlay ? "text-white" : ""
-              }`}
-            >
-              {overlay ? null : (
-                <Link
-                  href="/quote"
-                  className="font-semibold text-navy hover:text-brand-red"
-                >
-                  ขอใบเสนอราคา - Quotation
-                </Link>
-              )}
-              <BrochureLink
-                className={overlay ? "text-white/75 hover:text-white" : "text-muted hover:text-navy"}
+      {overlay ? (
+        <div className="pointer-events-auto hidden border-b border-white/15 bg-transparent lg:block">
+          <div className={shellPad}>
+            <div className="grid w-full grid-cols-[1fr_auto_1fr] items-center gap-2 py-1.5 sm:py-2">
+              <Link
+                href="/"
+                className="flex shrink-0 items-center justify-self-start"
               >
-                Download Brochure ช่างตี๋ 2026
-              </BrochureLink>
+                <Image
+                  src="/images/brand/logo-mark-white.png"
+                  alt={`${siteConfig.name} ออกแบบ-ติดตั้ง ผ้าม่าน`}
+                  width={200}
+                  height={200}
+                  className="h-10 w-10 object-contain md:h-12 md:w-12"
+                  priority
+                />
+              </Link>
+
+              <nav className="flex min-w-0 items-center gap-1 text-white">
+                {desktopNavItems(t)}
+              </nav>
+
+              <div className="ml-auto flex items-center justify-end justify-self-end text-sm">
+                <div className="inline-flex h-11 items-center">
+                  <SiteSearch className="mr-1 inline-flex items-center justify-center rounded-md p-2 text-white hover:bg-white/10" />
+                  <QuotePill label={t("nav.quote")} className="bg-transparent text-white" />
+                </div>
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      ) : null}
 
-      {/* Sentinel: when this leaves the viewport, pin the navy bar */}
-      {hasFullBleedHero ? null : <div ref={sentinelRef} className="h-0 w-full" aria-hidden />}
-
-      {/* Spacer keeps layout from jumping when nav becomes fixed */}
       {stuck && !hasFullBleedHero ? <div style={{ height: navHeight }} aria-hidden /> : null}
 
-      {/* Navy main nav — overlay on home; pinned menu bar when scrolled */}
       <div
         ref={navRef}
         className={`pointer-events-auto z-50 text-white ${
@@ -186,12 +202,8 @@ function SiteHeaderBar({ pathname }: { pathname: string }) {
               : "relative bg-navy shadow-md shadow-navy/25 max-lg:pt-[env(safe-area-inset-top,0px)]"
         }`}
       >
-        <div className={`${shellPad} hidden lg:block`}>
-          <nav
-            className={`${overlay ? "w-full" : contentCol} flex items-center gap-1 ${
-              overlay ? "[&>a:first-child]:pl-0 [&>div:first-child_a]:pl-0" : ""
-            }`}
-          >
+        <div className={`${shellPad} ${overlay ? "hidden" : "hidden lg:block"}`}>
+          <nav className={`${contentCol} flex items-center gap-1`}>
             {pinNav ? (
               <Link
                 href="/"
@@ -207,54 +219,30 @@ function SiteHeaderBar({ pathname }: { pathname: string }) {
                 />
               </Link>
             ) : null}
-            {mainNav.map((item) =>
-              "mega" in item && item.mega ? (
-                <DesktopDisclosure
-                  key={item.href}
-                  href={item.href}
-                  label={t(item.labelKey)}
-                  panelClassName="w-[min(40rem,calc(100vw-2rem))] p-4"
-                >
-                  {(close) => <ProductsMegaPanel onNavigate={close} />}
-                </DesktopDisclosure>
-              ) : "portfolio" in item && item.portfolio ? (
-                <DesktopDisclosure
-                  key={item.href}
-                  href={item.href}
-                  label={t(item.labelKey)}
-                >
-                  {(close) => <PortfolioNavPanel onNavigate={close} />}
-                </DesktopDisclosure>
-              ) : "about" in item && item.about ? (
-                <DesktopDisclosure
-                  key={item.href}
-                  href={item.href}
-                  label={t(item.labelKey)}
-                >
-                  {(close) => <AboutNavPanel onNavigate={close} />}
-                </DesktopDisclosure>
-              ) : (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className="inline-flex items-center gap-1.5 px-4 py-3 text-sm font-medium hover:bg-white/10"
-                >
-                  {"home" in item && item.home ? (
-                    <Home className="h-4 w-4" />
-                  ) : null}
-                  {t(item.labelKey)}
-                </Link>
-              ),
-            )}
-            <div className="ml-auto flex items-center gap-2 py-2">
+            {desktopNavItems(t)}
+            {pinNav ? (
               <SiteSearch className="inline-flex items-center justify-center rounded-md p-2 text-white hover:bg-white/10" />
-              {overlay ? null : (
-                <Link
-                  href="/quote"
-                  className="rounded-md bg-brand-red px-3 py-1.5 text-sm font-semibold hover:bg-brand-red-soft"
-                >
-                  {t("nav.quote")}
-                </Link>
+            ) : null}
+            <div className="ml-auto flex items-center gap-2 py-2">
+              {!pinNav ? (
+                <>
+                  <SiteSearch className="inline-flex items-center justify-center rounded-md p-2 text-white hover:bg-white/10" />
+                  {overlay ? null : <QuotePill label={t("nav.quote")} />}
+                </>
+              ) : (
+                <div className="inline-flex h-11 items-center">
+                  <BrochureLink
+                    slide
+                    className="bg-transparent text-white"
+                    fillClassName="bg-white"
+                    hoverLabelClassName="group-hover:text-navy-solid group-focus-visible:text-navy-solid"
+                    iconClassName="text-navy-solid"
+                  >
+                    Brochure ช่างตี๋
+                  </BrochureLink>
+                  <span aria-hidden className="mx-3 h-5 w-px shrink-0 bg-white/55" />
+                  <QuotePill label={t("nav.quote")} className="bg-transparent text-white" />
+                </div>
               )}
             </div>
           </nav>
@@ -291,14 +279,7 @@ function SiteHeaderBar({ pathname }: { pathname: string }) {
             </div>
             <div className="flex min-w-0 flex-1 items-center justify-end gap-1.5 sm:gap-2">
               <SiteSearch className="inline-flex size-11 shrink-0 items-center justify-center rounded-md text-white hover:bg-white/10" />
-              {overlay ? null : (
-                <Link
-                  href="/quote"
-                  className="inline-flex min-h-11 items-center rounded-md bg-brand-red px-3 text-sm font-semibold hover:bg-brand-red-soft"
-                >
-                  {t("nav.quoteShort")}
-                </Link>
-              )}
+              {overlay ? null : <QuotePill label={t("nav.quoteShort")} />}
             </div>
           </div>
         </div>
@@ -352,6 +333,23 @@ function SiteHeaderBar({ pathname }: { pathname: string }) {
                       </button>
                       {portfolioOpen ? (
                         <PortfolioMobileLinks onNavigate={() => setOpen(false)} />
+                      ) : null}
+                    </div>
+                  ) : "stories" in item && item.stories ? (
+                    <div key={item.href}>
+                      <button
+                        type="button"
+                        className="flex min-h-12 w-full items-center justify-between py-3 text-left text-sm font-medium text-white"
+                        onClick={() => setStoriesOpen((v) => !v)}
+                        aria-expanded={storiesOpen}
+                      >
+                        {t(item.labelKey)}
+                        <ChevronDown
+                          className={`h-4 w-4 transition ${storiesOpen ? "rotate-180" : ""}`}
+                        />
+                      </button>
+                      {storiesOpen ? (
+                        <StoriesMobileLinks onNavigate={() => setOpen(false)} />
                       ) : null}
                     </div>
                   ) : "about" in item && item.about ? (
@@ -411,53 +409,94 @@ function DesktopDisclosure({
   children: (close: () => void) => React.ReactNode;
   panelClassName?: string;
 }) {
-  const { t } = useI18n();
   const [open, setOpen] = useState(false);
+  const reducedMotion = useReducedMotion();
   const wrapRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!open) return;
-    function onDoc(e: MouseEvent) {
-      if (!wrapRef.current?.contains(e.target as Node)) setOpen(false);
-    }
     function onKey(e: KeyboardEvent) {
       if (e.key === "Escape") setOpen(false);
     }
-    document.addEventListener("mousedown", onDoc);
     document.addEventListener("keydown", onKey);
-    return () => {
-      document.removeEventListener("mousedown", onDoc);
-      document.removeEventListener("keydown", onKey);
-    };
+    return () => document.removeEventListener("keydown", onKey);
   }, [open]);
 
   return (
-    <div ref={wrapRef} className="relative">
-      <div className="inline-flex items-stretch">
+    <div
+      ref={wrapRef}
+      className="relative"
+      onMouseEnter={() => setOpen(true)}
+      onMouseLeave={() => setOpen(false)}
+      onFocus={() => setOpen(true)}
+      onBlur={(e) => {
+        if (!wrapRef.current?.contains(e.relatedTarget as Node | null)) setOpen(false);
+      }}
+    >
+      <Link
+        href={href}
+        className="inline-flex items-center px-4 py-3 text-sm font-normal hover:bg-white/10"
+        aria-expanded={open}
+        aria-haspopup="true"
+      >
+        {label}
+      </Link>
+      <AnimatePresence>
+        {open ? (
+          <motion.div
+            initial={reducedMotion ? false : { height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={reducedMotion ? undefined : { height: 0, opacity: 0 }}
+            transition={{
+              duration: reducedMotion ? 0 : 0.28,
+              ease: [0.22, 1, 0.36, 1],
+            }}
+            className="absolute left-0 top-full z-50 overflow-hidden"
+          >
+            <div
+              className={`rounded-lg border border-line bg-panel text-ink shadow-lg ${panelClassName}`}
+            >
+              {children(() => setOpen(false))}
+            </div>
+          </motion.div>
+        ) : null}
+      </AnimatePresence>
+    </div>
+  );
+}
+
+function StoriesNavPanel({ onNavigate }: { onNavigate?: () => void }) {
+  const { t } = useI18n();
+  return (
+    <div className="min-w-[12rem] py-1">
+      {STORIES_NAV.map((item) => (
         <Link
-          href={href}
-          className="inline-flex items-center px-4 py-3 text-sm font-medium hover:bg-white/10"
+          key={item.href}
+          href={item.href}
+          onClick={onNavigate}
+          className="block px-4 py-2.5 text-sm text-ink hover:bg-paper hover:text-navy"
         >
-          {label}
+          {t(item.labelKey)}
         </Link>
-        <button
-          type="button"
-          className="inline-flex items-center pr-3 hover:bg-white/10"
-          aria-expanded={open}
-          aria-haspopup="true"
-          aria-label={`${t("nav.openMenu")} ${label}`}
-          onClick={() => setOpen((v) => !v)}
+      ))}
+    </div>
+  );
+}
+
+function StoriesMobileLinks({ onNavigate }: { onNavigate: () => void }) {
+  const { t } = useI18n();
+  return (
+    <div className="space-y-0.5 pb-3 pl-2">
+      {STORIES_NAV.map((item) => (
+        <Link
+          key={item.href}
+          href={item.href}
+          onClick={onNavigate}
+          className="flex min-h-11 items-center py-2 text-sm text-white/90 hover:text-white"
         >
-          <ChevronDown className={`h-3.5 w-3.5 opacity-80 transition ${open ? "rotate-180" : ""}`} />
-        </button>
-      </div>
-      {open ? (
-        <div
-          className={`absolute left-0 top-full z-50 border border-line bg-panel text-ink shadow-lg ${panelClassName}`}
-        >
-          {children(() => setOpen(false))}
-        </div>
-      ) : null}
+          {t(item.labelKey)}
+        </Link>
+      ))}
     </div>
   );
 }
