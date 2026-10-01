@@ -26,6 +26,7 @@ export function ProductsHub() {
         description={t("products.hubDesc")}
         aside={<ProductHeroCovers items={HERO_COVERS} />}
         align="bottom"
+        compact
       />
 
       <div className="mx-auto max-w-5xl px-6 sm:px-10 lg:px-16 py-10 sm:py-12">

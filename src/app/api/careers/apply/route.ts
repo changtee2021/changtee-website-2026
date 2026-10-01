@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { jobApplicationSchema } from "@/lib/validations/career";
 import { createJobApplication } from "@/lib/careers/store";
 import { sendJobApplicationEmails } from "@/lib/email/careers-mailer";
-import { pushLineMessage, hrLineTarget } from "@/lib/outbound/line";
+import { pushLineCard, hrLineTarget } from "@/lib/outbound/line";
 import { verifyTurnstileToken } from "@/lib/security/turnstile";
 import { bytesMatchDeclaredType, isPdfBytes } from "@/lib/security/file-magic";
 import { toStorageRef } from "@/lib/security/lead-media";
@@ -160,13 +160,15 @@ export async function POST(request: Request) {
       ];
     }
 
-    const line = await pushLineMessage(
-      [
-        "📄 มีใบสมัครงานใหม่",
-        `ตำแหน่ง: ${application.jobTitle || "สมัครทั่วไป"}`,
-        `ชื่อ: ${application.fullName}`,
-        `โทร: ${application.phone}`,
-      ].join("\n"),
+    const line = await pushLineCard(
+      {
+        title: "มีใบสมัครงานใหม่",
+        fields: [
+          { label: "ตำแหน่ง", value: application.jobTitle || "สมัครทั่วไป" },
+          { label: "ชื่อ", value: application.fullName },
+          { label: "โทร", value: application.phone },
+        ],
+      },
       hrLineTarget(),
     );
     notify.push({ channel: "line", ...line });

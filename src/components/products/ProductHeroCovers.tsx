@@ -9,7 +9,7 @@ export function ProductHeroCovers({ items }: { items: PillarHubItem[] }) {
 
   return (
     <div
-      className="relative h-64 w-full overflow-hidden sm:h-[32rem]"
+      className="relative h-52 w-full overflow-hidden sm:h-[min(26rem,calc(70dvh-9.5rem))]"
       style={{
         maskImage:
           "linear-gradient(to bottom, transparent 0%, black 18%, black 72%, transparent 100%)",

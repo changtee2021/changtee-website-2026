@@ -20,11 +20,15 @@ const svgIcons: Record<string, string> = {
 type Props = {
   className?: string;
   size?: number;
+  /** White glyph only — no brand-color circle. */
+  flat?: boolean;
+  /** Space between icons, in pixels. */
+  gap?: number;
 };
 
-export function SocialLinks({ className = "", size = 28 }: Props) {
+export function SocialLinks({ className = "", size = 28, flat = false, gap = 8 }: Props) {
   return (
-    <div className={`flex items-center gap-2 ${className}`}>
+    <div className={`flex items-center ${className}`} style={{ gap }}>
       {siteConfig.social
         .filter((item) => !isPlaceholderSocialUrl(item.href))
         .map((item) => (
@@ -35,14 +39,18 @@ export function SocialLinks({ className = "", size = 28 }: Props) {
           rel="noopener noreferrer"
           aria-label={item.label}
           title={item.label}
-          className={`inline-flex items-center justify-center rounded-full transition hover:opacity-80 ${brandStyles[item.label] || "bg-navy"}`}
+          className={
+            flat
+              ? "inline-flex items-center justify-center text-white transition hover:opacity-70"
+              : `inline-flex items-center justify-center rounded-full transition hover:opacity-80 ${brandStyles[item.label] || "bg-navy"}`
+          }
           style={{ width: size, height: size }}
         >
           <Image
             src={svgIcons[item.label] || item.icon}
             alt=""
-            width={Math.round(size * 0.55)}
-            height={Math.round(size * 0.55)}
+            width={flat ? size : Math.round(size * 0.55)}
+            height={flat ? size : Math.round(size * 0.55)}
             className="object-contain brightness-0 invert"
             unoptimized
           />

@@ -21,7 +21,6 @@ export function HomePortfolioSection() {
           <>{field("title")}</>
         </EditableSpot>
       }
-      subtitle={field("subtitle")}
     />
   );
 }

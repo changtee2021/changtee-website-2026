@@ -5,7 +5,6 @@ import { MessageCircle, Ruler, Truck } from "lucide-react";
 import { BlogPreview } from "@/components/home/BlogPreview";
 import { CatalogSection } from "@/components/home/CatalogSection";
 import { ClientsLogos } from "@/components/home/ClientsLogos";
-import { FeatureStrip } from "@/components/home/FeatureStrip";
 import { Hero } from "@/components/home/Hero";
 import { HomeInstallVideosSection } from "@/components/home/HomeInstallVideosSection";
 import { HomePanel } from "@/components/home/HomePanel";
@@ -47,10 +46,6 @@ export function HomeSectionsVisualPreview() {
     <div className="bg-shell pb-3 text-ink sm:pb-4">
       <LockedSpot reason="แก้ที่เมนูสไลด์หน้าแรก">
         <Hero />
-      </LockedSpot>
-
-      <LockedSpot reason="เนื้อหาคงที่">
-        <FeatureStrip />
       </LockedSpot>
 
       {/* Product grid — matches live ProductGrid */}

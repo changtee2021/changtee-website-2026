@@ -61,9 +61,9 @@ export const siteConfig = {
   url: resolveSiteUrl(),
   /** Admin origin (e.g. https://admin.changtee-curtain.com). Empty = path `/admin`. */
   adminUrl: process.env.NEXT_PUBLIC_ADMIN_URL || "",
-  /** Primary display phone — first SALE contact */
-  phoneTel: process.env.NEXT_PUBLIC_PHONE_TEL || "0928874288",
-  phoneDisplay: process.env.NEXT_PUBLIC_PHONE_DISPLAY || "092-887-4288",
+  /** Primary tap-to-call number */
+  phoneTel: process.env.NEXT_PUBLIC_PHONE_TEL || "0942163761",
+  phoneDisplay: process.env.NEXT_PUBLIC_PHONE_DISPLAY || "094-216-3761",
   /** LINE Official Account */
   lineId: "@chang-tee",
   lineUrl: process.env.NEXT_PUBLIC_LINE_URL || "https://lin.ee/7Ul6K4n",
@@ -87,8 +87,8 @@ export const siteConfig = {
   mapsEmbedUrl:
     "https://www.google.com/maps?q=13.8935427,100.6961787&z=16&hl=th&output=embed",
   saleContacts: [
-    { name: "เซลล์โส", phoneDisplay: "092-887-4288", phoneTel: "0928874288" },
     { name: "เชลล์ตุ่น", phoneDisplay: "094-216-3761", phoneTel: "0942163761" },
+    { name: "เซลล์โส", phoneDisplay: "092-887-4288", phoneTel: "0928874288" },
     { name: "เชลล์โจ้", phoneDisplay: "094-216-3762", phoneTel: "0942163762" },
     { name: "เชลล์เฟิร์น", phoneDisplay: "094-216-3763", phoneTel: "0942163763" },
     { name: "เชลล์ฝัน", phoneDisplay: "081-550-8044", phoneTel: "0815508044" },
@@ -145,7 +145,7 @@ export const siteConfig = {
   brochureUrl: "/brochure/company-profile-2026.pdf",
   brochureManifestUrl: "/brochure/company-profile-2026/manifest.json",
   brochureOnlineUrl: "https://canva.link/z3p0u8f2gcg9p61",
-  brochureLabel: "Download Brochure ช่างตี๋ 2026",
+  brochureLabel: "Brochure ช่างตี๋",
 } as const;
 
 /** Verified social profile URLs for schema.org sameAs (excludes bare platform homepages). */

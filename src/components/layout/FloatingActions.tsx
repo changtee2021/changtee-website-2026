@@ -296,19 +296,19 @@ export function FloatingActions() {
                   {t("fab.quote")}
                 </Link>
               </motion.div>
-              <motion.button
-                type="button"
+              <motion.a
+                href={`tel:${siteConfig.phoneTel}`}
                 variants={item}
                 transition={{ duration: 0.24, ease: [0.22, 1, 0.36, 1] }}
                 className="max-lg:!hidden min-h-11 items-center gap-2 rounded-full bg-brand-red px-3.5 py-2 text-sm font-semibold text-white shadow-md lg:inline-flex"
                 onClick={() => {
                   trackSiteClick("phone");
-                  setPhonesOpen(true);
+                  closeAll();
                 }}
               >
                 <Phone className="size-4 shrink-0" />
                 {t("fab.call")}
-              </motion.button>
+              </motion.a>
             </motion.div>
           ) : null}
         </AnimatePresence>

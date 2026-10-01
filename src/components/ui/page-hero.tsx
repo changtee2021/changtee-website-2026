@@ -16,6 +16,7 @@ export function PageHero({
   imageClassName,
   align = "center",
   priority = true,
+  compact = false,
 }: {
   image: string;
   imageAlt: string;
@@ -30,10 +31,13 @@ export function PageHero({
   imageClassName?: string;
   align?: "center" | "bottom";
   priority?: boolean;
+  /** Portfolio and products: end the hero at the shorter frame (~70dvh). */
+  compact?: boolean;
 }) {
+  const minH = compact ? "min-h-[70dvh]" : "min-h-[100dvh]";
   return (
     <section className="relative bg-navy text-white">
-      <div className="relative min-h-[100dvh] w-full overflow-hidden">
+      <div className={cn("relative w-full overflow-hidden", minH)}>
         <Image
           src={image}
           alt={imageAlt}
@@ -47,7 +51,8 @@ export function PageHero({
 
         <div
           className={cn(
-            "relative z-[1] flex h-full min-h-[100dvh] flex-col px-6 pt-28 sm:px-10 lg:px-16",
+            "relative z-[1] flex h-full flex-col px-6 pt-28 sm:px-10 lg:px-16",
+            minH,
             align === "bottom"
               ? "justify-end pb-6 sm:pb-8"
               : "justify-end pb-16 sm:justify-center sm:pb-16 sm:pt-40",
