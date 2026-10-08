@@ -160,7 +160,7 @@ export function wrapNoticeEmail(opts: {
         <table role="presentation" width="640" cellpadding="0" cellspacing="0" style="max-width:640px;width:100%;background:#ffffff;border-radius:16px;overflow:hidden;border:1px solid #ece7df">
           <tr>
             <td style="background:${accent};padding:22px 24px 18px">
-              <div style="font-size:11px;letter-spacing:.14em;color:rgba(255,255,255,.75);font-weight:700">CHANG TEE CURTAIN</div>
+              <div style="font-size:11px;letter-spacing:.14em;color:rgba(255,255,255,.75);font-weight:700">CHANGTEE PHAMAN</div>
               <div style="font-size:22px;line-height:1.3;color:#fff;font-weight:800;margin-top:4px">${escapeHtml(opts.title)}</div>
               ${
                 opts.subtitle

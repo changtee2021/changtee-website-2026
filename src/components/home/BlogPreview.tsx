@@ -44,6 +44,7 @@ export function BlogPreview() {
     <HomePanel tone="clear">
       <div className="py-7 sm:py-9 md:py-12">
         <PanelHeading
+          eyebrow="Journal"
           title={t("home.blog")}
           align="start"
           action={

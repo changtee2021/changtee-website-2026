@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { LearnSheetView } from "@/components/learn/LearnSheetView";
-import { LEARN_SHEETS, learnSheetBySlug } from "@/lib/learn";
+import { LEARN_ENABLED, LEARN_SHEETS, learnSheetBySlug } from "@/lib/learn";
 import { pageMetadata } from "@/lib/seo/meta";
 
 export function generateStaticParams() {
+  if (!LEARN_ENABLED) return [];
   return LEARN_SHEETS.map((sheet) => ({ slug: sheet.slug }));
 }
 
@@ -14,7 +15,7 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await params;
-  const sheet = learnSheetBySlug(slug);
+  const sheet = LEARN_ENABLED ? learnSheetBySlug(slug) : undefined;
   if (!sheet) return {};
   return pageMetadata({
     title: sheet.title,
@@ -30,7 +31,7 @@ export default async function LearnSheetPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const sheet = learnSheetBySlug(slug);
+  const sheet = LEARN_ENABLED ? learnSheetBySlug(slug) : undefined;
   if (!sheet) notFound();
   return <LearnSheetView sheet={sheet} />;
 }

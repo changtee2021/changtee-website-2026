@@ -3,7 +3,7 @@ import { DEMO_BLOG } from "@/lib/cms/blog-demo";
 import { DEMO_PORTFOLIO } from "@/lib/cms/portfolio-demo";
 import { publishedBlog, publishedPortfolio } from "@/lib/cms/public-content";
 import { readCmsCollection } from "@/lib/cms/cms-server";
-import { LEARN_SHEETS } from "@/lib/learn";
+import { LEARN_ENABLED, LEARN_SHEETS } from "@/lib/learn";
 import { productCatalog } from "@/lib/product-catalog";
 import { siteConfig } from "@/lib/site-config";
 import type { BlogPost } from "@/lib/cms/blog-demo";
@@ -71,7 +71,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { path: "/products", changeFrequency: "weekly", priority: 0.8 },
     { path: "/portfolio", changeFrequency: "weekly", priority: 0.8 },
     { path: "/blog", changeFrequency: "weekly", priority: 0.8 },
-    { path: "/learn", changeFrequency: "weekly", priority: 0.8 },
+    ...(LEARN_ENABLED
+      ? [{ path: "/learn", changeFrequency: "weekly" as const, priority: 0.8 }]
+      : []),
     { path: "/quote", changeFrequency: "monthly", priority: 0.9 },
     { path: "/contact", changeFrequency: "monthly", priority: 0.7 },
     { path: "/visit-factory", changeFrequency: "monthly", priority: 0.6 },
@@ -108,7 +110,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         priority: r.priority,
       }),
     ),
-    ...LEARN_SHEETS.map((sheet) =>
+    ...(LEARN_ENABLED ? LEARN_SHEETS : []).map((sheet) =>
       entry(base, `/learn/${sheet.slug}`, {
         changeFrequency: "monthly",
         priority: 0.7,

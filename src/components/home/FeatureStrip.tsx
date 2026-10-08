@@ -14,7 +14,7 @@ const ITEMS: { title: MessageKey; icon: typeof Ruler }[] = [
 export function FeatureStrip() {
   const { t } = useI18n();
   return (
-    <ul className="flex flex-wrap items-center">
+    <ul className="inline-flex flex-wrap items-center gap-y-2 rounded-2xl border border-white/20 bg-white/10 px-4 py-3 backdrop-blur-md sm:px-6">
       {ITEMS.map((item, i) => {
         const Icon = item.icon;
         return (
@@ -24,7 +24,7 @@ export function FeatureStrip() {
             delayStep={i}
             className={
               i > 0
-                ? "ml-5 flex items-center gap-2.5 border-l border-white/80 pl-5 sm:ml-7 sm:pl-7"
+                ? "ml-4 flex items-center gap-2.5 border-l border-white/30 pl-4 sm:ml-6 sm:pl-6"
                 : "flex items-center gap-2.5"
             }
           >

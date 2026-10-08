@@ -288,7 +288,7 @@ export type CompanySettings = {
 
 export const DEMO_COMPANY_SETTINGS: CompanySettings = {
   companyName: "ช่างตี๋ ผ้าม่าน",
-  tradeName: "Chang Tee Curtain",
+  tradeName: "Changtee Phaman",
   address:
     "310 ถนนไทยรามัญ แขวงสามวาตะวันตก เขตคลองสามวา กรุงเทพมหานคร 10510",
   phone: "02-000-0000",
@@ -296,6 +296,6 @@ export const DEMO_COMPANY_SETTINGS: CompanySettings = {
   email: "hello@changtee-curtain.com",
   hours: "จ.–ส. 09:00–18:00",
   mapUrl: "https://maps.google.com",
-  usp: "ถูก เร็ว ดี",
+  usp: "Crafted by Experience. Designed for Life.",
   warrantyYears: 1,
 };

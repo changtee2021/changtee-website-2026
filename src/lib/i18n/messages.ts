@@ -93,7 +93,7 @@ export const th = {
   "footer.cookieSettings": "Cookie Settings",
   "footer.rights": "All rights reserved.",
   "footer.description":
-    "ผู้เชี่ยวชาญด้านผ้าม่านแบบครบวงจร มีโรงงานผลิตเอง วัดหน้างานฟรี ติดตั้งทั่วประเทศไทย",
+    "Premium Window Covering Brand — ประสบการณ์ของช่าง สู่มาตรฐานของงานออกแบบ มีโรงงานผลิตเอง วัดหน้างานฟรี ติดตั้งทั่วประเทศไทย",
   "footer.hours": "เปิดบริการทุกวัน 08.00 น. – 20.00 น.",
   "footer.address1": "310 ถนนไทยรามัญ",
   "footer.address2": "แขวงสามวาตะวันตก เขตคลองสามวา",
@@ -127,7 +127,7 @@ export const th = {
   "cookie.save": "บันทึกการตั้งค่า",
 
   "home.kicker": "ผลิตเอง ติดตั้งเอง",
-  "home.title": "แต่งบ้านให้สวย เริ่มที่ผ้าม่านที่ใช่",
+  "home.title": "แต่งบ้านให้สวย เริ่มที่ม่านที่ใช่",
   "home.subtitle": "A beautiful home starts with the right curtains",
   "home.seeWork": "ดูผลงานติดตั้ง",
   "home.quote": "ขอใบเสนอราคา",
@@ -247,14 +247,14 @@ export const en: { [K in keyof typeof th]: string } = {
   "footer.contact": "Contact",
   "footer.location": "Location",
   "footer.openMaps": "Open in Google Maps →",
-  "footer.mapsTitle": "Chang Tee Curtain showroom map",
+  "footer.mapsTitle": "Changtee Phaman showroom map",
   "footer.privacy": "Privacy Policy",
   "footer.cookies": "Cookie Policy",
   "footer.terms": "Terms of Service",
   "footer.cookieSettings": "Cookie Settings",
   "footer.rights": "All rights reserved.",
   "footer.description":
-    "Full-service curtains, made in our own factory. Free measuring at your place. We install anywhere in Thailand.",
+    "Premium Window Covering Brand — an installer’s experience, built into design standards. Made in our own factory, free measuring, installed anywhere in Thailand.",
   "footer.hours": "Open every day, 8:00 AM – 8:00 PM",
   "footer.address1": "310 Thai Ramun Road",
   "footer.address2": "Sam Wa Tawan Tok, Khlong Sam Wa",
@@ -290,7 +290,7 @@ export const en: { [K in keyof typeof th]: string } = {
 
   "home.kicker": "Made and installed by us",
   "home.title": "A beautiful home starts with the right curtains",
-  "home.subtitle": "แต่งบ้านให้สวย เริ่มที่ผ้าม่านที่ใช่",
+  "home.subtitle": "แต่งบ้านให้สวย เริ่มที่ม่านที่ใช่",
   "home.seeWork": "See our installations",
   "home.quote": "Get a quote",
   "home.heroAlt": "Living-room curtains by Chang Tee",
@@ -313,7 +313,7 @@ export const en: { [K in keyof typeof th]: string } = {
   "home.seeAllWork": "See all work",
   "home.seeWorkShort": "See work",
   "common.call": "Call",
-  "common.showroomAlt": "Chang Tee Curtain showroom",
+  "common.showroomAlt": "Changtee Phaman showroom",
   "common.prev": "Previous",
   "common.next": "Next",
 

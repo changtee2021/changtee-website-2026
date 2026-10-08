@@ -8,6 +8,7 @@ import { publishedHeroSlides } from "@/lib/cms/hero-slides-demo";
 import { FeatureStrip } from "@/components/home/FeatureStrip";
 import { revealEase } from "@/components/home/Reveal";
 import { useI18n } from "@/lib/i18n/use-i18n";
+import { siteConfig } from "@/lib/site-config";
 
 const FALLBACK = {
   src: "/images/generated/ct-hero-living.webp",
@@ -86,41 +87,55 @@ export function Hero() {
             ),
           )}
 
-          <div className="pointer-events-none absolute inset-0 z-[2] bg-gradient-to-b from-navy/55 via-navy/15 to-navy/80 sm:bg-gradient-to-r sm:from-navy/75 sm:via-navy/30 sm:to-navy/20" />
+          <div className="pointer-events-none absolute inset-0 z-[2] bg-gradient-to-b from-navy/55 via-navy/10 to-navy/85 sm:bg-gradient-to-r sm:from-navy/70 sm:via-navy/20 sm:to-transparent" />
+          <div className="pointer-events-none absolute inset-x-0 bottom-0 z-[2] hidden h-2/5 bg-gradient-to-t from-navy-deep/80 to-transparent sm:block" />
 
           <div className="absolute inset-0 z-[3] flex flex-col justify-end px-6 pb-8 pt-28 sm:px-10 sm:pb-10 lg:px-16">
             <div className="max-w-2xl">
-              <motion.h1
+              <motion.p
                 {...enter(0)}
-                className="font-display text-4xl font-normal leading-[1.12] tracking-tight sm:text-5xl lg:text-[3.25rem]"
+                className="mb-4 flex items-center gap-3 text-xs font-semibold tracking-[0.22em] text-white/85 uppercase sm:text-sm"
+              >
+                <span aria-hidden className="h-px w-8 bg-white/60" />
+                {siteConfig.concept}
+              </motion.p>
+              <motion.h1
+                {...enter(1)}
+                className="font-display text-[clamp(2.5rem,7vw,4.75rem)] font-light leading-[1.08] tracking-tight text-balance drop-shadow-[0_2px_24px_rgba(7,21,38,0.35)]"
               >
                 {t("home.title")}
               </motion.h1>
-              <p className="mt-2 font-modern text-lg font-normal leading-snug text-white/85 sm:text-xl">
-                {t("home.subtitle")}
-              </p>
             </div>
-            <div className="mt-6 max-w-5xl">
+            <motion.div {...enter(2)} className="mt-8 max-w-5xl">
               <FeatureStrip />
-            </div>
+            </motion.div>
             {len > 1 ? (
-              <div className="mt-4 flex items-center">
-                {slides.map((slide, i) => (
-                  <button
-                    key={slide.id}
-                    type="button"
-                    aria-label={`ไปสไลด์ ${i + 1}`}
-                    aria-current={i === safeIndex ? "true" : undefined}
-                    onClick={() => setIndex(i)}
-                    className="flex h-11 w-11 items-center justify-center"
-                  >
-                    <span
-                      className={`rounded-full transition-all duration-300 ${
-                        i === safeIndex ? "h-1.5 w-6 bg-white" : "h-1.5 w-1.5 bg-white/45"
-                      }`}
-                    />
-                  </button>
-                ))}
+              <div className="mt-3 flex items-center gap-4">
+                <span
+                  aria-hidden
+                  className="font-modern text-xs tabular-nums tracking-[0.18em] text-white/80"
+                >
+                  {String(safeIndex + 1).padStart(2, "0")}
+                  <span className="text-white/45"> / {String(len).padStart(2, "0")}</span>
+                </span>
+                <div className="flex items-center">
+                  {slides.map((slide, i) => (
+                    <button
+                      key={slide.id}
+                      type="button"
+                      aria-label={`ไปสไลด์ ${i + 1}`}
+                      aria-current={i === safeIndex ? "true" : undefined}
+                      onClick={() => setIndex(i)}
+                      className="flex h-11 w-9 items-center justify-center"
+                    >
+                      <span
+                        className={`h-0.5 w-full rounded-full transition-all duration-500 ${
+                          i === safeIndex ? "bg-white" : "bg-white/35"
+                        }`}
+                      />
+                    </button>
+                  ))}
+                </div>
               </div>
             ) : null}
           </div>

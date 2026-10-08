@@ -30,6 +30,7 @@
 - [Website health](seo/WEBSITE-HEALTH.md) — performance, reliability, CWV risks
 - [Competitor SEO gap](seo/COMPETITOR-SEO-GAP.md)
 - [AI search competitive analysis](seo/AI-SEARCH-COMPETITIVE-ANALYSIS.md)
+- [GEO — AI search playbook](seo/GEO-AI-SEARCH.md) — llms.txt, AI crawlers, brand JSON-LD, FAQ, off-site checklist
 - [Search trend radar](seo/SEARCH-TREND-RADAR.md)
 - [Competitive SEO roadmap (90 days)](seo/COMPETITIVE-SEO-ROADMAP.md)
 - [Final report (before/after)](seo/SEO-FINAL-REPORT.md) — updated after implementation

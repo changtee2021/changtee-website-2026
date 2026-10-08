@@ -62,7 +62,7 @@ export function ServicesStrip() {
   return (
     <HomePanel tone="clear">
       <div className="px-1 py-2 sm:px-2 sm:py-3">
-        <PanelHeading title="บริการของเรา" />
+        <PanelHeading eyebrow="Our Services" title="บริการของเรา" />
 
         <div className="mt-5 grid gap-6 md:grid-cols-3 md:gap-8">
           {homeServices.map((service, i) => {

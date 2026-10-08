@@ -1,3 +1,9 @@
+/**
+ * Learn room is switched off for now. Flip to `true` to bring back the
+ * /learn pages, nav link, home teaser, search, sitemap and llms.txt entries.
+ */
+export const LEARN_ENABLED = false;
+
 export type LearnRoomId = "fabric" | "partition" | "motor";
 
 export type LearnSheetKind = "lesson" | "video";

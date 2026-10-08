@@ -34,12 +34,18 @@ export function isPlaceholderSocialUrl(href: string): boolean {
 
 export const siteConfig = {
   name: "ช่างตี๋ ผ้าม่าน",
-  nameEn: "Chang Tee Curtain",
+  nameEn: "Changtee Phaman",
   legalName: "บริษัท ช่างตี๋ ผ้าม่าน จำกัด",
   tagline: "ออกแบบ-ติดตั้ง ผ้าม่าน ครบวงจร",
-  usp: "ถูก เร็ว ดี",
+  /** Brand concept (EN) — "Crafted by Experience. Designed for Life." */
+  concept: "Crafted by Experience. Designed for Life.",
+  /** Brand identity formula: ช่าง + งานฝีมือ + ประสบการณ์ */
+  identity: ["ช่าง", "งานฝีมือ", "ประสบการณ์"],
+  /** Brand positioning line (EN) */
+  positioning: "Premium Window Covering Brand",
+  usp: "ช่าง + งานฝีมือ + ประสบการณ์",
   description:
-    "ผู้เชี่ยวชาญด้านผ้าม่านแบบครบวงจร มีโรงงานผลิตเอง วัดหน้างานฟรี ติดตั้งทั่วประเทศไทย",
+    "Premium Window Covering Brand — ผู้เชี่ยวชาญด้านผ้าม่านและม่านปรับแสงแบบครบวงจร ออกแบบ ผลิตเองที่โรงงาน ติดตั้งโดยช่างมืออาชีพ วัดหน้างานฟรี ทั่วประเทศไทย",
   /** Default Open Graph / Twitter share image (1200-ish landscape preferred). */
   ogImage: "/images/generated/ct-hero-living.webp",
   /** Real showroom photo — use for all “ร้านเรา / โชว์รูม” placements. */
@@ -161,7 +167,6 @@ export const navItems = [
   { href: "/", label: "หน้าแรก" },
   { href: "/products", label: "สินค้า/บริการ" },
   { href: "/portfolio", label: "ผลงาน" },
-  { href: "/learn", label: "ห้องเรียนรู้" },
   { href: "/blog", label: "บทความ" },
   { href: "/contact", label: "เกี่ยวกับเรา" },
   { href: "/careers", label: "ร่วมงานกับเรา" },
