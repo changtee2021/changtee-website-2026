@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import {
   Building2,
@@ -67,22 +68,7 @@ export function AboutPageView() {
 
       <HomePanel>
         <div className="p-7 text-center sm:p-9 md:p-12">
-          <p className="text-xs font-semibold tracking-[0.16em] text-brand-red uppercase">
-            Our Identity
-          </p>
-          <h2 className="mt-2 font-display text-2xl font-semibold text-navy md:text-3xl">
-            “ช่างตี๋ ผ้าม่าน” ตัวตนของเรา คือ
-          </h2>
-          <p className="mt-4 flex flex-wrap items-center justify-center gap-x-3 gap-y-1 font-display text-xl font-semibold text-brand-red sm:text-2xl">
-            {siteConfig.identity.map((word, i) => (
-              <span key={word} className="inline-flex items-center gap-3">
-                {i > 0 ? <span className="text-navy">+</span> : null}
-                {word}
-              </span>
-            ))}
-          </p>
-          <p className="mt-6 text-sm text-muted">คอนเซปของเรา คือ</p>
-          <p className="mt-2 font-display text-xl font-semibold tracking-wide text-navy uppercase sm:text-2xl">
+          <p className="font-display text-xl font-semibold tracking-wide text-navy uppercase sm:text-2xl">
             Crafted by Experience.
             <br />
             Designed for Life.
@@ -93,6 +79,32 @@ export function AboutPageView() {
             {" "}— ยกระดับจาก “ร้านผ้าม่าน” ไปเป็น{" "}
             <strong className="font-semibold text-navy">{siteConfig.positioning}</strong>
           </p>
+        </div>
+      </HomePanel>
+
+      <HomePanel tone="navy">
+        <div className="flex flex-col items-center gap-5 px-5 py-7 text-center sm:flex-row sm:gap-8 sm:p-9 sm:text-left md:gap-10 md:p-12">
+          <div className="flex w-44 shrink-0 items-center justify-center rounded-2xl bg-white p-2 sm:w-48 md:w-56">
+            <Image
+              src="/images/about/glp-logo.png"
+              alt="GLP — Good Labour Practices มาตรฐานแรงงาน"
+              width={196}
+              height={119}
+              className="h-auto w-full object-contain"
+            />
+          </div>
+          <div className="min-w-0 flex-1">
+            <p className="text-xs font-semibold tracking-[0.16em] text-brand-red uppercase">
+              Good Labour Practices
+            </p>
+            <h2 className="mt-1.5 font-display text-xl font-semibold sm:text-2xl md:text-3xl">
+              ได้มาตรฐานแรงงาน GLP
+            </h2>
+            <p className="mt-3 max-w-2xl text-sm leading-relaxed text-white/75 sm:text-[15px]">
+              ช่างตี๋ ได้มาตรฐาน GLP (Good Labour Practices) จากสำนักพัฒนามาตรฐานแรงงาน
+              ทุกชิ้นงานผลิตโดยทีมที่ทำงานภายใต้การดูแลที่เป็นธรรมและปลอดภัย
+            </p>
+          </div>
         </div>
       </HomePanel>
 
@@ -171,7 +183,7 @@ export function AboutPageView() {
       </HomePanel>
 
       <section className="overflow-hidden bg-panel py-8 pb-14 sm:py-10 sm:pb-20">
-        <div className="mx-auto max-w-5xl px-6 sm:px-10 lg:px-16">
+        <div className="mx-auto max-w-site px-6 sm:px-10 lg:px-16">
           <PanelHeading title={aboutClients.title} />
         </div>
         <div className="mt-6">

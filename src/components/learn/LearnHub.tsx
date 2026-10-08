@@ -87,7 +87,7 @@ export function LearnHub() {
         }
       />
 
-      <section className="mx-auto max-w-5xl px-6 py-14 sm:px-10 lg:px-16">
+      <section className="mx-auto max-w-site px-6 py-14 sm:px-10 lg:px-16">
         <div className="grid gap-10 lg:grid-cols-[0.9fr_0.85fr_1fr] lg:items-center">
           <div>
             <p className="text-[11px] font-semibold tracking-[0.18em] text-brand-red uppercase">
@@ -142,7 +142,7 @@ export function LearnHub() {
         id="videos"
         className="scroll-mt-24 bg-gradient-to-br from-navy via-[#1a2f55] to-brand-red px-6 py-14 sm:px-10 lg:px-16"
       >
-        <div className="mx-auto max-w-5xl">
+        <div className="mx-auto max-w-site">
           <p className="text-[11px] font-semibold tracking-[0.18em] text-white/60 uppercase">
             คลิปสอน
           </p>
@@ -183,7 +183,7 @@ export function LearnHub() {
         </div>
       </section>
 
-      <div className="mx-auto max-w-5xl px-6 pt-14 sm:px-10 lg:px-16">
+      <div className="mx-auto max-w-site px-6 pt-14 sm:px-10 lg:px-16">
         <div className="flex flex-wrap items-end justify-between gap-3">
           <div>
             <p className="text-[11px] font-semibold tracking-[0.18em] text-brand-red uppercase">

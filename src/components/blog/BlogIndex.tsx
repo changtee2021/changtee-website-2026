@@ -97,7 +97,7 @@ export function BlogIndex() {
         }
       />
 
-      <div className="mx-auto max-w-5xl px-6 sm:px-10 lg:px-16 pt-8">
+      <div className="mx-auto max-w-site px-6 sm:px-10 lg:px-16 pt-8">
         {published.length === 0 ? (
           <p className="mt-10 text-center text-sm text-muted">ยังไม่มีบทความ</p>
         ) : (

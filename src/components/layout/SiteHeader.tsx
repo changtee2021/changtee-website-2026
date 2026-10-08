@@ -89,8 +89,8 @@ function desktopNavItems(translate: (key: MessageKey) => string) {
 }
 
 /** Match HomePanel / page content column */
-const shellPad = "px-6 sm:px-10 lg:px-16";
-const contentCol = "mx-auto w-full max-w-5xl";
+const shellPad = "px-6 sm:px-10 lg:px-20 xl:px-24";
+const contentCol = "mx-auto w-full max-w-site";
 
 /** Pages whose hero is a full-bleed image — header floats transparently on top */
 const FULL_BLEED_HERO_PATHS = new Set([

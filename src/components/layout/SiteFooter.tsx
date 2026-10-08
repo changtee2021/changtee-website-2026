@@ -22,7 +22,7 @@ export function SiteFooter() {
 
   return (
     <footer className="mt-auto border-t border-line bg-panel">
-      <div className="mx-auto max-w-5xl px-4 py-8 sm:px-10 sm:py-12 lg:px-16">
+      <div className="mx-auto max-w-site px-4 py-8 sm:px-10 sm:py-12 lg:px-20 xl:px-24">
         <div className="grid gap-8 md:grid-cols-2 md:gap-8 lg:grid-cols-[1.15fr_1fr_0.95fr] lg:gap-10">
           <div>
             <div className="flex items-start gap-3">
@@ -178,7 +178,7 @@ export function SiteFooter() {
       </div>
 
       <div className="bg-[#0b1220] text-white">
-        <div className="mx-auto flex max-w-5xl flex-col gap-3 px-4 py-4 text-xs text-white/70 sm:px-10 md:flex-row md:items-center md:justify-between lg:px-16">
+        <div className="mx-auto flex max-w-site flex-col gap-3 px-4 py-4 text-xs text-white/70 sm:px-10 md:flex-row md:items-center md:justify-between lg:px-20 xl:px-24">
           <nav className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center sm:gap-x-0 sm:gap-y-1">
             <Link href="/privacy" className="hover:text-white">
               {t("footer.privacy")}
