@@ -22,14 +22,14 @@ export function PageSkeleton({
 
       {/* Header band */}
       <section className="border-b border-line/70 bg-panel">
-        <div className="mx-auto max-w-5xl px-6 sm:px-10 lg:px-16 py-10 sm:py-14">
+        <div className="mx-auto max-w-site px-6 sm:px-10 lg:px-16 py-10 sm:py-14">
           <Skeleton className="h-3 w-40" />
           <Skeleton className="mt-4 h-9 w-64 sm:w-80" />
           <Skeleton className="mt-3 h-4 w-full max-w-md" />
         </div>
       </section>
 
-      <div className="mx-auto max-w-5xl px-6 sm:px-10 lg:px-16 pt-8">
+      <div className="mx-auto max-w-site px-6 sm:px-10 lg:px-16 pt-8">
         <div className="mb-6 flex items-center gap-3">
           <WanderingEyes
             className="size-10 text-navy"

@@ -1,46 +1,5 @@
 [
   {
-    "id": "pf-cp-017",
-    "title": "ม่านตาไก่ หาดบ้านดิน รีสอร์ท",
-    "slug": "eyelet-had-ban-din-resort",
-    "summary": "ม่านตาไก่โทนเทา เข้ากับห้องไม้รีสอร์ทกาญจนบุรี โดยไม่แย่งบรรยากาศ",
-    "detail": "ห้องพักไม้ที่หาดบ้านดินต้องการม่านที่ดูเป็นธรรมชาติ ไม่แข็งเหมือนโรงแรมทั่วไป เลยเลือกม่านตาไก่ผ้าทึบโทนเทา ให้ลอนผ้าทิ้งตัวสบายตา\n\nผ้าทึบช่วยบังแดดและให้ความเป็นส่วนตัวตอนกลางคืน ขณะที่สไตล์ตาไก่เข้ากับเฟอร์นิเจอร์ไม้รีสอร์ทได้โดยไม่แย่งบรรยากาศ",
-    "place": "กาญจนบุรี",
-    "productSlug": "curtain",
-    "spaceType": "hotel-resort",
-    "tags": [
-      "ม่านตาไก่",
-      "รีสอร์ท"
-    ],
-    "image": "/images/portfolio/eyelet-had-ban-din-resort/01.webp",
-    "gallery": [
-      "/images/portfolio/eyelet-had-ban-din-resort/01.webp",
-      "/images/portfolio/eyelet-had-ban-din-resort/02.webp",
-      "/images/portfolio/eyelet-had-ban-din-resort/03.webp",
-      "/images/portfolio/eyelet-had-ban-din-resort/04.webp"
-    ],
-    "status": "published",
-    "pinned": false,
-    "sortOrder": 1,
-    "customerName": "หาดบ้านดิน รีสอร์ท",
-    "showCustomerName": true,
-    "installLocation": "ห้องพักรีสอร์ท",
-    "installDate": "2026",
-    "lineItems": [
-      {
-        "productName": "ม่านตาไก่",
-        "sku": "AZ20-26",
-        "serialOrCode": "",
-        "material": "",
-        "color": "",
-        "quantity": "",
-        "notes": ""
-      }
-    ],
-    "updatedAt": "2026-08-15T20:10:00+07:00",
-    "seoDescription": "ผลงานติดม่านตาไก่ผ้าทึบโทนเทาที่หาดบ้านดิน รีสอร์ท กาญจนบุรี เข้ากับห้องไม้ บังแดดและให้ความเป็นส่วนตัว"
-  },
-  {
     "id": "pf-cp-020",
     "title": "ม่านจีบ พาทิโอ อพาร์ทเมนท์",
     "slug": "pleat-patio-apartment",
@@ -95,8 +54,9 @@
       "ม่านจีบ",
       "บ้าน"
     ],
-    "image": "/images/portfolio/pleat-premium-rama2/01.webp",
+    "image": "/images/portfolio/pleat-premium-rama2/05.webp",
     "gallery": [
+      "/images/portfolio/pleat-premium-rama2/05.webp",
       "/images/portfolio/pleat-premium-rama2/01.webp",
       "/images/portfolio/pleat-premium-rama2/02.webp",
       "/images/portfolio/pleat-premium-rama2/03.webp",
@@ -122,37 +82,6 @@
     ],
     "updatedAt": "2026-08-15T20:10:00+07:00",
     "seoDescription": "ติดม่านจีบบ้านพักหมู่บ้านซื้อตรง พรีเมียม พระราม 2 กรุงเทพฯ โทนเรียบ กันแดด เหมาะบ้านโครงการ"
-  },
-  {
-    "id": "pf-cp-022",
-    "title": "ม่านจีบ ทาวน์อินทาวน์ ชมพูมุก",
-    "slug": "pleat-town-in-town",
-    "summary": "ม่านจีบโทนชมพูมุก แต่งบ้านทาวน์อินทาวน์ให้อุ่นตาโดยไม่ต้องเปลี่ยนเฟอร์นิเจอร์",
-    "detail": "บ้านทาวน์อินทาวน์เลือกม่านจีบโทนชมพูมุก เพื่อให้ห้องดูนุ่มขึ้นโดยไม่ต้องเปลี่ยนเฟอร์นิเจอร์ทั้งห้อง\n\nจีบเรียบช่วยให้ผ้าทิ้งตัวสวยแม้บานไม่กว้าง และยังคุมแสงได้ถ้าจับคู่ผ้าทึบ เหมาะบ้านในเมืองที่อยากได้ม่านแต่งบ้านกรุงเทพฯ โทนหวานแต่ใช้งานจริง",
-    "place": "ทาวน์อินทาวน์ กรุงเทพฯ",
-    "productSlug": "curtain",
-    "spaceType": "home-condo",
-    "tags": [
-      "ม่านจีบ",
-      "บ้าน"
-    ],
-    "image": "/images/portfolio/pleat-town-in-town/01.webp",
-    "gallery": [
-      "/images/portfolio/pleat-town-in-town/01.webp",
-      "/images/portfolio/pleat-town-in-town/02.webp",
-      "/images/portfolio/pleat-town-in-town/03.webp",
-      "/images/portfolio/pleat-town-in-town/04.webp"
-    ],
-    "status": "published",
-    "pinned": false,
-    "sortOrder": 4,
-    "customerName": "ทาวน์อินทาวน์",
-    "showCustomerName": true,
-    "installLocation": "บ้านพักอาศัย",
-    "installDate": "2026",
-    "lineItems": [],
-    "updatedAt": "2026-08-15T20:10:00+07:00",
-    "seoDescription": "ติดม่านจีบโทนชมพูมุกบ้านทาวน์อินทาวน์ กรุงเทพฯ แต่งห้องให้อุ่นตา คุมแสงได้ เหมาะบ้านในเมือง"
   },
   {
     "id": "pf-cp-025",
@@ -208,8 +137,9 @@
       "ม่านลอนเทป",
       "บ้าน"
     ],
-    "image": "/images/portfolio/swave-pleno-thairamun/01.webp",
+    "image": "/images/portfolio/swave-pleno-thairamun/05.webp",
     "gallery": [
+      "/images/portfolio/swave-pleno-thairamun/05.webp",
       "/images/portfolio/swave-pleno-thairamun/01.webp",
       "/images/portfolio/swave-pleno-thairamun/02.webp",
       "/images/portfolio/swave-pleno-thairamun/03.webp",
@@ -238,7 +168,7 @@
   },
   {
     "id": "pf-cp-029",
-    "title": "ม่านพับ คุณสุน",
+    "title": "Private Home",
     "slug": "roman-khun-sun",
     "summary": "ม่านพับบานแคบ เก็บผ้าชิดบน ไม่กินพื้นที่หน้าต่าง",
     "detail": "หน้าต่างบานแคบหรือทรงสูงติดม่านจีบแล้วผ้าจะดูแน่นเกินไป เลยเลือกม่านพับให้พับเก็บชิดบน ไม่บังบาน\n\nเหมาะบ้านที่อยากได้ม่านแต่งบ้านแบบเรียบ คุมแสงได้ และยังดูเป็นระเบียบแม้พื้นที่หน้าต่างจำกัด",
@@ -330,8 +260,9 @@
       "ม่านโรงพยาบาล",
       "สถานศึกษา"
     ],
-    "image": "/images/portfolio/hospital-kosen-kmitl/01.webp",
+    "image": "/images/portfolio/hospital-kosen-kmitl/05.webp",
     "gallery": [
+      "/images/portfolio/hospital-kosen-kmitl/05.webp",
       "/images/portfolio/hospital-kosen-kmitl/01.webp",
       "/images/portfolio/hospital-kosen-kmitl/02.webp",
       "/images/portfolio/hospital-kosen-kmitl/03.webp",
@@ -430,35 +361,6 @@
     "seoDescription": "ติดม่านม้วนกรองแสงโถงผู้โดยสารสนามบินดอนเมือง กันแดดจัด ยังมองเห็นลานจอดเครื่อง"
   },
   {
-    "id": "pf-cp-042",
-    "title": "ม่านม้วนเครือสุกี้ตี๋น้อย",
-    "slug": "roller-teenoi-network",
-    "summary": "ม่านม้วนเครือสุกี้ตี๋น้อย คุมแสงหลายสาขาให้โทนเดียวกัน เช็ดง่าย",
-    "detail": "ร้านอาหารเปิดยาว กระจกหน้าร้านโดนแดดและต้องดูสะอาดทุกสาขา เลยใช้ม่านม้วนชุดเดียวกันทั้งเครือสุกี้ตี๋น้อย ทั้งโกลด์ เมเจอร์ บิ๊กซี อินเด็กซ์ โอโซน โลตัส และสาขา BBQ\n\nม่านม้วนร้านอาหารช่วยลดแสงจ้า ลดความร้อน และยังดูแลง่ายกว่าผ้าม่านที่ซับกลิ่น",
-    "place": "หลายสาขาทั่วประเทศ",
-    "productSlug": "roller-blinds",
-    "spaceType": "restaurant-cafe",
-    "tags": [
-      "ม่านม้วน",
-      "ร้านอาหาร",
-      "ตี๋น้อย"
-    ],
-    "image": "/brochure/company-profile-2026/pages/page-042.jpg",
-    "gallery": [
-      "/brochure/company-profile-2026/pages/page-042.jpg"
-    ],
-    "status": "published",
-    "pinned": false,
-    "sortOrder": 12,
-    "customerName": "สุกี้ตี๋น้อย",
-    "showCustomerName": true,
-    "installLocation": "สาขาเครือสุกี้ตี๋น้อย",
-    "installDate": "2026",
-    "lineItems": [],
-    "updatedAt": "2026-08-15T20:10:00+07:00",
-    "seoDescription": "ผลงานม่านม้วนเครือสุกี้ตี๋น้อยหลายสาขาทั่วประเทศ คุมแสงหน้าร้าน เช็ดง่าย เหมาะร้านอาหาร"
-  },
-  {
     "id": "pf-cp-043",
     "title": "ม่านม้วน สุกี้ตี๋น้อย สรงประภา",
     "slug": "roller-teenoi-songprapa",
@@ -511,8 +413,9 @@
       "ม่านม้วน",
       "ร้านอาหาร"
     ],
-    "image": "/images/portfolio/roller-teenoi-bbq-jas/01.webp",
+    "image": "/images/portfolio/roller-teenoi-bbq-jas/05.webp",
     "gallery": [
+      "/images/portfolio/roller-teenoi-bbq-jas/05.webp",
       "/images/portfolio/roller-teenoi-bbq-jas/01.webp",
       "/images/portfolio/roller-teenoi-bbq-jas/02.webp",
       "/images/portfolio/roller-teenoi-bbq-jas/03.webp",
@@ -1052,16 +955,16 @@
   },
   {
     "id": "pf-cp-084",
-    "title": "ฉากกั้นห้อง หมู่บ้านถนนสามวา",
+    "title": "ม่านม้วนภายนอก หมู่บ้านถนนสามวา",
     "slug": "partition-samwa-village",
-    "summary": "ฉากกั้นบ้านคลองสามวา แบ่งห้องเพิ่ม กั้นแอร์ได้โดยไม่ทุบผนัง",
-    "detail": "บ้านหมู่บ้านถนนสามวาต้องการห้องเพิ่ม เช่น มุมทำงานหรือกั้นแอร์ เลยเลือกฉากกั้นห้องแทนการก่อผนัง\n\nติดตั้งเร็ว ย้ายได้ เหมาะฉากกั้นห้องบ้านพักกรุงเทพฯ ที่อยากแบ่งโซนโดยไม่เสียโครงสร้างเดิม",
+    "summary": "ม่านม้วนภายนอกบ้านคลองสามวา กันแดดและฝนสาดด้านนอก ยังเปิดรับลมและวิวสวนได้",
+    "detail": "บ้านในหมู่บ้านถนนสามวาติดม่านม้วนภายนอกบริเวณหน้าบ้าน เพื่อตัดแดดและฝนสาดที่เข้ามาถึงพื้นที่ใช้งานด้านนอก โดยไม่ต้องก่อผนังทึบ\n\nม้วนเก็บได้เมื่ออยากเปิดโล่ง เหมาะม่านภายนอกบ้านกรุงเทพฯ ที่อยากใช้พื้นที่นอกอาคารได้สบายขึ้นทั้งวัน",
     "place": "คลองสามวา กรุงเทพฯ",
-    "productSlug": "pvc-partition",
+    "productSlug": "outdoor-factory",
     "spaceType": "home-condo",
     "tags": [
-      "ฉากกั้นห้อง",
-      "บ้าน"
+      "ม่านม้วนภายนอก",
+      "ม่านภายนอก"
     ],
     "image": "/images/portfolio/partition-samwa-village/01.webp",
     "gallery": [
@@ -1074,11 +977,11 @@
     "sortOrder": 28,
     "customerName": "หมู่บ้านถนนสามวา",
     "showCustomerName": true,
-    "installLocation": "บ้านพักอาศัย",
+    "installLocation": "หน้าบ้าน / นอกอาคาร",
     "installDate": "2026",
     "lineItems": [
       {
-        "productName": "ฉากกั้นห้อง",
+        "productName": "ม่านม้วนภายนอก",
         "sku": "WPRB1006",
         "serialOrCode": "",
         "material": "",
@@ -1088,47 +991,7 @@
       }
     ],
     "updatedAt": "2026-08-15T20:10:00+07:00",
-    "seoDescription": "ติดฉากกั้นห้องบ้านหมู่บ้านถนนสามวา คลองสามวา กรุงเทพฯ แบ่งห้อง กั้นแอร์ โดยไม่ทุบผนัง"
-  },
-  {
-    "id": "pf-cp-085",
-    "title": "ฉากกั้นห้อง เขาย้อย เพชรบุรี",
-    "slug": "partition-khao-yoi",
-    "summary": "ฉากกั้นบ้านเขาย้อย เพชรบุรี แบ่งโซนบ้านโดยไม่ต้องรองานก่อสร้าง",
-    "detail": "บ้านพักเขาย้อยใช้ฉากกั้นห้องเพื่อแบ่งพื้นที่ใช้สอย โดยไม่ต้องรองานก่อสร้าง\n\nฉากกั้นช่วยกั้นแอร์และบังสายตา เหมาะบ้านต่างจังหวัดที่อยากได้ห้องเพิ่มแบบงบคุมได้",
-    "place": "เขาย้อย เพชรบุรี",
-    "productSlug": "pvc-partition",
-    "spaceType": "home-condo",
-    "tags": [
-      "ฉากกั้นห้อง",
-      "บ้าน"
-    ],
-    "image": "/images/portfolio/partition-khao-yoi/01.webp",
-    "gallery": [
-      "/images/portfolio/partition-khao-yoi/01.webp",
-      "/images/portfolio/partition-khao-yoi/02.webp",
-      "/images/portfolio/partition-khao-yoi/03.webp"
-    ],
-    "status": "published",
-    "pinned": false,
-    "sortOrder": 29,
-    "customerName": "เขาย้อย",
-    "showCustomerName": true,
-    "installLocation": "บ้านพักอาศัย",
-    "installDate": "2026",
-    "lineItems": [
-      {
-        "productName": "ฉากกั้นห้อง",
-        "sku": "WPRB1003",
-        "serialOrCode": "",
-        "material": "",
-        "color": "",
-        "quantity": "",
-        "notes": ""
-      }
-    ],
-    "updatedAt": "2026-08-15T20:10:00+07:00",
-    "seoDescription": "ติดฉากกั้นห้องบ้านเขาย้อย เพชรบุรี แบ่งโซน กั้นแอร์ โดยไม่ต้องก่อสร้าง"
+    "seoDescription": "ติดม่านม้วนภายนอกบ้านหมู่บ้านถนนสามวา คลองสามวา กรุงเทพฯ กันแดด กันฝนสาด ใช้พื้นที่นอกบ้านได้สบายขึ้น"
   },
   {
     "id": "pf-cp-087",

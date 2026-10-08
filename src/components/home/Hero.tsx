@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useEffect, useMemo, useRef, useState, type TouchEvent } from "react";
-import { motion, useReducedMotion } from "framer-motion";
+import { motion, useReducedMotion, useScroll, useTransform } from "framer-motion";
 import { useHeroSlides } from "@/lib/cms/demo-store";
 import { publishedHeroSlides } from "@/lib/cms/hero-slides-demo";
 import { FeatureStrip } from "@/components/home/FeatureStrip";
@@ -15,13 +15,24 @@ const FALLBACK = {
   alt: "ผ้าม่านห้องนั่งเล่น ผลงานช่างตี๋",
 };
 
-export function Hero() {
+/**
+ * `pinned` keeps the hero fixed behind the next section (which must be opaque and
+ * share a `relative` wrapper with it). Off by default so other callers, e.g. the CMS preview, scroll normally.
+ */
+export function Hero({ pinned = false }: { pinned?: boolean }) {
   const { t } = useI18n();
   const stored = useHeroSlides();
   const slides = useMemo(() => publishedHeroSlides(stored), [stored]);
   const reduced = useReducedMotion();
   const [index, setIndex] = useState(0);
   const [hoverPaused, setHoverPaused] = useState(false);
+
+  // Scroll-linked depth: the hero stays pinned while the product sheet slides over it.
+  // Transform/opacity only (compositor-friendly); disabled for reduced motion.
+  const { scrollY } = useScroll();
+  const imageY = useTransform(scrollY, [0, 700], [0, reduced ? 0 : 90]);
+  const contentOpacity = useTransform(scrollY, [0, 480], [1, reduced ? 1 : 0]);
+  const contentY = useTransform(scrollY, [0, 480], [0, reduced ? 0 : -36]);
 
   const len = slides.length;
   const safeIndex = len > 0 ? index % len : 0;
@@ -55,7 +66,7 @@ export function Hero() {
   }
 
   return (
-    <section className="relative bg-navy text-white">
+    <section className={`bg-navy text-white ${pinned ? "sticky top-0 z-0" : "relative"}`}>
       <div
         className="relative min-h-[100dvh] w-full overflow-hidden"
         onMouseEnter={() => setHoverPaused(true)}
@@ -64,6 +75,7 @@ export function Hero() {
         onTouchEnd={onTouchEnd}
       >
         <div className="absolute inset-0">
+          <motion.div style={{ y: imageY }} className="absolute inset-x-0 -top-24 bottom-0">
           {(len > 0 ? slides : [{ id: "fallback", src: FALLBACK.src, alt: FALLBACK.alt }]).map(
             (item, i) => (
               <div
@@ -86,11 +98,18 @@ export function Hero() {
               </div>
             ),
           )}
+          </motion.div>
 
           <div className="pointer-events-none absolute inset-0 z-[2] bg-gradient-to-b from-navy/55 via-navy/10 to-navy/85 sm:bg-gradient-to-r sm:from-navy/70 sm:via-navy/20 sm:to-transparent" />
           <div className="pointer-events-none absolute inset-x-0 bottom-0 z-[2] hidden h-2/5 bg-gradient-to-t from-navy-deep/80 to-transparent sm:block" />
 
-          <div className="absolute inset-0 z-[3] flex flex-col justify-end px-6 pb-8 pt-28 sm:px-10 sm:pb-10 lg:px-16">
+          {/* Bottom padding leaves room for the product sheet that overlaps the hero edge. */}
+          <motion.div
+            style={{ opacity: contentOpacity, y: contentY }}
+            className="absolute inset-0 z-[3] flex flex-col justify-end px-6 pb-16 pt-28 sm:px-10 sm:pb-20 lg:px-20 xl:px-24"
+          >
+            {/* Same max-w-site column as HomePanel so the hero and the product grid share a left edge. */}
+            <div className="mx-auto w-full max-w-site">
             <div className="max-w-2xl">
               <motion.p
                 {...enter(0)}
@@ -106,7 +125,7 @@ export function Hero() {
                 {t("home.title")}
               </motion.h1>
             </div>
-            <motion.div {...enter(2)} className="mt-8 max-w-5xl">
+            <motion.div {...enter(2)} className="mt-8 max-w-site">
               <FeatureStrip />
             </motion.div>
             {len > 1 ? (
@@ -138,7 +157,8 @@ export function Hero() {
                 </div>
               </div>
             ) : null}
-          </div>
+            </div>
+          </motion.div>
         </div>
       </div>
     </section>

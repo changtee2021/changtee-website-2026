@@ -142,7 +142,7 @@ export function PortfolioDetailView({
             ดูภาพใหญ่
           </span>
         </button>
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 mx-auto max-w-5xl px-6 sm:px-10 lg:px-16 pb-6 sm:pb-10">
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 mx-auto max-w-site px-6 sm:px-10 lg:px-16 pb-6 sm:pb-10">
           <p className="pointer-events-auto text-sm text-white/90">
             <Link href="/portfolio" className="hover:underline">
               ผลงาน
@@ -180,7 +180,7 @@ export function PortfolioDetailView({
         </div>
       </div>
 
-      <div className="mx-auto max-w-5xl px-6 sm:px-10 lg:px-16 py-10">
+      <div className="mx-auto max-w-site px-6 sm:px-10 lg:px-16 py-10">
         <div className="max-w-3xl">
           <div className="flex flex-wrap gap-2">
             {itemCategorySlugs(item).map((slug) => (

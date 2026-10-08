@@ -22,7 +22,7 @@ export function CareersIndex() {
   return (
     <div className="bg-shell pb-16">
       <section className="border-b border-line/70 bg-white">
-        <div className="mx-auto max-w-5xl px-6 sm:px-10 lg:px-16 py-10 sm:py-14">
+        <div className="mx-auto max-w-site px-6 sm:px-10 lg:px-16 py-10 sm:py-14">
           <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted">
             Careers · ร่วมงานกับเรา
           </p>
@@ -36,7 +36,7 @@ export function CareersIndex() {
         </div>
       </section>
 
-      <div className="mx-auto max-w-5xl px-6 sm:px-10 lg:px-16 pt-10">
+      <div className="mx-auto max-w-site px-6 sm:px-10 lg:px-16 pt-10">
         <h2 className="font-display text-xl font-semibold text-navy">ตำแหน่งที่เปิดรับสมัคร</h2>
 
         {openJobs.length === 0 ? (

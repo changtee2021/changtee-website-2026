@@ -29,7 +29,7 @@ export function ProductsHub() {
         compact
       />
 
-      <div className="mx-auto max-w-5xl px-6 sm:px-10 lg:px-16 py-10 sm:py-12">
+      <div className="mx-auto max-w-site px-6 sm:px-10 lg:px-16 py-10 sm:py-12">
         <nav
           aria-label={t("products.hubNav")}
           className="flex gap-2 overflow-x-auto pb-1"

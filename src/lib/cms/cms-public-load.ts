@@ -6,9 +6,24 @@ import {
 } from "@/lib/cms/portfolio-demo";
 import { readCmsCollection } from "@/lib/cms/cms-server";
 import { readLocalCmsCollection } from "@/lib/cms/cms-local-store";
+import type { PublicCmsCollection } from "@/lib/cms/cms-collections";
 import { publishedBlog, publishedPortfolio } from "@/lib/cms/public-content";
 
 async function loadCollection<T>(collection: "blog" | "portfolio") {
+  const remote = await readCmsCollection<T>(collection);
+  if (remote && remote.length > 0) return remote;
+  const local = await readLocalCmsCollection<T>(collection);
+  if (local && local.length > 0) return local;
+  return null;
+}
+
+/**
+ * Server-side: published items of any public CMS collection.
+ * `null` means "nothing stored" so callers keep the build-time seed.
+ */
+export async function loadPublicCollection<T>(
+  collection: PublicCmsCollection,
+): Promise<T[] | null> {
   const remote = await readCmsCollection<T>(collection);
   if (remote && remote.length > 0) return remote;
   const local = await readLocalCmsCollection<T>(collection);

@@ -99,18 +99,8 @@ export function AboutOneStopCms({
     <>
       <div className="grid gap-8 p-7 sm:p-9 md:grid-cols-2 md:items-center md:gap-10 md:p-12">
         <div>
-          <EditableSpot sectionId="oneStop" fieldKey="subtitle">
-            <p className="text-xs font-semibold tracking-[0.16em] text-brand-red uppercase">
-              {values.subtitle}
-            </p>
-          </EditableSpot>
-          <EditableSpot sectionId="oneStop" fieldKey="title">
-            <h2 className="mt-2 font-display text-2xl font-semibold text-navy md:text-3xl">
-              {values.title}
-            </h2>
-          </EditableSpot>
           <EditableSpot sectionId="oneStop" fieldKey="body">
-            <p className="mt-4 text-sm leading-relaxed text-muted">
+            <p className="text-sm leading-relaxed text-muted">
               {values.body}
             </p>
           </EditableSpot>

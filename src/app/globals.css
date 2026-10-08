@@ -51,6 +51,8 @@
   --color-shell: var(--shell);
   --color-panel: var(--panel);
   --radius-panel: 1.75rem;
+  /* One site-wide content width: header, hero, panels, hubs and footer all share it (see max-w-site). */
+  --container-site: 120rem;
   --font-sans: var(--font-body), "IBM Plex Sans Thai", sans-serif;
   --font-display: var(--font-display-family), var(--font-body), "Prompt", "IBM Plex Sans Thai", sans-serif;
   --font-modern: var(--font-modern-family), ui-sans-serif, sans-serif;

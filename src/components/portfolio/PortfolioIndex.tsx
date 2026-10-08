@@ -381,7 +381,8 @@ export function PortfolioIndex({
         compact
       />
 
-      <div className="mx-auto max-w-6xl px-6 sm:px-10 lg:px-16 pt-8 sm:pt-10">
+      {/* Same side padding as PageHero so the gallery lines up with the heading; cap only on ultra-wide screens. */}
+      <div className="mx-auto max-w-site px-6 pt-8 sm:px-10 sm:pt-10 lg:px-16">
         <div className="lg:grid lg:grid-cols-[14.5rem_minmax(0,1fr)] lg:items-start lg:gap-12">
           <aside className="mb-6 lg:sticky lg:top-24 lg:mb-0">
             <div className="flex flex-col gap-2">

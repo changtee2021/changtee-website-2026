@@ -1,6 +1,6 @@
 "use client";
 
-import { useSyncExternalStore } from "react";
+import { createContext, useContext, useSyncExternalStore } from "react";
 import { DEMO_BLOG, type BlogPost } from "@/lib/cms/blog-demo";
 import {
   DEMO_PORTFOLIO,
@@ -34,6 +34,8 @@ function createDemoStore<T>(
   let memory = seed;
   let hydrated = false;
   let remoteStarted = false;
+  /** True once the public CMS fetch has answered (even with "no items"). */
+  let remoteLoaded = false;
   const listeners = new Set<Listener>();
 
   function notify() {
@@ -61,6 +63,7 @@ function createDemoStore<T>(
     void fetch(`/api/public/cms/${collection}`, { cache: "no-store" })
       .then((res) => res.json())
       .then((json: { items?: T[] | null }) => {
+        remoteLoaded = true;
         if (!Array.isArray(json.items) || json.items.length === 0) return;
         memory = json.items;
         hydrated = true;
@@ -184,6 +187,18 @@ function createDemoStore<T>(
     notify();
   }
 
+  /**
+   * Silent seed from a server-rendered CMS snapshot (no notify, safe to call
+   * while rendering). Replaces stale localStorage/seed so the first client
+   * paint matches the server HTML. Ignored once the live fetch has answered,
+   * because that data is newer than any server snapshot.
+   */
+  function seedFromServer(items: T[]) {
+    if (remoteLoaded || !Array.isArray(items) || items.length === 0) return;
+    memory = items;
+    hydrated = true;
+  }
+
   function subscribe(listener: Listener) {
     listeners.add(listener);
     return () => listeners.delete(listener);
@@ -201,9 +216,24 @@ function createDemoStore<T>(
     write,
     applyPreview,
     hydrateFromServer,
+    seedFromServer,
     read,
   };
 }
+
+/**
+ * CMS data loaded on the server for the current page (ISR). Hooks fall back to
+ * it for the server/hydration snapshot, so the HTML shows published content
+ * instead of the build-time seed.
+ */
+export type CmsServerData = {
+  portfolio?: PortfolioItem[] | null;
+  heroSlides?: HeroSlide[] | null;
+  catalogs?: CatalogItem[] | null;
+  pageSections?: PageSectionRecord[] | null;
+};
+
+export const CmsServerDataContext = createContext<CmsServerData>({});
 
 const portfolioStore = createDemoStore<PortfolioItem>(
   "changtee.cms.portfolio.v1",
@@ -228,10 +258,11 @@ const catalogStore = createDemoStore<CatalogItem>(
 );
 
 export function usePortfolioItems(): PortfolioItem[] {
+  const server = useContext(CmsServerDataContext).portfolio;
   const raw = useSyncExternalStore(
     portfolioStore.subscribe,
     portfolioStore.getSnapshot,
-    portfolioStore.getServerSnapshot,
+    () => server ?? portfolioStore.getServerSnapshot(),
   );
   return raw.map((item) => normalizePortfolioItem(item));
 }
@@ -288,10 +319,11 @@ export function getBlogById(id: string): BlogPost | undefined {
 }
 
 export function useHeroSlides(): HeroSlide[] {
+  const server = useContext(CmsServerDataContext).heroSlides;
   return useSyncExternalStore(
     heroSlideStore.subscribe,
     heroSlideStore.getSnapshot,
-    heroSlideStore.getServerSnapshot,
+    () => server ?? heroSlideStore.getServerSnapshot(),
   );
 }
 
@@ -315,10 +347,11 @@ export function removeHeroSlide(id: string) {
 }
 
 export function useCatalogs(): CatalogItem[] {
+  const server = useContext(CmsServerDataContext).catalogs;
   const raw = useSyncExternalStore(
     catalogStore.subscribe,
     catalogStore.getSnapshot,
-    catalogStore.getServerSnapshot,
+    () => server ?? catalogStore.getServerSnapshot(),
   );
   return raw.map((item) => normalizeCatalog(item));
 }
@@ -351,11 +384,23 @@ const pageSectionStore = createDemoStore<PageSectionRecord>(
 );
 
 export function usePageSections(): PageSectionRecord[] {
+  const server = useContext(CmsServerDataContext).pageSections;
   return useSyncExternalStore(
     pageSectionStore.subscribe,
     pageSectionStore.getSnapshot,
-    pageSectionStore.getServerSnapshot,
+    () => server ?? pageSectionStore.getServerSnapshot(),
   );
+}
+
+/**
+ * Seed every store from the server snapshot before children read them.
+ * Silent (no notify) and a no-op once the live fetch has answered.
+ */
+export function seedCmsStoresFromServer(data: CmsServerData) {
+  if (data.portfolio) portfolioStore.seedFromServer(data.portfolio);
+  if (data.heroSlides) heroSlideStore.seedFromServer(data.heroSlides);
+  if (data.catalogs) catalogStore.seedFromServer(data.catalogs);
+  if (data.pageSections) pageSectionStore.seedFromServer(data.pageSections);
 }
 
 export function setPageSections(items: PageSectionRecord[]) {

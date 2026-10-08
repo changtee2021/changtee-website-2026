@@ -54,7 +54,7 @@ export default async function CategoryPage({ params }: Props) {
   const highlights = getCategoryHighlights(cat);
 
   return (
-    <div className="mx-auto max-w-5xl px-6 sm:px-10 lg:px-16 py-10 sm:py-12">
+    <div className="mx-auto max-w-site px-6 sm:px-10 lg:px-16 py-10 sm:py-12">
       <JsonLd data={getCategoryJsonLd(cat)} />
       <p className="text-sm text-muted">
         <Link href="/products" className="hover:text-navy">

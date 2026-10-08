@@ -52,7 +52,7 @@ export function VisitBookingSection() {
   const highlights = isPresentation ? PRESENTATION_HIGHLIGHTS : VISIT_HIGHLIGHTS;
 
   return (
-    <div className="mx-auto w-full max-w-5xl px-6 pt-8 sm:px-10 sm:pt-12 lg:px-16">
+    <div className="mx-auto w-full max-w-site px-6 pt-8 sm:px-10 sm:pt-12 lg:px-16">
       <VisitModeSwitch mode={mode} className="mx-auto max-w-xl" />
 
       {isPresentation ? null : (

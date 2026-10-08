@@ -382,7 +382,7 @@ export function BlogDetailView({
       ) : null}
 
       {related.length > 0 && relatedCms.enabled ? (
-        <section className="mx-auto mt-14 max-w-5xl px-6 sm:px-10 lg:px-16">
+        <section className="mx-auto mt-14 max-w-site px-6 sm:px-10 lg:px-16">
           <EditableSpot sectionId="related" fieldKey="postsHeading">
             <h2 className="font-display text-xl font-semibold text-navy">
               {relatedCms.values.postsHeading}
@@ -429,7 +429,7 @@ export function BlogDetailView({
       ) : null}
 
       {relatedWorks.length > 0 && relatedCms.enabled ? (
-        <section className="mx-auto mt-14 max-w-5xl px-6 sm:px-10 lg:px-16">
+        <section className="mx-auto mt-14 max-w-site px-6 sm:px-10 lg:px-16">
           <EditableSpot sectionId="related" fieldKey="worksHeading">
             <h2 className="font-display text-xl font-semibold text-navy">
               {relatedCms.values.worksHeading}
@@ -480,7 +480,7 @@ export function BlogDetailView({
       ) : null}
 
       {installVideos.length > 0 && relatedCms.enabled ? (
-        <div className="mx-auto mt-14 max-w-5xl px-6 sm:px-10 lg:px-16">
+        <div className="mx-auto mt-14 max-w-site px-6 sm:px-10 lg:px-16">
           <InstallVideosSection
             label="YouTube"
             title={

@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, ArrowUpRight } from "lucide-react";
 import { HomePanel } from "@/components/home/HomePanel";
+import { Reveal } from "@/components/home/Reveal";
 import { EditableSpot } from "@/components/preview/EditableSpot";
 import { useSectionValues } from "@/lib/cms/demo-store";
 import { HOME_SECTION_DEFAULTS } from "@/lib/cms/page-sections";
@@ -12,21 +13,28 @@ import { useCmsText } from "@/lib/i18n/use-cms-text";
 
 /** Older portrait files saved in demo store map to the wide photo set. */
 const LEGACY_TILE_IMAGE: Record<string, string> = {
-  "/images/home/products/01-curtain.png": "/images/home/products/wide-curtain.jpg",
-  "/images/home/products/02-roller.png": "/images/home/products/wide-roller.jpg",
-  "/images/home/products/03-wood.png": "/images/home/products/wide-wood.jpg",
-  "/images/home/products/08-aluminium.png": "/images/home/products/wide-aluminum.jpg",
-  "/images/home/products/04-vertical.png": "/images/home/products/wide-vertical.jpg",
-  "/images/home/products/05-folding.png": "/images/home/products/wide-folding.jpg",
-  "/images/home/products/06-noren.png": "/images/home/products/wide-print.jpg",
+  "/images/home/products/01-curtain.png": "/images/home/products/wide-curtain-bedroom.jpg",
+  "/images/home/products/wide-curtain.jpg": "/images/home/products/wide-curtain-bedroom.jpg",
+  "/images/home/products/02-roller.png": "/images/home/products/wide-roller-office.jpg",
+  "/images/home/products/wide-roller.jpg": "/images/home/products/wide-roller-office.jpg",
+  "/images/home/products/03-wood.png": "/images/home/products/wide-wood-livingroom.jpg",
+  "/images/home/products/wide-wood.jpg": "/images/home/products/wide-wood-livingroom.jpg",
+  "/images/home/products/08-aluminium.png": "/images/home/products/wide-aluminum-hand.jpg",
+  "/images/home/products/wide-aluminum.jpg": "/images/home/products/wide-aluminum-hand.jpg",
+  "/images/home/products/04-vertical.png": "/images/home/products/wide-vertical-office.jpg",
+  "/images/home/products/wide-vertical.jpg": "/images/home/products/wide-vertical-office.jpg",
+  "/images/home/products/05-folding.png": "/images/home/products/wide-folding-lobby.jpg",
+  "/images/home/products/wide-folding.jpg": "/images/home/products/wide-folding-lobby.jpg",
+  "/images/home/products/06-noren.png": "/images/home/products/wide-print-noren.jpg",
+  "/images/home/products/wide-print.jpg": "/images/home/products/wide-print-noren.jpg",
   "/images/home/products/07-wallpaper.png": "/images/home/products/wide-wallpaper.jpg",
-  "/images/home/products/real-curtain.jpg": "/images/home/products/wide-curtain.jpg",
-  "/images/home/products/real-roller.jpg": "/images/home/products/wide-roller.jpg",
-  "/images/home/products/real-wood.jpg": "/images/home/products/wide-wood.jpg",
-  "/images/home/products/real-aluminum.jpg": "/images/home/products/wide-aluminum.jpg",
-  "/images/home/products/real-vertical.jpg": "/images/home/products/wide-vertical.jpg",
-  "/images/home/products/real-folding.jpg": "/images/home/products/wide-folding.jpg",
-  "/images/home/products/real-print.jpg": "/images/home/products/wide-print.jpg",
+  "/images/home/products/real-curtain.jpg": "/images/home/products/wide-curtain-bedroom.jpg",
+  "/images/home/products/real-roller.jpg": "/images/home/products/wide-roller-office.jpg",
+  "/images/home/products/real-wood.jpg": "/images/home/products/wide-wood-livingroom.jpg",
+  "/images/home/products/real-aluminum.jpg": "/images/home/products/wide-aluminum-hand.jpg",
+  "/images/home/products/real-vertical.jpg": "/images/home/products/wide-vertical-office.jpg",
+  "/images/home/products/real-folding.jpg": "/images/home/products/wide-folding-lobby.jpg",
+  "/images/home/products/real-print.jpg": "/images/home/products/wide-print-noren.jpg",
   "/images/home/products/real-wallpaper.jpg": "/images/home/products/wide-wallpaper.jpg",
 };
 
@@ -77,11 +85,14 @@ export function ProductGrid() {
   });
 
   return (
-    <HomePanel tone="clear" sectionClassName="z-20">
+    <HomePanel
+      tone="clear"
+      sectionClassName="z-20 -mt-8 rounded-t-[2rem] bg-shell pt-8 shadow-[0_-24px_48px_-24px_rgba(7,21,38,0.45)] sm:-mt-10 sm:pt-10"
+    >
       <div className="px-1 py-8 sm:px-2 sm:py-10 md:py-12">
         <div className="flex flex-col gap-2 sm:gap-3">
-          {[tiles.slice(0, 4), tiles.slice(4)].map((row) => (
-            <div key={row[0]?.n} className="category-pop-row">
+          {[tiles.slice(0, 4), tiles.slice(4)].map((row, rowIndex) => (
+            <Reveal key={row[0]?.n} delayStep={rowIndex} className="category-pop-row">
               {row.map((item) => (
                 <EditableSpot
                   key={`tile-${item.n}`}
@@ -132,7 +143,7 @@ export function ProductGrid() {
                   </Link>
                 </EditableSpot>
               ))}
-            </div>
+            </Reveal>
           ))}
         </div>
 
