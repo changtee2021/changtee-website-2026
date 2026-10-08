@@ -1,6 +1,7 @@
 import { Hero } from "@/components/home/Hero";
 import { ProductGrid } from "@/components/home/ProductGrid";
 import { HomeBelowFold } from "@/components/home/HomeBelowFold";
+import { HomeFaq } from "@/components/home/HomeFaq";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { getLocalBusinessJsonLd } from "@/lib/local-business-jsonld";
 
@@ -11,6 +12,7 @@ export default function HomePage() {
       <Hero />
       <ProductGrid />
       <HomeBelowFold />
+      <HomeFaq />
     </div>
   );
 }

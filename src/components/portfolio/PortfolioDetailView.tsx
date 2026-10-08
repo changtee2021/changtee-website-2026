@@ -20,7 +20,7 @@ import {
   bodyParagraphs,
   learnForPortfolio,
 } from "@/lib/cms/public-content";
-import { roomById } from "@/lib/learn";
+import { LEARN_ENABLED, roomById } from "@/lib/learn";
 import { trackPortfolioQuoteClick } from "@/lib/cms/portfolio-analytics";
 import { PortfolioViewTracker } from "@/components/portfolio/PortfolioEngagement";
 import { PortfolioShareDialog } from "@/components/portfolio/PortfolioShareDialog";
@@ -77,7 +77,10 @@ export function PortfolioDetailView({
     () => blogForPortfolio(item, posts, 3),
     [item, posts],
   );
-  const relatedLearn = useMemo(() => learnForPortfolio(item, 3), [item]);
+  const relatedLearn = useMemo(
+    () => (LEARN_ENABLED ? learnForPortfolio(item, 3) : []),
+    [item],
+  );
 
   const gallery = useMemo(
     () =>

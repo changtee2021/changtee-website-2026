@@ -7,6 +7,7 @@ import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { ChevronDown, Home, Menu, X } from "lucide-react";
 import { siteConfig } from "@/lib/site-config";
+import { LEARN_ENABLED } from "@/lib/learn";
 import { useLockBodyScroll } from "@/lib/use-lock-body-scroll";
 import { SiteSearch } from "@/components/layout/SiteSearch";
 import {
@@ -36,7 +37,7 @@ const mainNav = [
 
 const STORIES_NAV = [
   { href: "/blog", labelKey: "nav.blog" },
-  { href: "/learn", labelKey: "nav.learn" },
+  ...(LEARN_ENABLED ? [{ href: "/learn", labelKey: "nav.learn" } as const] : []),
 ] as const;
 
 function desktopNavItems(translate: (key: MessageKey) => string) {
@@ -380,13 +381,23 @@ function SiteHeaderBar({ pathname }: { pathname: string }) {
                     </Link>
                   ),
                 )}
-                <Link
-                  href="/quote"
-                  className="flex min-h-12 items-center py-3 text-sm font-semibold text-white"
-                  onClick={() => setOpen(false)}
-                >
-                  {t("nav.quote")}
-                </Link>
+                <div className="grid grid-cols-[1fr_auto] gap-2 py-3">
+                  <Link
+                    href="/quote"
+                    className="flex min-h-12 items-center justify-center rounded-full bg-white px-6 text-sm font-semibold text-navy-solid"
+                    onClick={() => setOpen(false)}
+                  >
+                    {t("nav.quote")}
+                  </Link>
+                  <a
+                    href={siteConfig.lineUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="flex min-h-12 items-center justify-center rounded-full border border-white/40 px-6 text-sm font-semibold text-white"
+                  >
+                    LINE
+                  </a>
+                </div>
               </div>
             </div>
               </div>

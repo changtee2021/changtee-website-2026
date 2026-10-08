@@ -45,7 +45,7 @@ export function SiteFooter() {
                   {siteConfig.nameEn}
                 </div>
                 <div className="text-sm font-semibold leading-5 text-brand-red">
-                  Quickly Quality Professional
+                  {siteConfig.concept}
                 </div>
                 <div className="text-sm font-light leading-5 text-navy">
                   Curtain & Blinds Service Solution

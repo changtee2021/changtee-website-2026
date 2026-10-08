@@ -66,6 +66,37 @@ export function AboutPageView() {
       </div>
 
       <HomePanel>
+        <div className="p-7 text-center sm:p-9 md:p-12">
+          <p className="text-xs font-semibold tracking-[0.16em] text-brand-red uppercase">
+            Our Identity
+          </p>
+          <h2 className="mt-2 font-display text-2xl font-semibold text-navy md:text-3xl">
+            “ช่างตี๋ ผ้าม่าน” ตัวตนของเรา คือ
+          </h2>
+          <p className="mt-4 flex flex-wrap items-center justify-center gap-x-3 gap-y-1 font-display text-xl font-semibold text-brand-red sm:text-2xl">
+            {siteConfig.identity.map((word, i) => (
+              <span key={word} className="inline-flex items-center gap-3">
+                {i > 0 ? <span className="text-navy">+</span> : null}
+                {word}
+              </span>
+            ))}
+          </p>
+          <p className="mt-6 text-sm text-muted">คอนเซปของเรา คือ</p>
+          <p className="mt-2 font-display text-xl font-semibold tracking-wide text-navy uppercase sm:text-2xl">
+            Crafted by Experience.
+            <br />
+            Designed for Life.
+          </p>
+          <p className="mx-auto mt-6 max-w-xl text-sm leading-relaxed text-muted">
+            <strong className="font-semibold text-navy">ประสบการณ์</strong>ของช่าง
+            สู่มาตรฐานของ<strong className="font-semibold text-navy">งานออกแบบ</strong>
+            {" "}— ยกระดับจาก “ร้านผ้าม่าน” ไปเป็น{" "}
+            <strong className="font-semibold text-navy">{siteConfig.positioning}</strong>
+          </p>
+        </div>
+      </HomePanel>
+
+      <HomePanel>
         <AboutOneStopCms>
           <ul className="mt-6 space-y-2 text-sm text-ink/90">
             <li>· วัดหน้างานฟรี ทั้งบ้านและโปรเจกต์องค์กร</li>

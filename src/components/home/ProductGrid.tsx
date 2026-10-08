@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { ArrowRight, ArrowUpRight } from "lucide-react";
 import { HomePanel } from "@/components/home/HomePanel";
 import { EditableSpot } from "@/components/preview/EditableSpot";
 import { useSectionValues } from "@/lib/cms/demo-store";
@@ -91,7 +92,7 @@ export function ProductGrid() {
                 >
                   <Link
                     href={item.href}
-                    className="category-pop-card group relative block overflow-hidden rounded-md"
+                    className="category-pop-card group relative block overflow-hidden rounded-xl"
                     aria-label={item.name}
                     onClick={(e) => {
                       // In preview, let EditableSpot handle clicks
@@ -112,12 +113,18 @@ export function ProductGrid() {
                       className="category-pop-photo"
                       sizes="(max-width: 640px) 70vw, 50vw"
                     />
-                    <span className="category-pop-label pointer-events-none absolute inset-x-0 bottom-0 z-[1] bg-gradient-to-t from-black/70 via-black/25 to-transparent px-3 pb-3 pt-10">
-                      <span className="category-pop-th block text-sm font-semibold leading-tight text-white">
+                    <span
+                      aria-hidden
+                      className="pointer-events-none absolute right-2.5 top-2.5 z-[1] flex size-8 items-center justify-center rounded-full bg-white/90 text-navy-solid opacity-0 shadow-sm transition duration-300 group-hover:opacity-100 group-focus-visible:opacity-100"
+                    >
+                      <ArrowUpRight className="size-4" />
+                    </span>
+                    <span className="category-pop-label pointer-events-none absolute inset-x-0 bottom-0 z-[1] bg-gradient-to-t from-navy-deep/85 via-navy-deep/30 to-transparent px-3.5 pb-3.5 pt-12">
+                      <span className="category-pop-th block text-sm font-semibold leading-tight text-white sm:text-base">
                         {item.thai}
                       </span>
                       {item.english ? (
-                        <span className="category-pop-en mt-0.5 block text-[11px] font-normal leading-tight text-white/85">
+                        <span className="category-pop-en mt-1 block text-xs font-normal leading-tight tracking-wide text-white/80">
                           {item.english}
                         </span>
                       ) : null}
@@ -138,7 +145,7 @@ export function ProductGrid() {
           >
             <Link
               href="/products"
-              className="text-sm font-semibold text-brand-red hover:underline"
+              className="inline-flex min-h-11 items-center gap-1.5 text-sm font-semibold text-navy transition hover:gap-2.5 hover:text-brand-red"
               onClick={(e) => {
                 if (typeof window !== "undefined" && window.parent !== window) {
                   e.preventDefault();
@@ -146,6 +153,7 @@ export function ProductGrid() {
               }}
             >
               {field("allLinkLabel")}
+              <ArrowRight className="size-4" aria-hidden />
             </Link>
           </EditableSpot>
         </div>

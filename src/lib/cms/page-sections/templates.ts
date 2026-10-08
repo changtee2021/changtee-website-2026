@@ -158,10 +158,10 @@ export const PORTFOLIO_ITEM_SECTION_DEFS: SectionDef[] = [
 
 export const ABOUT_SECTION_DEFAULTS: Record<string, Record<string, string>> = {
   hero: {
-    eyebrow: "เกี่ยวกับเรา · Chang Tee Curtain",
-    title: "ช่างม่านที่เข้าใจคุณ",
+    eyebrow: "เกี่ยวกับเรา · Changtee Phaman",
+    title: "Crafted by Experience. Designed for Life.",
     lead:
-      "เราเชื่อว่าผ้าม่านไม่ใช่แค่ของตกแต่ง แต่คือองค์ประกอบสำคัญที่สะท้อนตัวตนและไลฟ์สไตล์ของเจ้าของบ้าน",
+      "“ช่างตี๋ ผ้าม่าน” ตัวตนของเรา คือ ช่าง + งานฝีมือ + ประสบการณ์ — นำประสบการณ์ของช่างสู่มาตรฐานของงานออกแบบ ยกระดับจากร้านผ้าม่านไปเป็น Premium Window Covering Brand",
     body:
       "ช่างตี๋ใส่ใจตั้งแต่ต้นทาง — รับฟังความต้องการ วิเคราะห์แสง ทิศทางลม และบรรยากาศของห้อง เพื่อออกแบบม่านที่สวยและใช้งานได้จริง เพราะสำหรับเรา งานที่ดีไม่ใช่แค่ติดตั้งเสร็จ แต่ต้องทำให้คุณรู้สึก “ใช่” ทุกครั้งที่มองเห็น",
     image: "/images/generated/ct-hero-about.webp",

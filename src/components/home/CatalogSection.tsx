@@ -18,7 +18,7 @@ export function CatalogSection() {
   return (
     <HomePanel tone="clear">
       <div className="py-7 sm:py-9 md:py-12">
-        <PanelHeading title={t("home.catalog")} align="start" />
+        <PanelHeading eyebrow="Catalogue" title={t("home.catalog")} align="start" />
 
         <div className="no-scrollbar mt-6 flex gap-4 overflow-x-auto pb-1">
           {catalogs.map((catalog, i) => (

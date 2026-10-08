@@ -5,7 +5,7 @@ import { pageMetadata } from "@/lib/seo/meta";
 export const metadata: Metadata = pageMetadata({
   title: "เกี่ยวกับเรา",
   description:
-    "ช่างม่านที่เข้าใจคุณ — ออกแบบ ผลิต ติดตั้งผ้าม่านครบวงจร มีโรงงานเอง วัดหน้างานฟรี รับประกัน 1 ปี",
+    "Crafted by Experience. Designed for Life. — ช่าง + งานฝีมือ + ประสบการณ์ Premium Window Covering Brand ออกแบบ ผลิต ติดตั้งครบวงจร มีโรงงานเอง วัดหน้างานฟรี รับประกัน 1 ปี",
   path: "/contact",
 });
 

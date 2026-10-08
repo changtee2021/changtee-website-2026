@@ -6,7 +6,7 @@ import {
 } from "@/lib/cms/portfolio-demo";
 import { BLOG_CATEGORY_LABELS, type BlogPost } from "@/lib/cms/blog-demo";
 import { publishedBlog, publishedPortfolio } from "@/lib/cms/public-content";
-import { LEARN_SHEETS } from "@/lib/learn";
+import { LEARN_ENABLED, LEARN_SHEETS } from "@/lib/learn";
 
 export type SearchEntryType = "product" | "portfolio" | "blog" | "learn";
 
@@ -107,7 +107,7 @@ export function buildSearchIndex(
 ): SearchEntry[] {
   return [
     ...PRODUCT_ENTRIES,
-    ...LEARN_ENTRIES,
+    ...(LEARN_ENABLED ? LEARN_ENTRIES : []),
     ...portfolioEntries(portfolioItems),
     ...blogEntries(blogPosts),
   ];

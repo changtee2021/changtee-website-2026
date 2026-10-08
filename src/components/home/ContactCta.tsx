@@ -47,7 +47,7 @@ export function ContactCta() {
             >
               <Link
                 href="/quote"
-                className="inline-flex rounded-full bg-white px-6 py-3 text-sm font-semibold text-navy transition hover:bg-white/90"
+                className="inline-flex min-h-12 items-center rounded-full bg-white px-7 text-sm font-semibold text-navy-solid shadow-lg shadow-black/20 transition hover:bg-white/90 active:scale-[0.98]"
                 onClick={(e) => {
                   if (typeof window !== "undefined" && window.parent !== window) {
                     e.preventDefault();
@@ -66,17 +66,19 @@ export function ContactCta() {
                 href={siteConfig.lineUrl}
                 target="_blank"
                 rel="noreferrer"
-                className="inline-flex rounded-full bg-[#06C755] px-6 py-3 text-sm font-semibold text-white transition hover:brightness-110"
+                className="inline-flex min-h-12 items-center gap-2 rounded-full border border-white/40 px-7 text-sm font-semibold text-white transition hover:bg-white/10 active:scale-[0.98]"
                 onClick={(e) => {
                   if (typeof window !== "undefined" && window.parent !== window) {
                     e.preventDefault();
                   }
                 }}
               >
+                <span aria-hidden className="size-2 rounded-full bg-[#06C755]" />
                 {field("lineLabel")}
               </a>
             </EditableSpot>
           </div>
+          <p className="mt-4 text-xs text-white/60">{t("home.why.measure.desc")}</p>
 
           <div className="mt-8 space-y-1.5 text-sm text-white/70">
             <p>

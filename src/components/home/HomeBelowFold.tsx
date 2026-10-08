@@ -2,6 +2,7 @@
 
 import dynamic from "next/dynamic";
 import { SectionLoader } from "@/components/ui/section-loader";
+import { LEARN_ENABLED } from "@/lib/learn";
 
 const HomePortfolioSection = dynamic(
   () =>
@@ -74,7 +75,7 @@ export function HomeBelowFold() {
       <StatsStory />
       <Testimonials />
       <CatalogSection />
-      <LearnTeaser />
+      {LEARN_ENABLED ? <LearnTeaser /> : null}
       <BlogPreview />
       <ContactCta />
     </>

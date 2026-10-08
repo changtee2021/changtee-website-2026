@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import { notFound } from "next/navigation";
+import { LEARN_ENABLED } from "@/lib/learn";
 import { LearnHub } from "@/components/learn/LearnHub";
 import { pageMetadata } from "@/lib/seo/meta";
 
@@ -11,5 +13,6 @@ export const metadata: Metadata = pageMetadata({
 });
 
 export default function LearnPage() {
+  if (!LEARN_ENABLED) notFound();
   return <LearnHub />;
 }
