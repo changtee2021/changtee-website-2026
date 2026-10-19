@@ -90,7 +90,9 @@ async function handleClaim(event: LineWebhookEvent) {
 }
 
 export async function POST(request: Request) {
-  const secret = process.env.LINE_LEAD_CHANNEL_SECRET;
+  // LINE posts to wp-enterprise (the chat inbox owns this bot's webhook URL);
+  // wp-enterprise forwards claim taps here with the original signature intact.
+  const secret = process.env.LINE_CHANNEL_SECRET;
   if (!secret) {
     return NextResponse.json({ error: "not configured" }, { status: 503 });
   }
