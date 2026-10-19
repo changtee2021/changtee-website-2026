@@ -49,6 +49,15 @@ type AnalyticsPayload = {
   clickName?: string;
 };
 
+/** Host of the page that sent the visitor here; stays the same across client-side navigation. */
+function entryReferrerHost() {
+  try {
+    return document.referrer ? new URL(document.referrer).hostname : "";
+  } catch {
+    return "";
+  }
+}
+
 export function sendSiteAnalytics(payload: AnalyticsPayload) {
   if (typeof window === "undefined") return;
   if (navigator.webdriver) return;
@@ -60,6 +69,7 @@ export function sendSiteAnalytics(payload: AnalyticsPayload) {
     kind: payload.kind,
     path,
     clickName: payload.clickName,
+    referrer: entryReferrerHost(),
     sessionId: getAnalyticsSessionId(),
     visitorId: getAnalyticsVisitorId(),
   });

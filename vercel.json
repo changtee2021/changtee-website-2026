@@ -1,3 +1,7 @@
 {
-  "framework": "nextjs"
+  "framework": "nextjs",
+  "crons": [
+    { "path": "/api/cron/line-report?period=week", "schedule": "0 2 * * 1" },
+    { "path": "/api/cron/line-report?period=month", "schedule": "0 2 1 * *" }
+  ]
 }

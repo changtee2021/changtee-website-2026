@@ -239,6 +239,13 @@ export async function pushLineCard(
   return pushLinePayload(lineCardMessage(card), to);
 }
 
+export async function pushLineFlex(
+  message: Record<string, unknown>,
+  to?: string | null,
+): Promise<{ ok: boolean; error?: string }> {
+  return pushLinePayload(message, to);
+}
+
 /** Answers a webhook event; reply tokens are single-use and expire within a minute. */
 export async function replyLineMessages(
   replyToken: string,
