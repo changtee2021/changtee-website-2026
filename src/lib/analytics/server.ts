@@ -110,6 +110,13 @@ export function referrerHostFromRequest(request: Request) {
   }
 }
 
+/** Browser-reported referrer host; empty string means the visitor typed or bookmarked the site. */
+export function sanitizeReferrerHost(raw: unknown): string | null {
+  const value = String(raw ?? "").trim().toLowerCase();
+  if (!value) return null;
+  return /^[a-z0-9.-]{1,253}$/.test(value) ? value : null;
+}
+
 export function bangkokRange(from: string, to: string) {
   const start = `${from}T00:00:00+07:00`;
   const endDate = new Date(`${to}T00:00:00+07:00`);

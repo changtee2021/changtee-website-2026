@@ -6,6 +6,7 @@ import {
   referrerHostFromRequest,
   sanitizeAnalyticsPath,
   sanitizeId,
+  sanitizeReferrerHost,
 } from "@/lib/analytics/server";
 import { ANALYTICS_CLICK_LABELS } from "@/lib/analytics/labels";
 import { isRateLimited } from "@/lib/security/rate-limit";
@@ -37,6 +38,7 @@ export async function POST(request: Request) {
     sessionId?: string;
     visitorId?: string;
     clickName?: string;
+    referrer?: string;
   } = {};
   try {
     payload = (await request.json()) as typeof payload;
@@ -56,13 +58,18 @@ export async function POST(request: Request) {
     kind === "click" && CLICK_NAMES.has(String(payload.clickName || ""))
       ? String(payload.clickName)
       : null;
+  // Older cached bundles do not send `referrer`; keep their rows flagged as untracked.
+  const referrerTracked = typeof payload.referrer === "string";
 
   try {
     const supabase = createServiceSupabase();
     const { error } = await supabase.from("site_page_views").insert({
       path,
       host: hostFromRequest(request),
-      referrer_host: referrerHostFromRequest(request),
+      referrer_host: referrerTracked
+        ? sanitizeReferrerHost(payload.referrer)
+        : referrerHostFromRequest(request),
+      referrer_tracked: referrerTracked,
       device: deviceFromUserAgent(ua),
       session_id: sessionId,
       visitor_id: sanitizeId(payload.visitorId),
