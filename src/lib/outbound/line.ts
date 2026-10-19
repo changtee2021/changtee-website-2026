@@ -198,10 +198,9 @@ export function lineCardMessage(card: LineCard) {
 async function pushLinePayload(
   message: Record<string, unknown>,
   to?: string | null,
-  channelToken?: string,
 ): Promise<{ ok: boolean; error?: string }> {
   try {
-    const token = channelToken || process.env.LINE_CHANNEL_ACCESS_TOKEN;
+    const token = process.env.LINE_CHANNEL_ACCESS_TOKEN;
     const target = to || process.env.LINE_SALES_TO_ID;
     if (!token || !target) {
       throw new Error("LINE credentials not configured");
@@ -240,33 +239,13 @@ export async function pushLineCard(
   return pushLinePayload(lineCardMessage(card), to);
 }
 
-/**
- * Lead cards go out from the lead bot because its webhook (not the main bot's,
- * which feeds the wp-enterprise chat inbox) receives the claim taps. If the lead
- * bot cannot post (for example it is not in the group), the main bot still
- * delivers the alert so no lead goes unannounced.
- */
-export async function pushLeadLineCard(
-  card: LineCard,
-  to?: string | null,
-): Promise<{ ok: boolean; error?: string }> {
-  const leadToken = process.env.LINE_LEAD_CHANNEL_ACCESS_TOKEN;
-  const message = lineCardMessage(card);
-  if (leadToken) {
-    const sent = await pushLinePayload(message, to, leadToken);
-    if (sent.ok) return sent;
-    console.error("pushLeadLineCard lead bot", sent.error);
-  }
-  return pushLinePayload(message, to);
-}
-
-/** Answers a lead-bot webhook event; reply tokens are single-use and expire within a minute. */
+/** Answers a webhook event; reply tokens are single-use and expire within a minute. */
 export async function replyLineMessages(
   replyToken: string,
   messages: Record<string, unknown>[],
 ): Promise<{ ok: boolean; error?: string }> {
   try {
-    const token = process.env.LINE_LEAD_CHANNEL_ACCESS_TOKEN;
+    const token = process.env.LINE_CHANNEL_ACCESS_TOKEN;
     if (!token) throw new Error("LINE credentials not configured");
 
     const res = await fetch("https://api.line.me/v2/bot/message/reply", {
