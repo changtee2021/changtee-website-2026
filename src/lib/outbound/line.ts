@@ -10,7 +10,7 @@ export function lineNotifyConfigured(): boolean {
   return Boolean(process.env.LINE_CHANNEL_ACCESS_TOKEN);
 }
 
-export type LineCardField = { label: string; value: string };
+export type LineCardField = { label: string; value: string; max?: number };
 
 export type LineCard = {
   title: string;
@@ -18,10 +18,23 @@ export type LineCard = {
   /** Shown only when set, for example a one-off test send. */
   badge?: string;
   link?: { label: string; url: string };
+  /** Customer phone for a tap-to-call button (works on LINE mobile). */
+  call?: string;
+  callLabel?: string;
+  /**
+   * Chat buttons: `text` is posted into the chat as the tapper. With `postback`
+   * set, LINE also sends that data to `/api/line/webhook`.
+   */
+  pickers?: {
+    prompt: string;
+    options: { label: string; text: string; postback?: string }[];
+  };
+  tone?: "default" | "success";
 };
 
 const CARD_NAVY = "#0B1F3A";
 const CARD_RED = "#C0392B";
+const CARD_GREEN = "#1E8E5A";
 
 function clip(value: string, max: number) {
   const text = value.replace(/\s+/g, " ").trim();
@@ -33,9 +46,75 @@ export function lineCardMessage(card: LineCard) {
   const rows = card.fields
     .map((field) => ({
       label: clip(field.label, 20),
-      value: clip(field.value, 80),
+      value: clip(field.value, field.max ?? 80),
     }))
     .filter((field) => field.value);
+
+  const footerContents: Record<string, unknown>[] = [];
+  const dialable = card.call?.replace(/[^\d+]/g, "");
+  if (dialable) {
+    footerContents.push({
+      type: "button",
+      style: "primary",
+      height: "sm",
+      color: CARD_RED,
+      action: {
+        type: "uri",
+        label: clip(`${card.callLabel ?? "โทร"} ${card.call}`, 20),
+        uri: `tel:${dialable}`,
+      },
+    });
+  }
+  if (card.pickers?.options.length) {
+    footerContents.push({
+      type: "text",
+      text: clip(card.pickers.prompt, 40),
+      size: "xs",
+      color: "#6B7280",
+      align: "center",
+      margin: "md",
+    });
+    const options = card.pickers.options;
+    for (let i = 0; i < options.length; i += 3) {
+      footerContents.push({
+        type: "box",
+        layout: "horizontal",
+        spacing: "sm",
+        contents: options.slice(i, i + 3).map((option) => ({
+          type: "button",
+          style: "secondary",
+          height: "sm",
+          action: option.postback
+            ? {
+                type: "postback",
+                label: clip(option.label, 20),
+                data: option.postback.slice(0, 300),
+                displayText: clip(option.text, 300),
+              }
+            : {
+                type: "message",
+                label: clip(option.label, 20),
+                text: clip(option.text, 300),
+              },
+        })),
+      });
+    }
+  }
+  if (card.link) {
+    footerContents.push({
+      type: "button",
+      style: "link",
+      height: "sm",
+      color: CARD_RED,
+      action: {
+        type: "uri",
+        label: clip(card.link.label, 20),
+        uri: card.link.url,
+      },
+    });
+  }
+
+  const success = card.tone === "success";
 
   return {
     type: "flex" as const,
@@ -46,13 +125,13 @@ export function lineCardMessage(card: LineCard) {
       header: {
         type: "box",
         layout: "vertical",
-        backgroundColor: CARD_NAVY,
+        backgroundColor: success ? CARD_GREEN : CARD_NAVY,
         paddingAll: "16px",
         contents: [
           {
             type: "text",
             text: card.badge ? `ทดสอบ · ช่างตี๋ ผ้าม่าน` : "ช่างตี๋ ผ้าม่าน",
-            color: card.badge ? "#F6C945" : "#F3D2D0",
+            color: card.badge ? "#F6C945" : success ? "#D5F5E3" : "#F3D2D0",
             size: "xs",
             weight: card.badge ? "bold" : "regular",
           },
@@ -83,6 +162,7 @@ export function lineCardMessage(card: LineCard) {
               color: "#6B7280",
               size: "sm",
               flex: 2,
+              wrap: true,
             },
             {
               type: "text",
@@ -96,31 +176,20 @@ export function lineCardMessage(card: LineCard) {
           ],
         })),
       },
-      ...(card.link
+      ...(footerContents.length
         ? {
             footer: {
               type: "box",
               layout: "vertical",
+              spacing: "sm",
               paddingAll: "12px",
-              contents: [
-                {
-                  type: "button",
-                  style: "link",
-                  height: "sm",
-                  color: CARD_RED,
-                  action: {
-                    type: "uri",
-                    label: clip(card.link.label, 20),
-                    uri: card.link.url,
-                  },
-                },
-              ],
+              contents: footerContents,
             },
           }
         : {}),
       styles: {
         header: { separator: false },
-        body: { separator: true, separatorColor: CARD_RED },
+        body: { separator: true, separatorColor: success ? CARD_GREEN : CARD_RED },
       },
     },
   };
@@ -129,9 +198,10 @@ export function lineCardMessage(card: LineCard) {
 async function pushLinePayload(
   message: Record<string, unknown>,
   to?: string | null,
+  channelToken?: string,
 ): Promise<{ ok: boolean; error?: string }> {
   try {
-    const token = process.env.LINE_CHANNEL_ACCESS_TOKEN;
+    const token = channelToken || process.env.LINE_CHANNEL_ACCESS_TOKEN;
     const target = to || process.env.LINE_SALES_TO_ID;
     if (!token || !target) {
       throw new Error("LINE credentials not configured");
@@ -170,6 +240,54 @@ export async function pushLineCard(
   return pushLinePayload(lineCardMessage(card), to);
 }
 
+/**
+ * Lead cards go out from the lead bot because its webhook (not the main bot's,
+ * which feeds the wp-enterprise chat inbox) receives the claim taps. If the lead
+ * bot cannot post (for example it is not in the group), the main bot still
+ * delivers the alert so no lead goes unannounced.
+ */
+export async function pushLeadLineCard(
+  card: LineCard,
+  to?: string | null,
+): Promise<{ ok: boolean; error?: string }> {
+  const leadToken = process.env.LINE_LEAD_CHANNEL_ACCESS_TOKEN;
+  const message = lineCardMessage(card);
+  if (leadToken) {
+    const sent = await pushLinePayload(message, to, leadToken);
+    if (sent.ok) return sent;
+    console.error("pushLeadLineCard lead bot", sent.error);
+  }
+  return pushLinePayload(message, to);
+}
+
+/** Answers a lead-bot webhook event; reply tokens are single-use and expire within a minute. */
+export async function replyLineMessages(
+  replyToken: string,
+  messages: Record<string, unknown>[],
+): Promise<{ ok: boolean; error?: string }> {
+  try {
+    const token = process.env.LINE_LEAD_CHANNEL_ACCESS_TOKEN;
+    if (!token) throw new Error("LINE credentials not configured");
+
+    const res = await fetch("https://api.line.me/v2/bot/message/reply", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ replyToken, messages: messages.slice(0, 5) }),
+    });
+
+    if (!res.ok) throw new Error(`LINE HTTP ${res.status}`);
+    return { ok: true };
+  } catch (err) {
+    return {
+      ok: false,
+      error: err instanceof Error ? err.message : "LINE failed",
+    };
+  }
+}
+
 /** Destination for factory-visit booking alerts (falls back to sales group). */
 export function visitLineTarget(): string | undefined {
   return process.env.LINE_VISIT_TO_ID || process.env.LINE_SALES_TO_ID;
@@ -205,18 +323,19 @@ function bangkokParts(iso: string) {
   };
 }
 
-/** Opens Gmail search for the staff notice, where the full details live. */
-export function gmailNoticeLink(subject: string) {
-  return `https://mail.google.com/mail/u/0/#search/${encodeURIComponent(`subject:${subject}`)}`;
-}
+export const LEAD_SALES_PICKERS = ["โจ้", "หนุ่ม", "ตุ่น", "โส", "เฟิร์น"];
 
-/** Short staff card. Skips address and tax id — those stay in email and admin. */
+export const LEAD_CLAIM_ACTION = "claim";
+
+/** Short staff card. Skips billing address and tax id — those stay in email and admin. */
 export function leadLineCard(lead: {
+  id: string;
   source: string;
   contactName: string;
   phone: string;
   lineId?: string | null;
   businessName?: string | null;
+  installAddress?: string | null;
   productType?: string | null;
   requestedSize?: string | null;
   callbackDate?: string | null;
@@ -226,14 +345,8 @@ export function leadLineCard(lead: {
 }): LineCard {
   const title = LEAD_SOURCE_LABELS[lead.source] || lead.source;
   const note = lead.note?.replace(/\s+/g, " ").trim();
+  const installAddress = lead.installAddress?.replace(/\s+/g, " ").trim();
   const when = bangkokParts(lead.createdAt || new Date().toISOString());
-  const subjectKind =
-    lead.source === "contact"
-      ? "ติดต่อบริษัท"
-      : lead.source === "fab"
-        ? "ติดต่อด่วน"
-        : "ขอใบเสนอราคา";
-  const subject = `[${subjectKind}] ${lead.contactName} · ${lead.productType || title}`;
   const fields: LineCardField[] = [
     { label: "วันที่", value: when.dateText },
     { label: "เวลา", value: when.timeText },
@@ -246,12 +359,94 @@ export function leadLineCard(lead: {
   if (lead.lineId) fields.push({ label: "LINE", value: lead.lineId });
   if (lead.productType) fields.push({ label: "สินค้า", value: lead.productType });
   if (lead.requestedSize) fields.push({ label: "ขนาด", value: lead.requestedSize });
-  if (lead.callbackDate) fields.push({ label: "ติดตั้ง", value: lead.callbackDate });
+  if (installAddress && installAddress !== "-") {
+    fields.push({ label: "ที่ติดตั้ง", value: installAddress, max: 200 });
+  }
+  if (lead.callbackDate) fields.push({ label: "วันติดตั้ง", value: lead.callbackDate });
   if (note) fields.push({ label: "โน้ต", value: note });
   return {
     title: `มีคำขอ${title}ใหม่`,
     badge: lead.badge,
     fields,
-    link: { label: "ดูรายละเอียดในเมล", url: gmailNoticeLink(subject) },
+    call: lead.phone,
+    pickers: {
+      prompt: "ใครรับงานนี้? กดชื่อเพื่อรับงาน",
+      options: LEAD_SALES_PICKERS.map((name) => {
+        const data = new URLSearchParams({
+          action: LEAD_CLAIM_ACTION,
+          lead: lead.id,
+          by: name,
+        });
+        if (lead.badge) data.set("test", "1");
+        return {
+          label: name,
+          text: `${name}รับงานนี้`,
+          postback: data.toString(),
+        };
+      }),
+    },
   };
+}
+
+function minutesBetween(fromIso: string, toIso: string) {
+  const minutes = Math.round(
+    (new Date(toIso).getTime() - new Date(fromIso).getTime()) / 60000,
+  );
+  if (!Number.isFinite(minutes) || minutes < 0) return null;
+  if (minutes < 60) return `${minutes} นาที`;
+  const hours = Math.floor(minutes / 60);
+  const rest = minutes % 60;
+  return rest ? `${hours} ชม. ${rest} นาที` : `${hours} ชม.`;
+}
+
+/** Bot reply after a salesperson taps their name on a lead card. */
+export function claimedLeadLineCard(claim: {
+  claimedBy: string;
+  claimedAt: string;
+  lead: {
+    contactName: string;
+    phone: string;
+    productType?: string | null;
+    installAddress?: string | null;
+    createdAt?: string | null;
+  };
+  badge?: string;
+}): LineCard {
+  const claimed = bangkokParts(claim.claimedAt);
+  const { lead } = claim;
+  const installAddress = lead.installAddress?.replace(/\s+/g, " ").trim();
+  const fields: LineCardField[] = [
+    { label: "ผู้รับงาน", value: claim.claimedBy },
+    { label: "วันที่รับงาน", value: claimed.dateText },
+    { label: "เวลารับงาน", value: `${claimed.timeText} น.` },
+    { label: "ลูกค้า", value: lead.contactName },
+    { label: "โทร", value: lead.phone },
+  ];
+  if (lead.productType) fields.push({ label: "สินค้า", value: lead.productType });
+  if (installAddress && installAddress !== "-") {
+    fields.push({ label: "ที่ติดตั้ง", value: installAddress, max: 200 });
+  }
+  if (lead.createdAt) {
+    const requested = bangkokParts(lead.createdAt);
+    fields.push({
+      label: "ลูกค้าส่งคำขอ",
+      value: `${requested.dateText} · ${requested.timeText} น.`,
+    });
+    const waited = minutesBetween(lead.createdAt, claim.claimedAt);
+    if (waited) fields.push({ label: "รับงานภายใน", value: waited });
+  }
+  return {
+    title: `✅ ${claim.claimedBy}รับงานแล้ว`,
+    badge: claim.badge,
+    tone: "success",
+    fields,
+    call: lead.phone,
+    callLabel: "โทรด่วน",
+  };
+}
+
+/** Text reply when someone taps a name on a lead that already has an owner. */
+export function alreadyClaimedLineText(claimedBy: string, claimedAt: string) {
+  const when = bangkokParts(claimedAt);
+  return `งานนี้${claimedBy}รับไปแล้ว เมื่อ ${when.dateText} เวลา ${when.timeText} น.`;
 }
