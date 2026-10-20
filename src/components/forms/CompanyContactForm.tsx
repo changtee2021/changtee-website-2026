@@ -9,6 +9,7 @@ import {
   TurnstileField,
 } from "@/components/forms/TurnstileField";
 import { companyInquiryTypes } from "@/lib/about-content";
+import { thankYouHref } from "@/lib/leads/quote-no";
 
 export function CompanyContactForm() {
   const router = useRouter();
@@ -50,9 +51,9 @@ export function CompanyContactForm() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
-      const json = (await res.json()) as { error?: string };
+      const json = (await res.json()) as { error?: string; quoteNo?: string | null };
       if (!res.ok) throw new Error(json.error || "ส่งข้อมูลไม่สำเร็จ");
-      router.push("/thank-you");
+      router.push(thankYouHref(json.quoteNo));
     } catch (err) {
       setError(err instanceof Error ? err.message : "เกิดข้อผิดพลาด");
       setPending(false);

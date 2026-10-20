@@ -45,6 +45,7 @@ import {
   type SiteMediaKind,
 } from "@/lib/leads/site-media";
 import { toStorageRef } from "@/lib/security/lead-media";
+import { thankYouHref } from "@/lib/leads/quote-no";
 
 type SiteMediaItem = {
   id: string;
@@ -423,9 +424,9 @@ export function QuoteForm() {
         method: "POST",
         body: formData,
       });
-      const json = await readJsonResponse<{ error?: string }>(res);
+      const json = await readJsonResponse<{ error?: string; quoteNo?: string | null }>(res);
       if (!res.ok) throw new Error(json.error || "ส่งแบบฟอร์มไม่สำเร็จ");
-      router.push("/thank-you");
+      router.push(thankYouHref(json.quoteNo));
     } catch (err) {
       setError(err instanceof Error ? err.message : "เกิดข้อผิดพลาด");
       setPending(false);
