@@ -33,6 +33,7 @@ function validSignature(body: string, signature: string | null, secret: string) 
 }
 
 const TEST_CLAIM_LEAD = {
+  quoteNo: "Q69-TEST",
   contactName: "TEST",
   phone: "0812345678",
   productType: "ม่านม้วน",
@@ -76,7 +77,10 @@ async function handleClaim(event: LineWebhookEvent) {
 
   if (!claim.isNewClaim) {
     await replyLineMessages(replyToken, [
-      { type: "text", text: alreadyClaimedLineText(claim.claimedBy, claim.claimedAt) },
+      {
+        type: "text",
+        text: alreadyClaimedLineText(claim.claimedBy, claim.claimedAt, claim.lead.quoteNo),
+      },
     ]);
     return;
   }

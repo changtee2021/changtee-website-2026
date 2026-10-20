@@ -86,10 +86,11 @@ export async function createLead(
         form_payload: lead,
         pdpa_accepted: true,
       })
-      .select("id")
+      .select("id, quote_no")
       .single();
 
     if (!error && data) {
+      lead.quoteNo = (data.quote_no as string | null) ?? null;
       await supabase.from("lead_events").insert({
         lead_id: lead.id,
         from_status: null,
@@ -264,6 +265,7 @@ function mapDbLead(row: Record<string, unknown>): QuoteLead {
     return {
       ...payload,
       id: String(row.id),
+      quoteNo: (row.quote_no as string) || null,
       status: row.status as LeadStatus,
       createdAt: String(row.created_at ?? payload.createdAt),
       updatedAt: String(row.updated_at ?? payload.updatedAt),
@@ -272,6 +274,7 @@ function mapDbLead(row: Record<string, unknown>): QuoteLead {
 
   return {
     id: String(row.id),
+    quoteNo: (row.quote_no as string) || null,
     source: (row.source as QuoteLead["source"]) || "quote",
     status: (row.status as LeadStatus) || "new",
     contactName: String(row.full_name || ""),

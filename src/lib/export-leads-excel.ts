@@ -55,6 +55,7 @@ export function downloadLeadsExcel(input: ExportLeadsInput) {
     wb,
     sheetFromRows([
       [
+        "เลขที่",
         "วันที่",
         "ชื่อผู้ติดต่อ",
         "เบอร์",
@@ -70,6 +71,7 @@ export function downloadLeadsExcel(input: ExportLeadsInput) {
         "หมายเหตุ",
       ],
       ...input.leads.map((l) => [
+        l.quoteNo || "",
         new Date(l.createdAt).toLocaleString("th-TH"),
         l.contactName,
         l.phone,
