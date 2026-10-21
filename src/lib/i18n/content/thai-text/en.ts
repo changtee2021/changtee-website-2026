@@ -704,6 +704,8 @@ export const THAI_TEXT_EN: Record<string, string> = {
     "Size 5",
   "กรอกแบบฟอร์มขอใบเสนอราคาจากช่างตี๋ ผ้าม่าน":
     "Fill in the quote request form from Chang Tee Curtains",
+  "ขอใบเสนอราคาผ้าม่าน ม่านม้วน มู่ลี่ และม่านไฟฟ้าจากช่างตี๋ วัดหน้างานฟรี ผลิตเองที่โรงงาน ติดตั้งทั่วประเทศไทย รับประกัน 1 ปี":
+    "Quote for curtains, blinds and motorized blinds from Chang Tee. Free measuring, made in our factory, installed across Thailand, 1-year warranty.",
   "“ช่างตี๋ ผ้าม่าน” ตัวตนของเรา คือ ช่าง + งานฝีมือ + ประสบการณ์ — นำประสบการณ์ของช่างสู่มาตรฐานของงานออกแบบ ยกระดับจากร้านผ้าม่านไปเป็น Premium Window Covering Brand":
     "“Chang Tee Curtains” — our identity is craftsman + craftsmanship + experience — bringing installers' experience to design standards, elevating a curtain shop into a Premium Window Covering Brand",
   "เร็วทันใจ":
@@ -2133,7 +2135,7 @@ export const THAI_TEXT_EN: Record<string, string> = {
   "ออกแบบ-ติดตั้ง ผ้าม่าน ครบวงจร":
     "Curtain design & installation, end to end",
   "Premium Window Covering Brand — ผู้เชี่ยวชาญด้านผ้าม่านและม่านปรับแสงแบบครบวงจร ออกแบบ ผลิตเองที่โรงงาน ติดตั้งโดยช่างมืออาชีพ วัดหน้างานฟรี ทั่วประเทศไทย":
-    "Premium Window Covering Brand — full-service curtain and blind specialists: designed and made in our own factory, installed by professional technicians, with free on-site measuring across Thailand.",
+    "Chang Tee curtain and blind specialists: designed and made in our own factory, installed by our technicians, with free measuring across Thailand.",
   "กำลังโหลดผลงาน…":
     "Loading projects…",
   "กำลังโหลดบทความ…":

@@ -1,8 +1,11 @@
 import { aboutSegments, aboutSmartMotor } from "@/lib/about-content";
 import { BRAND_FAQS, brandFacts } from "@/lib/brand-facts";
 import { DEMO_BLOG, type BlogPost } from "@/lib/cms/blog-demo";
+import { DEMO_PORTFOLIO, productLabel, type PortfolioItem } from "@/lib/cms/portfolio-demo";
 import { readCmsCollection } from "@/lib/cms/cms-server";
-import { publishedBlog } from "@/lib/cms/public-content";
+import { publishedBlog, publishedPortfolio } from "@/lib/cms/public-content";
+import { areaJobLine, areaPath, serviceAreas } from "@/lib/service-areas";
+import { blogIndexableLocales } from "@/lib/i18n/content/thai-text/sections.server";
 import { LEARN_ENABLED, LEARN_SHEETS } from "@/lib/learn";
 import { PRODUCT_PILLARS, productCatalog } from "@/lib/product-catalog";
 import { siteConfig, socialSameAsUrls } from "@/lib/site-config";
@@ -18,6 +21,33 @@ async function blogPostsWithinTimeout(): Promise<BlogPost[]> {
     new Promise<null>((resolve) => setTimeout(() => resolve(null), CMS_READ_TIMEOUT_MS)),
   ]);
   return publishedBlog(remote ?? DEMO_BLOG);
+}
+
+async function portfolioWithinTimeout(): Promise<PortfolioItem[]> {
+  const remote = await Promise.race([
+    readCmsCollection<PortfolioItem>("portfolio").catch(() => null),
+    new Promise<null>((resolve) => setTimeout(() => resolve(null), CMS_READ_TIMEOUT_MS)),
+  ]);
+  return publishedPortfolio(remote ?? DEMO_PORTFOLIO);
+}
+
+/**
+ * Starting prices already published in the curtain price guide.
+ * They are starting points, not a quote. Keep them identical to that article.
+ */
+function startingPrices(base: string): string[] {
+  return [
+    "## Starting prices / ราคาเริ่มต้น",
+    "",
+    "Published starting prices (not a quote — fabric, motor, height and access change the price). Source: the price guide.",
+    "",
+    `- Curtains / ผ้าม่าน: from 1,500 THB per m² — ${base}/products/curtain`,
+    `- Roller blinds / ม่านม้วน: from 550 THB per m² — ${base}/products/roller-blinds`,
+    "- Wood venetian blinds / มู่ลี่ไม้: from 1,690 THB per m²",
+    "- PVC partitions / ฉากกั้น PVC: from 790 THB per m²",
+    `- ${link(base, "/blog/curtain-price-guide", "ราคาผ้าม่านคิดจากอะไร / Curtain price guide")}`,
+    "",
+  ];
 }
 
 function link(base: string, path: string, title: string, note?: string) {
@@ -112,7 +142,7 @@ export async function buildLlmsText({ full }: { full: boolean }): Promise<string
   lines.push("## Languages / ภาษา");
   lines.push("");
   lines.push(
-    "Thai is the main language (unprefixed URLs). Home, product categories, about/contact and quote pages are also published per language; articles and portfolio stay Thai.",
+    "Thai is the main language (unprefixed URLs). Home, product categories, about/contact and quote pages are published in every language. Articles with a full English translation are also at /en/blog/…; portfolio stays Thai.",
   );
   lines.push("");
   for (const locale of LOCALES) {
@@ -143,6 +173,7 @@ export async function buildLlmsText({ full }: { full: boolean }): Promise<string
     }
   }
   lines.push("");
+  lines.push(...startingPrices(base));
 
   if (full) {
     if (LEARN_ENABLED) {
@@ -160,8 +191,35 @@ export async function buildLlmsText({ full }: { full: boolean }): Promise<string
       lines.push("");
       for (const post of posts) {
         lines.push(link(base, `/blog/${post.slug}`, post.title, post.excerpt));
+        if (blogIndexableLocales(post.slug).includes("en")) {
+          lines.push(`  - English: ${base}/en/blog/${post.slug}`);
+        }
       }
       lines.push("");
+    }
+
+    const jobs = await portfolioWithinTimeout();
+    if (jobs.length) {
+      lines.push("## Installations / ผลงานติดตั้ง");
+      lines.push("");
+      lines.push("Real jobs. Customer names are omitted.");
+      lines.push("");
+      for (const item of jobs.slice(0, 120)) {
+        lines.push(
+          link(base, `/portfolio/${item.slug}`, item.title, areaJobLine(item) || productLabel(item.productSlug)),
+        );
+      }
+      lines.push("");
+      const areas = serviceAreas(jobs);
+      if (areas.length) {
+        lines.push("## Installation areas / พื้นที่ติดตั้ง");
+        lines.push("");
+        lines.push(link(base, "/areas", "ทุกพื้นที่ / All areas"));
+        for (const area of areas) {
+          lines.push(link(base, areaPath(area.name), area.name, `${area.items.length} jobs`));
+        }
+        lines.push("");
+      }
     }
 
     lines.push("## FAQ / คำถามที่พบบ่อย");
@@ -175,7 +233,8 @@ export async function buildLlmsText({ full }: { full: boolean }): Promise<string
   } else {
     lines.push("## Optional");
     lines.push("");
-    lines.push(link(base, "/llms-full.txt", "llms-full.txt", "every product, guide, article and FAQ"));
+    lines.push(link(base, "/llms-full.txt", "llms-full.txt", "every product, installation, guide, article and FAQ"));
+    lines.push(link(base, "/areas", "พื้นที่ติดตั้ง / Installation areas"));
     lines.push(link(base, "/sitemap.xml", "Sitemap"));
     lines.push("");
   }

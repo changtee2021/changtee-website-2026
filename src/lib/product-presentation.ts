@@ -2113,9 +2113,11 @@ export function getProductJsonLd(
 
   // Quote-only catalog: Product without Offer (incomplete Offer+no price is invalid for rich results).
   // Also expose Service so local-service intent is clear.
+  const englishName = [product.nameEn, category.nameEn].filter(Boolean).join(" ");
   const productLd = {
     "@type": ["Product", "Service"],
     name: `${product.name} ${category.name}`,
+    ...(englishName ? { alternateName: englishName } : {}),
     description: presentation.seoDescription,
     image: [`${base}${image}`],
     brand: {

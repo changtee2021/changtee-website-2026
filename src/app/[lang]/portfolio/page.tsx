@@ -6,6 +6,8 @@ import { loadPortfolioItems } from "@/lib/cms/cms-public-load";
 import { publishedPortfolio } from "@/lib/cms/public-content";
 import { pageMetadata } from "@/lib/seo/meta";
 import { langFromParams } from "@/lib/i18n/lang-param";
+import { tx } from "@/lib/i18n/content/thai-text/server";
+import { LocaleLink as Link } from "@/components/i18n/LocaleLink";
 
 export const revalidate = 120;
 
@@ -25,13 +27,25 @@ export async function generateMetadata({
   });
 }
 
-export default async function PortfolioPage() {
+export default async function PortfolioPage({
+  params,
+}: {
+  params: Promise<{ lang: string }>;
+}) {
+  const locale = await langFromParams(params);
   const items = await loadPortfolioItems();
   return (
-    <Suspense
-      fallback={<PortfolioIndexFallback items={publishedPortfolio(items)} />}
-    >
-      <PortfolioIndex initialItems={items} />
-    </Suspense>
+    <>
+      <p className="bg-shell px-6 pt-4 text-sm sm:px-10 lg:px-16">
+        <Link href="/areas" className="font-semibold text-navy hover:text-brand-red">
+          {tx(locale, "พื้นที่ติดตั้ง")}
+        </Link>
+      </p>
+      <Suspense
+        fallback={<PortfolioIndexFallback items={publishedPortfolio(items)} />}
+      >
+        <PortfolioIndex initialItems={items} />
+      </Suspense>
+    </>
   );
 }
