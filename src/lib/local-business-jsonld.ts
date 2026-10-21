@@ -70,7 +70,6 @@ export function getLocalBusinessJsonLd(
         image: `${base}/images/brand/logo.png`,
         telephone,
         email: siteConfig.emailTo,
-        priceRange: "฿฿",
         areaServed: { "@type": "Country", name: "Thailand" },
         knowsAbout: brandKnowsAbout,
         brand: { "@id": `${base}/#brand` },
