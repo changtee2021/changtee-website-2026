@@ -15,11 +15,15 @@ GEO (Generative Engine Optimization) คือการทำให้ ChatGPT, 
 
 | URL / ส่วน | รายละเอียด |
 | --- | --- |
-| `/llms.txt` | สรุปแบรนด์ ข้อมูลสำคัญ ช่องทางติดต่อ หมวดสินค้า (มาตรฐาน llmstxt.org) |
+| `/llms.txt` | สรุปแบรนด์ ชื่อเรียกอื่น (Chang Tee Curtains, Changtee) ที่อยู่ไทย/อังกฤษ เบอร์แบบ +66 ลิงก์ทุกภาษา หมวดสินค้า (มาตรฐาน llmstxt.org) |
 | `/llms-full.txt` | เพิ่มสินค้าทุกรุ่น ห้องเรียนรู้ บทความ และ FAQ ทั้งหมด |
 | `/robots.txt` | อนุญาต AI crawler ชัดเจน (GPTBot, OAI-SearchBot, ClaudeBot, PerplexityBot, Google-Extended, Applebot-Extended ฯลฯ) — ยังกัน `/admin`, `/api`, `/leads` |
 | JSON-LD หน้าแรก | Organization + Brand (slogan, knowsAbout, contactPoint), HomeAndConstructionBusiness (areaServed, hasOfferCatalog), WebSite + SearchAction, FAQPage |
 | FAQ หน้าแรก (`#faq`) | render ฝั่ง server — AI crawler ส่วนใหญ่ไม่รัน JavaScript จึงต้องเห็นใน HTML ตรงๆ |
+| หน้าแรกทุกภาษา | canonical ของภาษาตัวเอง (`/en`, `/km`, …) + hreflang ครบ 7 ภาษา — ห้ามชี้ canonical กลับ `/` |
+| JSON-LD `/products` | CollectionPage + ItemList ทุกหมวด + BreadcrumbList |
+| JSON-LD `/contact` | AboutPage/ContactPage + ข้อมูลธุรกิจชุดเดียวกับหน้าแรก (ไม่มี FAQPage เพราะ FAQ ไม่ได้แสดงหน้านี้) |
+| `/portfolio` | HTML ฝั่ง server มีหัวข้อและการ์ดผลงานทุกชิ้น (`PortfolioIndexFallback`) ตัวกรองโหลดตามมาในเบราว์เซอร์ |
 
 ## กติกา (ห้ามละเมิด)
 

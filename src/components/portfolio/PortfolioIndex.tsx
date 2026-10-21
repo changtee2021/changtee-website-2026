@@ -880,7 +880,7 @@ function FilterIconBtn({
   );
 }
 
-function GalleryCard({
+export function GalleryCard({
   item,
   showProduct,
 }: {

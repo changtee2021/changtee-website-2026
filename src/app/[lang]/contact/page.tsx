@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import { AboutPageView } from "@/components/about/AboutPageView";
+import { JsonLd } from "@/components/seo/JsonLd";
+import { getAboutPageJsonLd } from "@/lib/local-business-jsonld";
 import { pageMetadata } from "@/lib/seo/meta";
 import { langFromParams } from "@/lib/i18n/lang-param";
 
@@ -18,6 +20,16 @@ export async function generateMetadata({
   });
 }
 
-export default function ContactPage() {
-  return <AboutPageView />;
+export default async function ContactPage({
+  params,
+}: {
+  params: Promise<{ lang: string }>;
+}) {
+  const locale = await langFromParams(params);
+  return (
+    <>
+      <JsonLd data={getAboutPageJsonLd(locale)} />
+      <AboutPageView />
+    </>
+  );
 }

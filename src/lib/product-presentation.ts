@@ -1914,19 +1914,30 @@ function clampSeoDescription(text: string): string {
   const normalized = text.replace(/\s+/g, " ").trim();
   if (normalized.length <= 160) {
     if (normalized.length >= 140) return normalized;
-    const pad = " วัดหน้างานฟรีกับช่างตี๋";
-    const next = `${normalized}${normalized.endsWith(".") ? "" : "."}${pad}`;
-    return next.length <= 160 ? next : next.slice(0, 160);
+    const next = `${normalized} ผลิตเองที่โรงงาน ติดตั้งทั่วประเทศไทย`;
+    return next.length <= 160 ? next : normalized;
   }
   return `${normalized.slice(0, 157).trimEnd()}…`;
+}
+
+/** Summaries often restate the tagline; repeating it reads as spam in search snippets. */
+function restatesTagline(tagline: string, summary: string): boolean {
+  const words = summary.split(/\s+/).filter((w) => w.length >= 4);
+  if (words.length === 0) return true;
+  const shared = words.filter((w) => tagline.includes(w)).length;
+  return shared * 2 >= words.length;
 }
 
 function buildSeoDescription(
   product: ProductChild,
   contentTagline: string,
 ): string {
-  const core = `${contentTagline} ${product.summary} นัดวัดหน้างานฟรีกับช่างตี๋`;
-  return clampSeoDescription(core);
+  const summary = restatesTagline(contentTagline, product.summary)
+    ? ""
+    : ` ${product.summary}`;
+  return clampSeoDescription(
+    `${contentTagline}${summary} นัดวัดหน้างานฟรีกับช่างตี๋`,
+  );
 }
 
 function buildSwatches(
