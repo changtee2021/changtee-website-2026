@@ -4,18 +4,26 @@ import {
   brandKnowsAbout,
   brandOfferCatalog,
 } from "@/lib/brand-facts";
-import type { Locale } from "@/lib/i18n/locale";
+import { LOCALES, LOCALE_META, type Locale } from "@/lib/i18n/locale";
+import { tx } from "@/lib/i18n/content/thai-text/server";
 
 /** LocalBusiness + Organization JSON-LD for homepage / root SEO. */
 export function getLocalBusinessJsonLd(
   locale: Locale = "th",
+  options: { withFaq?: boolean; page?: Record<string, unknown> } = {},
 ): Record<string, unknown> {
   const base = siteConfig.url.replace(/\/$/, "");
   const telephone = siteConfig.saleContacts[0]?.phoneTel
     ? `+66${siteConfig.saleContacts[0].phoneTel.replace(/^0/, "")}`
     : undefined;
   const sameAs = socialSameAsUrls();
-  const alternateNames = [siteConfig.name, siteConfig.nameEn, "ช่างตี๋", "Changtee"];
+  const alternateNames = [
+    siteConfig.name,
+    siteConfig.nameEn,
+    tx("en", siteConfig.name),
+    "ช่างตี๋",
+    "Changtee",
+  ];
 
   return {
     "@context": "https://schema.org",
@@ -105,7 +113,7 @@ export function getLocalBusinessJsonLd(
         name: siteConfig.name,
         alternateName: siteConfig.nameEn,
         publisher: { "@id": `${base}/#organization` },
-        inLanguage: ["th-TH", "en"],
+        inLanguage: LOCALES.map((l) => LOCALE_META[l].hreflang),
         potentialAction: {
           "@type": "SearchAction",
           target: {
@@ -115,7 +123,29 @@ export function getLocalBusinessJsonLd(
           "query-input": "required name=search_term_string",
         },
       },
-      brandFaqJsonLd(base, locale),
+      ...(options.withFaq === false ? [] : [brandFaqJsonLd(base, locale)]),
+      ...(options.page ? [options.page] : []),
     ],
   };
+}
+
+/**
+ * About/contact page: the same business record as home plus an AboutPage node,
+ * without FAQPage because that FAQ is only rendered on home.
+ */
+export function getAboutPageJsonLd(locale: Locale = "th"): Record<string, unknown> {
+  const base = siteConfig.url.replace(/\/$/, "");
+  const url = `${base}/contact`;
+  return getLocalBusinessJsonLd(locale, {
+    withFaq: false,
+    page: {
+      "@type": ["AboutPage", "ContactPage"],
+      "@id": `${url}#page`,
+      url,
+      name: tx(locale, "เกี่ยวกับเรา"),
+      isPartOf: { "@id": `${base}/#website` },
+      about: { "@id": `${base}/#organization` },
+      mainEntity: { "@id": `${base}/#localbusiness` },
+    },
+  });
 }

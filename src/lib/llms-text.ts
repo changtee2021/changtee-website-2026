@@ -6,6 +6,8 @@ import { publishedBlog } from "@/lib/cms/public-content";
 import { LEARN_ENABLED, LEARN_SHEETS } from "@/lib/learn";
 import { PRODUCT_PILLARS, productCatalog } from "@/lib/product-catalog";
 import { siteConfig, socialSameAsUrls } from "@/lib/site-config";
+import { tx } from "@/lib/i18n/content/thai-text/server";
+import { LOCALES, LOCALE_META, localizedHref } from "@/lib/i18n/locale";
 
 const CMS_READ_TIMEOUT_MS = 3000;
 
@@ -41,7 +43,16 @@ export async function buildLlmsText({ full }: { full: boolean }): Promise<string
   lines.push("");
   lines.push(`- Thai name: ${siteConfig.name}`);
   lines.push(`- English name: ${siteConfig.nameEn}`);
-  lines.push(`- Legal name: ${siteConfig.legalName}`);
+  lines.push(`- Legal name: ${siteConfig.legalName} (${tx("en", siteConfig.legalName)})`);
+  lines.push(
+    `- Also known as: ${[
+      "ช่างตี๋",
+      "Changtee",
+      tx("en", siteConfig.name),
+      "Changtee Curtain",
+      new URL(base).host,
+    ].join(", ")}`,
+  );
   lines.push(`- Concept: ${siteConfig.concept}`);
   lines.push("- Identity: ช่าง + งานฝีมือ + ประสบการณ์ (Craftsman + Craftsmanship + Experience)");
   lines.push("- Promise: ประสบการณ์ของช่าง สู่มาตรฐานของงานออกแบบ (an installer's experience, built into design standards)");
@@ -68,8 +79,18 @@ export async function buildLlmsText({ full }: { full: boolean }): Promise<string
   lines.push(
     `- Showroom: ${siteConfig.address.line1} ${siteConfig.address.line2} ${siteConfig.address.city}`,
   );
-  lines.push(`- Hours: ${siteConfig.hours}`);
-  lines.push(`- Phone: ${siteConfig.phoneDisplay}`);
+  const { line1, line2, city } = siteConfig.address;
+  lines.push(
+    `- Showroom (EN): ${[line1, line2, city].map((part) => tx("en", part)).join(", ")}, Thailand`,
+  );
+  lines.push(`- Hours: ${siteConfig.hours} (${tx("en", siteConfig.hours)})`);
+  const phoneDigits = siteConfig.phoneDisplay.replace(/\D/g, "");
+  const intlPhone = /^0\d{9}$/.test(phoneDigits)
+    ? `+66 ${phoneDigits.slice(1, 3)} ${phoneDigits.slice(3, 6)} ${phoneDigits.slice(6)}`
+    : null;
+  lines.push(
+    `- Phone: ${siteConfig.phoneDisplay}${intlPhone ? ` (international ${intlPhone})` : ""}`,
+  );
   lines.push(`- LINE: ${siteConfig.lineId} (${siteConfig.lineUrl})`);
   lines.push(`- Email: ${siteConfig.emailTo}`);
   lines.push(`- Google Maps: ${siteConfig.mapsUrl}`);
@@ -87,6 +108,20 @@ export async function buildLlmsText({ full }: { full: boolean }): Promise<string
   lines.push(link(base, "/quote", "ขอใบเสนอราคา / Get a quote", "วัดหน้างานฟรี"));
   lines.push(link(base, "/contact", "เกี่ยวกับเรา / About & contact"));
   lines.push(link(base, "/visit-factory", "เยี่ยมชมโรงงาน / Factory visit"));
+  lines.push("");
+  lines.push("## Languages / ภาษา");
+  lines.push("");
+  lines.push(
+    "Thai is the main language (unprefixed URLs). Home, product categories, about/contact and quote pages are also published per language; articles and portfolio stay Thai.",
+  );
+  lines.push("");
+  for (const locale of LOCALES) {
+    const path = localizedHref(locale, "/");
+    const meta = LOCALE_META[locale];
+    lines.push(
+      `- [${meta.nativeLabel} (${meta.hreflang})](${base}${path === "/" ? "/" : path})`,
+    );
+  }
   lines.push("");
   lines.push("## Product categories / หมวดสินค้า");
   lines.push("");

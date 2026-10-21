@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import { ProductsHub } from "@/components/products/ProductsHub";
+import { JsonLd } from "@/components/seo/JsonLd";
+import { getProductsHubJsonLd } from "@/lib/category-jsonld";
 import { pageMetadata } from "@/lib/seo/meta";
 import { langFromParams } from "@/lib/i18n/lang-param";
 
@@ -20,5 +22,10 @@ export async function generateMetadata({
 }
 
 export default function ProductsPage() {
-  return <ProductsHub />;
+  return (
+    <>
+      <JsonLd data={getProductsHubJsonLd()} />
+      <ProductsHub />
+    </>
+  );
 }

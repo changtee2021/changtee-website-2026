@@ -9,8 +9,26 @@ import type { CatalogItem } from "@/lib/cms/catalogs-demo";
 import type { HeroSlide } from "@/lib/cms/hero-slides-demo";
 import type { PageSectionRecord } from "@/lib/cms/page-sections";
 import type { PortfolioItem } from "@/lib/cms/portfolio-demo";
+import type { Metadata } from "next";
 import { langFromParams } from "@/lib/i18n/lang-param";
+import { localizedHref } from "@/lib/i18n/locale";
 import { getLocalBusinessJsonLd } from "@/lib/local-business-jsonld";
+import { hreflangLanguages, indexableLocales } from "@/lib/seo/meta";
+
+/** Title/description come from the layouts; without this every locale home points its canonical at the Thai `/`. */
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ lang: string }>;
+}): Promise<Metadata> {
+  const locale = await langFromParams(params);
+  return {
+    alternates: {
+      canonical: localizedHref(locale, "/"),
+      languages: hreflangLanguages("/", indexableLocales("ui")),
+    },
+  };
+}
 
 /**
  * Home reads published CMS content on the server (ISR), like /portfolio.
