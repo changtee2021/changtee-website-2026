@@ -171,7 +171,7 @@ function HeroSlideEditorForm({
               label="ข้อความ alt (เข้าถึงได้)"
               value={form.alt}
               onChange={(v) => set("alt", v)}
-              placeholder="ม่านม้วน ช่างตี๋ — เริ่มต้น 550฿"
+              placeholder="ม่านม้วน ช่างตี๋"
             />
             <div className="grid gap-3 sm:grid-cols-2">
               <Field
@@ -190,7 +190,7 @@ function HeroSlideEditorForm({
                 label="ราคา / ข้อความราคา"
                 value={form.price}
                 onChange={(v) => set("price", v)}
-                placeholder="เริ่มต้น 550฿ ตร.เมตร"
+                placeholder=""
               />
               <Field
                 label="ป้าย (badge)"

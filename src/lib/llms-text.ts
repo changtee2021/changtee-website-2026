@@ -31,25 +31,6 @@ async function portfolioWithinTimeout(): Promise<PortfolioItem[]> {
   return publishedPortfolio(remote ?? DEMO_PORTFOLIO);
 }
 
-/**
- * Starting prices already published in the curtain price guide.
- * They are starting points, not a quote. Keep them identical to that article.
- */
-function startingPrices(base: string): string[] {
-  return [
-    "## Starting prices / ราคาเริ่มต้น",
-    "",
-    "Published starting prices (not a quote — fabric, motor, height and access change the price). Source: the price guide.",
-    "",
-    `- Curtains / ผ้าม่าน: from 1,500 THB per m² — ${base}/products/curtain`,
-    `- Roller blinds / ม่านม้วน: from 550 THB per m² — ${base}/products/roller-blinds`,
-    "- Wood venetian blinds / มู่ลี่ไม้: from 1,690 THB per m²",
-    "- PVC partitions / ฉากกั้น PVC: from 790 THB per m²",
-    `- ${link(base, "/blog/curtain-price-guide", "ราคาผ้าม่านคิดจากอะไร / Curtain price guide")}`,
-    "",
-  ];
-}
-
 function link(base: string, path: string, title: string, note?: string) {
   return `- [${title}](${base}${path})${note ? `: ${note}` : ""}`;
 }
@@ -173,7 +154,6 @@ export async function buildLlmsText({ full }: { full: boolean }): Promise<string
     }
   }
   lines.push("");
-  lines.push(...startingPrices(base));
 
   if (full) {
     if (LEARN_ENABLED) {
