@@ -14,6 +14,7 @@
 - [Overview](architecture/overview.md)
 - [Data model](architecture/data-model.md)
 - [Page Editor](architecture/page-editor.md)
+- [Multi-language (i18n) / ระบบ 7 ภาษา](architecture/i18n.md) — URL prefixes, hreflang, overlays, chat channels
 
 ## Security / ความปลอดภัย
 
@@ -41,6 +42,7 @@
 
 - [Decision sheet](decisions/DECISION-SHEET.md)
 - [LINE OA](brand/LINE-OA.md)
+- [i18n glossary / คำศัพท์แปล 7 ภาษา](brand/i18n-glossary.md)
 - [Content workflow / วิธีเขียนบทความ](brand/content-workflow.md) — start here: ตี๋ → เฮง → อาร์ต + แผนเนื้อหา 50 บทความ
 - [Writer persona (ตี๋)](brand/content-writer-persona.md)
 - [QC persona (บก.เฮง)](brand/content-qc-persona.md)

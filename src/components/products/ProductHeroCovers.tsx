@@ -1,5 +1,5 @@
 import Image from "next/image";
-import Link from "next/link";
+import { LocaleLink as Link } from "@/components/i18n/LocaleLink";
 import type { PillarHubItem } from "@/lib/product-catalog";
 
 export function ProductHeroCovers({ items }: { items: PillarHubItem[] }) {

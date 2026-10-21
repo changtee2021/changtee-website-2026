@@ -1,13 +1,15 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
+import { LocaleLink as Link } from "@/components/i18n/LocaleLink";
 import { useEffect, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { Check, Copy, FileText, MessageCircle, Phone, X } from "lucide-react";
 import { trackSiteClick } from "@/lib/analytics/collect";
 import { siteConfig } from "@/lib/site-config";
 import { useI18n } from "@/lib/i18n/use-i18n";
+import { useTx } from "@/lib/i18n/use-tx";
+import { localeContactChannels } from "@/lib/i18n/contact-channels";
 
 type PhoneContact = {
   name: string;
@@ -42,7 +44,7 @@ function MessengerIcon({ className }: { className?: string }) {
   );
 }
 
-function socialHref(label: "Facebook" | "YouTube" | "TikTok" | "LINE") {
+function socialHref(label: "Facebook" | "YouTube" | "Instagram" | "TikTok" | "LINE") {
   return siteConfig.social.find((item) => item.label === label)?.href ?? "#";
 }
 
@@ -70,6 +72,7 @@ function PhoneList({
   }
 
   const { t } = useI18n();
+  const { tx } = useTx();
 
   return (
     <div
@@ -101,7 +104,7 @@ function PhoneList({
                   onPick();
                 }}
               >
-                <span className="truncate text-muted">{contact.name}</span>
+                <span className="truncate text-muted">{tx(contact.name)}</span>
                 <span className="shrink-0 font-semibold tabular-nums">
                   {contact.phoneDisplay}
                 </span>
@@ -109,7 +112,7 @@ function PhoneList({
               <button
                 type="button"
                 className="inline-flex size-11 shrink-0 items-center justify-center rounded-xl text-muted hover:bg-paper hover:text-navy dark:hover:bg-white/8 dark:hover:text-white"
-                aria-label={`${t("fab.copy")} ${contact.name}`}
+                aria-label={`${t("fab.copy")} ${tx(contact.name)}`}
                 onClick={() => void copyNumber(contact.phoneTel)}
               >
                 {copied === contact.phoneTel ? (
@@ -127,7 +130,8 @@ function PhoneList({
 }
 
 export function FloatingActions() {
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
+  const chatChannels = localeContactChannels(locale);
   const [open, setOpen] = useState(false);
   const [phonesOpen, setPhonesOpen] = useState(false);
   const reduced = useReducedMotion();
@@ -266,6 +270,28 @@ export function FloatingActions() {
                 TikTok
               </motion.a>
               <motion.a
+                href={socialHref("Instagram")}
+                target="_blank"
+                rel="noopener noreferrer"
+                variants={item}
+                transition={{ duration: 0.24, ease: [0.22, 1, 0.36, 1] }}
+                className={`${pill} bg-gradient-to-r from-[#F58529] via-[#DD2A7B] to-[#8134AF] text-white`}
+                onClick={() => {
+                  trackSiteClick("instagram");
+                  closeAll();
+                }}
+              >
+                <Image
+                  src="/images/social/instagram.svg"
+                  alt=""
+                  width={16}
+                  height={16}
+                  className="brightness-0 invert"
+                  unoptimized
+                />
+                Instagram
+              </motion.a>
+              <motion.a
                 href={siteConfig.lineUrl}
                 target="_blank"
                 rel="noreferrer"
@@ -280,6 +306,21 @@ export function FloatingActions() {
                 <MessageCircle className="size-4 shrink-0" />
                 <span className="truncate">LINE {siteConfig.lineId}</span>
               </motion.a>
+              {chatChannels.map((chat) => (
+                <motion.a
+                  key={chat.id}
+                  href={chat.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  variants={item}
+                  transition={{ duration: 0.24, ease: [0.22, 1, 0.36, 1] }}
+                  className={`${pill} ${chat.tone}`}
+                  onClick={closeAll}
+                >
+                  <MessageCircle className="size-4 shrink-0" />
+                  <span className="truncate">{chat.label}</span>
+                </motion.a>
+              ))}
               <motion.div
                 variants={item}
                 transition={{ duration: 0.24, ease: [0.22, 1, 0.36, 1] }}

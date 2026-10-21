@@ -1,3 +1,4 @@
+import { Tx } from "@/components/i18n/Tx";
 import { cn } from "@/lib/utils";
 
 type WanderingEyesProps = React.ComponentProps<"span"> & {
@@ -126,7 +127,7 @@ function WanderingEyes({
             />
           ))}
         </span>
-        <span className="sr-only">กำลังโหลด</span>
+        <span className="sr-only"><Tx>กำลังโหลด</Tx></span>
       </span>
     </>
   );

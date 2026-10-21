@@ -9,6 +9,22 @@ function resolveSiteUrl(): string {
   return "http://localhost:3000";
 }
 
+const YOUTUBE_CHANNEL = "https://www.youtube.com/@ช่างตี๋-ผ้าม่าน";
+
+/** Drop an env URL whose path was saved with Thai bytes read as Latin-1. */
+function httpsUrl(value: string | undefined, fallback: string): string {
+  const raw = value?.trim();
+  if (!raw) return fallback;
+  try {
+    const url = new URL(raw);
+    if (url.protocol !== "https:") return fallback;
+    if (/[\u0080-\u00FF]/.test(decodeURIComponent(url.pathname))) return fallback;
+    return raw;
+  } catch {
+    return fallback;
+  }
+}
+
 /** Platform homepages used as empty-env placeholders — never put in JSON-LD sameAs. */
 const PLACEHOLDER_SOCIAL_HOSTS = new Set([
   "www.facebook.com",
@@ -73,6 +89,14 @@ export const siteConfig = {
   /** LINE Official Account */
   lineId: "@chang-tee",
   lineUrl: process.env.NEXT_PUBLIC_LINE_URL || "https://lin.ee/7Ul6K4n",
+  /** Per-market chat apps — empty env = hidden. Shown by locale in `localeContactChannels`. */
+  chatChannels: {
+    wechatId: process.env.NEXT_PUBLIC_WECHAT_ID || "",
+    wechatUrl: process.env.NEXT_PUBLIC_WECHAT_URL || "",
+    viberUrl: process.env.NEXT_PUBLIC_VIBER_URL || "",
+    telegramUrl: process.env.NEXT_PUBLIC_TELEGRAM_URL || "",
+    whatsappUrl: process.env.NEXT_PUBLIC_WHATSAPP_URL || "",
+  },
   lineQrUrl: "/images/line/line-oa-qr.png",
   lineQrSizes: {
     L: "/images/line/qr-L.png",
@@ -121,9 +145,7 @@ export const siteConfig = {
     },
     {
       label: "YouTube",
-      href:
-        process.env.NEXT_PUBLIC_YOUTUBE_URL ||
-        "https://www.youtube.com/@ช่างตี๋-ผ้าม่าน",
+      href: httpsUrl(process.env.NEXT_PUBLIC_YOUTUBE_URL, YOUTUBE_CHANNEL),
       icon: "/images/social/youtube.svg",
     },
     {
@@ -131,15 +153,13 @@ export const siteConfig = {
       href: process.env.NEXT_PUBLIC_LINE_URL || "https://lin.ee/7Ul6K4n",
       icon: "/images/social/line.svg",
     },
-    ...(process.env.NEXT_PUBLIC_INSTAGRAM_URL
-      ? [
-          {
-            label: "Instagram",
-            href: process.env.NEXT_PUBLIC_INSTAGRAM_URL,
-            icon: "/images/social/instagram.svg",
-          },
-        ]
-      : []),
+    {
+      label: "Instagram",
+      href:
+        process.env.NEXT_PUBLIC_INSTAGRAM_URL ||
+        "https://www.instagram.com/changtee.curtain/",
+      icon: "/images/social/instagram.svg",
+    },
     {
       label: "TikTok",
       href:

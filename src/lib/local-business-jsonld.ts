@@ -4,9 +4,12 @@ import {
   brandKnowsAbout,
   brandOfferCatalog,
 } from "@/lib/brand-facts";
+import type { Locale } from "@/lib/i18n/locale";
 
 /** LocalBusiness + Organization JSON-LD for homepage / root SEO. */
-export function getLocalBusinessJsonLd(): Record<string, unknown> {
+export function getLocalBusinessJsonLd(
+  locale: Locale = "th",
+): Record<string, unknown> {
   const base = siteConfig.url.replace(/\/$/, "");
   const telephone = siteConfig.saleContacts[0]?.phoneTel
     ? `+66${siteConfig.saleContacts[0].phoneTel.replace(/^0/, "")}`
@@ -112,7 +115,7 @@ export function getLocalBusinessJsonLd(): Record<string, unknown> {
           "query-input": "required name=search_term_string",
         },
       },
-      brandFaqJsonLd(base),
+      brandFaqJsonLd(base, locale),
     ],
   };
 }

@@ -12,6 +12,7 @@ import {
   X,
   type LucideIcon,
 } from "lucide-react";
+import { LocaleLink as Link } from "@/components/i18n/LocaleLink";
 import { PdpaConsentField } from "@/components/forms/PdpaConsentField";
 import {
   VisitDocumentsField,
@@ -143,9 +144,9 @@ export function ProductPresentationForm() {
         <div className="rounded-xl border border-navy/15 bg-paper px-4 py-3 text-sm leading-relaxed text-navy">
           ฟอร์มนี้รับเฉพาะนิติบุคคลและองค์กร หากเป็นบ้านพักอาศัยหรือคอนโดส่วนตัว
           กรุณาใช้หน้า{" "}
-          <a href="/quote" className="font-semibold underline underline-offset-2">
+          <Link href="/quote" className="font-semibold underline underline-offset-2">
             ขอใบเสนอราคา
-          </a>
+          </Link>
         </div>
 
         <div className="divide-y divide-line">

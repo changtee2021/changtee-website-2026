@@ -24,6 +24,8 @@ import {
 import { PREVIEW_QUERY } from "@/lib/editor/protocol";
 import { verifyPreviewToken } from "@/lib/editor/preview-token";
 import { legacyCmsRedirect } from "@/lib/legacy-cms-redirects";
+import { localeFromPrefix } from "@/lib/i18n/locale";
+import { localeToParam } from "@/lib/i18n/lang-param";
 
 function withAdminHeaders(
   request: NextRequest,
@@ -101,7 +103,11 @@ async function withPreviewHeaders(
     requestHeaders.set("x-changtee-preview", "1");
   }
 
-  const res = NextResponse.next({ request: { headers: requestHeaders } });
+  const route = resolvePublicLocaleRoute(request);
+  if (route.redirect) return NextResponse.redirect(route.redirect, 308);
+  const res = route.rewrite
+    ? NextResponse.rewrite(route.rewrite, { request: { headers: requestHeaders } })
+    : NextResponse.next({ request: { headers: requestHeaders } });
   if (previewOk) {
     res.headers.set("Cache-Control", "no-store");
     res.headers.set("X-Robots-Tag", "noindex, nofollow");
@@ -218,8 +224,49 @@ export async function middleware(request: NextRequest) {
     return withAdminHeaders(request, pathname);
   }
 
-  const res = NextResponse.next();
+  const route = resolvePublicLocaleRoute(request);
+  if (route.redirect) return NextResponse.redirect(route.redirect, 308);
+  const res = route.rewrite
+    ? NextResponse.rewrite(route.rewrite)
+    : NextResponse.next();
   return applyPublicHostRobots(res, host, pathname);
+}
+
+/** Top-level app folders outside `app/[lang]` — never locale-rewritten. */
+const NON_LOCALE_ROOTS = new Set(["api", "_next", "admin", "dev"]);
+
+/**
+ * Thai URLs stay unprefixed (rewritten to `/th/...` internally); `/th/...`
+ * redirects to the bare URL so each page has one Thai address. Other locales
+ * keep their prefix, normalized to lowercase.
+ */
+function resolvePublicLocaleRoute(request: NextRequest): {
+  redirect?: URL;
+  rewrite?: URL;
+} {
+  const { pathname } = request.nextUrl;
+  const segments = pathname.split("/").filter(Boolean);
+  const first = segments[0] ?? "";
+  if (NON_LOCALE_ROOTS.has(first)) return {};
+
+  if (first.toLowerCase() === "th") {
+    const dest = request.nextUrl.clone();
+    dest.pathname = `/${segments.slice(1).join("/")}`;
+    return { redirect: dest };
+  }
+
+  const locale = localeFromPrefix(first);
+  if (locale) {
+    const canonicalSeg = localeToParam(locale);
+    if (first === canonicalSeg) return {};
+    const dest = request.nextUrl.clone();
+    dest.pathname = `/${[canonicalSeg, ...segments.slice(1)].join("/")}`;
+    return { redirect: dest };
+  }
+
+  const rewrite = request.nextUrl.clone();
+  rewrite.pathname = pathname === "/" ? "/th" : `/th${pathname}`;
+  return { rewrite };
 }
 
 export const config = {

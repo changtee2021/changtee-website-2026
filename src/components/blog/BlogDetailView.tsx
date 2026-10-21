@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
+import { LocaleLink as Link } from "@/components/i18n/LocaleLink";
 import type { ReactNode } from "react";
 import { EditableSpot } from "@/components/preview/EditableSpot";
 import { InstallVideosSection } from "@/components/media/InstallVideosSection";

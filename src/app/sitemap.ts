@@ -6,6 +6,9 @@ import { readCmsCollection } from "@/lib/cms/cms-server";
 import { LEARN_ENABLED, LEARN_SHEETS } from "@/lib/learn";
 import { productCatalog } from "@/lib/product-catalog";
 import { siteConfig } from "@/lib/site-config";
+import { localizedHref, type Locale } from "@/lib/i18n/locale";
+import { productIndexableLocales } from "@/lib/i18n/content/product-overlays";
+import { hreflangLanguages, indexableLocales } from "@/lib/seo/meta";
 import type { BlogPost } from "@/lib/cms/blog-demo";
 import type { PortfolioItem } from "@/lib/cms/portfolio-demo";
 
@@ -37,6 +40,7 @@ async function readCmsWithinTimeout<T>(
   ]);
 }
 
+/** One sitemap URL per indexable locale, each carrying the full hreflang set. */
 function entry(
   base: string,
   path: string,
@@ -44,19 +48,27 @@ function entry(
     lastModified?: string | Date | null;
     changeFrequency: SitemapEntry["changeFrequency"];
     priority: number;
+    locales?: Locale[];
   },
-): SitemapEntry {
+): SitemapEntry[] {
   const lastModified = opts.lastModified
     ? new Date(opts.lastModified)
     : undefined;
-  return {
-    url: `${base}${path}`,
-    ...(lastModified && !Number.isNaN(lastModified.getTime())
-      ? { lastModified }
-      : {}),
-    changeFrequency: opts.changeFrequency,
-    priority: opts.priority,
-  };
+  const locales = opts.locales ?? indexableLocales("ui");
+  const bare = path || "/";
+  const languages = locales.length > 1 ? hreflangLanguages(bare, locales) : null;
+  return locales.map((locale) => {
+    const localized = localizedHref(locale, bare);
+    return {
+      url: localized === "/" ? base : `${base}${localized}`,
+      ...(lastModified && !Number.isNaN(lastModified.getTime())
+        ? { lastModified }
+        : {}),
+      changeFrequency: opts.changeFrequency,
+      priority: opts.priority,
+      ...(languages ? { alternates: { languages } } : {}),
+    };
+  });
 }
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
@@ -84,17 +96,19 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   ];
 
   const productRoutes = productCatalog.flatMap((cat) => [
-    entry(base, `/products/${cat.slug}`, {
+    ...entry(base, `/products/${cat.slug}`, {
       changeFrequency: "weekly",
       priority: 0.8,
     }),
-    ...cat.children.map((child) =>
+    ...cat.children.flatMap((child) =>
       entry(base, `/products/${cat.slug}/${child.slug}`, {
         changeFrequency: "weekly",
         priority: 0.8,
+        locales: productIndexableLocales(cat.slug, child.slug),
       }),
     ),
   ]);
+  const cmsLocales = indexableLocales("cms");
 
   const [remotePortfolio, remoteBlog] = await Promise.all([
     readCmsWithinTimeout<PortfolioItem>("portfolio"),
@@ -104,31 +118,34 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const blogItems = publishedBlog(remoteBlog ?? DEMO_BLOG);
 
   return [
-    ...staticRoutes.map((r) =>
+    ...staticRoutes.flatMap((r) =>
       entry(base, r.path, {
         changeFrequency: r.changeFrequency,
         priority: r.priority,
       }),
     ),
-    ...(LEARN_ENABLED ? LEARN_SHEETS : []).map((sheet) =>
+    ...(LEARN_ENABLED ? LEARN_SHEETS : []).flatMap((sheet) =>
       entry(base, `/learn/${sheet.slug}`, {
         changeFrequency: "monthly",
         priority: 0.7,
+        locales: cmsLocales,
       }),
     ),
     ...productRoutes,
-    ...portfolioItems.map((item) =>
+    ...portfolioItems.flatMap((item) =>
       entry(base, `/portfolio/${item.slug}`, {
         lastModified: item.updatedAt,
         changeFrequency: "weekly",
         priority: 0.7,
+        locales: cmsLocales,
       }),
     ),
-    ...blogItems.map((post) =>
+    ...blogItems.flatMap((post) =>
       entry(base, `/blog/${post.slug}`, {
         lastModified: post.updatedAt || post.publishedAt,
         changeFrequency: "weekly",
         priority: 0.7,
+        locales: cmsLocales,
       }),
     ),
   ];

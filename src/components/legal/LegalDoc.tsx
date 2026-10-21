@@ -1,4 +1,5 @@
-import Link from "next/link";
+import { LocaleLink as Link } from "@/components/i18n/LocaleLink";
+import { LegalTranslationNote } from "@/components/legal/LegalTranslationNote";
 import {
   LEGAL_EFFECTIVE_DATE,
   LEGAL_VERSION,
@@ -57,6 +58,7 @@ export function LegalDoc({ title, subtitle, sections, currentPath }: Props) {
         <article>
           <h1 className="font-display text-3xl font-semibold text-navy">{title}</h1>
           <p className="mt-3 text-sm leading-7 text-muted">{subtitle}</p>
+          <LegalTranslationNote />
 
           <ol className="mt-8 space-y-2 rounded-xl border border-line bg-white p-4 text-sm">
             {sections.map((s) => (

@@ -2,7 +2,7 @@
 
 import { useMemo } from "react";
 import Image from "next/image";
-import Link from "next/link";
+import { LocaleLink as Link } from "@/components/i18n/LocaleLink";
 import { useSearchParams } from "next/navigation";
 import { useBlogPosts, usePortfolioItems } from "@/lib/cms/demo-store";
 import { buildSearchIndex, entryTypeLabel, searchSite } from "@/lib/site-search";

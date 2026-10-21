@@ -8,6 +8,7 @@ import { publishedHeroSlides } from "@/lib/cms/hero-slides-demo";
 import { FeatureStrip } from "@/components/home/FeatureStrip";
 import { revealEase } from "@/components/home/Reveal";
 import { useI18n } from "@/lib/i18n/use-i18n";
+import { useTx } from "@/lib/i18n/use-tx";
 import { siteConfig } from "@/lib/site-config";
 
 const FALLBACK = {
@@ -21,6 +22,7 @@ const FALLBACK = {
  */
 export function Hero({ pinned = false }: { pinned?: boolean }) {
   const { t } = useI18n();
+  const { tx } = useTx();
   const stored = useHeroSlides();
   const slides = useMemo(() => publishedHeroSlides(stored), [stored]);
   const reduced = useReducedMotion();
@@ -89,7 +91,7 @@ export function Hero({ pinned = false }: { pinned?: boolean }) {
               >
                 <Image
                   src={item.src}
-                  alt={item.alt || FALLBACK.alt}
+                  alt={tx(item.alt || FALLBACK.alt)}
                   fill
                   priority={i === 0}
                   className="object-cover object-center"
@@ -142,7 +144,7 @@ export function Hero({ pinned = false }: { pinned?: boolean }) {
                     <button
                       key={slide.id}
                       type="button"
-                      aria-label={`ไปสไลด์ ${i + 1}`}
+                      aria-label={`${t("slider.goTo")} ${i + 1}`}
                       aria-current={i === safeIndex ? "true" : undefined}
                       onClick={() => setIndex(i)}
                       className="flex h-11 w-9 items-center justify-center"

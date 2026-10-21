@@ -1,14 +1,16 @@
 "use client";
 
-import Link from "next/link";
+import { LocaleLink as Link } from "@/components/i18n/LocaleLink";
 import { useState } from "react";
 import { PRODUCT_PILLARS, hubItemsForPillar } from "@/lib/product-catalog";
 import { catalogName, categorySummary, pillarSummary } from "@/lib/i18n";
 import { useI18n } from "@/lib/i18n/use-i18n";
+import { useTx } from "@/lib/i18n/use-tx";
 import { cn } from "@/lib/utils";
 
 export function ProductsMegaPanel({ onNavigate }: { onNavigate?: () => void }) {
   const { t, locale } = useI18n();
+  const { find } = useTx();
   const [active, setActive] = useState<(typeof PRODUCT_PILLARS)[number]["id"]>(1);
   const items = hubItemsForPillar(active);
   const activePillar = PRODUCT_PILLARS.find((p) => p.id === active);
@@ -31,7 +33,7 @@ export function ProductsMegaPanel({ onNavigate }: { onNavigate?: () => void }) {
             )}
           >
             <span className="font-semibold">
-              {p.code} {catalogName(locale, p)}
+              {p.code} {catalogName(locale, p, find)}
             </span>
           </button>
         ))}
@@ -39,7 +41,7 @@ export function ProductsMegaPanel({ onNavigate }: { onNavigate?: () => void }) {
       <div>
         <div className="mb-2 flex items-center justify-between gap-2">
           <p className="text-xs text-muted">
-            {activePillar ? pillarSummary(locale, activePillar) : ""}
+            {activePillar ? pillarSummary(locale, activePillar, find) : ""}
           </p>
           <Link
             href={`/products#pillar-${active}`}
@@ -58,7 +60,7 @@ export function ProductsMegaPanel({ onNavigate }: { onNavigate?: () => void }) {
               className="rounded-md px-3 py-2 hover:bg-paper"
             >
               <div className="text-sm font-semibold text-navy">
-                {catalogName(locale, item)}
+                {catalogName(locale, item, find)}
               </div>
               {locale === "th" && item.nameEn ? (
                 <div className="text-[11px] text-muted">{item.nameEn}</div>
@@ -66,7 +68,7 @@ export function ProductsMegaPanel({ onNavigate }: { onNavigate?: () => void }) {
                 <div className="text-[11px] text-muted">{item.name}</div>
               ) : null}
               <div className="line-clamp-1 text-xs text-muted">
-                {categorySummary(locale, { slug: item.href.split("/")[2] ?? "", summary: item.summary })}
+                {categorySummary(locale, { slug: item.href.split("/")[2] ?? "", summary: item.summary }, find)}
               </div>
             </Link>
           ))}
@@ -88,6 +90,7 @@ export function ProductsMegaPanel({ onNavigate }: { onNavigate?: () => void }) {
 /** Compact list for mobile accordion */
 export function ProductsMobileLinks({ onNavigate }: { onNavigate: () => void }) {
   const { t, locale } = useI18n();
+  const { find } = useTx();
   return (
     <div className="pb-3 pl-2">
       <Link
@@ -104,7 +107,7 @@ export function ProductsMobileLinks({ onNavigate }: { onNavigate: () => void }) 
             className="block px-2 py-2 text-xs font-semibold tracking-wide text-brand-red"
             onClick={onNavigate}
           >
-            {p.code} {catalogName(locale, p)}
+            {p.code} {catalogName(locale, p, find)}
           </Link>
           <div className="space-y-0.5 pb-2">
             {hubItemsForPillar(p.id).map((item) => (
@@ -114,7 +117,7 @@ export function ProductsMobileLinks({ onNavigate }: { onNavigate: () => void }) 
                 className="flex min-h-11 items-center rounded-md px-2 py-2 text-sm text-white/85 hover:bg-white/10"
                 onClick={onNavigate}
               >
-                {catalogName(locale, item)}
+                {catalogName(locale, item, find)}
               </Link>
             ))}
           </div>

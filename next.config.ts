@@ -13,6 +13,23 @@ function siteOriginForFrameSrc(): string {
 const siteOrigin = siteOriginForFrameSrc();
 const frameSrcExtra = siteOrigin ? ` ${siteOrigin}` : "";
 
+const SCRIPT_HOSTS = [
+  "https://www.googletagmanager.com",
+  "https://www.google-analytics.com",
+  "https://connect.facebook.net",
+  "https://challenges.cloudflare.com",
+].join(" ");
+
+/**
+ * Public pages stay static, so CSP cannot use a per-request nonce.
+ * Dev keeps 'unsafe-eval' for React refresh. Production drops it and allows
+ * only WebAssembly compile (pdf.js) via 'wasm-unsafe-eval'.
+ */
+const publicScriptSrc =
+  process.env.NODE_ENV === "production"
+    ? `script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval' ${SCRIPT_HOSTS}`
+    : `script-src 'self' 'unsafe-inline' 'unsafe-eval' ${SCRIPT_HOSTS}`;
+
 const securityHeaders = [
   { key: "X-Content-Type-Options", value: "nosniff" },
   {
@@ -32,7 +49,7 @@ const securityHeaders = [
     key: "Content-Security-Policy",
     value: [
       "default-src 'self'",
-      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://www.google-analytics.com https://connect.facebook.net https://challenges.cloudflare.com",
+      publicScriptSrc,
       "style-src 'self' 'unsafe-inline'",
       "img-src 'self' data: blob: https:",
       "font-src 'self' data:",

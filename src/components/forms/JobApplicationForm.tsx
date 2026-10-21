@@ -7,7 +7,9 @@ import {
   isTurnstileEnabled,
   TurnstileField,
 } from "@/components/forms/TurnstileField";
+import { useI18n } from "@/lib/i18n/use-i18n";
 import { EDUCATION_LEVELS } from "@/lib/careers/types";
+import { thankYouHref } from "@/lib/leads/quote-no";
 import type { JobPosting } from "@/lib/cms/careers-demo";
 
 const GENERAL_APPLICATION = "__general__";
@@ -20,6 +22,7 @@ export function JobApplicationForm({
   defaultJobId?: string;
 }) {
   const router = useRouter();
+  const { locale } = useI18n();
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [resumeName, setResumeName] = useState<string | null>(null);
@@ -52,7 +55,7 @@ export function JobApplicationForm({
       });
       const json = (await res.json()) as { error?: string };
       if (!res.ok) throw new Error(json.error || "ส่งใบสมัครไม่สำเร็จ");
-      router.push("/thank-you");
+      router.push(thankYouHref(undefined, locale));
     } catch (err) {
       setError(err instanceof Error ? err.message : "เกิดข้อผิดพลาด");
       setPending(false);

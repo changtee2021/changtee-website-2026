@@ -1,0 +1,55 @@
+{
+  "numPages": 10,
+  "pages": [
+    {
+      "file": "/catalog/pvc-strip/pages/page-001.jpg",
+      "width": 723,
+      "height": 1024
+    },
+    {
+      "file": "/catalog/pvc-strip/pages/page-002.jpg",
+      "width": 723,
+      "height": 1024
+    },
+    {
+      "file": "/catalog/pvc-strip/pages/page-003.jpg",
+      "width": 723,
+      "height": 1024
+    },
+    {
+      "file": "/catalog/pvc-strip/pages/page-004.jpg",
+      "width": 723,
+      "height": 1024
+    },
+    {
+      "file": "/catalog/pvc-strip/pages/page-005.jpg",
+      "width": 723,
+      "height": 1024
+    },
+    {
+      "file": "/catalog/pvc-strip/pages/page-006.jpg",
+      "width": 723,
+      "height": 1024
+    },
+    {
+      "file": "/catalog/pvc-strip/pages/page-007.jpg",
+      "width": 723,
+      "height": 1024
+    },
+    {
+      "file": "/catalog/pvc-strip/pages/page-008.jpg",
+      "width": 723,
+      "height": 1024
+    },
+    {
+      "file": "/catalog/pvc-strip/pages/page-009.jpg",
+      "width": 723,
+      "height": 1024
+    },
+    {
+      "file": "/catalog/pvc-strip/pages/page-010.jpg",
+      "width": 723,
+      "height": 1024
+    }
+  ]
+}

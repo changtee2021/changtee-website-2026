@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
+import { LocaleLink as Link } from "@/components/i18n/LocaleLink";
 import { HomePanel } from "@/components/home/HomePanel";
 import { Reveal } from "@/components/home/Reveal";
 import { EditableSpot } from "@/components/preview/EditableSpot";

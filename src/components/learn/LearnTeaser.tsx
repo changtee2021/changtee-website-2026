@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import { LocaleLink as Link } from "@/components/i18n/LocaleLink";
 import { LEARN_SHEETS } from "@/lib/learn";
 import { HomePanel } from "@/components/home/HomePanel";
 import { useI18n } from "@/lib/i18n/use-i18n";

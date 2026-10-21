@@ -95,6 +95,7 @@ async function openPdfDocument(
   const { loadPdfjs } = await import("./pdfjs-browser");
   const pdfjsLib = await loadPdfjs();
 
+  // pdfjs-dist 6 removed isEvalSupported; image decode no longer uses eval.
   const loadingTask = pdfjsLib.getDocument({ url: fileUrl });
   if (onDownloadProgress) {
     loadingTask.onProgress = (p: { loaded: number; total: number }) =>

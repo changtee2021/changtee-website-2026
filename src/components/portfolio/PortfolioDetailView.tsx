@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import Image from "next/image";
-import Link from "next/link";
+import { LocaleLink as Link } from "@/components/i18n/LocaleLink";
 import { ArrowUpRight, MapPin, ZoomIn } from "lucide-react";
 import { EditableSpot } from "@/components/preview/EditableSpot";
 import {

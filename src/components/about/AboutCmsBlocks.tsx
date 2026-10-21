@@ -1,12 +1,9 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
 import { EditableSpot } from "@/components/preview/EditableSpot";
 import { useSectionValues } from "@/lib/cms/demo-store";
 import { ABOUT_SECTION_DEFAULTS } from "@/lib/cms/page-sections/templates";
-import { siteConfig } from "@/lib/site-config";
-
 export function AboutHeroCms() {
   const { values, enabled } = useSectionValues(
     "about",
@@ -35,13 +32,8 @@ export function AboutHeroCms() {
 
         <div className="relative z-[1] flex h-full min-h-[100dvh] flex-col justify-end px-6 pb-16 pt-28 sm:px-10 sm:pb-20 sm:pt-40 lg:px-16">
           <div className="max-w-xl">
-            <EditableSpot sectionId="hero" fieldKey="eyebrow">
-              <p className="text-xs font-semibold tracking-[0.18em] text-white/70 uppercase">
-                {values.eyebrow} · {siteConfig.nameEn}
-              </p>
-            </EditableSpot>
             <EditableSpot sectionId="hero" fieldKey="title">
-              <h1 className="mt-3 font-display text-3xl font-semibold leading-tight sm:text-4xl lg:text-[2.9rem]">
+              <h1 className="font-display text-3xl font-semibold leading-tight sm:text-4xl lg:text-[2.9rem]">
                 {values.title}
               </h1>
             </EditableSpot>
@@ -50,32 +42,6 @@ export function AboutHeroCms() {
                 {values.lead}
               </p>
             </EditableSpot>
-            <div className="mt-7 flex flex-wrap gap-3">
-              <a
-                href="#company-contact"
-                className="inline-flex rounded-full bg-white px-5 py-3 text-sm font-semibold text-navy transition hover:bg-white/90"
-              >
-                ติดต่อเรา
-              </a>
-              <Link
-                href="/visit-factory"
-                className="inline-flex min-h-11 items-center rounded-full border border-white/35 px-5 py-3 text-sm font-semibold text-white transition hover:bg-white/10"
-              >
-                เยี่ยมชมโรงงาน
-              </Link>
-              <Link
-                href="/visit-factory?mode=presentation"
-                className="inline-flex min-h-11 items-center rounded-full border border-white/35 px-5 py-3 text-sm font-semibold text-white transition hover:bg-white/10"
-              >
-                นัดนำเสนอสินค้า
-              </Link>
-              <Link
-                href="/careers"
-                className="inline-flex rounded-full border border-white/35 px-5 py-3 text-sm font-semibold text-white transition hover:bg-white/10"
-              >
-                ร่วมงานกับเรา
-              </Link>
-            </div>
           </div>
         </div>
       </div>

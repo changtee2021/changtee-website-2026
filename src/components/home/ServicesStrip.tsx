@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { LocaleLink as Link } from "@/components/i18n/LocaleLink";
 import { HomePanel, PanelHeading } from "@/components/home/HomePanel";
 import { Reveal } from "@/components/home/Reveal";
 import { homeServices } from "@/lib/mock-content";

@@ -1,5 +1,8 @@
+"use client";
+
 import Image from "next/image";
 import { CLIENT_LOGOS } from "@/lib/client-logos";
+import { useTx } from "@/lib/i18n/use-tx";
 import { cn } from "@/lib/utils";
 
 /** Split all logos across 3 marquee rows */
@@ -10,9 +13,10 @@ const ROW_BOTTOM = CLIENT_LOGOS.slice(ROW_SIZE * 2);
 
 /** Client logo marquees — rendered inside StatsStory as one combined home section. */
 export function ClientsLogos() {
+  const { tx } = useTx();
   return (
     <div className="px-0 py-2 sm:py-3">
-      <p className="sr-only">ลูกค้าองค์กรที่ไว้วางใจช่างตี๋</p>
+      <p className="sr-only">{tx("ลูกค้าองค์กรที่ไว้วางใจช่างตี๋")}</p>
       <div className="space-y-1.5 sm:space-y-2">
         <LogoMarquee logos={ROW_TOP} direction="left" duration={90} />
         <LogoMarquee logos={ROW_MID} direction="right" duration={105} />

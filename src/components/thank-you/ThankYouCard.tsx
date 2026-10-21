@@ -1,6 +1,6 @@
 import { Suspense } from "react";
 import Image from "next/image";
-import Link from "next/link";
+import { LocaleLink as Link } from "@/components/i18n/LocaleLink";
 import { ThankYouQuoteNo } from "@/components/thank-you/ThankYouQuoteNo";
 import { Check, MessageCircle, Phone } from "lucide-react";
 import { siteConfig } from "@/lib/site-config";

@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import { LocaleLink as Link } from "@/components/i18n/LocaleLink";
 import type { SpaceType } from "@/lib/cms/portfolio-demo";
 import { useI18n } from "@/lib/i18n/use-i18n";
 import type { MessageKey } from "@/lib/i18n/messages";

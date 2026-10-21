@@ -9,6 +9,7 @@ import {
   TurnstileField,
 } from "@/components/forms/TurnstileField";
 import { thankYouHref } from "@/lib/leads/quote-no";
+import { useI18n } from "@/lib/i18n/use-i18n";
 
 type Props = {
   source?: "quote" | "contact" | "fab";
@@ -22,6 +23,7 @@ export function LeadForm({
   submitLabel = "ส่งข้อมูล",
 }: Props) {
   const router = useRouter();
+  const { locale } = useI18n();
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
@@ -60,7 +62,7 @@ export function LeadForm({
       });
       const json = (await res.json()) as { error?: string; quoteNo?: string | null };
       if (!res.ok) throw new Error(json.error || "ส่งข้อมูลไม่สำเร็จ");
-      router.push(thankYouHref(json.quoteNo));
+      router.push(thankYouHref(json.quoteNo, locale));
     } catch (err) {
       setError(err instanceof Error ? err.message : "เกิดข้อผิดพลาด");
       setPending(false);

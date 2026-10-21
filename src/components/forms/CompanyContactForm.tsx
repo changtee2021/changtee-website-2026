@@ -2,6 +2,7 @@
 
 import { useCallback, useState, type HTMLAttributes } from "react";
 import { useRouter } from "next/navigation";
+import { LocaleLink as Link } from "@/components/i18n/LocaleLink";
 import { PdpaConsentField } from "@/components/forms/PdpaConsentField";
 import { MarketingConsentField } from "@/components/forms/MarketingConsentField";
 import {
@@ -10,9 +11,11 @@ import {
 } from "@/components/forms/TurnstileField";
 import { companyInquiryTypes } from "@/lib/about-content";
 import { thankYouHref } from "@/lib/leads/quote-no";
+import { useI18n } from "@/lib/i18n/use-i18n";
 
 export function CompanyContactForm() {
   const router = useRouter();
+  const { locale } = useI18n();
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
@@ -53,7 +56,7 @@ export function CompanyContactForm() {
       });
       const json = (await res.json()) as { error?: string; quoteNo?: string | null };
       if (!res.ok) throw new Error(json.error || "ส่งข้อมูลไม่สำเร็จ");
-      router.push(thankYouHref(json.quoteNo));
+      router.push(thankYouHref(json.quoteNo, locale));
     } catch (err) {
       setError(err instanceof Error ? err.message : "เกิดข้อผิดพลาด");
       setPending(false);
@@ -116,9 +119,9 @@ export function CompanyContactForm() {
       </button>
       <p className="text-xs text-muted">
         ต้องการใบเสนอราคาสำหรับบ้าน/คอนโด?{" "}
-        <a href="/quote" className="font-medium text-navy underline">
+        <Link href="/quote" className="font-medium text-navy underline">
           ไปที่ฟอร์มขอใบเสนอราคา
-        </a>
+        </Link>
       </p>
     </form>
   );
