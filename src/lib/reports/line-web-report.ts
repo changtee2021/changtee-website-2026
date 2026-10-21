@@ -24,7 +24,7 @@ export type WebReportStats = {
   mobileShare: number;
   sourcesTracked: number;
   sourcesTrackedFrom: string | null;
-  sources: { search: number; direct: number; social: number; other: number };
+  sources: { search: number; ai: number; direct: number; social: number; other: number };
   topProducts: { slug: string; views: number }[];
 };
 
@@ -49,7 +49,7 @@ const MUTED = "#6B7280";
 const INK = "#111827";
 const SOFT = "#F4F6F9";
 const BAR = "#CBD5E1";
-const SOURCE_COLORS = ["#0B1F3A", "#5B7DB1", "#A9BCD8", "#E3E8F0"];
+const SOURCE_COLORS = ["#0B1F3A", "#7C3AED", "#5B7DB1", "#A9BCD8", "#E3E8F0"];
 
 function parseDay(day: string) {
   return new Date(`${day}T00:00:00Z`);
@@ -148,6 +148,7 @@ export async function fetchWebReportStats(range: DayRange): Promise<WebReportSta
     sourcesTrackedFrom: raw.sourcesTrackedFrom ? String(raw.sourcesTrackedFrom) : null,
     sources: {
       search: num(raw.sources?.search),
+      ai: num(raw.sources?.ai),
       direct: num(raw.sources?.direct),
       social: num(raw.sources?.social),
       other: num(raw.sources?.other),
@@ -378,6 +379,7 @@ function sourcesSection(current: WebReportStats, previous: WebReportStats): Flex
   const nodes: FlexNode[] = [sectionTitle("คนมาจากไหน", "คน · เทียบ")];
   const rows: [string, keyof WebReportStats["sources"]][] = [
     ["Google / ค้นหา", "search"],
+    ["AI (ChatGPT ฯลฯ)", "ai"],
     ["เข้าตรง", "direct"],
     ["โซเชียล / LINE", "social"],
     ["เว็บอื่น ๆ", "other"],
@@ -416,8 +418,8 @@ function sourcesSection(current: WebReportStats, previous: WebReportStats): Flex
               flex: 0,
               backgroundColor: SOURCE_COLORS[i],
               cornerRadius: "2px",
-              borderWidth: i === 3 ? "1px" : undefined,
-              borderColor: i === 3 ? BAR : undefined,
+              borderWidth: i === rows.length - 1 ? "1px" : undefined,
+              borderColor: i === rows.length - 1 ? BAR : undefined,
             }),
             text(label, { size: "xs", color: INK, flex: 5 }),
             text(`${shares[i]}%`, { size: "xxs", color: MUTED, align: "end", flex: 2 }),

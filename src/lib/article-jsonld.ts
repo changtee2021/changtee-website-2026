@@ -1,11 +1,19 @@
 import type { BlogPost } from "@/lib/cms/blog-demo";
 import { BLOG_CATEGORY_LABELS } from "@/lib/cms/blog-demo";
 import { siteConfig } from "@/lib/site-config";
+import { LOCALE_META, localizedHref, type Locale } from "@/lib/i18n/locale";
 
 /** Article + BreadcrumbList JSON-LD for a blog detail page. */
-export function getArticleJsonLd(post: BlogPost): Record<string, unknown> {
+export function getArticleJsonLd(
+  post: BlogPost,
+  locale: Locale = "th",
+  copy?: { headline?: string; description?: string },
+): Record<string, unknown> {
   const base = siteConfig.url.replace(/\/$/, "");
-  const url = `${base}/blog/${post.slug}`;
+  const path = localizedHref(locale, `/blog/${post.slug}`);
+  const url = `${base}${path === "/" ? "" : path}`;
+  const headline = copy?.headline || post.title;
+  const description = copy?.description || post.seoDescription || post.excerpt;
   const cover = post.cover.trim() || "/images/banners/hero-1.png";
 
   return {
@@ -14,14 +22,14 @@ export function getArticleJsonLd(post: BlogPost): Record<string, unknown> {
       {
         "@type": "Article",
         "@id": `${url}#article`,
-        headline: post.title,
-        description: post.seoDescription || post.excerpt,
+        headline,
+        description,
         image: [cover.startsWith("http") ? cover : `${base}${cover}`],
         articleSection: BLOG_CATEGORY_LABELS[post.category],
         keywords: post.tags.join(", "),
         datePublished: post.publishedAt ?? undefined,
         dateModified: post.updatedAt || post.publishedAt || undefined,
-        inLanguage: "th-TH",
+        inLanguage: LOCALE_META[locale].hreflang,
         author: {
           "@type": "Organization",
           name: siteConfig.name,
@@ -51,7 +59,7 @@ export function getArticleJsonLd(post: BlogPost): Record<string, unknown> {
             name: "บทความ",
             item: `${base}/blog`,
           },
-          { "@type": "ListItem", position: 3, name: post.title, item: url },
+          { "@type": "ListItem", position: 3, name: headline, item: url },
         ],
       },
     ],

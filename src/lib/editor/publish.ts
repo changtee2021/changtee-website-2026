@@ -6,6 +6,7 @@ import {
   readPageSectionsPublished,
 } from "@/lib/editor/draft-server";
 import { flattenPages } from "@/lib/editor/page-registry";
+import { pingIndexNow } from "@/lib/seo/indexnow";
 
 const HISTORY_LIMIT = 10;
 
@@ -111,6 +112,7 @@ export async function publishPageKey(
     }
   }
 
+  await pingIndexNow(paths);
   return { ok: true, updatedAt: result.updatedAt, revalidated: paths };
 }
 

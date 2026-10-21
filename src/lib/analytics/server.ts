@@ -177,8 +177,16 @@ function clickLabel(name: string) {
     : name;
 }
 
+/** Same hosts as changtee_web.line_report_stats. Gemini is matched before Google. */
+function isAiReferrer(host: string) {
+  return /chatgpt\.com|openai\.com|perplexity\.ai|gemini\.google\.|aistudio\.google\.|copilot\.microsoft\.|claude\.ai|anthropic\.com|phind\.com|you\.com|meta\.ai/.test(
+    host,
+  );
+}
+
 function liveCity(referrerHost: string | null) {
   if (!referrerHost) return "ตรง";
+  if (isAiReferrer(referrerHost)) return "AI";
   if (/google|bing|yahoo/.test(referrerHost)) return "ค้นหา";
   if (/facebook|instagram|tiktok|line\.me/.test(referrerHost)) return "โซเชียล";
   return referrerHost;

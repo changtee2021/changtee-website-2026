@@ -66,3 +66,24 @@ export function sectionThaiText(
   }
   return Object.keys(pack).length ? pack : undefined;
 }
+
+/**
+ * An article is ready in English when nearly every string on that page has a
+ * translation. Below this, the page still shows Thai and stays out of the
+ * English sitemap.
+ */
+const BLOG_EN_READY = 0.85;
+
+export function blogTranslationCoverage(slug: string): number {
+  const indexes = SECTIONS.blog.PAGES[slug];
+  if (!indexes?.length) return 0;
+  const values = SECTIONS.blog.text.en;
+  let filled = 0;
+  for (const i of indexes) if (values[i]?.trim()) filled += 1;
+  return filled / indexes.length;
+}
+
+/** Thai always; English only for articles whose translation is complete enough to index. */
+export function blogIndexableLocales(slug: string): ("th" | "en")[] {
+  return blogTranslationCoverage(slug) >= BLOG_EN_READY ? ["th", "en"] : ["th"];
+}

@@ -15,7 +15,8 @@ export async function generateMetadata({
   const locale = await langFromParams(params);
   return pageMetadata({
     title: "ขอใบเสนอราคา",
-    description: "กรอกแบบฟอร์มขอใบเสนอราคาจากช่างตี๋ ผ้าม่าน",
+    description:
+      "ขอใบเสนอราคาผ้าม่าน ม่านม้วน มู่ลี่ และม่านไฟฟ้าจากช่างตี๋ วัดหน้างานฟรี ผลิตเองที่โรงงาน ติดตั้งทั่วประเทศไทย รับประกัน 1 ปี",
     path: "/quote",
     locale,
   });

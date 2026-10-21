@@ -9,6 +9,8 @@ import { siteConfig } from "@/lib/site-config";
 import { localizedHref, type Locale } from "@/lib/i18n/locale";
 import { productIndexableLocales } from "@/lib/i18n/content/product-overlays";
 import { hreflangLanguages, indexableLocales } from "@/lib/seo/meta";
+import { blogIndexableLocales } from "@/lib/i18n/content/thai-text/sections.server";
+import { areaPath, serviceAreas } from "@/lib/service-areas";
 import type { BlogPost } from "@/lib/cms/blog-demo";
 import type { PortfolioItem } from "@/lib/cms/portfolio-demo";
 
@@ -145,7 +147,21 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         lastModified: post.updatedAt || post.publishedAt,
         changeFrequency: "weekly",
         priority: 0.7,
-        locales: cmsLocales,
+        locales: blogIndexableLocales(post.slug),
+      }),
+    ),
+    ...(serviceAreas(portfolioItems).length
+      ? entry(base, "/areas", {
+          changeFrequency: "weekly",
+          priority: 0.6,
+          locales: ["th"],
+        })
+      : []),
+    ...serviceAreas(portfolioItems).flatMap((area) =>
+      entry(base, areaPath(area.name), {
+        changeFrequency: "weekly",
+        priority: 0.6,
+        locales: ["th"],
       }),
     ),
   ];

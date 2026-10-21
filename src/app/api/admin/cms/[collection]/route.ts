@@ -8,6 +8,7 @@ import {
   writeLocalCmsCollection,
 } from "@/lib/cms/cms-local-store";
 import { revalidateCmsCollection } from "@/lib/cms/revalidate-cms";
+import { indexNowPaths, pingIndexNow } from "@/lib/seo/indexnow";
 
 export const runtime = "nodejs";
 
@@ -92,5 +93,6 @@ export async function PUT(request: Request, { params }: Props) {
     return NextResponse.json({ error }, { status: 503 });
   }
   revalidateCmsCollection(collection);
+  await pingIndexNow(indexNowPaths(collection, merged));
   return NextResponse.json({ ok: true, updatedAt: result.updatedAt });
 }
