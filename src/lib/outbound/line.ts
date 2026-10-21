@@ -239,6 +239,13 @@ export async function pushLineCard(
   return pushLinePayload(lineCardMessage(card), to);
 }
 
+export async function pushLineFlex(
+  message: Record<string, unknown>,
+  to?: string | null,
+): Promise<{ ok: boolean; error?: string }> {
+  return pushLinePayload(message, to);
+}
+
 /** Answers a webhook event; reply tokens are single-use and expire within a minute. */
 export async function replyLineMessages(
   replyToken: string,
@@ -309,6 +316,7 @@ export const LEAD_CLAIM_ACTION = "claim";
 /** Short staff card. Skips billing address and tax id — those stay in email and admin. */
 export function leadLineCard(lead: {
   id: string;
+  quoteNo?: string | null;
   source: string;
   contactName: string;
   phone: string;
@@ -327,6 +335,7 @@ export function leadLineCard(lead: {
   const installAddress = lead.installAddress?.replace(/\s+/g, " ").trim();
   const when = bangkokParts(lead.createdAt || new Date().toISOString());
   const fields: LineCardField[] = [
+    { label: "เลขที่", value: lead.quoteNo ?? "" },
     { label: "วันที่", value: when.dateText },
     { label: "เวลา", value: when.timeText },
     {
@@ -383,6 +392,7 @@ export function claimedLeadLineCard(claim: {
   claimedBy: string;
   claimedAt: string;
   lead: {
+    quoteNo?: string | null;
     contactName: string;
     phone: string;
     productType?: string | null;
@@ -395,6 +405,7 @@ export function claimedLeadLineCard(claim: {
   const { lead } = claim;
   const installAddress = lead.installAddress?.replace(/\s+/g, " ").trim();
   const fields: LineCardField[] = [
+    { label: "เลขที่", value: lead.quoteNo ?? "" },
     { label: "ผู้รับงาน", value: claim.claimedBy },
     { label: "วันที่รับงาน", value: claimed.dateText },
     { label: "เวลารับงาน", value: `${claimed.timeText} น.` },
@@ -425,7 +436,12 @@ export function claimedLeadLineCard(claim: {
 }
 
 /** Text reply when someone taps a name on a lead that already has an owner. */
-export function alreadyClaimedLineText(claimedBy: string, claimedAt: string) {
+export function alreadyClaimedLineText(
+  claimedBy: string,
+  claimedAt: string,
+  quoteNo?: string | null,
+) {
   const when = bangkokParts(claimedAt);
-  return `งานนี้${claimedBy}รับไปแล้ว เมื่อ ${when.dateText} เวลา ${when.timeText} น.`;
+  const job = quoteNo ? `งาน ${quoteNo} ` : "งานนี้";
+  return `${job}${claimedBy}รับไปแล้ว เมื่อ ${when.dateText} เวลา ${when.timeText} น.`;
 }

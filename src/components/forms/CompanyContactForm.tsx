@@ -10,9 +10,12 @@ import {
   TurnstileField,
 } from "@/components/forms/TurnstileField";
 import { companyInquiryTypes } from "@/lib/about-content";
+import { thankYouHref } from "@/lib/leads/quote-no";
+import { useI18n } from "@/lib/i18n/use-i18n";
 
 export function CompanyContactForm() {
   const router = useRouter();
+  const { locale } = useI18n();
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
@@ -51,9 +54,9 @@ export function CompanyContactForm() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
-      const json = (await res.json()) as { error?: string };
+      const json = (await res.json()) as { error?: string; quoteNo?: string | null };
       if (!res.ok) throw new Error(json.error || "ส่งข้อมูลไม่สำเร็จ");
-      router.push("/thank-you");
+      router.push(thankYouHref(json.quoteNo, locale));
     } catch (err) {
       setError(err instanceof Error ? err.message : "เกิดข้อผิดพลาด");
       setPending(false);

@@ -223,7 +223,7 @@ export async function POST(request: Request) {
       const line = await pushLineCard(leadLineCard(lead));
       notify.push({ channel: "line", ...line });
 
-      return NextResponse.json({ ok: true, id: lead.id, notify });
+      return NextResponse.json({ ok: true, id: lead.id, quoteNo: lead.quoteNo ?? null, notify });
     }
 
     // Compact JSON leads (contact / fab)
@@ -297,7 +297,7 @@ export async function POST(request: Request) {
     const line = await pushLineCard(leadLineCard(lead));
     notify.push({ channel: "line", ...line });
 
-    return NextResponse.json({ ok: true, id: lead.id, notify });
+    return NextResponse.json({ ok: true, id: lead.id, quoteNo: lead.quoteNo ?? null, notify });
   } catch (err) {
     if (err instanceof Error && err.message === "LEAD_PERSISTENCE_UNAVAILABLE") {
       return NextResponse.json(

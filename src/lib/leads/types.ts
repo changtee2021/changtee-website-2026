@@ -103,6 +103,8 @@ export const REFERRAL_SOURCES = [
 
 export type QuoteLead = {
   id: string;
+  /** Running number from the database, e.g. Q69-0001 (Buddhist-era year). */
+  quoteNo?: string | null;
   source: "quote" | "estimate" | "contact" | "fab";
   status: LeadStatus;
   contactName: string;

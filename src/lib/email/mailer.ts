@@ -121,13 +121,19 @@ export async function resolveQuoteAttachments(lead: QuoteLead): Promise<QuoteMai
   });
 }
 
+function leadFooter(lead: QuoteLead) {
+  return lead.quoteNo ? `เลขที่ ${lead.quoteNo} · Lead ID: ${lead.id}` : `Lead ID: ${lead.id}`;
+}
+
 function leadNoticeCopy(lead: QuoteLead) {
+  const ref = lead.quoteNo ? `${lead.quoteNo} · ` : "";
+  const customerRef = lead.quoteNo ? ` เลขที่ ${lead.quoteNo}` : "";
   if (lead.source === "contact") {
     return {
       title: "ข้อความติดต่อใหม่",
       subtitle: "จากฟอร์มติดต่อบริษัท",
-      subject: `[ติดต่อบริษัท] ${lead.contactName} · ${lead.productType}`,
-      customerSubject: "รับเรื่องติดต่อแล้ว — ช่างตี๋ ผ้าม่าน",
+      subject: `[ติดต่อบริษัท] ${ref}${lead.contactName} · ${lead.productType}`,
+      customerSubject: `รับเรื่องติดต่อแล้ว${customerRef} — ช่างตี๋ ผ้าม่าน`,
       customerIntro:
         "เราได้รับข้อความของท่านเรียบร้อยแล้ว ทีมงานจะอ่านรายละเอียดและติดต่อกลับโดยเร็วที่สุด ผ่านอีเมลหรือช่องทางที่ท่านให้ไว้",
     };
@@ -136,8 +142,8 @@ function leadNoticeCopy(lead: QuoteLead) {
     return {
       title: "คำขอจากปุ่มติดต่อด่วน",
       subtitle: "จากปุ่มติดต่อบนเว็บไซต์",
-      subject: `[ติดต่อด่วน] ${lead.contactName} · ${lead.productType}`,
-      customerSubject: "รับเรื่องติดต่อแล้ว — ช่างตี๋ ผ้าม่าน",
+      subject: `[ติดต่อด่วน] ${ref}${lead.contactName} · ${lead.productType}`,
+      customerSubject: `รับเรื่องติดต่อแล้ว${customerRef} — ช่างตี๋ ผ้าม่าน`,
       customerIntro:
         "เราได้รับคำขอของท่านเรียบร้อยแล้ว ทีมงานจะติดต่อกลับโดยเร็วที่สุด ผ่านอีเมลหรือช่องทางที่ท่านให้ไว้",
     };
@@ -145,8 +151,8 @@ function leadNoticeCopy(lead: QuoteLead) {
   return {
     title: "ขอใบเสนอราคา",
     subtitle: `แสดงผลจากฟอร์ม · สถานะ: ${LEAD_STATUS_LABELS[lead.status]}`,
-    subject: `[ขอใบเสนอราคา] ${lead.contactName} · ${lead.productType}`,
-    customerSubject: "รับเรื่องขอใบเสนอราคา — ช่างตี๋ ผ้าม่าน",
+    subject: `[ขอใบเสนอราคา] ${ref}${lead.contactName} · ${lead.productType}`,
+    customerSubject: `รับเรื่องขอใบเสนอราคา${customerRef} — ช่างตี๋ ผ้าม่าน`,
     customerIntro:
       "เราได้รับคำขอใบเสนอราคาของท่านเรียบร้อยแล้ว ทีมงานจะตรวจสอบข้อมูลและติดต่อกลับโดยเร็วที่สุด ผ่านอีเมลหรือช่องทางที่ท่านให้ไว้",
   };
@@ -173,7 +179,7 @@ export function buildAdminSummaryHtml(
         "เรื่องที่ติดต่อ",
         `${fieldRow("หัวข้อ", lead.productType)}${fieldRow("ข้อความ", contactMessage(lead) || lead.note)}`,
       )}`,
-      footer: `Lead ID: ${lead.id}`,
+      footer: leadFooter(lead),
     });
   }
 
@@ -189,7 +195,7 @@ export function buildAdminSummaryHtml(
         "สิ่งที่สนใจ",
         `${fieldRow("สินค้าที่สนใจ", lead.productType)}${fieldRow("รายละเอียดเพิ่มเติม", lead.note)}`,
       )}`,
-      footer: `Lead ID: ${lead.id}`,
+      footer: leadFooter(lead),
     });
   }
 
@@ -215,7 +221,7 @@ export function buildAdminSummaryHtml(
       "งานที่ต้องการ",
       `${fieldRow("ประเภทสินค้า", lead.productType)}${fieldRow("ขนาดที่ต้องการ (กว้าง×สูง)", lead.requestedSize)}${fieldRow("วันที่อยากติดตั้ง", lead.callbackDate)}${fieldLinkRow("แนบภาพหน้างาน", files)}${fieldRow("หาเราเจอจากที่ไหน", lead.referralSource)}`,
     )}${attachmentGallery(files)}${fieldSection("หมายเหตุ", fieldRow("รายละเอียดเพิ่มเติม", lead.note))}`,
-    footer: `Lead ID: ${lead.id}`,
+    footer: leadFooter(lead),
   });
 }
 
@@ -264,7 +270,7 @@ export function buildCustomerReplyHtml(lead: QuoteLead) {
     nextStep: "ทีมงานจะตรวจข้อมูลหน้างาน แล้วติดต่อกลับพร้อมใบเสนอราคา",
     summary: `${fieldSection(
       "งานที่ขอใบเสนอราคา",
-      `${fieldRow("ประเภทสินค้า", lead.productType)}${fieldRow("ขนาดที่ต้องการ", lead.requestedSize)}${fieldRow("วันที่อยากติดตั้ง", lead.callbackDate)}`,
+      `${fieldRow("เลขที่คำขอ", lead.quoteNo)}${fieldRow("ประเภทสินค้า", lead.productType)}${fieldRow("ขนาดที่ต้องการ", lead.requestedSize)}${fieldRow("วันที่อยากติดตั้ง", lead.callbackDate)}`,
     )}${channels}`,
     signOff: "ขอบคุณที่ไว้วางใจ<br/>ทีมงานช่างตี๋ ผ้าม่าน",
   });

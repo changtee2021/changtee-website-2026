@@ -10,11 +10,12 @@ import { ArrowRight, Search, X } from "lucide-react";
 import { useBlogPosts, usePortfolioItems } from "@/lib/cms/demo-store";
 import { buildSearchIndex, searchSite } from "@/lib/site-search";
 import { useLockBodyScroll } from "@/lib/use-lock-body-scroll";
+import { localizedHref } from "@/lib/i18n/locale";
 import { useI18n } from "@/lib/i18n/use-i18n";
 import type { MessageKey } from "@/lib/i18n/messages";
 
 export function SiteSearch({ className = "" }: { className?: string }) {
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
@@ -74,7 +75,7 @@ export function SiteSearch({ className = "" }: { className?: string }) {
 
   function go(href: string) {
     close();
-    router.push(href);
+    router.push(localizedHref(locale, href));
   }
 
   function onSubmit(e: FormEvent) {

@@ -1,5 +1,7 @@
+import { Suspense } from "react";
 import Image from "next/image";
 import { LocaleLink as Link } from "@/components/i18n/LocaleLink";
+import { ThankYouQuoteNo } from "@/components/thank-you/ThankYouQuoteNo";
 import { Check, MessageCircle, Phone } from "lucide-react";
 import { siteConfig } from "@/lib/site-config";
 
@@ -37,6 +39,9 @@ export function ThankYouCard() {
               ขอบคุณที่ไว้วางใจช่างตี๋ ผ้าม่าน เราได้ส่งอีเมลยืนยันให้คุณแล้ว (หากระบุอีเมลไว้)
               ทีมงานจะติดต่อกลับโดยเร็วที่สุดผ่านช่องทางที่คุณให้ไว้
             </p>
+            <Suspense fallback={null}>
+              <ThankYouQuoteNo />
+            </Suspense>
           </div>
 
           <div className="mt-8 grid gap-3 sm:grid-cols-2">

@@ -45,6 +45,8 @@ import {
   type SiteMediaKind,
 } from "@/lib/leads/site-media";
 import { toStorageRef } from "@/lib/security/lead-media";
+import { thankYouHref } from "@/lib/leads/quote-no";
+import { useI18n } from "@/lib/i18n/use-i18n";
 
 type SiteMediaItem = {
   id: string;
@@ -161,6 +163,7 @@ function resolveProductType(raw: string | null, item?: string | null): string {
 
 export function QuoteForm() {
   const router = useRouter();
+  const { locale } = useI18n();
   const searchParams = useSearchParams();
   const formRef = useRef<HTMLFormElement>(null);
   const siteFileRef = useRef<HTMLInputElement>(null);
@@ -423,9 +426,9 @@ export function QuoteForm() {
         method: "POST",
         body: formData,
       });
-      const json = await readJsonResponse<{ error?: string }>(res);
+      const json = await readJsonResponse<{ error?: string; quoteNo?: string | null }>(res);
       if (!res.ok) throw new Error(json.error || "ส่งแบบฟอร์มไม่สำเร็จ");
-      router.push("/thank-you");
+      router.push(thankYouHref(json.quoteNo, locale));
     } catch (err) {
       setError(err instanceof Error ? err.message : "เกิดข้อผิดพลาด");
       setPending(false);

@@ -207,6 +207,7 @@ export function LeadsBoard() {
       if (productFilter !== "all" && l.productType !== productFilter) return false;
       if (!q) return true;
       return (
+        (l.quoteNo || "").toLowerCase().includes(q) ||
         l.contactName.toLowerCase().includes(q) ||
         l.phone.toLowerCase().includes(q) ||
         (l.lineId || "").toLowerCase().includes(q) ||
@@ -756,7 +757,7 @@ export function LeadsBoard() {
             <input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="ค้นหาชื่อ / เบอร์ / อีเมล"
+              placeholder="ค้นหาเลขที่ / ชื่อ / เบอร์ / อีเมล"
               className="w-full rounded-xl border border-line bg-paper py-2.5 pl-10 pr-3 text-sm text-navy outline-none focus:border-navy"
             />
           </label>
@@ -791,7 +792,7 @@ export function LeadsBoard() {
           <table className="min-w-full text-left text-sm">
             <thead className="bg-[#f8fafc] text-muted">
               <tr>
-                <th className="px-4 py-3 font-medium">วันที่</th>
+                <th className="px-4 py-3 font-medium">เลขที่ / วันที่</th>
                 <th className="px-4 py-3 font-medium">ชื่อผู้ติดต่อ</th>
                 <th className="px-4 py-3 font-medium">เบอร์</th>
                 <th className="px-4 py-3 font-medium">สินค้า</th>
@@ -812,6 +813,9 @@ export function LeadsBoard() {
                 filtered.map((lead) => (
                   <tr key={lead.id} className="border-t border-line align-top">
                     <td className="px-4 py-3 whitespace-nowrap">
+                      {lead.quoteNo ? (
+                        <div className="font-semibold tabular-nums text-navy">{lead.quoteNo}</div>
+                      ) : null}
                       <div className="text-navy">
                         {new Date(lead.createdAt).toLocaleDateString("th-TH")}
                       </div>
@@ -964,7 +968,7 @@ export function LeadsBoard() {
                 <h2 className="font-display text-xl font-semibold text-navy">
                   รายละเอียดคำขอ
                 </h2>
-                <p className="text-sm text-muted">{selected.id}</p>
+                <p className="text-sm text-muted">{selected.quoteNo ?? selected.id}</p>
               </div>
               <button
                 type="button"
