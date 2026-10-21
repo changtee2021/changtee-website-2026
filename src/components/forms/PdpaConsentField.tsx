@@ -1,4 +1,5 @@
-import Link from "next/link";
+import { LocaleLink as Link } from "@/components/i18n/LocaleLink";
+import { Tx } from "@/components/i18n/Tx";
 
 export function PdpaConsentField({
   checked,
@@ -22,14 +23,15 @@ export function PdpaConsentField({
           : {})}
       />
       <span>
-        ข้าพเจ้ายินยอมให้เก็บ ใช้ และประมวลผลข้อมูลส่วนบุคคลเพื่อติดต่อกลับ
-        และจัดทำใบเสนอราคา/ให้บริการ ตาม{" "}
+        <Tx>
+          ข้าพเจ้ายินยอมให้เก็บ ใช้ และประมวลผลข้อมูลส่วนบุคคลเพื่อติดต่อกลับ และจัดทำใบเสนอราคา/ให้บริการ ตาม
+        </Tx>{" "}
         <Link href="/privacy" className="text-navy underline">
-          นโยบายความเป็นส่วนตัว
+          <Tx>นโยบายความเป็นส่วนตัว</Tx>
         </Link>{" "}
-        และยอมรับ{" "}
+        <Tx>และยอมรับ</Tx>{" "}
         <Link href="/terms" className="text-navy underline">
-          ข้อกำหนดการใช้บริการ
+          <Tx>ข้อกำหนดการใช้บริการ</Tx>
         </Link>
       </span>
     </label>

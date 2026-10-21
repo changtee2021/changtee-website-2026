@@ -1,6 +1,6 @@
 import type { LearnSheet } from "@/lib/learn";
 import { LEARN_SHEETS } from "@/lib/learn";
-import Link from "next/link";
+import { LocaleLink as Link } from "@/components/i18n/LocaleLink";
 
 export function MotorLesson({ sheet }: { sheet: LearnSheet }) {
   const siblings = LEARN_SHEETS.filter(

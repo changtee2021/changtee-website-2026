@@ -40,6 +40,21 @@ export const productCatalogs: ProductCatalogFile[] = [
     status: "published",
     sortOrder: 1,
   },
+  {
+    id: "pvc-strip",
+    title: "แคตตาล็อกม่านริ้วพลาสติก",
+    titleEn: "PVC Strip Curtain Catalog",
+    description:
+      "รวมชนิดม่านริ้ว PVC ผิวเรียบ ผิวแถบ แม่เหล็ก ทนเย็น กันแมลง และระบบรางแขวนทุกแบบ — เปิดดูออนไลน์หรือดาวน์โหลด PDF",
+    href: "/catalog/pvc-strip.pdf",
+    coverImage: "/images/catalogs/pvc-strip-cover.jpg",
+    productHref: "/products/outdoor-factory/pvc-strip",
+    categorySlug: "outdoor-factory",
+    productSlug: "pvc-strip",
+    manifestUrl: "/catalog/pvc-strip/manifest.json",
+    status: "published",
+    sortOrder: 2,
+  },
 ];
 
 export function isPublishedCatalog(c: ProductCatalogFile): boolean {

@@ -817,8 +817,60 @@ const INSTALL_VIDEOS_BY_CATEGORY: Record<string, InstallVideoClip[]> = {
   service: [],
 };
 
-export function getInstallVideos(categorySlug: string): InstallVideoClip[] {
-  return INSTALL_VIDEOS_BY_CATEGORY[categorySlug] ?? [];
+type ProductDecisionOverride = {
+  prep?: Partial<PrepGuide>;
+  /** `null` hides the category compare table on this product. */
+  compare?: CompareTable | null;
+  installVideos?: InstallVideoClip[];
+  reviews?: ReviewItem[];
+  hidePortfolio?: boolean;
+};
+
+/** Products whose buyers differ from the rest of the category (e.g. factory vs home). */
+const PRODUCT_DECISION_OVERRIDES: Record<string, ProductDecisionOverride> = {
+  "outdoor-factory/pvc-strip": {
+    prep: {
+      title: "เตรียมอะไรก่อนช่างมาดูหน้างาน",
+      intro:
+        "ม่านริ้วต้องดูขนาดช่องประตู สิ่งที่วิ่งผ่าน และอุณหภูมิสองฝั่ง — เตรียมข้อมูลคร่าวๆ ช่วยให้แนะนำรุ่นริ้วและรางได้เร็วขึ้น",
+      measureTips: [
+        "ถ่ายรูปช่องประตูจากทั้งสองฝั่ง พร้อมขนาดกว้าง × สูงคร่าวๆ",
+        "บอกว่าอะไรผ่านประตูนี้ — คนเดิน รถเข็น รถยก หรือพนักงานถือถาดอาหาร",
+        "แจ้งประเภทพื้นที่ (ไลน์ผลิต โกดัง ห้องเย็น หลังครัว) และปัญหาที่อยากแก้ เช่น ฝุ่น แมลง ความเย็นรั่ว กลิ่นควัน",
+      ],
+      prepareItems: [
+        "ดูว่าหัวประตูมีคานหรือผนังให้ยึดรางได้",
+        "นัดช่วงที่หยุดสัญจรประตูนั้นได้สั้นๆ ระหว่างติดตั้ง",
+        "มีผู้ดูแลโรงงาน คลัง หรือร้านอยู่ด้วยตอนวัด",
+        "ส่งรูปและขนาดคร่าวๆ มาก่อนนัดได้ทาง LINE",
+      ],
+    },
+    compare: null,
+    installVideos: [],
+    reviews: [],
+    hidePortfolio: true,
+  },
+};
+
+function productOverride(categorySlug: string, productSlug?: string) {
+  return productSlug
+    ? PRODUCT_DECISION_OVERRIDES[`${categorySlug}/${productSlug}`]
+    : undefined;
+}
+
+export function shouldShowPortfolio(categorySlug: string, productSlug?: string) {
+  return !productOverride(categorySlug, productSlug)?.hidePortfolio;
+}
+
+export function getInstallVideos(
+  categorySlug: string,
+  productSlug?: string,
+): InstallVideoClip[] {
+  return (
+    productOverride(categorySlug, productSlug)?.installVideos ??
+    INSTALL_VIDEOS_BY_CATEGORY[categorySlug] ??
+    []
+  );
 }
 
 export function getFeaturedInstallVideos(limit = 3): InstallVideoClip[] {
@@ -866,12 +918,22 @@ export function installVideosForText(haystack: string, limit = 3): InstallVideoC
   return out;
 }
 
-export function getCompareTable(categorySlug: string): CompareTable | null {
+export function getCompareTable(
+  categorySlug: string,
+  productSlug?: string,
+): CompareTable | null {
+  const product = productOverride(categorySlug, productSlug);
+  if (product && "compare" in product) return product.compare ?? null;
   return COMPARE_BY_CATEGORY[categorySlug] ?? null;
 }
 
-export function getPrepGuide(categorySlug: string): PrepGuide {
-  const override = PREP_BY_CATEGORY[categorySlug];
+export function getPrepGuide(
+  categorySlug: string,
+  productSlug?: string,
+): PrepGuide {
+  const override =
+    productOverride(categorySlug, productSlug)?.prep ??
+    PREP_BY_CATEGORY[categorySlug];
   if (!override) return DEFAULT_PREP;
   return {
     title: override.title ?? DEFAULT_PREP.title,
@@ -894,7 +956,10 @@ export function reviewsForCategory(
   categorySlug: string,
   _categoryName: string,
   limit = 3,
+  productSlug?: string,
 ): ReviewItem[] {
+  const productReviews = productOverride(categorySlug, productSlug)?.reviews;
+  if (productReviews) return productReviews.slice(0, limit);
   const published = DEMO_REVIEWS.filter((r) => r.status === "published").sort(
     (a, b) => {
       if (a.pinned !== b.pinned) return a.pinned ? -1 : 1;

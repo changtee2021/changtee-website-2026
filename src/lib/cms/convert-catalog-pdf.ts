@@ -41,6 +41,7 @@ export async function convertPdfCatalog(
   const pdfjsLib = await loadPdfjs();
 
   const data = new Uint8Array(await file.arrayBuffer());
+  // pdfjs-dist 6 removed isEvalSupported; image decode no longer uses eval.
   const loadingTask = pdfjsLib.getDocument({ data });
   const pdf = await loadingTask.promise;
   const scale = DPI / 72;

@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { LocaleLink as Link } from "@/components/i18n/LocaleLink";
 import { siteConfig } from "@/lib/site-config";
 
 const COPY: Record<

@@ -1,4 +1,6 @@
 import { aboutSmartMotor } from "@/lib/about-content";
+import { tx } from "@/lib/i18n/content/thai-text/server";
+import type { Locale } from "@/lib/i18n/locale";
 import { PRODUCT_PILLARS, productCatalog } from "@/lib/product-catalog";
 import { siteConfig } from "@/lib/site-config";
 
@@ -93,14 +95,17 @@ export const BRAND_FAQS: BrandFaq[] = [
   },
 ];
 
-export function brandFaqJsonLd(base: string): Record<string, unknown> {
+export function brandFaqJsonLd(
+  base: string,
+  locale: Locale = "th",
+): Record<string, unknown> {
   return {
     "@type": "FAQPage",
     "@id": `${base}/#faq`,
     mainEntity: BRAND_FAQS.map((f) => ({
       "@type": "Question",
-      name: f.q,
-      acceptedAnswer: { "@type": "Answer", text: f.a },
+      name: tx(locale, f.q),
+      acceptedAnswer: { "@type": "Answer", text: tx(locale, f.a) },
     })),
   };
 }

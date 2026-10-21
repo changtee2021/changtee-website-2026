@@ -4,6 +4,11 @@ import {
   type ProductChild,
 } from "@/lib/product-catalog";
 import { PRODUCT_FAQS, type ProductFaq } from "./product-faqs";
+import type { Locale } from "@/lib/i18n/locale";
+import {
+  getProductOverlay,
+  mergeProductOverlay,
+} from "@/lib/i18n/content/product-overlays";
 
 export type { ProductFaq };
 
@@ -414,15 +419,27 @@ const CONTENT: Record<string, Omit<ProductContent, "faqs"> & { faqs?: ProductFaq
     care: "วางแผนทำความสะอาดตามความสูงและความปลอดภัยของหน้างาน",
   },
   "outdoor-factory/pvc-strip": {
-    tagline: "ม่านริ้วพลาสติกสำหรับโรงงาน คลัง และห้องเย็น",
+    tagline: "กันฝุ่น กันแมลง กันเสียง คุมอุณหภูมิ — คนและรถยังผ่านได้ทันที",
     body: [
-      "ม่านริ้ว PVC ช่วยกั้นฝุ่น แมลง และรักษาอุณหภูมิบริเวณประตูทางเข้าออกที่ต้องสัญจรบ่อย",
-      "เลือกความหนา สีใส/สี และความสูงตามมาตรฐานงานอุตสาหกรรม",
-      "ออกแบบให้เปลี่ยนริ้วเป็นเส้นได้ ลดเวลาหยุดหน้างาน",
+      "ม่านริ้วพลาสติก PVC แขวนเป็นแถบซ้อนกันที่ประตูหรือช่องทางเดิน เมื่อคนหรือรถยกผ่าน ริ้วจะแหวกออกแล้วปิดกลับเอง ช่วยกั้นฝุ่น ควัน แมลง และเสียงรบกวน โดยไม่ต้องเปิด-ปิดบานประตูทุกครั้ง",
+      "ในโรงงานใช้แยกไลน์ผลิตและโซนสะอาด ในโกดังใช้ปิดช่องประตูกว้างให้รถยกผ่านได้ ส่วนร้านอาหารใช้กั้นหลังครัวกับหน้าร้าน กันกลิ่น ควัน และแมลง ไม่ให้แอร์หน้าร้านรั่ว และหน้าห้องเย็นช่วยลดลมเย็นรั่วออก ประหยัดไฟ",
+      "มีให้เลือก 4 กลุ่มหลัก: ใสมาตรฐาน · เหลืองกันแมลง · ทนเย็นพิเศษ (Super Polar ถึง -50°C) · สีทึบกันแสง ทั้งผิวเรียบและผิวแถบกันกระแทก ขนาด 200x2 และ 300x3 มม.",
+      "ช่างตี๋สำรวจหน้างาน วัดช่องประตู แนะนำรุ่นริ้ว ระยะซ้อน และชนิดรางแขวนให้เหมาะกับการใช้งานจริง แล้วติดตั้งให้ครบ ริ้วเส้นไหนขุ่นหรือขาดก็เปลี่ยนเฉพาะเส้นได้",
     ],
-    highlights: ["ทนใช้งานหนัก", "กั้นฝุ่น/แมลง", "ช่วยคุมอุณหภูมิ", "เปลี่ยนริ้วได้เป็นจุด"],
-    suitableFor: ["โรงงาน", "คลังสินค้า", "ห้องเย็น", "ครัวใหญ่"],
-    care: "เช็ดคราบด้วยน้ำยาที่เหมาะพลาสติก เปลี่ยนริ้วที่ขุ่นหรือฉีกเป็นเส้น",
+    highlights: [
+      "กันฝุ่นและแมลง",
+      "คุมอุณหภูมิ ประหยัดไฟ",
+      "ทนเย็นถึง -50°C (Super Polar)",
+      "เปลี่ยนริ้วทีละเส้นได้",
+    ],
+    suitableFor: [
+      "โรงงาน / ไลน์ผลิต",
+      "โกดังเก็บสินค้า",
+      "ร้านอาหาร / หลังครัว",
+      "โรงงานอาหาร",
+      "ห้องเย็น / รถห้องเย็น",
+    ],
+    care: "เช็ดด้วยน้ำสบู่อ่อนหรือน้ำยาที่ใช้กับพลาสติก หลีกเลี่ยงตัวทำละลายแรง ริ้วที่ขุ่น ขาด หรือแข็งตัวให้ถอดเปลี่ยนเฉพาะเส้นนั้น",
   },
   "motorized/curtain": {
     tagline: "ผ้าม่านไฟฟ้า เปิด-ปิดด้วยรีโมทหรือสมาร์ทโฮม",
@@ -625,6 +642,7 @@ function fallbackContent(
 export function getProductContent(
   categorySlug: string,
   productSlug: string,
+  locale: Locale = "th",
 ): ProductContent | null {
   const found = getProduct(categorySlug, productSlug);
   if (!found) return null;
@@ -652,7 +670,7 @@ export function getProductContent(
     resolved = [...resolved, ...pad].slice(0, 5);
   }
 
-  return {
+  const thai: ProductContent = {
     tagline: base.tagline,
     body: base.body,
     highlights: base.highlights,
@@ -660,6 +678,12 @@ export function getProductContent(
     care: base.care,
     faqs: resolved,
   };
+
+  if (locale === "th") return thai;
+  return mergeProductOverlay(
+    thai,
+    getProductOverlay(locale, categorySlug, productSlug),
+  );
 }
 
 export function getCategoryHighlights(category: ProductCategory): string[] {

@@ -4,6 +4,7 @@ import { useState, type ReactNode } from "react";
 import { siteConfig } from "@/lib/site-config";
 import { CatalogFlipbookModal } from "@/components/catalog/CatalogFlipbookModal";
 import { IconSlide } from "@/components/layout/IconSlide";
+import { useTx } from "@/lib/i18n/use-tx";
 import { cn } from "@/lib/utils";
 
 type Props = {
@@ -26,7 +27,9 @@ export function BrochureLink({
   iconClassName,
 }: Props) {
   const [open, setOpen] = useState(false);
-  const label = typeof children === "string" ? children : siteConfig.brochureLabel;
+  const { tx } = useTx();
+  const brochureLabel = tx(siteConfig.brochureLabel);
+  const label = typeof children === "string" ? children : brochureLabel;
 
   return (
     <>
@@ -46,17 +49,17 @@ export function BrochureLink({
           onClick={() => setOpen(true)}
           className={cn("cursor-pointer text-inherit", className)}
         >
-          {children ?? siteConfig.brochureLabel}
+          {children ?? brochureLabel}
         </button>
       )}
       {open ? (
         <CatalogFlipbookModal
           fileUrl={siteConfig.brochureUrl}
           fileName="changtee-brochure-2026.pdf"
-          title={siteConfig.brochureLabel}
+          title={brochureLabel}
           manifestUrl={siteConfig.brochureManifestUrl}
           onlineUrl={siteConfig.brochureOnlineUrl}
-          onlineLabel="เปิดพรีเซ้นท์"
+          onlineLabel={tx("เปิดพรีเซ้นท์")}
           onClose={() => setOpen(false)}
         />
       ) : null}

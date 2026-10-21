@@ -1,10 +1,11 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
+import { LocaleLink as Link } from "@/components/i18n/LocaleLink";
 import { useEffect, useMemo, useRef, useState, type TouchEvent } from "react";
 import { ChevronLeft, ChevronRight, Pause, Play } from "lucide-react";
 import { useHeroSlides } from "@/lib/cms/demo-store";
+import { useI18n } from "@/lib/i18n/use-i18n";
 import {
   publishedHeroSlides,
   type HeroSlide,
@@ -16,6 +17,7 @@ export function HeroSlider({
   /** Override for admin preview (includes unpublished draft). */
   slides?: HeroSlide[];
 }) {
+  const { t } = useI18n();
   const stored = useHeroSlides();
   const slides = useMemo(() => {
     if (slidesProp?.length) {
@@ -106,7 +108,7 @@ export function HeroSlider({
           <>
             <button
               type="button"
-              aria-label="สไลด์ก่อนหน้า"
+              aria-label={t("slider.prev")}
               className="absolute left-2 top-1/2 z-10 flex size-11 -translate-y-1/2 items-center justify-center rounded-full bg-white/80 text-navy hover:bg-white sm:left-3 md:left-6"
               onClick={() =>
                 setIndex((i) => (i - 1 + slides.length) % slides.length)
@@ -116,7 +118,7 @@ export function HeroSlider({
             </button>
             <button
               type="button"
-              aria-label="สไลด์ถัดไป"
+              aria-label={t("slider.next")}
               className="absolute right-2 top-1/2 z-10 flex size-11 -translate-y-1/2 items-center justify-center rounded-full bg-white/80 text-navy hover:bg-white sm:right-3 md:right-6"
               onClick={() => setIndex((i) => (i + 1) % slides.length)}
             >
@@ -127,7 +129,7 @@ export function HeroSlider({
                 <button
                   key={item.id}
                   type="button"
-                  aria-label={`ไปสไลด์ ${i + 1}`}
+                  aria-label={`${t("slider.goTo")} ${i + 1}`}
                   aria-current={i === safeIndex ? "true" : undefined}
                   className="flex h-11 w-11 items-center justify-center"
                   onClick={() => setIndex(i)}
@@ -141,7 +143,7 @@ export function HeroSlider({
               ))}
               <button
                 type="button"
-                aria-label={userPaused || reduceMotion ? "เล่นสไลด์อัตโนมัติ" : "หยุดสไลด์อัตโนมัติ"}
+                aria-label={userPaused || reduceMotion ? t("slider.play") : t("slider.pause")}
                 className="ml-1 flex size-11 items-center justify-center rounded-full bg-white/80 text-navy hover:bg-white"
                 onClick={() => setUserPaused((v) => !v)}
               >

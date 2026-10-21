@@ -1,3 +1,5 @@
+import { localeFromPrefix } from "@/lib/i18n/locale";
+
 /** Old CMS paths (Thai slug + Mongo-style id) → new App Router URLs. */
 
 const MONGO_ID_SUFFIX = /\/[a-f0-9]{24}$/i;
@@ -294,6 +296,9 @@ export function legacyCmsRedirect(pathname: string): string | null {
   const path = decodePathname(pathname);
 
   if (isKnownAppPath(path)) return null;
+  // The old CMS had no language prefixes; keyword rules would hijack /en/products/... etc.
+  const first = path.split("/")[1] ?? "";
+  if (first.toLowerCase() === "th" || localeFromPrefix(first)) return null;
 
   for (const rule of LEGACY_RULES) {
     if (rule.match(path)) return rule.destination;

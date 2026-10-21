@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
+import { LocaleLink as Link } from "@/components/i18n/LocaleLink";
 import { BookOpen, Factory, FileText, Presentation, Users } from "lucide-react";
 import { siteConfig } from "@/lib/site-config";
 import { LazyMapsEmbed } from "@/components/layout/LazyMapsEmbed";
@@ -11,10 +11,12 @@ import { BrochureLink } from "@/components/catalog/BrochureLink";
 import { LanguageToggle } from "@/components/layout/LanguageToggle";
 import { ThemeToggle } from "@/components/layout/ThemeToggle";
 import { useI18n } from "@/lib/i18n/use-i18n";
+import { useTx } from "@/lib/i18n/use-tx";
 
 export function SiteFooter() {
   const year = new Date().getFullYear();
   const { t, locale } = useI18n();
+  const { tx } = useTx();
   const mapsSrc =
     locale === "en"
       ? siteConfig.mapsEmbedUrl.replace("hl=th", "hl=en")
@@ -108,7 +110,7 @@ export function SiteFooter() {
                   key={c.phoneTel}
                   className="flex flex-col gap-0.5 sm:flex-row sm:items-center sm:justify-between sm:gap-3"
                 >
-                  <span className="text-muted">{c.name}</span>
+                  <span className="text-muted">{tx(c.name)}</span>
                   <a
                     href={`tel:${c.phoneTel}`}
                     className="shrink-0 font-medium text-navy hover:text-brand-red"
@@ -207,7 +209,7 @@ export function SiteFooter() {
             <LanguageToggle />
             <ThemeToggle />
             <p>
-              © {year} {siteConfig.legalName}. {t("footer.rights")}
+              © {year} {tx(siteConfig.legalName)}. {t("footer.rights")}
             </p>
           </div>
         </div>

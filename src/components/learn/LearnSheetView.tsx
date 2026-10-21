@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { LocaleLink as Link } from "@/components/i18n/LocaleLink";
 import { FabricLesson } from "@/components/learn/FabricLesson";
 import { MotorLesson } from "@/components/learn/MotorLesson";
 import { PartitionLesson } from "@/components/learn/PartitionLesson";

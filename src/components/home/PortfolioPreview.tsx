@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
+import { LocaleLink as Link } from "@/components/i18n/LocaleLink";
 import { useMemo, useRef, useState, type ReactNode } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { ChevronLeft, ChevronRight, MapPin } from "lucide-react";
@@ -10,6 +10,7 @@ import { revealEase } from "@/components/home/Reveal";
 import { usePortfolioItems } from "@/lib/cms/demo-store";
 import { type SpaceType } from "@/lib/cms/portfolio-demo";
 import { useI18n } from "@/lib/i18n/use-i18n";
+import { useTx } from "@/lib/i18n/use-tx";
 import type { MessageKey } from "@/lib/i18n/messages";
 import { publishedPortfolio } from "@/lib/cms/public-content";
 
@@ -33,6 +34,7 @@ export function PortfolioPreview({
   subtitle?: ReactNode;
 } = {}) {
   const { t } = useI18n();
+  const { tx } = useTx();
   const stored = usePortfolioItems();
   const items = useMemo(() => publishedPortfolio(stored), [stored]);
   const [tab, setTab] = useState<(typeof TABS)[number]["key"]>("all");
@@ -101,7 +103,7 @@ export function PortfolioPreview({
           >
             {filtered.length === 0 ? (
               <p className="py-14 text-center text-sm text-muted">
-                ยังไม่มีผลงานหมวดนี้ ลองดูหมวดอื่น หรือทักมาคุยกับเราได้เลย
+                {tx("ยังไม่มีผลงานหมวดนี้ ลองดูหมวดอื่น หรือทักมาคุยกับเราได้เลย")}
               </p>
             ) : (
               <div
@@ -117,21 +119,21 @@ export function PortfolioPreview({
                     <div className="relative aspect-[4/3] overflow-hidden rounded-sm bg-line/40">
                       <Image
                         src={item.image}
-                        alt={item.title}
+                        alt={tx(item.title)}
                         fill
                         className="object-cover transition-transform duration-500 group-hover:scale-[1.04]"
                         sizes="(max-width: 640px) 78vw, 300px"
                       />
                     </div>
                     <div className="flex flex-1 flex-col px-1 pb-1 pt-4">
-                      <h3 className="font-semibold text-navy">{item.title}</h3>
+                      <h3 className="font-semibold text-navy">{tx(item.title)}</h3>
                       <p className="mt-1 line-clamp-2 min-h-[2.5rem] text-sm text-muted">
-                        {item.summary}
+                        {tx(item.summary)}
                       </p>
                       <div className="mt-auto flex items-center justify-between gap-3 pt-4">
                         <span className="inline-flex min-w-0 items-center gap-1 text-xs text-muted">
                           <MapPin className="size-3 shrink-0 opacity-80" aria-hidden />
-                          <span className="truncate">{item.place}</span>
+                          <span className="truncate">{tx(item.place)}</span>
                         </span>
                         <span className="shrink-0 rounded-full bg-navy px-4 py-1.5 text-xs font-semibold text-white transition group-hover:bg-brand-red">
                           {t("home.seeWorkShort")}

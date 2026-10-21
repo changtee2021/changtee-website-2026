@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { LocaleLink as Link } from "@/components/i18n/LocaleLink";
 import { Reveal } from "@/components/home/Reveal";
 import { InstallVideosSection } from "@/components/media/InstallVideosSection";
 import type { ReviewItem } from "@/lib/cms/reviews-demo";

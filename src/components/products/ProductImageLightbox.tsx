@@ -128,6 +128,8 @@ type ClickableProps = {
   onOpen: () => void;
   className?: string;
   imageClassName?: string;
+  /** cover crops to the frame. contain shows the whole photo. */
+  fit?: "cover" | "contain";
   sizes?: string;
   priority?: boolean;
   rounded?: string;
@@ -140,6 +142,7 @@ export function ClickableProductImage({
   onOpen,
   className,
   imageClassName,
+  fit = "cover",
   sizes,
   priority,
   rounded = "rounded-2xl",
@@ -161,7 +164,9 @@ export function ClickableProductImage({
         alt={alt}
         fill
         className={cn(
-          "object-cover transition duration-500 group-hover:scale-[1.02]",
+          fit === "contain"
+            ? "object-contain"
+            : "object-cover transition duration-500 group-hover:scale-[1.02]",
           imageClassName,
         )}
         sizes={sizes}

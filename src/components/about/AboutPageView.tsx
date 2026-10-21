@@ -1,5 +1,5 @@
 import Image from "next/image";
-import Link from "next/link";
+import { LocaleLink as Link } from "@/components/i18n/LocaleLink";
 import {
   Building2,
   Factory,
@@ -58,7 +58,6 @@ export function AboutPageView() {
                 <h2 className="mt-1.5 font-display text-lg font-semibold text-navy">
                   {item.title}
                 </h2>
-                <p className="mt-2 text-sm leading-relaxed text-muted">{item.desc}</p>
               </Reveal>
             );
           })}

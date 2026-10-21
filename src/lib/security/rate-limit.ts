@@ -18,47 +18,25 @@ function memoryHit(key: string, windowMs: number, max: number) {
 
 async function supabaseHit(key: string, windowMs: number, max: number) {
   const supabase = createServiceSupabase();
-  const windowStart = new Date(Date.now() - windowMs).toISOString();
-
-  const { data: existing, error: readError } = await supabase
-    .from("rate_limits")
-    .select("key, window_started_at, hit_count")
-    .eq("key", key)
-    .maybeSingle();
-
-  if (readError) throw readError;
-
-  const nowIso = new Date().toISOString();
-  const stale =
-    !existing ||
-    new Date(String(existing.window_started_at)).getTime() < Date.now() - windowMs;
-
-  if (stale) {
-    const { error } = await supabase.from("rate_limits").upsert({
-      key,
-      window_started_at: nowIso,
-      hit_count: 1,
-      updated_at: nowIso,
-    });
-    if (error) throw error;
-    return false;
-  }
-
-  const nextCount = Number(existing.hit_count || 0) + 1;
-  const { error } = await supabase
-    .from("rate_limits")
-    .update({ hit_count: nextCount, updated_at: nowIso })
-    .eq("key", key)
-    .gte("window_started_at", windowStart);
+  const { data, error } = await supabase.rpc("rate_limit_hit", {
+    _key: key,
+    _window_seconds: Math.max(1, Math.ceil(windowMs / 1000)),
+    _max: max,
+  });
   if (error) throw error;
-  return nextCount > max;
+  return Boolean(data);
 }
 
 export function getRequestIp(request: Request) {
+  const vercelForwarded = request.headers
+    .get("x-vercel-forwarded-for")
+    ?.split(",")[0]
+    ?.trim();
+  if (vercelForwarded) return vercelForwarded;
+  const realIp = request.headers.get("x-real-ip")?.trim();
+  if (realIp) return realIp;
   return (
-    request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
-    request.headers.get("x-real-ip") ||
-    "unknown"
+    request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown"
   );
 }
 

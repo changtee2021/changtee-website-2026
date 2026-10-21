@@ -2,6 +2,7 @@
 
 import { useCallback, useState, type HTMLAttributes } from "react";
 import { useRouter } from "next/navigation";
+import { LocaleLink as Link } from "@/components/i18n/LocaleLink";
 import { PdpaConsentField } from "@/components/forms/PdpaConsentField";
 import { MarketingConsentField } from "@/components/forms/MarketingConsentField";
 import {
@@ -115,9 +116,9 @@ export function CompanyContactForm() {
       </button>
       <p className="text-xs text-muted">
         ต้องการใบเสนอราคาสำหรับบ้าน/คอนโด?{" "}
-        <a href="/quote" className="font-medium text-navy underline">
+        <Link href="/quote" className="font-medium text-navy underline">
           ไปที่ฟอร์มขอใบเสนอราคา
-        </a>
+        </Link>
       </p>
     </form>
   );

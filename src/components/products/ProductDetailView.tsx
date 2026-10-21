@@ -3,7 +3,7 @@
 import type { ReactNode } from "react";
 import { useEffect, useMemo } from "react";
 import Image from "next/image";
-import Link from "next/link";
+import { LocaleLink as Link } from "@/components/i18n/LocaleLink";
 import { CatalogCard } from "@/components/catalog/CatalogCard";
 import { ProductCtaCard } from "@/components/products/ProductCtaCard";
 import {
@@ -37,6 +37,7 @@ import {
   getInstallVideos,
   getPrepGuide,
   reviewsForCategory,
+  shouldShowPortfolio,
 } from "@/lib/product-decision-aids";
 import type { ProductPresentation } from "@/lib/product-presentation";
 import { siteConfig } from "@/lib/site-config";
@@ -50,6 +51,8 @@ type Props = {
   catalog: ProductCatalogFile | undefined;
   related: ProductChild[];
   portfolioWorks: PortfolioItem[];
+  /** Localized heading for non-Thai pages; `product.name` stays Thai for quote/lead data. */
+  displayName?: string;
 };
 
 function SectionLabel({ children }: { children: ReactNode }) {
@@ -69,7 +72,9 @@ export function ProductDetailView({
   catalog,
   related,
   portfolioWorks,
+  displayName,
 }: Props) {
+  const heading = displayName ?? product.name;
   const quoteHref = (() => {
     const p = new URLSearchParams();
     p.set("product", quoteProductType(category, product));
@@ -79,10 +84,11 @@ export function ProductDetailView({
 
   const portfolioHref = `/portfolio?product=${encodeURIComponent(category.slug)}`;
   const { assets } = presentation;
-  const compareTable = getCompareTable(category.slug);
-  const prepGuide = getPrepGuide(category.slug);
-  const reviews = reviewsForCategory(category.slug, category.name, 3);
-  const installVideos = getInstallVideos(category.slug);
+  const compareTable = getCompareTable(category.slug, product.slug);
+  const prepGuide = getPrepGuide(category.slug, product.slug);
+  const reviews = reviewsForCategory(category.slug, category.name, 3, product.slug);
+  const installVideos = getInstallVideos(category.slug, product.slug);
+  const showPortfolio = shouldShowPortfolio(category.slug, product.slug);
   const pageKey = productPageKey();
 
   useEffect(() => {
@@ -113,6 +119,15 @@ export function ProductDetailView({
   });
 
   const lightboxImages: GalleryImage[] = useMemo(() => {
+    if (assets.galleryOnly && assets.gallery.length > 0) {
+      return assets.gallery.map((src, i) => ({
+        src,
+        alt:
+          i === 0
+            ? `${product.name} ${category.name} — ภาพสินค้าหลัก`
+            : `${product.name} ${category.name} — ภาพติดตั้ง ${i + 1}`,
+      }));
+    }
     const list: GalleryImage[] = [
       {
         src: assets.hero,
@@ -157,23 +172,41 @@ export function ProductDetailView({
     return list;
   }, [assets, presentation, product.name, category.name, portfolioWorks]);
 
-  const thumbs = [
-    {
-      src: assets.texture,
-      alt: `รายละเอียดพื้นผิววัสดุ — ${product.name}`,
-      caption: "พื้นผิววัสดุ",
-    },
-    {
-      src: assets.lifestyle,
-      alt: `ตัวอย่างการใช้งานในห้องนั่งเล่น — ${product.name}`,
-      caption: "ห้องนั่งเล่น",
-    },
-    {
-      src: assets.context,
-      alt: `มุมห้องที่เหมาะกับ ${product.name}`,
-      caption: "มุมห้อง / ห้องนอน",
-    },
-  ];
+  const thumbs = assets.galleryOnly
+    ? assets.gallery.slice(1).map((src, i) => ({
+        src,
+        alt: assets.galleryCaptions?.[src]
+          ? `${assets.galleryCaptions[src]} — ${product.name}`
+          : src === assets.context
+            ? `มุมห้อง/ห้องนอนที่เหมาะกับ ${product.name}`
+            : `${product.name} ${category.name} — ภาพติดตั้ง ${i + 2}`,
+        caption:
+          assets.galleryCaptions?.[src] ??
+          (src === assets.context
+            ? "มุมห้อง / ห้องนอน"
+            : i === 0
+              ? "ติดตั้งจริง"
+              : `ภาพติดตั้ง ${i + 2}`),
+      }))
+    : [
+        {
+          src: assets.texture,
+          alt: `รายละเอียดพื้นผิววัสดุ — ${product.name}`,
+          caption: "พื้นผิววัสดุ",
+        },
+        {
+          src: assets.lifestyle,
+          alt: `ตัวอย่างการใช้งานในห้องนั่งเล่น — ${product.name}`,
+          caption: "ห้องนั่งเล่น",
+        },
+        {
+          src: assets.context,
+          alt: `มุมห้องที่เหมาะกับ ${product.name}`,
+          caption: "มุมห้อง / ห้องนอน",
+        },
+      ];
+
+  const photoFit = assets.galleryOnly ? "contain" : "cover";
 
   return (
     <ProductLightboxScope images={lightboxImages}>
@@ -209,7 +242,7 @@ export function ProductDetailView({
                 </Link>
               </li>
               <li aria-hidden>/</li>
-              <li className="font-medium text-navy">{product.name}</li>
+              <li className="font-medium text-navy">{heading}</li>
             </ol>
           </nav>
 
@@ -221,8 +254,11 @@ export function ProductDetailView({
                 className="aspect-[4/3]"
                 sizes="(max-width: 1024px) 100vw, 640px"
                 priority
+                fit={photoFit}
               />
-              <div className="grid grid-cols-3 gap-2 sm:gap-3">
+              <div
+                className={`grid gap-2 sm:gap-3 ${thumbs.length >= 4 ? "grid-cols-2 sm:grid-cols-4" : thumbs.length === 3 ? "grid-cols-3" : "grid-cols-2"}`}
+              >
                 {thumbs.map((t) => (
                   <div key={t.src}>
                     <ZoomImage
@@ -231,6 +267,7 @@ export function ProductDetailView({
                       className="aspect-square sm:aspect-[4/3]"
                       rounded="rounded-xl"
                       sizes="200px"
+                      fit={photoFit}
                     />
                     <p className="mt-1.5 text-center text-[11px] font-medium text-muted">
                       {t.caption}
@@ -243,9 +280,9 @@ export function ProductDetailView({
             <Reveal delayStep={1} className="lg:pt-2">
               <SectionLabel>Product sheet</SectionLabel>
               <h1 className="mt-2 font-display text-3xl font-semibold leading-tight text-navy sm:text-4xl">
-                {product.name}
+                {heading}
               </h1>
-              {product.nameEn ? (
+              {product.nameEn && product.nameEn !== heading ? (
                 <p className="mt-1 text-sm text-muted">{product.nameEn}</p>
               ) : null}
               <p className="mt-4 text-base leading-relaxed text-ink/90">
@@ -396,6 +433,7 @@ export function ProductDetailView({
                     alt={`${b.label} — ${product.name}`}
                     className="aspect-[8/5]"
                     sizes="(max-width: 640px) 100vw, 33vw"
+                    fit={photoFit}
                   />
                   <div className="pointer-events-none absolute inset-x-0 bottom-0 rounded-b-2xl bg-gradient-to-t from-navy/75 to-transparent p-3 sm:p-4">
                     <p className="font-display text-base font-semibold text-white sm:text-lg">
@@ -412,6 +450,100 @@ export function ProductDetailView({
           </Reveal>
           ) : null}
 
+          {presentation.variants?.length ? (
+            <Reveal className="mt-16 sm:mt-20">
+              <section>
+                <SectionLabel>Product types</SectionLabel>
+                <h2 className="mt-2 font-display text-2xl font-semibold text-navy sm:text-3xl">
+                  เลือกรุ่นให้ตรงงาน
+                </h2>
+                <div className="mt-6 grid gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-4">
+                  {presentation.variants.map((v) => (
+                    <div
+                      key={v.nameEn}
+                      className="overflow-hidden rounded-2xl border border-line bg-white"
+                    >
+                      <div className="relative aspect-[2/1] bg-white">
+                        <Image
+                          src={v.image}
+                          alt={`${v.name} (${v.nameEn}) — ${product.name}`}
+                          fill
+                          className="object-contain p-2"
+                          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+                        />
+                      </div>
+                      <div className="border-t border-line p-4">
+                        <p className="text-[10px] font-semibold uppercase tracking-wider text-muted sm:text-xs">
+                          {v.nameEn}
+                        </p>
+                        <h3 className="mt-0.5 font-display text-lg font-semibold text-navy">
+                          {v.name}
+                        </h3>
+                        <p className="mt-1.5 text-sm leading-relaxed text-muted">
+                          {v.body}
+                        </p>
+                        <p className="mt-3 text-xs text-navy">
+                          <span className="font-semibold text-brand-red">เหมาะกับ </span>
+                          {v.bestFor}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </section>
+            </Reveal>
+          ) : null}
+
+          {presentation.skuTable ? (
+            <Reveal className="mt-16 sm:mt-20">
+              <section>
+                <SectionLabel>Specifications</SectionLabel>
+                <h2 className="mt-2 font-display text-2xl font-semibold text-navy sm:text-3xl">
+                  {presentation.skuTable.title}
+                </h2>
+                <div className="mt-6 overflow-x-auto rounded-2xl border border-line">
+                  <table className="w-full min-w-[640px] text-left text-sm">
+                    <thead className="bg-navy text-white">
+                      <tr>
+                        {presentation.skuTable.columns.map((col) => (
+                          <th key={col} scope="col" className="px-4 py-3 font-semibold">
+                            {col}
+                          </th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {presentation.skuTable.rows.map((row) => (
+                        <tr
+                          key={row[0]}
+                          className="border-t border-line even:bg-paper/60"
+                        >
+                          {row.map((cell, i) => (
+                            <td
+                              key={i}
+                              className={
+                                i === 0
+                                  ? "whitespace-nowrap px-4 py-2.5 font-semibold tabular-nums text-navy"
+                                  : "whitespace-nowrap px-4 py-2.5 text-navy/85"
+                              }
+                            >
+                              {cell}
+                            </td>
+                          ))}
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+                {presentation.skuTable.note ? (
+                  <p className="mt-3 text-xs text-muted">
+                    {presentation.skuTable.note}
+                  </p>
+                ) : null}
+              </section>
+            </Reveal>
+          ) : null}
+
           {presentation.roomStyles.length > 0 ? (
           <Reveal delayStep={1} className="mt-16 sm:mt-20">
           <section>
@@ -422,6 +554,7 @@ export function ProductDetailView({
                   alt={`ตัวอย่างห้องสำหรับ ${product.name} — สไตล์ที่แนะนำ`}
                   className="aspect-[3/4] sm:aspect-[4/5]"
                   sizes="(max-width: 1024px) 100vw, 50vw"
+                  fit={photoFit}
                 />
                 <p className="mt-2 text-center text-xs text-muted">
                   ตัวอย่างห้องที่เหมาะกับ{product.name}
@@ -487,6 +620,7 @@ export function ProductDetailView({
                       className="aspect-[4/3]"
                       rounded="rounded-none"
                       sizes="(max-width: 640px) 78vw, 33vw"
+                      fit={photoFit}
                     />
                     <div className="p-3 sm:p-4">
                       <p className="text-[10px] font-semibold uppercase tracking-wider text-muted sm:text-xs">
@@ -557,7 +691,7 @@ export function ProductDetailView({
                   แคตตาล็อก
                 </h2>
                 <div className="mt-2 h-1 w-14 bg-brand-red" />
-                <div className="mt-4">
+                <div className="mt-4 max-w-sm">
                   <CatalogCard catalog={catalog} />
                 </div>
               </section>
@@ -569,6 +703,7 @@ export function ProductDetailView({
             clips={installVideos}
           />
 
+          {showPortfolio ? (
           <Reveal className="mt-16 sm:mt-20">
             <section>
               <div className="flex flex-wrap items-end justify-between gap-3">
@@ -631,6 +766,7 @@ export function ProductDetailView({
               )}
             </section>
           </Reveal>
+          ) : null}
 
           {related.length > 0 ? (
             <Reveal className="mt-16 sm:mt-20">

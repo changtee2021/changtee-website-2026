@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
+import { LocaleLink as Link } from "@/components/i18n/LocaleLink";
 import { useMemo, useState } from "react";
 import { BookOpen, Check, Link2, Play, Video } from "lucide-react";
 import { LEARN_ROOMS, LEARN_SHEETS, type LearnRoomId } from "@/lib/learn";

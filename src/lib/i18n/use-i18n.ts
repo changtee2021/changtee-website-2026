@@ -1,41 +1,32 @@
 "use client";
 
-import { useCallback, useSyncExternalStore } from "react";
+import { useCallback } from "react";
+import { usePathname, useRouter } from "next/navigation";
+import { useOptionalLocale } from "@/components/i18n/LocaleProvider";
 import {
-  LOCALE_EVENT,
-  LOCALE_STORAGE_KEY,
-  applyLocale,
-  getStoredLocale,
-  resolveLocale,
+  localizedHref,
+  stripLocalePrefix,
   type Locale,
 } from "@/lib/i18n/locale";
-import { t, type MessageKey } from "@/lib/i18n/index";
-
-function subscribe(onStoreChange: () => void) {
-  const onStorage = (e: StorageEvent) => {
-    if (e.key === LOCALE_STORAGE_KEY) onStoreChange();
-  };
-  window.addEventListener("storage", onStorage);
-  window.addEventListener(LOCALE_EVENT, onStoreChange);
-  return () => {
-    window.removeEventListener("storage", onStorage);
-    window.removeEventListener(LOCALE_EVENT, onStoreChange);
-  };
-}
-
-function getSnapshot(): Locale {
-  return resolveLocale(getStoredLocale());
-}
+import type { MessageKey } from "@/lib/i18n/index";
 
 export function useI18n() {
-  const locale = useSyncExternalStore(subscribe, getSnapshot, () => "th" as Locale);
+  const { locale, t } = useOptionalLocale();
+  const router = useRouter();
+  const pathname = usePathname() || "/";
 
-  const setLocale = useCallback((next: Locale) => {
-    applyLocale(next);
-    window.dispatchEvent(new Event(LOCALE_EVENT));
-  }, []);
+  const setLocale = useCallback(
+    (next: Locale) => {
+      const bare = stripLocalePrefix(pathname);
+      router.push(localizedHref(next, bare));
+    },
+    [pathname, router],
+  );
 
-  const translate = useCallback((key: MessageKey) => t(locale, key), [locale]);
+  const translate = useCallback(
+    (key: MessageKey) => t(key),
+    [t],
+  );
 
   return { locale, setLocale, t: translate };
 }

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { useI18n } from "@/lib/i18n/use-i18n";
 
 /** Load Google Maps iframe only after the block is near the viewport (or on click). */
 export function LazyMapsEmbed({
@@ -12,6 +13,7 @@ export function LazyMapsEmbed({
   title: string;
   className?: string;
 }) {
+  const { t } = useI18n();
   const ref = useRef<HTMLDivElement>(null);
   const [active, setActive] = useState(false);
 
@@ -49,7 +51,7 @@ export function LazyMapsEmbed({
           onClick={() => setActive(true)}
           className="flex h-full w-full flex-col items-center justify-center gap-2 bg-paper px-4 text-center text-sm font-medium text-navy hover:bg-white"
         >
-          <span>แตะเพื่อโหลดแผนที่</span>
+          <span>{t("map.tapToLoad")}</span>
           <span className="text-xs font-normal text-muted">Google Maps</span>
         </button>
       )}

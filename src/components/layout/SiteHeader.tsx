@@ -2,7 +2,7 @@
 
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import Image from "next/image";
-import Link from "next/link";
+import { LocaleLink as Link } from "@/components/i18n/LocaleLink";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { ChevronDown, Home, Menu, X } from "lucide-react";
@@ -25,6 +25,7 @@ import {
 import { BrochureLink } from "@/components/catalog/BrochureLink";
 import { QuotePill } from "@/components/layout/QuotePill";
 import { useI18n } from "@/lib/i18n/use-i18n";
+import { useTx } from "@/lib/i18n/use-tx";
 import type { MessageKey } from "@/lib/i18n/index";
 
 const mainNav = [
@@ -111,6 +112,7 @@ export function SiteHeader() {
 
 function SiteHeaderBar({ pathname }: { pathname: string }) {
   const { t } = useI18n();
+  const { tx } = useTx();
   const hasFullBleedHero = FULL_BLEED_HERO_PATHS.has(pathname);
   const [open, setOpen] = useState(false);
   const [productsOpen, setProductsOpen] = useState(false);
@@ -168,7 +170,7 @@ function SiteHeaderBar({ pathname }: { pathname: string }) {
               >
                 <Image
                   src="/images/brand/logo-mark-white.png"
-                  alt={`${siteConfig.name} ออกแบบ-ติดตั้ง ผ้าม่าน`}
+                  alt={`${tx(siteConfig.name)} ${tx("ออกแบบ-ติดตั้ง ผ้าม่าน")}`}
                   width={200}
                   height={200}
                   className="h-10 w-10 object-contain md:h-12 md:w-12"
@@ -209,7 +211,7 @@ function SiteHeaderBar({ pathname }: { pathname: string }) {
               <Link
                 href="/"
                 className="mr-2 shrink-0 py-2 pr-2"
-                aria-label={`${siteConfig.name} ${t("nav.homeAria")}`}
+                aria-label={`${tx(siteConfig.name)} ${t("nav.homeAria")}`}
               >
                 <Image
                   src="/images/brand/logo-mark-nav.png"
@@ -239,7 +241,7 @@ function SiteHeaderBar({ pathname }: { pathname: string }) {
                     hoverLabelClassName="group-hover:text-navy-solid group-focus-visible:text-navy-solid"
                     iconClassName="text-navy-solid"
                   >
-                    Brochure ช่างตี๋
+                    {tx("Brochure ช่างตี๋")}
                   </BrochureLink>
                   <span aria-hidden className="mx-3 h-5 w-px shrink-0 bg-white/55" />
                   <QuotePill label={t("nav.quote")} className="bg-transparent text-white" />
@@ -257,7 +259,7 @@ function SiteHeaderBar({ pathname }: { pathname: string }) {
               <Link
                 href="/"
                 className="shrink-0"
-                aria-label={`${siteConfig.name} ${t("nav.homeAria")}`}
+                aria-label={`${tx(siteConfig.name)} ${t("nav.homeAria")}`}
               >
                 <Image
                   src="/images/brand/logo-mark-nav.png"

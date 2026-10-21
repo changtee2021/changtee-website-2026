@@ -1,4 +1,5 @@
 import { Skeleton } from "@/components/ui/skeleton";
+import { Tx } from "@/components/i18n/Tx";
 import { WanderingEyes } from "@/components/wandering-eyes";
 import { cn } from "@/lib/utils";
 
@@ -18,7 +19,7 @@ export function PageSkeleton({
       aria-live="polite"
       aria-busy="true"
     >
-      <span className="sr-only">{label}</span>
+      <span className="sr-only"><Tx>{label}</Tx></span>
 
       {/* Header band */}
       <section className="border-b border-line/70 bg-panel">
@@ -35,7 +36,7 @@ export function PageSkeleton({
             className="size-10 text-navy"
             style={{ ["--duration" as string]: "8s" }}
           />
-          <p className="text-sm text-muted">{label}</p>
+          <p className="text-sm text-muted"><Tx>{label}</Tx></p>
         </div>
 
         {variant === "portfolio" ? <PortfolioSkeletonGrid /> : null}

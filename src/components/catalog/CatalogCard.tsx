@@ -5,6 +5,7 @@ import Image from "next/image";
 import { FileText } from "lucide-react";
 import type { ProductCatalogFile } from "@/lib/catalogs";
 import { CatalogFlipbookModal } from "@/components/catalog/CatalogFlipbookModal";
+import { useTx } from "@/lib/i18n/use-tx";
 
 type Props = {
   catalog: ProductCatalogFile;
@@ -15,6 +16,8 @@ export function CatalogCard({ catalog, compact = false }: Props) {
   const cover = catalog.coverImage;
   const [open, setOpen] = useState(false);
   const fileName = `${catalog.id}.pdf`;
+  const { tx, locale } = useTx();
+  const title = locale === "en" && catalog.titleEn ? catalog.titleEn : tx(catalog.title);
 
   return (
     <>
@@ -27,7 +30,7 @@ export function CatalogCard({ catalog, compact = false }: Props) {
           {cover ? (
             <Image
               src={cover}
-              alt={`ปก ${catalog.title}`}
+              alt={`${tx("ปก")} ${title}`}
               fill
               className="object-cover transition-transform duration-500 group-hover:scale-[1.04]"
               sizes={compact ? "280px" : "(max-width: 640px) 78vw, 300px"}
@@ -45,11 +48,11 @@ export function CatalogCard({ catalog, compact = false }: Props) {
               compact ? "text-sm" : "text-base"
             }`}
           >
-            {catalog.title}
+            {title}
           </h3>
           {!compact ? (
             <p className="mt-1 line-clamp-2 text-sm text-muted">
-              {catalog.description}
+              {tx(catalog.description)}
             </p>
           ) : (
             <p className="mt-0.5 text-xs text-muted">{catalog.titleEn}</p>
@@ -59,7 +62,7 @@ export function CatalogCard({ catalog, compact = false }: Props) {
               {compact ? "PDF" : catalog.titleEn}
             </span>
             <span className="shrink-0 rounded-full bg-navy px-4 py-1.5 text-xs font-semibold text-white transition group-hover:bg-brand-red">
-              เปิดดู
+              {tx("เปิดดู")}
             </span>
           </div>
         </div>
@@ -69,7 +72,7 @@ export function CatalogCard({ catalog, compact = false }: Props) {
         <CatalogFlipbookModal
           fileUrl={catalog.href}
           fileName={fileName}
-          title={catalog.title}
+          title={title}
           catalogId={catalog.id}
           manifestUrl={catalog.manifestUrl}
           onClose={() => setOpen(false)}

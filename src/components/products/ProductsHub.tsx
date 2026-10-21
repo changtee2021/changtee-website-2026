@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
+import { LocaleLink as Link } from "@/components/i18n/LocaleLink";
 import {
   PRODUCT_PILLARS,
   hubItemsForPillar,
@@ -11,11 +11,13 @@ import { PageHero } from "@/components/ui/page-hero";
 import { ProductHeroCovers } from "@/components/products/ProductHeroCovers";
 import { catalogName, categorySummary, pillarSummary } from "@/lib/i18n";
 import { useI18n } from "@/lib/i18n/use-i18n";
+import { useTx } from "@/lib/i18n/use-tx";
 
 const HERO_COVERS = PRODUCT_PILLARS.flatMap((p) => hubItemsForPillar(p.id));
 
 export function ProductsHub() {
   const { t, locale } = useI18n();
+  const { find } = useTx();
   return (
     <div>
       <PageHero
@@ -40,7 +42,7 @@ export function ProductsHub() {
               href={`#pillar-${p.id}`}
               className="shrink-0 rounded-full border border-line bg-white px-3 py-1.5 text-xs font-medium text-navy hover:border-navy/40"
             >
-              {p.code} {catalogName(locale, p)}
+              {p.code} {catalogName(locale, p, find)}
             </a>
           ))}
         </nav>
@@ -60,10 +62,10 @@ export function ProductsHub() {
                       {pillar.code} · {pillar.nameEn}
                     </p>
                     <h2 className="mt-1 font-display text-2xl font-semibold text-navy">
-                      {catalogName(locale, pillar)}
+                      {catalogName(locale, pillar, find)}
                     </h2>
                     <p className="mt-1 max-w-xl text-sm text-muted">
-                      {pillarSummary(locale, pillar)}
+                      {pillarSummary(locale, pillar, find)}
                     </p>
                   </div>
                 </div>
@@ -78,7 +80,7 @@ export function ProductsHub() {
                       <div className="relative aspect-[4/3] bg-paper">
                         <Image
                           src={item.image}
-                          alt={catalogName(locale, item)}
+                          alt={catalogName(locale, item, find)}
                           fill
                           className="object-cover transition duration-300 group-hover:scale-[1.03]"
                           sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
@@ -86,7 +88,7 @@ export function ProductsHub() {
                       </div>
                       <div className="p-4">
                         <h3 className="font-semibold text-navy group-hover:text-brand-red">
-                          {catalogName(locale, item)}
+                          {catalogName(locale, item, find)}
                         </h3>
                         {locale === "th" && item.nameEn ? (
                           <p className="mt-0.5 text-xs text-muted">{item.nameEn}</p>
@@ -95,10 +97,14 @@ export function ProductsHub() {
                         ) : null}
                         <div className="mt-2 h-px w-8 bg-brand-red" aria-hidden />
                         <p className="mt-2 line-clamp-2 text-sm text-muted">
-                          {categorySummary(locale, {
-                            slug: item.href.split("/")[2] ?? "",
-                            summary: item.summary,
-                          })}
+                          {categorySummary(
+                            locale,
+                            {
+                              slug: item.href.split("/")[2] ?? "",
+                              summary: item.summary,
+                            },
+                            find,
+                          )}
                         </p>
                       </div>
                     </Link>
@@ -126,7 +132,7 @@ export function ProductsHub() {
                 >
                   <span className="min-w-0">
                     <span className="block font-medium text-navy group-hover:text-brand-red">
-                      {catalogName(locale, cat)}
+                      {catalogName(locale, cat, find)}
                     </span>
                     <span className="block text-xs text-muted">
                       {locale === "en" ? cat.name : cat.nameEn}

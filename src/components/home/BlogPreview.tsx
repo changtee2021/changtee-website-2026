@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
+import { LocaleLink as Link } from "@/components/i18n/LocaleLink";
 import { useMemo } from "react";
 import { HomePanel, PanelHeading } from "@/components/home/HomePanel";
 import {
@@ -10,14 +10,18 @@ import {
 } from "@/lib/cms/blog-demo";
 import { publishedBlog } from "@/lib/cms/public-content";
 import { useBlogPosts } from "@/lib/cms/demo-store";
+import { LOCALE_META, type Locale } from "@/lib/i18n/locale";
 import { useI18n } from "@/lib/i18n/use-i18n";
+import { useTx } from "@/lib/i18n/use-tx";
 import type { MessageKey } from "@/lib/i18n/messages";
 
 const STARTER_COUNT = 5;
 
-function formatDate(iso: string | null, locale: string) {
+function formatDate(iso: string | null, locale: Locale) {
   if (!iso) return null;
-  return new Date(iso).toLocaleDateString(locale === "en" ? "en-GB" : "th-TH", {
+  const tag =
+    locale === "th" ? "th-TH" : locale === "en" ? "en-GB" : LOCALE_META[locale].htmlLang;
+  return new Date(iso).toLocaleDateString(tag, {
     year: "numeric",
     month: "short",
     day: "numeric",
@@ -26,6 +30,7 @@ function formatDate(iso: string | null, locale: string) {
 
 export function BlogPreview() {
   const { t, locale } = useI18n();
+  const { tx } = useTx();
   const posts = useBlogPosts();
   const published = useMemo(() => publishedBlog(posts), [posts]);
 
@@ -65,7 +70,7 @@ export function BlogPreview() {
             <div className="relative aspect-[16/10] w-full">
               <Image
                 src={featured.cover}
-                alt={featured.title}
+                alt={tx(featured.title)}
                 fill
                 className="object-cover transition duration-300 group-hover:scale-[1.02]"
                 sizes="(max-width: 1024px) 100vw, 420px"
@@ -76,10 +81,10 @@ export function BlogPreview() {
                 {t(`blog.cat.${featured.category}` as MessageKey)}
               </span>
               <h3 className="mt-2 font-display text-xl font-semibold text-navy sm:text-2xl">
-                {featured.title}
+                {tx(featured.title)}
               </h3>
               <p className="mt-3 line-clamp-3 text-sm text-muted">
-                {featured.excerpt}
+                {tx(featured.excerpt)}
               </p>
               <div className="mt-auto flex items-end justify-between gap-3 pt-4">
                 {formatDate(featured.publishedAt, locale) ? (
@@ -121,7 +126,7 @@ export function BlogPreview() {
                         {t(`blog.cat.${post.category}` as MessageKey)}
                       </span>
                       <span className="mt-0.5 block text-sm font-semibold leading-snug text-navy group-hover:underline">
-                        {post.title}
+                        {tx(post.title)}
                       </span>
                     </span>
                   </Link>
@@ -137,6 +142,7 @@ export function BlogPreview() {
 
 function HorizontalCard({ post }: { post: BlogPost }) {
   const { t } = useI18n();
+  const { tx } = useTx();
   return (
     <Link
       href={`/blog/${post.slug}`}
@@ -145,7 +151,7 @@ function HorizontalCard({ post }: { post: BlogPost }) {
       <div className="relative h-20 w-24 shrink-0 self-start overflow-hidden rounded-lg sm:h-24 sm:w-28">
         <Image
           src={post.cover}
-          alt={post.title}
+          alt={tx(post.title)}
           fill
           className="object-cover transition duration-300 group-hover:scale-[1.03]"
           sizes="112px"
@@ -156,9 +162,9 @@ function HorizontalCard({ post }: { post: BlogPost }) {
           {t(`blog.cat.${post.category}` as MessageKey)}
         </span>
         <h3 className="mt-0.5 line-clamp-2 text-sm font-semibold leading-snug text-navy">
-          {post.title}
+          {tx(post.title)}
         </h3>
-        <p className="mt-1 line-clamp-2 text-xs text-muted">{post.excerpt}</p>
+        <p className="mt-1 line-clamp-2 text-xs text-muted">{tx(post.excerpt)}</p>
         <span className="mt-auto self-end pt-2 text-sm font-semibold text-brand-red transition group-hover:translate-x-0.5">
           →
         </span>

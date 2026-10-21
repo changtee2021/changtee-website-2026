@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { useState } from "react";
+import { useTx } from "@/lib/i18n/use-tx";
 import type { InstallVideoClip } from "@/lib/product-decision-aids";
 import {
   YOUTUBE_CHANNEL_URL,
@@ -10,6 +11,7 @@ import {
 } from "@/lib/product-decision-aids";
 
 export function YouTubeEmbedCard({ clip }: { clip: InstallVideoClip }) {
+  const { tx } = useTx();
   const [playing, setPlaying] = useState(false);
   const youtubeId = clipYoutubeId(clip);
   const href = clip.videoUrl?.trim() || YOUTUBE_CHANNEL_URL;
@@ -20,7 +22,7 @@ export function YouTubeEmbedCard({ clip }: { clip: InstallVideoClip }) {
         {playing && youtubeId ? (
           <iframe
             src={ytEmbed(youtubeId, true)}
-            title={clip.title}
+            title={tx(clip.title)}
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
             allowFullScreen
             loading="lazy"
@@ -34,7 +36,7 @@ export function YouTubeEmbedCard({ clip }: { clip: InstallVideoClip }) {
               else window.open(href, "_blank", "noopener,noreferrer");
             }}
             className="group absolute inset-0 block w-full cursor-pointer text-left"
-            aria-label={`เล่นวิดีโอ: ${clip.title}`}
+            aria-label={`${tx("เล่นวิดีโอ")}: ${tx(clip.title)}`}
           >
             <Image
               src={clip.thumbnail}

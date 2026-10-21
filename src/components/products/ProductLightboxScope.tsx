@@ -69,6 +69,7 @@ export function ZoomImage({
   sizes,
   priority,
   showZoomHint = true,
+  fit,
 }: {
   src: string;
   alt: string;
@@ -77,6 +78,7 @@ export function ZoomImage({
   sizes?: string;
   priority?: boolean;
   showZoomHint?: boolean;
+  fit?: "cover" | "contain";
 }) {
   const { openSrc } = useProductLightbox();
   return (
@@ -89,6 +91,7 @@ export function ZoomImage({
       sizes={sizes}
       priority={priority}
       showZoomHint={showZoomHint}
+      fit={fit}
     />
   );
 }

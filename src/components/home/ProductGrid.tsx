@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
+import { LocaleLink as Link } from "@/components/i18n/LocaleLink";
 import { ArrowRight, ArrowUpRight } from "lucide-react";
 import { HomePanel } from "@/components/home/HomePanel";
 import { Reveal } from "@/components/home/Reveal";
@@ -59,7 +59,7 @@ export function ProductGrid() {
     "products",
     HOME_SECTION_DEFAULTS.products,
   );
-  const { field } = useCmsText("products", values);
+  const { field, locale } = useCmsText("products", values);
   if (!enabled) return null;
 
   const tiles = [1, 2, 3, 4, 5, 6, 7, 8].map((n) => {
@@ -70,11 +70,13 @@ export function ProductGrid() {
       TILE_EN[n - 1] ??
       HOME_SECTION_DEFAULTS_EN.products[`tile${n}Name`] ??
       "";
+    // Tiles pair the local name with the English one; on /en the English name stands alone.
+    const primary = locale === "th" ? thai : locale === "en" ? english || name : name;
     return {
       n,
       name,
-      thai,
-      english,
+      primary,
+      english: locale === "en" ? "" : english,
       href: values[`tile${n}Href`] ?? "/products",
       image: tileImage(
         values[`tile${n}Image`] ??
@@ -132,7 +134,7 @@ export function ProductGrid() {
                     </span>
                     <span className="category-pop-label pointer-events-none absolute inset-x-0 bottom-0 z-[1] bg-gradient-to-t from-navy-deep/85 via-navy-deep/30 to-transparent px-3.5 pb-3.5 pt-12">
                       <span className="category-pop-th block text-sm font-semibold leading-tight text-white sm:text-base">
-                        {item.thai}
+                        {item.primary}
                       </span>
                       {item.english ? (
                         <span className="category-pop-en mt-1 block text-xs font-normal leading-tight tracking-wide text-white/80">

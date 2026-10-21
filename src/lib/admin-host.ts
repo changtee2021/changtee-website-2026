@@ -102,8 +102,14 @@ const MARKETING_PREFIXES = [
 ] as const;
 
 export function isMarketingPath(pathname: string): boolean {
+  // Strip locale prefixes so /en/products still counts as marketing.
+  const bare = pathname.replace(
+    /^\/(en|my|lo|km|zh-hans|zh-hant)(?=\/|$)/i,
+    "",
+  ) || "/";
+  if (bare === "/" || bare === "") return true;
   return MARKETING_PREFIXES.some(
-    (p) => pathname === p || pathname.startsWith(`${p}/`),
+    (p) => bare === p || bare.startsWith(`${p}/`),
   );
 }
 

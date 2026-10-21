@@ -5,6 +5,8 @@ export type ProductChild = {
   summary: string;
   /** Sub-group within outdoor-factory (hub pillars 02 vs 04) */
   group?: "outdoor" | "factory";
+  /** Overrides /images/products/detail/{category}/{slug}.png */
+  image?: string;
 };
 
 export type ProductPillarId = 1 | 2 | 3 | 4 | 5 | 6 | 7;
@@ -153,8 +155,14 @@ export const productCatalog: ProductCategory[] = [
     image: `${D}/pvc-partition/solid.png`,
     children: [
       { slug: "solid", name: "ฉากกั้นทึบ", nameEn: "Solid Partition", summary: "แบ่งสัดส่วนชัดเจน" },
-      { slug: "japanese", name: "ฉากญี่ปุ่น", nameEn: "Japanese Partition", summary: "ลายญี่ปุ่นโปร่งเบา" },
-      { slug: "euro", name: "ฉากยูโร", nameEn: "Euro Partition", summary: "ช่องอะคริลิคทั้งใบ" },
+      {
+        slug: "japanese",
+        name: "ฉากญี่ปุ่น",
+        nameEn: "Japanese Partition",
+        summary: "ลายญี่ปุ่นโปร่งเบา",
+        image: "/images/products/detail/pvc-partition/japanese.jpg",
+      },
+      { slug: "euro", name: "ฉากยูโร", nameEn: "Euro Partition", summary: "ช่องอะคริลิคทั้งใบ", image: "/images/products/detail/pvc-partition/euro.jpg" },
       { slug: "usa", name: "ฉาก USA", nameEn: "USA Partition", summary: "ช่องอะคริลิคเป็นระยะ" },
     ],
   },
@@ -193,6 +201,7 @@ export const productCatalog: ProductCategory[] = [
         nameEn: "PVC Strip Curtain",
         summary: "โรงงาน คลัง ห้องเย็น",
         group: "factory",
+        image: "/images/products/detail/outdoor-factory/pvc-strip-blue-forklift.jpg",
       },
     ],
   },
@@ -361,5 +370,7 @@ export function quoteProductType(
 
 /** Per-SKU 4:3 catalog photos under /images/products/detail */
 export function childImage(category: ProductCategory, child: ProductChild): string {
-  return `/images/products/detail/${category.slug}/${child.slug}.png`;
+  return (
+    child.image ?? `/images/products/detail/${category.slug}/${child.slug}.png`
+  );
 }

@@ -191,6 +191,73 @@ export async function updateLeadStatus(
   return all[idx];
 }
 
+export type LeadLineClaim = {
+  lead: QuoteLead;
+  claimedBy: string;
+  claimedAt: string;
+  isNewClaim: boolean;
+};
+
+/**
+ * First tap wins: the update only matches while `line_claimed_by` is empty, so
+ * two salespeople tapping at once cannot both own the lead.
+ */
+export async function claimLeadFromLine(
+  id: string,
+  claimedBy: string,
+  lineUserId: string | null,
+): Promise<LeadLineClaim | null> {
+  const { createServiceSupabase } = await import("@/lib/supabase/server");
+  const supabase = createServiceSupabase();
+  const claimedAt = new Date().toISOString();
+
+  const { data: claimed, error } = await supabase
+    .from("leads")
+    .update({
+      line_claimed_by: claimedBy,
+      line_claimed_at: claimedAt,
+      line_claimed_user_id: lineUserId,
+      updated_at: claimedAt,
+    })
+    .eq("id", id)
+    .is("line_claimed_by", null)
+    .select("*")
+    .maybeSingle();
+
+  if (error) {
+    console.error("claimLeadFromLine", error.message, error.code);
+    return null;
+  }
+
+  if (claimed) {
+    await supabase.from("lead_events").insert({
+      lead_id: id,
+      from_status: claimed.status ?? null,
+      to_status: claimed.status,
+      note: `รับงานผ่าน LINE: ${claimedBy}`,
+    });
+    return {
+      lead: mapDbLead(claimed),
+      claimedBy,
+      claimedAt,
+      isNewClaim: true,
+    };
+  }
+
+  const { data: current } = await supabase
+    .from("leads")
+    .select("*")
+    .eq("id", id)
+    .maybeSingle();
+  if (!current?.line_claimed_by) return null;
+  return {
+    lead: mapDbLead(current),
+    claimedBy: String(current.line_claimed_by),
+    claimedAt: String(current.line_claimed_at),
+    isNewClaim: false,
+  };
+}
+
 function mapDbLead(row: Record<string, unknown>): QuoteLead {
   const payload = (row.form_payload as QuoteLead | null) ?? null;
   if (payload?.contactName) {

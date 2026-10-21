@@ -7,6 +7,7 @@ import { useSearchParams } from "next/navigation";
 import { revealEase } from "@/components/home/Reveal";
 import { parseVisitMode, visitModeHref } from "@/lib/visits/modes";
 import { siteConfig } from "@/lib/site-config";
+import { useI18n } from "@/lib/i18n/use-i18n";
 
 const SLIDES = [
   {
@@ -36,6 +37,7 @@ const SLIDES = [
 ] as const;
 
 export function FactoryVisitHero() {
+  const { t } = useI18n();
   const searchParams = useSearchParams();
   const mode = parseVisitMode(searchParams.get("mode"));
   const isPresentation = mode === "product-presentation";
@@ -177,7 +179,7 @@ export function FactoryVisitHero() {
               <button
                 key={slide.src}
                 type="button"
-                aria-label={`ไปสไลด์ ${i + 1}`}
+                aria-label={`${t("slider.goTo")} ${i + 1}`}
                 aria-current={i === safeIndex ? "true" : undefined}
                 onClick={() => setIndex(i)}
                 className="flex h-11 w-11 items-center justify-center"

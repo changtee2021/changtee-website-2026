@@ -24,6 +24,25 @@ export type DetailAsset = {
   /** Second room / bedroom context */
   context: string;
   gallery: string[];
+  /** Hero lightbox uses `gallery` only — no shared category or portfolio shots. */
+  galleryOnly?: boolean;
+  /** Per image src, replaces the generic thumbnail caption. */
+  galleryCaptions?: Record<string, string>;
+};
+
+export type ProductVariant = {
+  name: string;
+  nameEn: string;
+  body: string;
+  bestFor: string;
+  image: string;
+};
+
+export type ProductSkuTable = {
+  title: string;
+  columns: string[];
+  rows: string[][];
+  note?: string;
 };
 
 export type BenefitCard = {
@@ -45,6 +64,8 @@ export type ProductPresentation = {
   benefitCards: BenefitCard[];
   materials: { title: string; body: string; image: string }[];
   assets: DetailAsset;
+  variants?: ProductVariant[];
+  skuTable?: ProductSkuTable;
 };
 
 type CategoryDefaults = {
@@ -803,6 +824,8 @@ type PresentationOverride = Partial<
   Omit<ProductPresentation, "assets" | "roomStyles">
 > & {
   roomStyleIds?: string[];
+  /** Per style id, replace the stock style photo on this product only. */
+  styleImages?: Record<string, string>;
   assets?: Partial<DetailAsset>;
 };
 
@@ -839,6 +862,21 @@ export const PRODUCT_OVERRIDES: Partial<Record<string, PresentationOverride>> = 
       },
     ],
     roomStyleIds: ["modern-minimal", "soft-luxury", "office-clean"],
+    assets: {
+      hero: `${DETAIL}/curtain/s-wave.png`,
+      lifestyle: `${CTX}/curtain/living.png`,
+      context: `${CTX}/curtain/room.png`,
+      gallery: [
+        `${DETAIL}/curtain/s-wave-real-7.jpg`,
+        `${DETAIL}/curtain/s-wave-real-1.jpg`,
+        `${DETAIL}/curtain/s-wave-real-5.jpg`,
+        `${DETAIL}/curtain/s-wave-real-6.jpg`,
+        `${DETAIL}/curtain/s-wave-real-2.jpg`,
+        `${DETAIL}/curtain/s-wave-real-4.jpg`,
+        `${DETAIL}/curtain/s-wave-real-8.jpg`,
+      ],
+      galleryOnly: true,
+    },
   },
   "roller-blinds/zebra": {
     seoKeywords: [
@@ -1151,6 +1189,17 @@ export const PRODUCT_OVERRIDES: Partial<Record<string, PresentationOverride>> = 
       { label: "บริการ", value: "วัดหน้างานฟรี · ติดตั้งครบ" },
     ],
     roomStyleIds: ["resort-natural", "modern-minimal"],
+    assets: {
+      hero: "/images/products/detail/pvc-partition/japanese.jpg",
+      lifestyle: "/images/products/detail/pvc-partition/japanese-2.jpg",
+      context: "/images/products/detail/pvc-partition/japanese-room.jpg",
+      gallery: [
+        "/images/products/detail/pvc-partition/japanese.jpg",
+        "/images/products/detail/pvc-partition/japanese-2.jpg",
+        "/images/products/detail/pvc-partition/japanese-room.jpg",
+      ],
+      galleryOnly: true,
+    },
   },
   "pvc-partition/euro": {
     specs: [
@@ -1161,6 +1210,24 @@ export const PRODUCT_OVERRIDES: Partial<Record<string, PresentationOverride>> = 
       { label: "บริการ", value: "วัดหน้างานฟรี · ติดตั้งครบ" },
     ],
     roomStyleIds: ["modern-minimal", "cafe-retail"],
+    styleImages: {
+      "modern-minimal": "/images/products/detail/pvc-partition/euro-2.jpg",
+      "cafe-retail": "/images/products/detail/pvc-partition/euro-4.jpg",
+    },
+    assets: {
+      hero: "/images/products/detail/pvc-partition/euro.jpg",
+      texture: "/images/products/detail/pvc-partition/euro-4.jpg",
+      lifestyle: "/images/products/detail/pvc-partition/euro-2.jpg",
+      context: "/images/products/detail/pvc-partition/euro-3.jpg",
+      gallery: [
+        "/images/products/detail/pvc-partition/euro.jpg",
+        "/images/products/detail/pvc-partition/euro-2.jpg",
+        "/images/products/detail/pvc-partition/euro-3.jpg",
+        "/images/products/detail/pvc-partition/euro-4.jpg",
+        "/images/products/detail/pvc-partition/euro-5.jpg",
+      ],
+      galleryOnly: true,
+    },
   },
   "pvc-partition/usa": {
     specs: [
@@ -1193,35 +1260,140 @@ export const PRODUCT_OVERRIDES: Partial<Record<string, PresentationOverride>> = 
     roomStyleIds: ["modern-minimal", "office-clean"],
   },
   "outdoor-factory/pvc-strip": {
+    seoTitle: "ม่านริ้วพลาสติก PVC Strip Curtain โรงงาน ห้องเย็น",
+    seoDescription:
+      "ม่านริ้วพลาสติก PVC กันฝุ่น กันแมลง กันเสียง คุมอุณหภูมิ รุ่นใสมาตรฐาน กันแมลงสีเหลือง ทนเย็นถึง -50°C และสีทึบกันแสง ขนาด 200x2 / 300x3 มม. พร้อมรางแขวนและติดตั้งโดยช่างตี๋",
+    seoKeywords: [
+      "ม่านริ้วพลาสติก",
+      "ม่านริ้ว PVC",
+      "ม่านพลาสติกโรงงาน",
+      "ม่านห้องเย็น",
+      "ม่านกันแมลง",
+      "PVC strip curtain",
+      "ช่างตี๋",
+    ],
     specs: [
-      { label: "ระบบ", value: "ม่านริ้ว PVC ทางเข้าออกอุตสาหกรรม" },
-      { label: "หน้าที่หลัก", value: "กั้นฝุ่น แมลง รักษาอุณหภูมิประตูสัญจรบ่อย" },
-      { label: "วัสดุ", value: "ริ้วพลาสติก ความหนา/สีตามงานโรงงานหรือห้องเย็น" },
-      { label: "ดูแล", value: "เปลี่ยนริ้วเป็นเส้นได้ ไม่ต้องรื้อทั้งชุด" },
-      { label: "บริการ", value: "สำรวจหน้างาน · ติดตั้งครบ" },
+      { label: "วัสดุ", value: "PVC เกรดอุตสาหกรรม ยืดหยุ่น ไม่แตกกรอบ" },
+      { label: "ขนาดริ้ว", value: "กว้าง 200 / 300 มม. · หนา 2 / 3 มม." },
+      { label: "อุณหภูมิใช้งาน", value: "รุ่นทั่วไป -20°C ถึง 50°C · รุ่นทนเย็น -50°C ถึง 40°C" },
+      { label: "ผิวริ้ว", value: "ผิวเรียบ (มองทะลุชัด) · ผิวแถบกันกระแทก (RB)" },
+      { label: "สี", value: "ใส · เหลืองกันแมลง · ดำ / น้ำเงิน กันแสง · ใสอมเขียวกันไฟฟ้าสถิต" },
+      { label: "การติดตั้ง", value: "รางแขวนอะลูมิเนียม / สแตนเลส / รางเลื่อน · เปลี่ยนริ้วทีละเส้นได้" },
     ],
     materials: [
       {
-        title: "ริ้ว PVC",
-        body: "งานโรงงาน/คลัง/ห้องเย็น ไม่ใช่ม่านผ้าตกแต่งบ้านหรือม่านม้วนระเบียง",
-        image: `${DETAIL}/outdoor-factory/pvc-strip.png`,
+        title: "ริ้ว PVC ผิวเรียบ",
+        body: "ใสมองทะลุชัด เหมาะทางเดินคนและประตูที่ต้องเห็นรถหรือคนฝั่งตรงข้าม",
+        image: `${DETAIL}/outdoor-factory/pvc-strip-type-clear.jpg`,
       },
       {
-        title: "รางหัวประตู",
-        body: "ออกแบบให้เปลี่ยนริ้วเป็นจุด ลดเวลาหยุดหน้างาน",
+        title: "ริ้ว PVC ผิวแถบกันกระแทก (RB)",
+        body: "มีสันนูนตามยาว ลดรอยขีดข่วนเมื่อรถยกหรือรถเข็นผ่านบ่อย ริ้วจึงใสได้นานกว่า",
+        image: `${DETAIL}/outdoor-factory/pvc-strip-rolls.jpg`,
+      },
+      {
+        title: "รางแขวนหัวประตู",
+        body: "แผ่นแขวนอะลูมิเนียม รางสแตนเลส รางเลื่อนซ้าย-ขวา และรางแม่เหล็ก — ถอดเปลี่ยนริ้วเป็นจุดได้ ไม่ต้องรื้อทั้งชุด",
         image: `${TEXTURE}/outdoor-factory.png`,
       },
     ],
     benefitStats: [
       {
-        label: "ทนใช้งานหนัก",
-        detail: "ประตูสัญจรบ่อย กั้นฝุ่นและแมลงได้โดยไม่ต้องปิดบานทึบทุกครั้ง",
+        label: "กันฝุ่น กันแมลง กันเสียง",
+        detail: "แยกไลน์ผลิตและโซนสะอาดออกจากกัน โดยคนและรถยังเดินผ่านได้ทันที",
       },
       {
-        label: "คุมอุณหภูมิโซน",
-        detail: "ช่วยห้องเย็นและคลังลดการสูญเสียความเย็นตอนรถหรือคนเข้าออก",
+        label: "คุมอุณหภูมิ ประหยัดไฟ",
+        detail: "ลดลมเย็นรั่วตอนเปิดประตูห้องเย็นหรือห้องแอร์ แอร์ไม่ต้องทำงานหนัก",
       },
     ],
+    benefitCards: [
+      {
+        label: "โรงงาน / คลังสินค้า",
+        detail: "กั้นโซนผลิตกับโซนเก็บสินค้า รถยกวิ่งผ่านได้ทันที กันฝุ่นและเสียงข้ามโซน",
+        image: `${DETAIL}/outdoor-factory/pvc-strip-blue-forklift.jpg`,
+      },
+      {
+        label: "โกดัง / ประตูขนถ่ายสินค้า",
+        detail: "ปิดช่องประตูกว้างให้รถยกผ่านได้ ลดฝุ่น นก และแมลงเข้าคลัง ช่วยคุมอุณหภูมิสินค้า",
+        image: `${DETAIL}/outdoor-factory/pvc-strip-loading-dock.jpg`,
+      },
+      {
+        label: "ร้านอาหาร / หลังครัว",
+        detail: "กั้นครัวกับโซนหน้าร้าน กันกลิ่น ควัน และแมลง ไม่ให้แอร์หน้าร้านรั่วเข้าครัว พนักงานถือถาดเดินผ่านสะดวก",
+        image: `${DETAIL}/outdoor-factory/pvc-strip-kitchen.jpg`,
+      },
+    ],
+    variants: [
+      {
+        name: "มาตรฐานใส",
+        nameEn: "Standard Clear",
+        body: "ม่านริ้วใสคุณภาพสูง มองทะลุชัด ใช้ได้กับงานทั่วไป",
+        bestFor: "ไลน์ผลิต โกดังสินค้า หลังครัวร้านอาหาร ทางเดินพนักงาน",
+        image: `${DETAIL}/outdoor-factory/pvc-strip-type-clear.jpg`,
+      },
+      {
+        name: "กันแมลงสีเหลือง",
+        nameEn: "Yellow Anti Insects",
+        body: "สีเหลือง/ส้มช่วยลดแมลงที่ถูกดึงดูดด้วยแสง",
+        bestFor: "ทางเข้าโกดัง โรงงานอาหาร ประตูหลังครัว",
+        image: `${DETAIL}/outdoor-factory/pvc-strip-type-yellow.jpg`,
+      },
+      {
+        name: "ทนเย็นพิเศษ",
+        nameEn: "Super Polar",
+        body: "ยังนิ่ม ไม่แข็งกรอบ แม้อุณหภูมิต่ำถึง -50°C",
+        bestFor: "ห้องเย็น ห้องแช่แข็ง รถห้องเย็น",
+        image: `${DETAIL}/outdoor-factory/pvc-strip-type-polar.jpg`,
+      },
+      {
+        name: "สีทึบ",
+        nameEn: "Opaque Color",
+        body: "ช่วยบังสายตา กรองแสงจ้าและแสงเชื่อม มีสีดำ แดง เขียว น้ำเงิน ขาวควัน",
+        bestFor: "โซนงานเชื่อมในโรงงาน กั้นโซนเก็บของในโกดังให้พ้นสายตา",
+        image: `${DETAIL}/outdoor-factory/pvc-strip-type-opaque.jpg`,
+      },
+    ],
+    skuTable: {
+      title: "รหัสสินค้าและสเปก",
+      columns: ["รหัส", "ประเภท", "ผิวริ้ว", "อุณหภูมิใช้งาน", "ขนาด (กว้าง x หนา)", "สี"],
+      rows: [
+        ["SC-2002", "ธรรมดา", "เรียบ", "-20°C ถึง 50°C", "200 x 2 มม.", "ใส"],
+        ["SC-3003", "ธรรมดา", "เรียบ", "-20°C ถึง 50°C", "300 x 3 มม.", "ใส"],
+        ["SC-3002", "ธรรมดา", "เรียบ", "-20°C ถึง 50°C", "300 x 2 มม.", "ใส"],
+        ["SC-RB-2002", "ธรรมดา", "กันกระแทก", "-20°C ถึง 50°C", "200 x 2 มม.", "ใส"],
+        ["SC-RB-3003", "ธรรมดา", "กันกระแทก", "-20°C ถึง 50°C", "300 x 3 มม.", "ใส"],
+        ["SP-2002", "ทนเย็น", "เรียบ", "-50°C ถึง 40°C", "200 x 2 มม.", "ใส"],
+        ["SP-3003", "ทนเย็น", "เรียบ", "-50°C ถึง 40°C", "300 x 3 มม.", "ใส"],
+        ["SP-RB-2002", "ทนเย็น", "กันกระแทก", "-50°C ถึง 40°C", "200 x 2 มม.", "ใส"],
+        ["SP-RB-3003", "ทนเย็น", "กันกระแทก", "-50°C ถึง 40°C", "300 x 3 มม.", "ใส"],
+        ["Y/O-2002", "กันแมลง", "เรียบ", "-20°C ถึง 50°C", "200 x 2 มม.", "เหลือง"],
+        ["Y/O-3003", "กันแมลง", "เรียบ", "-20°C ถึง 50°C", "300 x 3 มม.", "เหลือง"],
+        ["Y/O-RB-2002", "กันแมลง", "กันกระแทก", "-20°C ถึง 50°C", "200 x 2 มม.", "เหลือง"],
+        ["Y/O-RB-3003", "กันแมลง", "กันกระแทก", "-20°C ถึง 50°C", "300 x 3 มม.", "เหลือง"],
+        ["BK-2002", "กันแสง", "เรียบ", "-20°C ถึง 50°C", "200 x 2 มม.", "ดำ"],
+        ["BU-2002", "กันแสง", "เรียบ", "-20°C ถึง 50°C", "200 x 2 มม.", "น้ำเงิน"],
+        ["AS-2002", "กันไฟฟ้าสถิต", "เรียบ", "-20°C ถึง 50°C", "200 x 2 มม.", "ใสอมเขียว"],
+      ],
+      note: "RB = ผิวแถบกันกระแทก · ไม่ระบุ = ผิวเรียบ · ขนาดอื่นและรุ่นแม่เหล็ก/เจาะรู/ผิวฝ้า ดูในแคตตาล็อกด้านล่าง",
+    },
+    assets: {
+      hero: `${DETAIL}/outdoor-factory/pvc-strip-blue-forklift.jpg`,
+      texture: `${DETAIL}/outdoor-factory/pvc-strip-factory.jpg`,
+      lifestyle: `${DETAIL}/outdoor-factory/pvc-strip-loading-dock.jpg`,
+      context: `${DETAIL}/outdoor-factory/pvc-strip-kitchen.jpg`,
+      gallery: [
+        `${DETAIL}/outdoor-factory/pvc-strip-blue-forklift.jpg`,
+        `${DETAIL}/outdoor-factory/pvc-strip-factory.jpg`,
+        `${DETAIL}/outdoor-factory/pvc-strip-loading-dock.jpg`,
+        `${DETAIL}/outdoor-factory/pvc-strip-kitchen.jpg`,
+      ],
+      galleryOnly: true,
+      galleryCaptions: {
+        [`${DETAIL}/outdoor-factory/pvc-strip-factory.jpg`]: "โรงงาน / ไลน์ผลิต",
+        [`${DETAIL}/outdoor-factory/pvc-strip-loading-dock.jpg`]: "โกดัง / ประตูขนถ่ายสินค้า",
+        [`${DETAIL}/outdoor-factory/pvc-strip-kitchen.jpg`]: "ร้านอาหาร / หลังครัว",      },
+    },
     roomStyleIds: [],
     consultantSteps: [],
   },
@@ -1821,7 +1993,12 @@ export function getProductPresentation(
   const override = PRODUCT_OVERRIDES[overrideKey];
 
   const roomStyleIds = override?.roomStyleIds ?? defaults.roomStyleIds;
-  const roomStyles = resolveRoomStyles(categorySlug, roomStyleIds);
+  const roomStyles = resolveRoomStyles(categorySlug, roomStyleIds).map(
+    (style) => {
+      const image = override?.styleImages?.[style.id];
+      return image ? { ...style, image } : style;
+    },
+  );
 
   const hero = childImage(category, product);
   const texture = CATEGORY_TEXTURE[category.slug] ?? hero;
@@ -1838,10 +2015,12 @@ export function getProductPresentation(
     lifestyle: override?.assets?.lifestyle ?? lifestyle,
     context: override?.assets?.context ?? contextRoom,
     gallery: override?.assets?.gallery ?? gallery,
+    galleryOnly: override?.assets?.galleryOnly,
+    galleryCaptions: override?.assets?.galleryCaptions,
   };
 
   const stats = override?.benefitStats ?? defaults.benefitStats;
-  const benefitCards: BenefitCard[] = [
+  const benefitCards: BenefitCard[] = override?.benefitCards ?? [
     {
       label: "รายละเอียดพื้นผิว",
       detail: `ผิวสัมผัสและลายวัสดุของ${product.name} — ดูใกล้ก่อนเลือกผ้า/รุ่น`,
@@ -1899,6 +2078,8 @@ export function getProductPresentation(
     benefitCards,
     materials: mergeMaterials(defaults.materials, override?.materials),
     assets,
+    variants: override?.variants,
+    skuTable: override?.skuTable,
   };
 }
 

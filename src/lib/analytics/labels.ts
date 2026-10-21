@@ -5,6 +5,7 @@ export const ANALYTICS_CLICK_LABELS = {
   catalog: "ดาวน์โหลดแคตตาล็อก",
   facebook: "Facebook",
   youtube: "YouTube",
+  instagram: "Instagram",
   tiktok: "TikTok",
 } as const;
 

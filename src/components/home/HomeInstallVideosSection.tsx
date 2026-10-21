@@ -9,6 +9,7 @@ import { EditableSpot } from "@/components/preview/EditableSpot";
 import { useSectionValues } from "@/lib/cms/demo-store";
 import { HOME_SECTION_DEFAULTS } from "@/lib/cms/page-sections";
 import { useCmsText } from "@/lib/i18n/use-cms-text";
+import { useTx } from "@/lib/i18n/use-tx";
 import {
   YOUTUBE_CHANNEL_URL,
   clipYoutubeId,
@@ -47,6 +48,7 @@ export function HomeInstallVideosSection() {
   const [playing, setPlaying] = useState(false);
   const stripRef = useRef<HTMLDivElement>(null);
   const { field } = useCmsText("installVideos", values);
+  const { tx } = useTx();
 
   if (!enabled || clips.length === 0) return null;
 
@@ -77,7 +79,7 @@ export function HomeInstallVideosSection() {
                 <iframe
                   key={youtubeId}
                   src={ytEmbed(youtubeId, true)}
-                  title={active.title}
+                  title={tx(active.title)}
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                   allowFullScreen
                   className="absolute inset-0 h-full w-full border-0"
@@ -87,7 +89,7 @@ export function HomeInstallVideosSection() {
                   type="button"
                   onClick={() => setPlaying(true)}
                   className="group absolute inset-0 block w-full"
-                  aria-label={`เล่นวิดีโอ: ${active.title}`}
+                  aria-label={`${tx("เล่นวิดีโอ")}: ${tx(active.title)}`}
                 >
                   <Image
                     src={active.thumbnail}
@@ -191,7 +193,7 @@ export function HomeInstallVideosSection() {
                         ? "ring-2 ring-brand-red ring-offset-2 ring-offset-navy"
                         : "ring-1 ring-white/10 hover:ring-white/30"
                     }`}
-                    aria-label={`เล่น: ${clip.title}`}
+                    aria-label={`${tx("เล่น")}: ${tx(clip.title)}`}
                     aria-pressed={selected}
                   >
                     <div className="relative aspect-video bg-navy">
@@ -216,7 +218,7 @@ export function HomeInstallVideosSection() {
                     </div>
                     <div className="bg-navy/80 px-3 py-2.5">
                       <p className="line-clamp-2 text-xs font-semibold leading-snug text-white sm:text-sm">
-                        {clip.title}
+                        {tx(clip.title)}
                       </p>
                     </div>
                   </button>
@@ -229,7 +231,7 @@ export function HomeInstallVideosSection() {
                 <button
                   type="button"
                   onClick={() => scrollStrip(-1)}
-                  aria-label="เลื่อนคลิปไปทางซ้าย"
+                  aria-label={tx("เลื่อนคลิปไปทางซ้าย")}
                   className="flex size-9 items-center justify-center rounded-full border border-white/25 text-white transition hover:border-white/50 hover:bg-white/10"
                 >
                   <ChevronLeft className="size-5" strokeWidth={2} />
@@ -237,7 +239,7 @@ export function HomeInstallVideosSection() {
                 <button
                   type="button"
                   onClick={() => scrollStrip(1)}
-                  aria-label="เลื่อนคลิปไปทางขวา"
+                  aria-label={tx("เลื่อนคลิปไปทางขวา")}
                   className="flex size-9 items-center justify-center rounded-full border border-white/25 text-white transition hover:border-white/50 hover:bg-white/10"
                 >
                   <ChevronRight className="size-5" strokeWidth={2} />
@@ -249,7 +251,7 @@ export function HomeInstallVideosSection() {
                 rel="noreferrer"
                 className="inline-flex items-center gap-1.5 text-sm font-semibold text-white/85 underline-offset-4 hover:text-white hover:underline"
               >
-                ดูคลิปเพิ่มบน YouTube →
+                {tx("ดูคลิปเพิ่มบน YouTube →")}
               </a>
             </div>
           </div>
