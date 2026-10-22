@@ -161,7 +161,7 @@ const nextConfig: NextConfig = {
       {
         source: "/sale-gallery",
         destination: "/",
-        permanent: false,
+        permanent: true,
       },
       // Legacy CMS (Mongo-style slug paths) — evidence in brand SERP Aug 2026
       {

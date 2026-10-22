@@ -1,3 +1,4 @@
+import { blogIndexableLocales } from "@/lib/i18n/content/thai-text/sections.server";
 import { areaPath, serviceAreaNames } from "@/lib/service-areas";
 import { siteConfig } from "@/lib/site-config";
 
@@ -35,8 +36,10 @@ export function indexNowPaths(collection: string, items: unknown[]): string[] {
   if (collection === "blog") {
     paths.add("/blog");
     for (const item of published) {
-      paths.add(`/blog/${item.slug}`);
-      paths.add(`/en/blog/${item.slug}`);
+      if (!item.slug) continue;
+      for (const locale of blogIndexableLocales(item.slug)) {
+        paths.add(locale === "en" ? `/en/blog/${item.slug}` : `/blog/${item.slug}`);
+      }
     }
   } else if (collection === "portfolio") {
     paths.add("/portfolio");

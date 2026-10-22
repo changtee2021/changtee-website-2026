@@ -44,11 +44,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         ...(CATEGORY_DEFAULTS[cat.slug]?.baseKeywords ?? []),
       ]),
     ),
+    translationScope: "product",
   });
 }
 
 export default async function CategoryPage({ params }: Props) {
   const { category } = await params;
+  const locale = await langFromParams(params);
   const cat = getCategory(category);
   if (!cat) notFound();
 
@@ -58,7 +60,7 @@ export default async function CategoryPage({ params }: Props) {
 
   return (
     <div className="mx-auto max-w-site px-6 sm:px-10 lg:px-16 py-10 sm:py-12">
-      <JsonLd data={getCategoryJsonLd(cat)} />
+      <JsonLd data={getCategoryJsonLd(cat, locale)} />
       <p className="text-sm text-muted">
         <Link href="/products" className="hover:text-navy">
           สินค้า/บริการ

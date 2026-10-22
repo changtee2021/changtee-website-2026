@@ -21,10 +21,15 @@ export async function generateMetadata({
   });
 }
 
-export default function ProductsPage() {
+export default async function ProductsPage({
+  params,
+}: {
+  params: Promise<{ lang: string }>;
+}) {
+  const locale = await langFromParams(params);
   return (
     <>
-      <JsonLd data={getProductsHubJsonLd()} />
+      <JsonLd data={getProductsHubJsonLd(locale)} />
       <ProductsHub />
     </>
   );

@@ -22,7 +22,7 @@ export async function generateMetadata({
       title: "นัดนำเสนอสินค้า",
       description:
         "นัดนำเสนอสินค้าผ้าม่านสำหรับนิติบุคคลและองค์กร ทีมช่างตี๋เข้าพบที่บริษัท หรือนัดพรีเซนต์ที่โชว์รูม",
-      path: "/visit-factory?mode=presentation",
+      path: "/visit-factory",
       image: "/images/factory/visit-01-production.png",
       locale,
     });

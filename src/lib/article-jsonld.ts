@@ -52,12 +52,17 @@ export function getArticleJsonLd(
       {
         "@type": "BreadcrumbList",
         itemListElement: [
-          { "@type": "ListItem", position: 1, name: "หน้าแรก", item: base },
+          {
+            "@type": "ListItem",
+            position: 1,
+            name: "หน้าแรก",
+            item: `${base}${localizedHref(locale, "/") === "/" ? "/" : localizedHref(locale, "/")}`,
+          },
           {
             "@type": "ListItem",
             position: 2,
             name: "บทความ",
-            item: `${base}/blog`,
+            item: `${base}${localizedHref(locale, "/blog")}`,
           },
           { "@type": "ListItem", position: 3, name: headline, item: url },
         ],
