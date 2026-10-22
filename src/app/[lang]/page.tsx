@@ -15,7 +15,7 @@ import { localizedHref } from "@/lib/i18n/locale";
 import { getLocalBusinessJsonLd } from "@/lib/local-business-jsonld";
 import { hreflangLanguages, indexableLocales } from "@/lib/seo/meta";
 
-/** Title/description come from the layouts; without this every locale home points its canonical at the Thai `/`. */
+/** Each locale home owns its canonical and hreflang. The root layout must not pin every page to `/`. */
 export async function generateMetadata({
   params,
 }: {

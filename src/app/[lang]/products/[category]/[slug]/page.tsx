@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { ProductDetailView } from "@/components/products/ProductDetailView";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { ThaiTextScope } from "@/components/i18n/ThaiTextScope";
+import { tx } from "@/lib/i18n/content/thai-text/server";
 import { sectionThaiText } from "@/lib/i18n/content/thai-text/sections.server";
 import { loadCatalogForProduct } from "@/lib/catalogs-server";
 import {
@@ -95,7 +96,12 @@ export default async function ProductDetailPage({ params }: Props) {
   const pillar = getPillar(cat.pillar);
   const related = cat.children.filter((c) => c.slug !== product.slug).slice(0, 3);
   const portfolioWorks = portfolioForProduct(cat.slug, product.name, undefined, 3);
-  const jsonLd = getProductJsonLd(category, slug);
+  const jsonLd = getProductJsonLd(
+    category,
+    slug,
+    locale,
+    content.faqs.map((faq) => ({ q: tx(locale, faq.q), a: tx(locale, faq.a) })),
+  );
 
   return (
     <>

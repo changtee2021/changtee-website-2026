@@ -3,6 +3,7 @@ import {
   getProduct,
   type ProductChild,
 } from "@/lib/product-catalog";
+import { localizedHref, type Locale } from "@/lib/i18n/locale";
 import { getProductContent } from "@/lib/product-content";
 import { siteConfig } from "@/lib/site-config";
 
@@ -2097,18 +2098,24 @@ export function getProductPresentation(
 export function getProductJsonLd(
   categorySlug: string,
   productSlug: string,
+  locale: Locale = "th",
+  faqs?: { q: string; a: string }[],
 ): Record<string, unknown> | null {
   const found = getProduct(categorySlug, productSlug);
   if (!found) return null;
 
-  const content = getProductContent(categorySlug, productSlug);
+  const content = getProductContent(categorySlug, productSlug, locale);
   const presentation = getProductPresentation(categorySlug, productSlug);
   if (!content || !presentation) return null;
 
   const { category, product } = found;
   const base = siteConfig.url.replace(/\/$/, "");
-  const productUrl = `${base}/products/${category.slug}/${product.slug}`;
-  const categoryUrl = `${base}/products/${category.slug}`;
+  const productPath = localizedHref(locale, `/products/${category.slug}/${product.slug}`);
+  const categoryPath = localizedHref(locale, `/products/${category.slug}`);
+  const hubPath = localizedHref(locale, "/products");
+  const productUrl = `${base}${productPath}`;
+  const categoryUrl = `${base}${categoryPath}`;
+  const hubUrl = hubPath === "/" ? `${base}/` : `${base}${hubPath}`;
   const image = presentation.assets.hero;
 
   // Quote-only catalog: Product without Offer (incomplete Offer+no price is invalid for rich results).
@@ -2134,14 +2141,14 @@ export function getProductJsonLd(
     areaServed: "TH",
     potentialAction: {
       "@type": "OrderAction",
-      target: `${base}/quote`,
+      target: `${base}${localizedHref(locale, "/quote")}`,
       name: "ขอใบเสนอราคา",
     },
   };
 
   const faqLd = {
     "@type": "FAQPage",
-    mainEntity: content.faqs.map((faq) => ({
+    mainEntity: (faqs ?? content.faqs).map((faq) => ({
       "@type": "Question",
       name: faq.q,
       acceptedAnswer: {
@@ -2158,7 +2165,7 @@ export function getProductJsonLd(
         "@type": "ListItem",
         position: 1,
         name: "สินค้า/บริการ",
-        item: `${base}/products`,
+        item: hubUrl,
       },
       {
         "@type": "ListItem",

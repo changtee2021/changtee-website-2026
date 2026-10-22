@@ -21,7 +21,7 @@ GEO (Generative Engine Optimization) คือการทำให้ ChatGPT, 
 | `/areas` | หน้าพื้นที่ติดตั้ง เปิดเฉพาะพื้นที่ที่มีผลงานเผยแพร่จริงอย่างน้อย 3 งาน |
 | `/llms-full.txt` | เพิ่มสินค้าทุกรุ่น ห้องเรียนรู้ บทความ และ FAQ ทั้งหมด |
 | `/robots.txt` | อนุญาต AI crawler ชัดเจน (GPTBot, OAI-SearchBot, ClaudeBot, PerplexityBot, Google-Extended, Applebot-Extended ฯลฯ) — ยังกัน `/admin`, `/api`, `/leads` |
-| JSON-LD หน้าแรก | Organization + Brand (slogan, knowsAbout, contactPoint), HomeAndConstructionBusiness (areaServed, hasOfferCatalog), WebSite + SearchAction, FAQPage |
+| JSON-LD หน้าแรก | Organization + Brand (slogan, knowsAbout, contactPoint), HomeAndConstructionBusiness (areaServed, hasOfferCatalog), WebSite, FAQPage. ไม่ใส่ SearchAction เพราะ `/search` เป็น noindex |
 | FAQ หน้าแรก (`#faq`) | render ฝั่ง server — AI crawler ส่วนใหญ่ไม่รัน JavaScript จึงต้องเห็นใน HTML ตรงๆ |
 | หน้าแรกทุกภาษา | canonical ของภาษาตัวเอง (`/en`, `/km`, …) + hreflang ครบ 7 ภาษา — ห้ามชี้ canonical กลับ `/` |
 | JSON-LD `/products` | CollectionPage + ItemList ทุกหมวด + BreadcrumbList |

@@ -111,6 +111,7 @@ export async function buildLlmsText({ full }: { full: boolean }): Promise<string
   lines.push("");
   lines.push(link(base, "/", "หน้าแรก / Home"));
   lines.push(link(base, "/products", "สินค้าและบริการ / Products", "ทุกหมวดสินค้า"));
+  lines.push(link(base, "/en/products", "Products (English)"));
   lines.push(link(base, "/portfolio", "ผลงานติดตั้ง / Portfolio", "งานจริงจากหน้างาน"));
   if (LEARN_ENABLED) {
     lines.push(link(base, "/learn", "ห้องเรียนรู้ / Learn", "ความรู้จากช่าง"));
@@ -123,7 +124,7 @@ export async function buildLlmsText({ full }: { full: boolean }): Promise<string
   lines.push("## Languages / ภาษา");
   lines.push("");
   lines.push(
-    "Thai is the main language (unprefixed URLs). Home, product categories, about/contact and quote pages are published in every language. Articles with a full English translation are also at /en/blog/…; portfolio stays Thai.",
+    "Thai is the main language (unprefixed URLs). Home, quote, contact, careers and legal pages are published in every language. Product pages are indexed in Thai and English. Articles are indexed in English only when that translation is complete (`/en/blog/…`). Portfolio, learn and installation areas stay Thai.",
   );
   lines.push("");
   for (const locale of LOCALES) {

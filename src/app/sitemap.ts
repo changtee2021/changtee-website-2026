@@ -75,32 +75,37 @@ function entry(
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const base = siteConfig.url.replace(/\/$/, "");
+  const uiLocales = indexableLocales("ui");
+  const productLocales = indexableLocales("product");
+  const cmsLocales = indexableLocales("cms");
 
   const staticRoutes: Array<{
     path: string;
     changeFrequency: SitemapEntry["changeFrequency"];
     priority: number;
+    locales: Locale[];
   }> = [
-    { path: "", changeFrequency: "monthly", priority: 1 },
-    { path: "/products", changeFrequency: "weekly", priority: 0.8 },
-    { path: "/portfolio", changeFrequency: "weekly", priority: 0.8 },
-    { path: "/blog", changeFrequency: "weekly", priority: 0.8 },
+    { path: "", changeFrequency: "monthly", priority: 1, locales: uiLocales },
+    { path: "/products", changeFrequency: "weekly", priority: 0.8, locales: productLocales },
+    { path: "/portfolio", changeFrequency: "weekly", priority: 0.8, locales: cmsLocales },
+    { path: "/blog", changeFrequency: "weekly", priority: 0.8, locales: cmsLocales },
     ...(LEARN_ENABLED
-      ? [{ path: "/learn", changeFrequency: "weekly" as const, priority: 0.8 }]
+      ? [{ path: "/learn", changeFrequency: "weekly" as const, priority: 0.8, locales: cmsLocales }]
       : []),
-    { path: "/quote", changeFrequency: "monthly", priority: 0.9 },
-    { path: "/contact", changeFrequency: "monthly", priority: 0.7 },
-    { path: "/visit-factory", changeFrequency: "monthly", priority: 0.6 },
-    { path: "/careers", changeFrequency: "weekly", priority: 0.6 },
-    { path: "/privacy", changeFrequency: "yearly", priority: 0.3 },
-    { path: "/cookies", changeFrequency: "yearly", priority: 0.3 },
-    { path: "/terms", changeFrequency: "yearly", priority: 0.3 },
+    { path: "/quote", changeFrequency: "monthly", priority: 0.9, locales: uiLocales },
+    { path: "/contact", changeFrequency: "monthly", priority: 0.7, locales: uiLocales },
+    { path: "/visit-factory", changeFrequency: "monthly", priority: 0.6, locales: uiLocales },
+    { path: "/careers", changeFrequency: "weekly", priority: 0.6, locales: uiLocales },
+    { path: "/privacy", changeFrequency: "yearly", priority: 0.3, locales: uiLocales },
+    { path: "/cookies", changeFrequency: "yearly", priority: 0.3, locales: uiLocales },
+    { path: "/terms", changeFrequency: "yearly", priority: 0.3, locales: uiLocales },
   ];
 
   const productRoutes = productCatalog.flatMap((cat) => [
     ...entry(base, `/products/${cat.slug}`, {
       changeFrequency: "weekly",
       priority: 0.8,
+      locales: productLocales,
     }),
     ...cat.children.flatMap((child) =>
       entry(base, `/products/${cat.slug}/${child.slug}`, {
@@ -110,7 +115,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       }),
     ),
   ]);
-  const cmsLocales = indexableLocales("cms");
 
   const [remotePortfolio, remoteBlog] = await Promise.all([
     readCmsWithinTimeout<PortfolioItem>("portfolio"),
@@ -124,6 +128,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       entry(base, r.path, {
         changeFrequency: r.changeFrequency,
         priority: r.priority,
+        locales: r.locales,
       }),
     ),
     ...(LEARN_ENABLED ? LEARN_SHEETS : []).flatMap((sheet) =>

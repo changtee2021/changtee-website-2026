@@ -4,7 +4,7 @@ import {
   brandKnowsAbout,
   brandOfferCatalog,
 } from "@/lib/brand-facts";
-import { LOCALES, LOCALE_META, type Locale } from "@/lib/i18n/locale";
+import { LOCALES, LOCALE_META, localizedHref, type Locale } from "@/lib/i18n/locale";
 import { tx } from "@/lib/i18n/content/thai-text/server";
 
 /** LocalBusiness + Organization JSON-LD for homepage / root SEO. */
@@ -113,14 +113,6 @@ export function getLocalBusinessJsonLd(
         alternateName: siteConfig.nameEn,
         publisher: { "@id": `${base}/#organization` },
         inLanguage: LOCALES.map((l) => LOCALE_META[l].hreflang),
-        potentialAction: {
-          "@type": "SearchAction",
-          target: {
-            "@type": "EntryPoint",
-            urlTemplate: `${base}/search?q={search_term_string}`,
-          },
-          "query-input": "required name=search_term_string",
-        },
       },
       ...(options.withFaq === false ? [] : [brandFaqJsonLd(base, locale)]),
       ...(options.page ? [options.page] : []),
@@ -134,7 +126,8 @@ export function getLocalBusinessJsonLd(
  */
 export function getAboutPageJsonLd(locale: Locale = "th"): Record<string, unknown> {
   const base = siteConfig.url.replace(/\/$/, "");
-  const url = `${base}/contact`;
+  const path = localizedHref(locale, "/contact");
+  const url = path === "/" ? `${base}/` : `${base}${path}`;
   return getLocalBusinessJsonLd(locale, {
     withFaq: false,
     page: {

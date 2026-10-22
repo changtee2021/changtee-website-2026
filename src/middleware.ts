@@ -185,8 +185,9 @@ export async function middleware(request: NextRequest) {
     }
 
     if (isMarketingPath(pathname)) {
+      const alias = publicAliasPath(pathname);
       return NextResponse.redirect(
-        new URL(`${pathname}${search}`, getSiteUrl()),
+        new URL(`${alias ?? pathname}${search}`, getSiteUrl()),
         308,
       );
     }
@@ -235,6 +236,31 @@ export async function middleware(request: NextRequest) {
 /** Top-level app folders outside `app/[lang]` — never locale-rewritten. */
 const NON_LOCALE_ROOTS = new Set(["api", "_next", "admin", "dev"]);
 
+/** Live duplicates of a canonical public page. Extra segments are dropped. */
+const PUBLIC_ALIASES: Record<string, string> = {
+  about: "contact",
+  estimate: "quote",
+};
+
+/**
+ * `/about` and `/{locale}/about` → contact (same for estimate → quote).
+ * Thai stays unprefixed. One hop, including `/th/about` and mixed-case prefixes.
+ */
+function publicAliasPath(pathname: string): string | null {
+  const segments = pathname.split("/").filter(Boolean);
+  if (!segments.length) return null;
+  const first = segments[0];
+  const thaiPrefix = first.toLowerCase() === "th";
+  const locale = thaiPrefix ? null : localeFromPrefix(first);
+  const hasLocale = thaiPrefix || locale !== null;
+  const head = (hasLocale ? segments[1] : first)?.toLowerCase();
+  const target = head ? PUBLIC_ALIASES[head] : undefined;
+  if (!target) return null;
+  const prefix = locale ? [localeToParam(locale)] : [];
+  const dest = `/${[...prefix, target].join("/")}`;
+  return dest === pathname ? null : dest;
+}
+
 /**
  * Thai URLs stay unprefixed (rewritten to `/th/...` internally); `/th/...`
  * redirects to the bare URL so each page has one Thai address. Other locales
@@ -245,6 +271,13 @@ function resolvePublicLocaleRoute(request: NextRequest): {
   rewrite?: URL;
 } {
   const { pathname } = request.nextUrl;
+  const alias = publicAliasPath(pathname);
+  if (alias) {
+    const dest = request.nextUrl.clone();
+    dest.pathname = alias;
+    return { redirect: dest };
+  }
+
   const segments = pathname.split("/").filter(Boolean);
   const first = segments[0] ?? "";
   if (NON_LOCALE_ROOTS.has(first)) return {};
