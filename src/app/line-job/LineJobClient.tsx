@@ -81,6 +81,67 @@ type JobView = {
 
 type Field = [label: string, value: string | null | undefined, href?: string];
 
+type StatusFilter = "all" | "waiting" | "active" | "done";
+
+const STATUS_FILTERS: [StatusFilter, string][] = [
+  ["all", "ทั้งหมด"],
+  ["waiting", "รอรับ"],
+  ["active", "กำลังดูแล"],
+  ["done", "ปิดแล้ว"],
+];
+
+function statusOf(row: { jobStatus: "done" | null; claimedBy: string | null }): Exclude<StatusFilter, "all"> {
+  if (row.jobStatus === "done") return "done";
+  return row.claimedBy ? "active" : "waiting";
+}
+
+function FilterSelect({
+  label,
+  value,
+  onChange,
+  allLabel,
+  options,
+}: {
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+  allLabel: string;
+  options: string[];
+}) {
+  return (
+    <label className="relative block">
+      <span className="sr-only">{label}</span>
+      <select
+        value={value}
+        onChange={(event) => onChange(event.target.value)}
+        className={`h-11 w-full appearance-none border bg-[#FFFFFF] pl-3 pr-8 text-sm outline-none focus:border-[#0B1F3A] ${
+          value ? "border-[#0B1F3A] font-semibold text-[#0B1F3A]" : "border-[#D7DEE8] text-[#5A6B82]"
+        }`}
+      >
+        <option value="">
+          {label}: {allLabel}
+        </option>
+        {options.map((option) => (
+          <option key={option} value={option}>
+            {option}
+          </option>
+        ))}
+      </select>
+      <svg
+        aria-hidden
+        viewBox="0 0 24 24"
+        className="pointer-events-none absolute right-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[#8794A7]"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+      >
+        <path d="M6 9l6 6 6-6" />
+      </svg>
+    </label>
+  );
+}
+
 const SOURCE_LABELS: Record<string, string> = {
   quote: "ขอใบเสนอราคา",
   contact: "ติดต่อ",
@@ -263,7 +324,10 @@ export default function LineJobClient({ liffId }: { liffId: string }) {
   const [tab, setTab] = useState<"jobs" | "web">("jobs");
   const [leadId, setLeadId] = useState("");
   const [leads, setLeads] = useState<LeadRow[] | null>(null);
-  const [filter, setFilter] = useState<"all" | "open" | "done">("all");
+  const [filter, setFilter] = useState<StatusFilter>("all");
+  const [query, setQuery] = useState("");
+  const [owner, setOwner] = useState("");
+  const [product, setProduct] = useState("");
   const [job, setJob] = useState<JobView | null>(null);
   const [preview, setPreview] = useState<LeadRow | null>(null);
   const [reports, setReports] = useState<Partial<Record<Period, WebReport>>>({});
@@ -415,15 +479,32 @@ export default function LineJobClient({ liffId }: { liffId: string }) {
   }
 
   const all = leads ?? [];
-  const counts = {
-    all: all.length,
-    open: all.filter((row) => row.jobStatus !== "done").length,
-    done: all.filter((row) => row.jobStatus === "done").length,
-  };
-  const waiting = all.filter((row) => !row.claimedBy && row.jobStatus !== "done").length;
-  const visible = all.filter((row) =>
-    filter === "done" ? row.jobStatus === "done" : filter === "open" ? row.jobStatus !== "done" : true,
+  const owners = [...new Set(all.map((row) => row.claimedBy).filter((name): name is string => Boolean(name)))].sort(
+    (a, b) => a.localeCompare(b, "th"),
   );
+  const products = [...new Set(all.map((row) => row.productType).filter(Boolean))].sort((a, b) => a.localeCompare(b, "th"));
+  const needle = query.trim().toLowerCase();
+  const narrowed = all.filter((row) => {
+    if (owner && row.claimedBy !== owner) return false;
+    if (product && row.productType !== product) return false;
+    if (!needle) return true;
+    return [row.contactName, row.quoteNo, row.productType, row.requestedSize, row.claimedBy]
+      .filter(Boolean)
+      .join(" ")
+      .toLowerCase()
+      .includes(needle);
+  });
+  const counts: Record<StatusFilter, number> = { all: narrowed.length, waiting: 0, active: 0, done: 0 };
+  for (const row of narrowed) counts[statusOf(row)] += 1;
+  const waiting = all.filter((row) => statusOf(row) === "waiting").length;
+  const visible = narrowed.filter((row) => filter === "all" || statusOf(row) === filter);
+  const hasFilters = Boolean(needle || owner || product || filter !== "all");
+  function clearFilters() {
+    setQuery("");
+    setOwner("");
+    setProduct("");
+    setFilter("all");
+  }
   const groups: { key: string; rows: LeadRow[] }[] = [];
   for (const row of visible) {
     const key = dayKey(row.createdAt);
@@ -470,9 +551,12 @@ export default function LineJobClient({ liffId }: { liffId: string }) {
           <button
             type="button"
             onClick={() => liff?.closeWindow()}
-            className="-mr-2 min-h-11 px-2 text-sm text-white/70"
+            aria-label="ปิดหน้านี้"
+            className="-mr-3 flex h-11 w-11 items-center justify-center text-white/80 active:text-white"
           >
-            ปิด
+            <svg aria-hidden viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+              <path d="M6 6l12 12M18 6L6 18" />
+            </svg>
           </button>
         </div>
 
@@ -523,20 +607,55 @@ export default function LineJobClient({ liffId }: { liffId: string }) {
 
         {tab === "jobs" && !leadId && (
           <>
-            <div className="grid grid-cols-3 border border-[#E3E8EF] bg-[#FFFFFF]">
-              {(
-                [
-                  ["all", "ทั้งหมด"],
-                  ["open", "ยังไม่ปิด"],
-                  ["done", "ปิดแล้ว"],
-                ] as const
-              ).map(([key, label], i) => (
+            <label className="relative block">
+              <span className="sr-only">ค้นหา</span>
+              <svg
+                aria-hidden
+                viewBox="0 0 24 24"
+                className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#8794A7]"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+              >
+                <circle cx="11" cy="11" r="7" />
+                <path d="M20 20l-3.5-3.5" />
+              </svg>
+              <input
+                type="search"
+                value={query}
+                onChange={(event) => setQuery(event.target.value)}
+                placeholder="ค้นหาชื่อลูกค้า เลขใบเสนอราคา สินค้า"
+                enterKeyHint="search"
+                className="h-11 w-full border border-[#D7DEE8] bg-[#FFFFFF] pl-9 pr-10 text-sm outline-none placeholder:text-[#A7B2C1] focus:border-[#0B1F3A]"
+              />
+              {query && (
+                <button
+                  type="button"
+                  onClick={() => setQuery("")}
+                  aria-label="ล้างคำค้นหา"
+                  className="absolute right-0 top-0 flex h-11 w-10 items-center justify-center text-[#8794A7]"
+                >
+                  <svg aria-hidden viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                    <path d="M6 6l12 12M18 6L6 18" />
+                  </svg>
+                </button>
+              )}
+            </label>
+
+            <div className="mt-2 grid grid-cols-2 gap-2">
+              <FilterSelect label="คนรับงาน" value={owner} onChange={setOwner} allLabel="ทุกคน" options={owners} />
+              <FilterSelect label="สินค้า" value={product} onChange={setProduct} allLabel="ทุกสินค้า" options={products} />
+            </div>
+
+            <div className="mt-3 grid grid-cols-4 border border-[#E3E8EF] bg-[#FFFFFF]">
+              {STATUS_FILTERS.map(([key, label], i) => (
                 <button
                   key={key}
                   type="button"
                   onClick={() => setFilter(key)}
                   aria-pressed={filter === key}
-                  className={`flex min-h-14 flex-col items-start justify-center px-3 text-left ${
+                  className={`flex min-h-14 flex-col items-start justify-center px-2.5 text-left ${
                     i > 0 ? "border-l border-[#E3E8EF]" : ""
                   } ${filter === key ? "bg-[#0B1F3A] text-white" : "text-[#0B1F3A]"}`}
                 >
@@ -551,8 +670,20 @@ export default function LineJobClient({ liffId }: { liffId: string }) {
             </div>
 
             {leads === null && !error && <ListSkeleton />}
+            {leads !== null && hasFilters && (
+              <div className="mt-3 flex items-center justify-between text-xs text-[#5A6B82]">
+                <span>
+                  พบ <span className="font-modern font-semibold text-[#0B1F3A] tabular-nums">{visible.length}</span> รายการ
+                </span>
+                <button type="button" onClick={clearFilters} className="min-h-9 px-1 underline">
+                  ล้างตัวกรอง
+                </button>
+              </div>
+            )}
             {leads !== null && visible.length === 0 && (
-              <p className="mt-10 text-center text-sm text-[#8794A7]">ไม่มีรายการในหมวดนี้</p>
+              <p className="mt-10 text-center text-sm text-[#8794A7]">
+                {hasFilters ? "ไม่พบรายการที่ตรงกับตัวกรอง" : "ยังไม่มีรายการ"}
+              </p>
             )}
 
             {groups.map((group) => (
