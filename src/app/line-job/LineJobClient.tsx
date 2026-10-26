@@ -121,7 +121,8 @@ export default function LineJobClient({ liffId }: { liffId: string }) {
           sdk.login();
           return;
         }
-        const id = new URLSearchParams(window.location.search).get("lead") ?? "";
+        const params = new URLSearchParams(window.location.search);
+        const id = params.get("list") === "1" ? "" : (params.get("lead") ?? "");
         if (id) {
           const data = (await api(sdk, `/api/line/job?lead=${id}`)) as JobView;
           if (cancelled) return;
@@ -227,6 +228,19 @@ export default function LineJobClient({ liffId }: { liffId: string }) {
           <p role="alert" className="mb-3 rounded-lg bg-rose-50 p-3 text-sm text-rose-700">
             {error}
           </p>
+        )}
+        {error && leadId && (
+          <button
+            type="button"
+            onClick={() => {
+              setLeadId("");
+              setJob(null);
+              setError("");
+            }}
+            className="mb-3 min-h-11 w-full rounded-lg bg-white font-medium shadow-sm"
+          >
+            กลับรายการ
+          </button>
         )}
 
         {tab === "jobs" && !leadId && (

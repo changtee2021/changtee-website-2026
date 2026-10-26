@@ -21,7 +21,8 @@ type LineWebhookEvent = {
 /** Opens the LIFF home. Hidden until NEXT_PUBLIC_LIFF_ID is set. */
 function botMenuMessage() {
   const liffId = process.env.NEXT_PUBLIC_LIFF_ID;
-  const url = liffId ? `https://liff.line.me/${liffId}` : "";
+  // `list=1` wins over a leftover `?lead=` so the menu always lands on the list.
+  const url = liffId ? `https://liff.line.me/${liffId}?list=1` : "";
   const button = (label: string) =>
     url
       ? {
