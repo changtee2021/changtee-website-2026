@@ -30,13 +30,65 @@ type JobView = {
   jobStatus: "done" | null;
   jobStatusAt: string | null;
   mine: boolean;
+  source?: string;
+  createdAt?: string;
   contactName?: string;
+  jobTitle?: string | null;
+  contactType?: string | null;
+  businessName?: string | null;
   phone?: string;
+  lineId?: string | null;
+  email?: string | null;
   productType?: string;
   requestedSize?: string | null;
-  installAddress?: string;
   callbackDate?: string | null;
+  installAddress?: string | null;
+  billingAddress?: string | null;
+  taxId?: string | null;
+  referralSource?: string | null;
+  note?: string | null;
+  media?: { url: string; video: boolean }[];
 };
+
+type Field = [label: string, value: string | null | undefined, href?: string];
+
+const SOURCE_LABELS: Record<string, string> = {
+  quote: "ขอใบเสนอราคา",
+  contact: "ติดต่อ",
+  fab: "ปุ่มลัดติดต่อ",
+  estimate: "ประเมินราคา",
+};
+
+const URL_RE = /(https?:\/\/[^\s]+)/g;
+
+function Linkified({ text }: { text: string }) {
+  return (
+    <>
+      {text.split(URL_RE).map((part, i) =>
+        i % 2 === 1 ? (
+          <a
+            key={i}
+            href={part}
+            target="_blank"
+            rel="noreferrer"
+            className="text-[#0B1F3A] underline decoration-[#C8102E] underline-offset-4"
+          >
+            {/maps\.app\.goo\.gl|goo\.gl\/maps|google\.[^/]+\/maps|maps\.google/i.test(part) ? "เปิดแผนที่" : "เปิดลิงก์"}
+          </a>
+        ) : (
+          part
+        ),
+      )}
+    </>
+  );
+}
+
+function errorText(code: string, fallback: string) {
+  if (code === "not_found") return "ไม่พบงานนี้";
+  if (code === "not_member") return "บัญชี LINE นี้ไม่ได้อยู่ในกลุ่มเซลส์ช่างตี๋ จึงดูข้อมูลไม่ได้";
+  if (code === "unauthorized") return "ยืนยันตัวตน LINE ไม่สำเร็จ ลองปิดแล้วเปิดใหม่";
+  return fallback;
+}
 
 type ReportStats = {
   visitors: number;
@@ -268,7 +320,7 @@ export default function LineJobClient({ liffId }: { liffId: string }) {
       } catch (err) {
         if (!cancelled) {
           const msg = err instanceof Error ? err.message : "";
-          setError(msg === "not_found" ? "ไม่พบงานนี้" : msg || "เปิดหน้านี้ไม่สำเร็จ");
+          setError(errorText(msg, msg || "เปิดหน้านี้ไม่สำเร็จ"));
         }
       }
     })();
@@ -279,7 +331,7 @@ export default function LineJobClient({ liffId }: { liffId: string }) {
 
   useEffect(() => {
     if (!liff || tab !== "web" || reports[period]) return;
-    loadReport(liff, period).catch(() => setError("โหลดสรุปเว็บไม่สำเร็จ"));
+    loadReport(liff, period).catch((err: Error) => setError(errorText(err.message, "โหลดสรุปเว็บไม่สำเร็จ")));
   }, [liff, tab, period, reports, loadReport]);
 
   function openLead(row: LeadRow) {
@@ -292,7 +344,7 @@ export default function LineJobClient({ liffId }: { liffId: string }) {
     window.scrollTo(0, 0);
     api(liff, `/api/line/job?lead=${row.id}`)
       .then((data) => setJob(data as JobView))
-      .catch((err: Error) => setError(err.message === "not_found" ? "ไม่พบงานนี้" : "เปิดรายละเอียดไม่สำเร็จ"));
+      .catch((err: Error) => setError(errorText(err.message, "เปิดรายละเอียดไม่สำเร็จ")));
   }
 
   function backToList() {
@@ -303,7 +355,7 @@ export default function LineJobClient({ liffId }: { liffId: string }) {
     setConfirming(false);
     setTab("jobs");
     window.scrollTo(0, 0);
-    if (liff) loadList(liff).catch(() => setError("โหลดรายการไม่สำเร็จ"));
+    if (liff) loadList(liff).catch((err: Error) => setError(errorText(err.message, "โหลดรายการไม่สำเร็จ")));
   }
 
   async function closeJob() {
@@ -605,15 +657,42 @@ function JobDetail({ job }: { job: JobView }) {
     { label: "รับงาน", done: Boolean(job.claimedBy), detail: job.claimedBy ? `${job.claimedBy} · ${stamp(job.claimedAt)}` : "ยังไม่มีคนรับ" },
     { label: "ปิดงาน", done: job.jobStatus === "done", detail: job.jobStatus === "done" ? stamp(job.jobStatusAt) : "ยังไม่ปิด" },
   ];
-  const fields: [string, string | null | undefined][] = [
-    ["ลูกค้า", job.contactName],
-    ["โทร", job.phone],
-    ["สินค้า", job.productType],
-    ["ขนาด", job.requestedSize],
-    ["ที่ติดตั้ง", job.installAddress],
-    ["วันติดตั้ง", job.callbackDate],
+  const phoneHref = job.phone ? `tel:${job.phone.replace(/[^\d+]/g, "")}` : undefined;
+  const sections: { title: string; rows: Field[] }[] = [
+    {
+      title: "ลูกค้า",
+      rows: [
+        ["ชื่อ", job.contactName],
+        ["ตำแหน่ง", job.jobTitle],
+        ["ประเภทลูกค้า", job.contactType],
+        ["บริษัท / ร้าน", job.businessName],
+        ["โทร", job.phone, phoneHref],
+        ["LINE", job.lineId],
+        ["อีเมล", job.email, job.email ? `mailto:${job.email}` : undefined],
+      ],
+    },
+    {
+      title: "งานที่ขอ",
+      rows: [
+        ["ประเภทคำขอ", job.source ? (SOURCE_LABELS[job.source] ?? job.source) : null],
+        ["สินค้า", job.productType],
+        ["ขนาด", job.requestedSize],
+        ["วันติดตั้ง", job.callbackDate],
+        ["รู้จักเราจาก", job.referralSource],
+        ["ส่งฟอร์มเมื่อ", job.createdAt ? stamp(job.createdAt) : null],
+      ],
+    },
+    {
+      title: "ที่อยู่และออกบิล",
+      rows: [
+        ["ที่ติดตั้ง", job.installAddress],
+        ["ที่อยู่ออกบิล", job.billingAddress],
+        ["เลขผู้เสียภาษี", job.taxId],
+      ],
+    },
   ];
-  const shownFields = fields.filter(([, value]) => value && value !== "-");
+  const media = job.media ?? [];
+  const note = job.note?.trim();
 
   return (
     <article>
@@ -641,22 +720,80 @@ function JobDetail({ job }: { job: JobView }) {
         ))}
       </ol>
 
-      {shownFields.length > 0 && (
-        <dl className="mt-6">
-          {shownFields.map(([label, value]) => (
-            <div key={label} className="grid grid-cols-4 gap-3 border-b border-[#E3E8EF] py-3 text-sm">
-              <dt className="text-[#8794A7]">{label}</dt>
-              <dd className="col-span-3 font-medium">{value}</dd>
-            </div>
-          ))}
-        </dl>
-      )}
-      {!job.mine && (
-        <p className="mt-6 border-l-2 border-[#E3E8EF] pl-4 text-sm text-[#5A6B82]">
-          {job.claimedBy
-            ? `ข้อมูลลูกค้าเห็นได้เฉพาะ ${job.claimedBy} ที่รับงานนี้`
-            : "ยังไม่มีคนรับงาน กดรับได้จากการ์ดในกลุ่ม LINE"}
+      {!job.claimedBy && (
+        <p className="mt-4 border-l-2 border-[#C8102E] bg-[#FDF2F4] py-2 pl-3 text-sm text-[#3F4D63]">
+          ยังไม่มีคนรับงาน กดชื่อรับงานได้จากการ์ดในกลุ่ม LINE
         </p>
+      )}
+      {job.claimedBy && !job.mine && job.jobStatus !== "done" && (
+        <p className="mt-4 text-xs text-[#8794A7]">ปิดงานได้เฉพาะ {job.claimedBy} ที่รับงานนี้</p>
+      )}
+
+      {sections.map((section) => {
+        const rows = section.rows.filter(([, value]) => value && value.trim() && value.trim() !== "-");
+        if (rows.length === 0) return null;
+        return (
+          <section key={section.title} className="mt-7">
+            <h2 className="border-b border-[#0B1F3A] pb-1.5 text-xs font-semibold">{section.title}</h2>
+            <dl>
+              {rows.map(([label, value, href]) => (
+                <div key={label} className="grid grid-cols-[6.5rem_1fr] gap-3 border-b border-[#E3E8EF] py-3 text-sm">
+                  <dt className="text-[#8794A7]">{label}</dt>
+                  <dd className="min-w-0 whitespace-pre-line break-words font-medium">
+                    {href ? (
+                      <a href={href} className="text-[#0B1F3A] underline decoration-[#C8102E] underline-offset-4">
+                        {value}
+                      </a>
+                    ) : (
+                      <Linkified text={value ?? ""} />
+                    )}
+                  </dd>
+                </div>
+              ))}
+            </dl>
+          </section>
+        );
+      })}
+
+      {note && (
+        <section className="mt-7">
+          <h2 className="border-b border-[#0B1F3A] pb-1.5 text-xs font-semibold">โน้ตจากลูกค้า</h2>
+          <p className="whitespace-pre-line break-words py-3 text-sm">
+            <Linkified text={note} />
+          </p>
+        </section>
+      )}
+
+      {media.length > 0 && (
+        <section className="mt-7">
+          <h2 className="flex items-baseline justify-between border-b border-[#0B1F3A] pb-1.5 text-xs font-semibold">
+            รูป / วิดีโอหน้างาน
+            <span className="font-modern font-normal text-[#8794A7]">{media.length}</span>
+          </h2>
+          <ul className="mt-3 grid grid-cols-3 gap-1.5">
+            {media.map((item, i) => (
+              <li key={item.url}>
+                <a
+                  href={item.url}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="relative block aspect-square overflow-hidden bg-[#EEF2F6]"
+                  aria-label={`${item.video ? "วิดีโอ" : "รูป"}ที่ ${i + 1}`}
+                >
+                  {item.video ? (
+                    <span className="flex h-full flex-col items-center justify-center gap-1 text-xs text-[#3F4D63]">
+                      <span aria-hidden className="text-2xl leading-none">▶</span>
+                      วิดีโอ
+                    </span>
+                  ) : (
+                    // eslint-disable-next-line @next/next/no-img-element -- signed storage URLs expire, so skip the image optimizer
+                    <img src={item.url} alt="" loading="lazy" className="h-full w-full object-cover" />
+                  )}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </section>
       )}
 
       {job.jobStatus === "done" && (
