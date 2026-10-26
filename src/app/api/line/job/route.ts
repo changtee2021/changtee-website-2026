@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getLeadJob, JOB_STATUSES, listLeadJobs, updateLeadJobStatus, type JobStatus } from "@/lib/leads/store";
 import { jobProgressLineCard, pushLineCard } from "@/lib/outbound/line";
+import { getCategory } from "@/lib/product-catalog";
 import {
   bangkokToday,
   fetchWebReportStats,
@@ -8,6 +9,7 @@ import {
   reportWindow,
   type ReportPeriod,
   type WebReportStats,
+
 } from "@/lib/reports/line-web-report";
 
 export const runtime = "nodejs";
@@ -57,19 +59,14 @@ function view(job: NonNullable<Awaited<ReturnType<typeof getLeadJob>>>, userId: 
   };
 }
 
-function reportView(period: ReportPeriod, stats: WebReportStats, labels: ReturnType<typeof reportLabels>) {
+/** Same numbers the weekly/monthly LINE report card shows, with product slugs resolved to names. */
+function reportStats(stats: WebReportStats) {
   return {
-    period,
-    title: labels.title,
-    range: labels.range,
-    versus: labels.versus,
-    visitors: stats.visitors,
-    pageviews: stats.pageviews,
-    sessions: stats.sessions,
-    leads: stats.leads,
-    contacts: stats.contacts,
-    mobileShare: stats.mobileShare,
-    topProducts: stats.topProducts.slice(0, 5),
+    ...stats,
+    topProducts: stats.topProducts.map((product) => ({
+      ...product,
+      name: getCategory(product.slug)?.name ?? product.slug,
+    })),
   };
 }
 
@@ -106,12 +103,10 @@ export async function GET(request: Request) {
     ]);
     return NextResponse.json(
       {
-        current: reportView(period, current, reportLabels(window)),
-        previous: {
-          visitors: previous.visitors,
-          pageviews: previous.pageviews,
-          leads: previous.leads,
-        },
+        period,
+        labels: reportLabels(window),
+        current: reportStats(current),
+        previous: reportStats(previous),
       },
       { headers: { "Cache-Control": "no-store" } },
     );

@@ -36,21 +36,74 @@ type JobView = {
   callbackDate?: string | null;
 };
 
-type WebReport = {
-  current: {
-    title: string;
-    range: string;
-    versus: string;
-    visitors: number;
-    pageviews: number;
-    sessions: number;
-    leads: number;
-    contacts: { line: number; phone: number; quote: number; facebook: number };
-    mobileShare: number;
-    topProducts: { slug: string; views: number }[];
-  };
-  previous: { visitors: number; pageviews: number; leads: number };
+type ReportStats = {
+  visitors: number;
+  pageviews: number;
+  sessions: number;
+  leads: number;
+  contacts: { line: number; phone: number; quote: number; facebook: number };
+  hours: number[];
+  peakDay: { day: string; people: number } | null;
+  mobileShare: number;
+  sourcesTracked: number;
+  sourcesTrackedFrom: string | null;
+  sources: { search: number; ai: number; direct: number; social: number; other: number };
+  topProducts: { slug: string; name: string; views: number }[];
 };
+
+type WebReport = {
+  period: "week" | "month";
+  labels: { title: string; range: string; versus: string; previousName: string };
+  current: ReportStats;
+  previous: ReportStats;
+};
+
+const SOURCE_ROWS = [
+  ["Google / ค้นหา", "search", "#0B1F3A"],
+  ["AI (ChatGPT ฯลฯ)", "ai", "#7C3AED"],
+  ["เข้าตรง", "direct", "#5B7DB1"],
+  ["โซเชียล / LINE", "social", "#A9BCD8"],
+  ["เว็บอื่น ๆ", "other", "#E3E8F0"],
+] as const;
+
+const DAY_FULL = ["อาทิตย์", "จันทร์", "อังคาร", "พุธ", "พฤหัสบดี", "ศุกร์", "เสาร์"];
+const MONTH_SHORT = ["ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.", "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค."];
+
+function dayLabel(day: string, withWeekday = true) {
+  const date = new Date(`${day}T00:00:00Z`);
+  const base = `${date.getUTCDate()} ${MONTH_SHORT[date.getUTCMonth()]}`;
+  return withWeekday ? `${DAY_FULL[date.getUTCDay()]} ${base}` : `${base} ${date.getUTCFullYear() + 543}`;
+}
+
+function fmt(value: number) {
+  return Math.round(value).toLocaleString("th-TH");
+}
+
+type Tone = "up" | "down" | "flat";
+
+function pct(current: number, previous: number): { text: string; tone: Tone } {
+  if (previous <= 0) return current > 0 ? { text: "ใหม่", tone: "up" } : { text: "—", tone: "flat" };
+  const p = Math.round(((current - previous) / previous) * 100);
+  if (p === 0) return { text: "เท่าเดิม", tone: "flat" };
+  return p > 0 ? { text: `▲ ${p}%`, tone: "up" } : { text: `▼ ${Math.abs(p)}%`, tone: "down" };
+}
+
+function diff(current: number, previous: number, unit: string, digits = 0): { text: string; tone: Tone } {
+  const d = Number((current - previous).toFixed(digits));
+  if (d === 0) return { text: "เท่าเดิม", tone: "flat" };
+  const amount = Math.abs(d).toFixed(digits);
+  return d > 0 ? { text: `▲ ${amount} ${unit}`, tone: "up" } : { text: `▼ ${amount} ${unit}`, tone: "down" };
+}
+
+const TONE_CLASS: Record<Tone, string> = {
+  up: "text-emerald-700",
+  down: "text-red-700",
+  flat: "text-slate-500",
+};
+
+function leadRate(stats: ReportStats) {
+  return stats.visitors > 0 ? (stats.leads / stats.visitors) * 100 : 0;
+}
 
 const SDK_URL = "https://static.line-scdn.net/liff/edge/2/sdk.js";
 
@@ -76,13 +129,6 @@ function formatTime(iso: string | null) {
     minute: "2-digit",
     hourCycle: "h23",
   }).format(new Date(iso));
-}
-
-function changeText(current: number, previous: number) {
-  if (previous <= 0) return current > 0 ? "ใหม่" : "—";
-  const pct = Math.round(((current - previous) / previous) * 100);
-  if (pct === 0) return "เท่าเดิม";
-  return pct > 0 ? `▲ ${pct}%` : `▼ ${Math.abs(pct)}%`;
 }
 
 export default function LineJobClient({ liffId }: { liffId: string }) {
@@ -410,36 +456,7 @@ export default function LineJobClient({ liffId }: { liffId: string }) {
               ))}
             </div>
             {!report && !error && <p className="text-slate-500">กำลังโหลด…</p>}
-            {report && (
-              <div className="rounded-2xl bg-white p-5 shadow">
-                <h2 className="text-lg font-bold">{report.current.title}</h2>
-                <p className="text-sm text-slate-500">
-                  {report.current.range} · {report.current.versus}
-                </p>
-                <dl className="mt-4 grid grid-cols-2 gap-3">
-                  <Stat label="ผู้เข้าชม" value={report.current.visitors} change={changeText(report.current.visitors, report.previous.visitors)} />
-                  <Stat label="การเปิดหน้า" value={report.current.pageviews} change={changeText(report.current.pageviews, report.previous.pageviews)} />
-                  <Stat label="เซสชัน" value={report.current.sessions} />
-                  <Stat label="ใบเสนอราคา" value={report.current.leads} change={changeText(report.current.leads, report.previous.leads)} />
-                </dl>
-                <p className="mt-4 text-sm text-slate-600">
-                  ติดต่อ: LINE {report.current.contacts.line} · โทร {report.current.contacts.phone} · ฟอร์ม{" "}
-                  {report.current.contacts.quote} · ดูจากมือถือ {report.current.mobileShare}%
-                </p>
-                {report.current.topProducts.length > 0 && (
-                  <ol className="mt-3 space-y-1 text-sm">
-                    {report.current.topProducts.map((product, i) => (
-                      <li key={product.slug} className="flex justify-between">
-                        <span>
-                          {i + 1}. {product.slug}
-                        </span>
-                        <span className="text-slate-500">{product.views}</span>
-                      </li>
-                    ))}
-                  </ol>
-                )}
-              </div>
-            )}
+            {report && <WebReportCard report={report} />}
           </>
         )}
 
@@ -465,12 +482,217 @@ function Row({ label, value }: { label: string; value?: string | null }) {
   );
 }
 
-function Stat({ label, value, change }: { label: string; value: number; change?: string }) {
+function SectionTitle({ title, hint }: { title: string; hint: string }) {
   return (
-    <div className="rounded-xl bg-slate-50 p-3">
-      <dt className="text-xs text-slate-500">{label}</dt>
-      <dd className="text-xl font-bold">{value.toLocaleString("th-TH")}</dd>
-      {change && <p className="text-xs text-slate-500">{change}</p>}
+    <div className="mb-2 flex items-baseline justify-between">
+      <h3 className="text-xs font-bold text-slate-500">{title}</h3>
+      <span className="text-[11px] text-slate-400">{hint}</span>
     </div>
+  );
+}
+
+function Kpi({
+  label,
+  value,
+  unit,
+  change,
+  from,
+  highlight = false,
+}: {
+  label: string;
+  value: string;
+  unit: string;
+  change: { text: string; tone: Tone };
+  from: string;
+  highlight?: boolean;
+}) {
+  return (
+    <div className={`rounded-xl p-3 ${highlight ? "bg-[#0B1F3A] text-white" : "bg-slate-50"}`}>
+      <p className={`text-[11px] ${highlight ? "text-slate-300" : "text-slate-500"}`}>{label}</p>
+      <p className="mt-1">
+        <span className={`text-2xl font-bold ${highlight ? "text-white" : "text-[#0B1F3A]"}`}>{value}</span>
+        <span className={`ml-1 text-[11px] ${highlight ? "text-slate-300" : "text-slate-500"}`}>{unit}</span>
+      </p>
+      <p
+        className={`mt-1 text-[11px] font-bold ${
+          highlight
+            ? change.tone === "up"
+              ? "text-emerald-300"
+              : change.tone === "down"
+                ? "text-red-300"
+                : "text-slate-300"
+            : TONE_CLASS[change.tone]
+        }`}
+      >
+        {change.text === "—" ? "—" : `${change.text} จาก ${from}`}
+      </p>
+    </div>
+  );
+}
+
+function WebReportCard({ report }: { report: WebReport }) {
+  const { current, previous, labels } = report;
+  const currentRate = leadRate(current);
+  const previousRate = leadRate(previous);
+
+  const contacts: [string, number, number][] = [
+    ["กด LINE", current.contacts.line, previous.contacts.line],
+    ["กดโทร", current.contacts.phone, previous.contacts.phone],
+    ["กดขอราคา", current.contacts.quote, previous.contacts.quote],
+    ["Facebook", current.contacts.facebook, previous.contacts.facebook],
+  ];
+  const contactMax = Math.max(...contacts.map(([, value]) => value), 0);
+
+  const hourMax = Math.max(...current.hours, 0);
+  const peakHour = current.hours.indexOf(hourMax);
+  const pad = (n: number) => String(n).padStart(2, "0");
+
+  const sourceTotal = SOURCE_ROWS.reduce((sum, [, key]) => sum + current.sources[key], 0);
+  const sourcesComparable = previous.sourcesTracked > 0;
+
+  return (
+    <article className="overflow-hidden rounded-2xl bg-white shadow">
+      <header className="bg-[#0B1F3A] px-5 py-4 text-white">
+        <p className="text-[11px] text-[#F3D2D0]">ช่างตี๋ ผ้าม่าน · changtee-curtain.com</p>
+        <h2 className="mt-1 text-lg font-bold">{labels.title}</h2>
+        <span className="mt-2 inline-block rounded-full bg-white/10 px-3 py-1 text-xs">{labels.range}</span>
+      </header>
+
+      <div className="space-y-5 border-t-2 border-[#C0392B] p-4">
+        <section>
+          <SectionTitle title="ภาพรวม" hint={labels.versus} />
+          <div className="grid grid-cols-2 gap-2">
+            <Kpi label="คนเข้าเว็บ" value={fmt(current.visitors)} unit="คน" change={pct(current.visitors, previous.visitors)} from={fmt(previous.visitors)} />
+            <Kpi label="ดูหน้าเว็บ" value={fmt(current.pageviews)} unit="ครั้ง" change={pct(current.pageviews, previous.pageviews)} from={fmt(previous.pageviews)} />
+            <Kpi label="ขอใบเสนอราคา" value={fmt(current.leads)} unit="ราย" change={diff(current.leads, previous.leads, "ราย")} from={fmt(previous.leads)} />
+            <Kpi
+              label="อัตราขอราคา"
+              value={currentRate.toFixed(2)}
+              unit="%"
+              change={diff(currentRate, previousRate, "จุด", 2)}
+              from={`${previousRate.toFixed(2)}%`}
+              highlight
+            />
+          </div>
+        </section>
+
+        <section className="border-t border-slate-200 pt-4">
+          <SectionTitle title="ลูกค้ากดติดต่อ" hint="คน · เทียบ" />
+          <ul className="space-y-2">
+            {contacts.map(([label, value, prev]) => {
+              const change = pct(value, prev);
+              const width = contactMax > 0 ? Math.max(2, Math.round((value / contactMax) * 100)) : 0;
+              return (
+                <li key={label} className="grid grid-cols-[5rem_1fr_3rem_3.5rem] items-center gap-2 text-xs">
+                  <span>{label}</span>
+                  <span className="h-2 rounded bg-slate-100">
+                    <span className="block h-2 rounded bg-[#0B1F3A]" style={{ width: `${width}%` }} />
+                  </span>
+                  <span className="text-right font-bold text-[#0B1F3A]">{fmt(value)}</span>
+                  <span className={`text-right text-[11px] font-bold ${TONE_CLASS[change.tone]}`}>{change.text}</span>
+                </li>
+              );
+            })}
+          </ul>
+        </section>
+
+        <section className="border-t border-slate-200 pt-4">
+          <SectionTitle title="ช่วงเวลาที่คนเข้าเยอะ" hint="คนเข้าเว็บ" />
+          {hourMax <= 0 ? (
+            <p className="text-xs text-slate-500">ยังไม่มีคนเข้าเว็บในช่วงนี้</p>
+          ) : (
+            <>
+              <p className="text-sm font-bold text-[#0B1F3A]">
+                คนเข้าเยอะสุด{" "}
+                <span className="text-[#C0392B]">
+                  {pad(peakHour * 3)}:00 – {pad(peakHour * 3 + 3)}:00 น.
+                </span>
+              </p>
+              <div className="mt-2 flex h-14 items-end gap-1">
+                {current.hours.map((value, i) => (
+                  <span
+                    key={i}
+                    className={`flex-1 rounded-sm ${i === peakHour ? "bg-[#C0392B]" : "bg-slate-300"}`}
+                    style={{ height: `${Math.max(3, Math.round((value / hourMax) * 56))}px` }}
+                  />
+                ))}
+              </div>
+              <div className="mt-1 flex gap-1">
+                {current.hours.map((_, i) => (
+                  <span key={i} className="flex-1 text-center text-[10px] text-slate-400">
+                    {pad(i * 3)}
+                  </span>
+                ))}
+              </div>
+              {current.peakDay && (
+                <p className="mt-2 text-center text-[11px] text-slate-500">
+                  วันที่คนเข้าเยอะสุด: {dayLabel(current.peakDay.day)} ({fmt(current.peakDay.people)} คน)
+                </p>
+              )}
+            </>
+          )}
+        </section>
+
+        <section className="border-t border-slate-200 pt-4">
+          <SectionTitle title="คนมาจากไหน" hint="คน · เทียบ" />
+          {current.sourcesTracked === 0 || sourceTotal === 0 ? (
+            <p className="text-xs text-slate-500">ยังไม่มีข้อมูลแหล่งที่มาในช่วงนี้ รายงานรอบถัดไปจะเริ่มเห็นตัวเลข</p>
+          ) : (
+            <>
+              <div className="flex h-2.5 overflow-hidden rounded-full bg-slate-100">
+                {SOURCE_ROWS.map(([, key, color]) => {
+                  const share = Math.round((current.sources[key] / sourceTotal) * 100);
+                  return share > 0 ? <span key={key} style={{ width: `${share}%`, backgroundColor: color }} /> : null;
+                })}
+              </div>
+              <ul className="mt-2 space-y-1.5">
+                {SOURCE_ROWS.map(([label, key, color]) => {
+                  const share = Math.round((current.sources[key] / sourceTotal) * 100);
+                  const change = sourcesComparable ? pct(current.sources[key], previous.sources[key]) : { text: "—", tone: "flat" as Tone };
+                  return (
+                    <li key={key} className="grid grid-cols-[0.5rem_1fr_2.5rem_3rem_3.5rem] items-center gap-2 text-xs">
+                      <span className="h-2 w-2 rounded-sm border border-slate-200" style={{ backgroundColor: color }} />
+                      <span>{label}</span>
+                      <span className="text-right text-[11px] text-slate-500">{share}%</span>
+                      <span className="text-right font-bold text-[#0B1F3A]">{fmt(current.sources[key])}</span>
+                      <span className={`text-right text-[11px] font-bold ${TONE_CLASS[change.tone]}`}>{change.text}</span>
+                    </li>
+                  );
+                })}
+              </ul>
+              {current.sourcesTracked < current.sessions * 0.95 && current.sourcesTrackedFrom && (
+                <p className="mt-1 text-[11px] text-slate-500">นับเฉพาะตั้งแต่ {dayLabel(current.sourcesTrackedFrom, false)}</p>
+              )}
+            </>
+          )}
+          <p className="mt-2 text-center text-[11px] text-slate-500">
+            เข้าจากมือถือ {fmt(current.mobileShare)}% · คอมพิวเตอร์/แท็บเล็ต {fmt(Math.max(0, 100 - current.mobileShare))}%
+          </p>
+        </section>
+
+        <section className="border-t border-slate-200 pt-4">
+          <SectionTitle title="สินค้าที่คนดูมาก" hint="ครั้ง" />
+          {current.topProducts.length === 0 ? (
+            <p className="text-xs text-slate-500">ยังไม่มีคนเปิดหน้าสินค้าในช่วงนี้</p>
+          ) : (
+            <ol className="space-y-1.5">
+              {current.topProducts.map((product, i) => (
+                <li key={product.slug} className="flex items-center gap-2 text-xs">
+                  <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-slate-100 text-[11px] font-bold text-[#0B1F3A]">
+                    {i + 1}
+                  </span>
+                  <span className="flex-1">{product.name}</span>
+                  <span className="text-[11px] text-slate-500">{fmt(product.views)}</span>
+                </li>
+              ))}
+            </ol>
+          )}
+        </section>
+
+        <p className="text-center text-[11px] text-slate-400">
+          ตัวเลขนับตามเวลาไทย · ▲▼ เทียบกับ{labels.previousName}
+        </p>
+      </div>
+    </article>
   );
 }
