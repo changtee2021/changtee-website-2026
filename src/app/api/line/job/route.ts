@@ -1,6 +1,14 @@
 import { NextResponse } from "next/server";
-import { getLeadJob, JOB_STATUSES, updateLeadJobStatus, type JobStatus } from "@/lib/leads/store";
+import { getLeadJob, JOB_STATUSES, listLeadJobs, updateLeadJobStatus, type JobStatus } from "@/lib/leads/store";
 import { jobProgressLineCard, pushLineCard } from "@/lib/outbound/line";
+import {
+  bangkokToday,
+  fetchWebReportStats,
+  reportLabels,
+  reportWindow,
+  type ReportPeriod,
+  type WebReportStats,
+} from "@/lib/reports/line-web-report";
 
 export const runtime = "nodejs";
 
@@ -49,11 +57,67 @@ function view(job: NonNullable<Awaited<ReturnType<typeof getLeadJob>>>, userId: 
   };
 }
 
+function reportView(period: ReportPeriod, stats: WebReportStats, labels: ReturnType<typeof reportLabels>) {
+  return {
+    period,
+    title: labels.title,
+    range: labels.range,
+    versus: labels.versus,
+    visitors: stats.visitors,
+    pageviews: stats.pageviews,
+    sessions: stats.sessions,
+    leads: stats.leads,
+    contacts: stats.contacts,
+    mobileShare: stats.mobileShare,
+    topProducts: stats.topProducts.slice(0, 5),
+  };
+}
+
 export async function GET(request: Request) {
   const userId = await verifiedLineUser(request);
   if (!userId) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
 
-  const leadId = new URL(request.url).searchParams.get("lead") ?? "";
+  const url = new URL(request.url);
+  const section = url.searchParams.get("section");
+  if (section === "list") {
+    const jobs = await listLeadJobs();
+    return NextResponse.json(
+      {
+        leads: jobs.map((job) => ({
+          id: job.lead.id,
+          quoteNo: job.lead.quoteNo ?? null,
+          contactName: job.lead.contactName,
+          productType: job.lead.productType,
+          requestedSize: job.lead.requestedSize ?? null,
+          createdAt: job.lead.createdAt,
+          claimedBy: job.claimedBy,
+          jobStatus: job.jobStatus,
+        })),
+      },
+      { headers: { "Cache-Control": "no-store" } },
+    );
+  }
+  if (section === "web") {
+    const period: ReportPeriod = url.searchParams.get("period") === "month" ? "month" : "week";
+    const window = reportWindow(period, bangkokToday());
+    const [current, previous] = await Promise.all([
+      fetchWebReportStats(window.current),
+      fetchWebReportStats(window.previous),
+    ]);
+    return NextResponse.json(
+      {
+        current: reportView(period, current, reportLabels(window)),
+        previous: {
+          visitors: previous.visitors,
+          pageviews: previous.pageviews,
+          leads: previous.leads,
+        },
+      },
+      { headers: { "Cache-Control": "no-store" } },
+    );
+  }
+
+  const leadId = url.searchParams.get("lead") ?? "";
   if (!UUID_RE.test(leadId)) return NextResponse.json({ error: "not_found" }, { status: 404 });
   const job = await getLeadJob(leadId);
   if (!job || !job.claimedBy) return NextResponse.json({ error: "not_found" }, { status: 404 });

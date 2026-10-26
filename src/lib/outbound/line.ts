@@ -322,6 +322,16 @@ const LEAD_SOURCE_LABELS: Record<string, string> = {
 
 function bangkokParts(iso: string) {
   const date = new Date(iso);
+  const short = new Intl.DateTimeFormat("en-GB", {
+    timeZone: "Asia/Bangkok",
+    day: "2-digit",
+    month: "2-digit",
+    year: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    hourCycle: "h23",
+  }).formatToParts(date);
+  const part = (type: string) => short.find((p) => p.type === type)?.value ?? "";
   return {
     dateText: new Intl.DateTimeFormat("th-TH", {
       timeZone: "Asia/Bangkok",
@@ -329,13 +339,19 @@ function bangkokParts(iso: string) {
       month: "short",
       year: "numeric",
     }).format(date),
-    timeText: new Intl.DateTimeFormat("th-TH", {
-      timeZone: "Asia/Bangkok",
-      hour: "2-digit",
-      minute: "2-digit",
-      hourCycle: "h23",
-    }).format(date),
+    timeText: `${part("hour")}.${part("minute")}`,
+    /** One line for the lead card, e.g. "D: 26/10/69   T: 10.41". */
+    dateTimeText: `D: ${part("day")}/${part("month")}/${part("year")}   T: ${part("hour")}.${part("minute")}`,
   };
+}
+
+/** Maps links are long and unreadable inside the card; the address text is enough. */
+function stripMapLinks(value: string) {
+  return value
+    .replace(/https?:\/\/(?:maps\.app\.goo\.gl|goo\.gl\/maps|maps\.google\.[^\s]+)\/\S*/gi, "")
+    .replace(/google maps:\s*/gi, "")
+    .replace(/\s+/g, " ")
+    .trim();
 }
 
 export const LEAD_SALES_PICKERS = ["โจ้", "หนุ่ม", "ตุ่น", "โส", "เฟิร์น", "ตี๋", "ฝัน", "แมว"];
@@ -385,12 +401,11 @@ export function leadLineCard(lead: {
 }): LineCard {
   const title = LEAD_SOURCE_LABELS[lead.source] || lead.source;
   const note = lead.note?.replace(/\s+/g, " ").trim();
-  const installAddress = lead.installAddress?.replace(/\s+/g, " ").trim();
+  const installAddress = stripMapLinks(lead.installAddress ?? "");
   const when = bangkokParts(lead.createdAt || new Date().toISOString());
   const fields: LineCardField[] = [
     { label: "เลขที่", value: lead.quoteNo ?? "" },
-    { label: "วันที่", value: when.dateText },
-    { label: "เวลา", value: when.timeText },
+    { label: "วันเวลา", value: when.dateTimeText },
     {
       label: "ชื่อ",
       value: `${lead.contactName}${lead.businessName ? ` (${lead.businessName})` : ""}`,
@@ -458,7 +473,7 @@ export function claimedLeadLineCard(claim: {
 }): LineCard {
   const claimed = bangkokParts(claim.claimedAt);
   const { lead } = claim;
-  const installAddress = lead.installAddress?.replace(/\s+/g, " ").trim();
+  const installAddress = stripMapLinks(lead.installAddress ?? "");
   const fields: LineCardField[] = [
     { label: "เลขที่", value: lead.quoteNo ?? "" },
     { label: "ผู้รับงาน", value: claim.claimedBy },
@@ -518,7 +533,7 @@ export function jobProgressLineCard(progress: {
   };
 }): LineCard {
   const when = bangkokParts(progress.at);
-  const address = progress.lead.installAddress?.replace(/\s+/g, " ").trim();
+  const address = stripMapLinks(progress.lead.installAddress ?? "");
   const fields: LineCardField[] = [
     { label: "เลขที่", value: progress.lead.quoteNo ?? "" },
     { label: "ผู้รับงาน", value: progress.claimedBy },

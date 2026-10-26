@@ -282,6 +282,24 @@ function mapJob(row: Record<string, unknown>): LeadJob {
   };
 }
 
+const JOB_LIST_LIMIT = 100;
+
+/** Recent leads for the LIFF home list, newest first. */
+export async function listLeadJobs(): Promise<LeadJob[]> {
+  const { createServiceSupabase } = await import("@/lib/supabase/server");
+  const supabase = createServiceSupabase();
+  const { data, error } = await supabase
+    .from("leads")
+    .select("*")
+    .order("created_at", { ascending: false })
+    .limit(JOB_LIST_LIMIT);
+  if (error) {
+    console.error("listLeadJobs", error.message, error.code);
+    return [];
+  }
+  return (data ?? []).map(mapJob);
+}
+
 export async function getLeadJob(id: string): Promise<LeadJob | null> {
   const { createServiceSupabase } = await import("@/lib/supabase/server");
   const supabase = createServiceSupabase();

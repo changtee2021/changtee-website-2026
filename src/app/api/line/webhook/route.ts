@@ -13,9 +13,45 @@ import {
 type LineWebhookEvent = {
   type?: string;
   replyToken?: string;
-  source?: { userId?: string };
+  source?: { type?: string; userId?: string };
   postback?: { data?: string };
+  message?: { type?: string; text?: string };
 };
+
+/** Opens the LIFF home. Hidden until NEXT_PUBLIC_LIFF_ID is set. */
+function botMenuMessage() {
+  const liffId = process.env.NEXT_PUBLIC_LIFF_ID;
+  const url = liffId ? `https://liff.line.me/${liffId}` : "";
+  const button = (label: string) =>
+    url
+      ? {
+          type: "button",
+          style: "primary",
+          height: "sm",
+          color: "#0B1F3A",
+          margin: "md",
+          action: { type: "uri", label, uri: url },
+        }
+      : { type: "text", text: label, size: "sm", margin: "md" };
+  return {
+    type: "flex",
+    altText: "เมนูช่างตี๋",
+    contents: {
+      type: "bubble",
+      body: {
+        type: "box",
+        layout: "vertical",
+        paddingAll: "16px",
+        contents: [
+          { type: "text", text: "เมนูช่างตี๋", weight: "bold", size: "lg", color: "#0B1F3A" },
+          { type: "text", text: "เลือกเมนูที่ต้องการ", size: "xs", color: "#6B7280", margin: "sm" },
+          button("1. อัปเดตสถานะงาน"),
+          button("2. อัปเดตเว็บไซต์"),
+        ],
+      },
+    },
+  };
+}
 
 const UUID_RE =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -114,8 +150,17 @@ export async function POST(request: Request) {
   }
 
   for (const event of events) {
-    if (event.type !== "postback") continue;
     try {
+      if (
+        event.type === "message" &&
+        event.message?.type === "text" &&
+        event.message.text?.trim() === "ช่างตี๋" &&
+        event.replyToken
+      ) {
+        await replyLineMessages(event.replyToken, [botMenuMessage()]);
+        continue;
+      }
+      if (event.type !== "postback") continue;
       await handleClaim(event);
     } catch (err) {
       console.error(
