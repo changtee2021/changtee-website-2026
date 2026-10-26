@@ -4,6 +4,7 @@ export const zhHans: { [K in keyof typeof th]: string } = {
   "skip.content": "跳到正文",
   "nav.home": "首页",
   "nav.products": "产品与服务",
+  "nav.custom": "定制",
   "nav.portfolio": "作品案例",
   "nav.learn": "学习中心",
   "nav.blog": "文章",

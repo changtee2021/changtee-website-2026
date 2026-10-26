@@ -335,6 +335,9 @@ export function hubItemsForPillar(pillarId: ProductPillarId): PillarHubItem[] {
     }));
 }
 
+/** Customer noren designer — used by the product-page quote button. */
+export const NOREN_QUOTE_PATH = "/quote/noren";
+
 /** Map catalog category (+ optional child) → /quote PRODUCT_TYPES label */
 export function quoteProductType(
   category: ProductCategory,
@@ -358,7 +361,7 @@ export function quoteProductType(
     case "motorized":
       return "ม่านไฟฟ้า";
     case "print-fabric":
-      return "อื่นๆ";
+      return child?.slug === "noren" ? "ม่านญี่ปุ่น" : "อื่นๆ";
     case "surface":
       return child?.slug === "window-film" ? "ฟิล์มอาคาร" : "วอลเปเปอร์";
     case "service":
@@ -366,6 +369,21 @@ export function quoteProductType(
     default:
       return "อื่นๆ";
   }
+}
+
+export function productQuoteHref(
+  category: ProductCategory,
+  child?: ProductChild,
+): string {
+  if (category.slug === "print-fabric" && child?.slug === "noren") {
+    return NOREN_QUOTE_PATH;
+  }
+  const product = quoteProductType(category, child);
+  const params = new URLSearchParams();
+  if (product) params.set("product", product);
+  if (child?.name) params.set("item", child.name);
+  const query = params.toString();
+  return query ? `/quote?${query}` : "/quote";
 }
 
 /** Per-SKU 4:3 catalog photos under /images/products/detail */

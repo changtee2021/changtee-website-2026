@@ -113,6 +113,27 @@ export function IconMotorized({ className, active }: IconProps) {
   );
 }
 
+/** ม่านญี่ปุ่น — hanging split noren */
+export function IconNoren({ className, active }: IconProps) {
+  const fill = active ? "#c8102e" : "#0b1f3a";
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill={fill}
+      xmlns="http://www.w3.org/2000/svg"
+      className={cn("size-8", className)}
+      aria-hidden
+    >
+      <rect x="2" y="3.1" width="20" height="1.7" rx="0.7" />
+      <rect x="3.5" y="3.1" width="2.3" height="3.6" rx="0.45" />
+      <rect x="10.85" y="3.1" width="2.3" height="3.6" rx="0.45" />
+      <rect x="18.2" y="3.1" width="2.3" height="3.6" rx="0.45" />
+      <path d="M3.15 7.3h7.4v13.2c0 .5-.4.9-.9.9H4.05c-.5 0-.9-.4-.9-.9V7.3Z" />
+      <path d="M13.45 7.3h7.4v13.2c0 .5-.4.9-.9.9h-5.6c-.5 0-.9-.4-.9-.9V7.3Z" />
+    </svg>
+  );
+}
+
 /** พิมพ์ผ้า — print-outline */
 export function IconPrint({ className, active }: IconProps) {
   return (
@@ -157,6 +178,7 @@ export const PRODUCT_LINE_ICONS: Record<string, ProductLineIcon> = {
   "outdoor-factory": IconOutdoor,
   motorized: IconMotorized,
   "print-fabric": IconPrint,
+  noren: IconNoren,
   surface: IconSurface,
   service: IconService,
 };

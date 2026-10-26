@@ -93,6 +93,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       ? [{ path: "/learn", changeFrequency: "weekly" as const, priority: 0.8, locales: cmsLocales }]
       : []),
     { path: "/quote", changeFrequency: "monthly", priority: 0.9, locales: uiLocales },
+    { path: "/custom", changeFrequency: "monthly", priority: 0.8, locales: uiLocales },
+    { path: "/quote/noren", changeFrequency: "monthly", priority: 0.8, locales: uiLocales },
     { path: "/contact", changeFrequency: "monthly", priority: 0.7, locales: uiLocales },
     { path: "/visit-factory", changeFrequency: "monthly", priority: 0.6, locales: uiLocales },
     { path: "/careers", changeFrequency: "weekly", priority: 0.6, locales: uiLocales },

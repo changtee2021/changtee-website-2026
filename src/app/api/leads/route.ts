@@ -21,6 +21,7 @@ import {
 import { formFlagTrue } from "@/lib/marketing/consent";
 import { subscribeIfOptedIn } from "@/lib/marketing/store";
 import { leadLineCard, leadLineImageUrls, pushLineCard } from "@/lib/outbound/line";
+import { parseNorenDesign } from "@/lib/noren/inbox";
 
 export const runtime = "nodejs";
 
@@ -177,8 +178,11 @@ export async function POST(request: Request) {
       }
 
       const data = parsed.data;
+      const norenDesign =
+        data.productType === "ม่านญี่ปุ่น" ? parseNorenDesign(form.get("norenDesign")) : null;
       const lead = await createLead({
         source: "quote",
+        estimatePayload: norenDesign,
         contactName: data.contactName,
         jobTitle: data.jobTitle || null,
         phone: data.phone,

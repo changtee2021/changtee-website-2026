@@ -7,6 +7,7 @@ export function ProductCtaCard({
   catalogHref,
   portfolioHref,
   subtitle,
+  quoteHref: quoteHrefProp,
 }: {
   /** Maps to quote form productType when it matches PRODUCT_TYPES */
   productLabel: string;
@@ -16,13 +17,14 @@ export function ProductCtaCard({
   /** e.g. /portfolio?product=curtain */
   portfolioHref?: string | null;
   subtitle?: string;
+  quoteHref?: string;
 }) {
   const quoteParams = new URLSearchParams();
   if (productLabel) quoteParams.set("product", productLabel);
   if (productItem) quoteParams.set("item", productItem);
-  const quoteHref = quoteParams.toString()
-    ? `/quote?${quoteParams.toString()}`
-    : "/quote";
+  const quoteHref =
+    quoteHrefProp ||
+    (quoteParams.toString() ? `/quote?${quoteParams.toString()}` : "/quote");
   const interestName = (productItem || productLabel).trim();
 
   return (

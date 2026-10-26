@@ -30,7 +30,7 @@ import {
   seedProductSectionRecords,
 } from "@/lib/cms/page-sections";
 import type { ProductCategory, ProductChild, ProductPillar } from "@/lib/product-catalog";
-import { childImage, quoteProductType } from "@/lib/product-catalog";
+import { childImage, productQuoteHref, quoteProductType } from "@/lib/product-catalog";
 import type { ProductContent } from "@/lib/product-content";
 import {
   getCompareTable,
@@ -75,12 +75,7 @@ export function ProductDetailView({
   displayName,
 }: Props) {
   const heading = displayName ?? product.name;
-  const quoteHref = (() => {
-    const p = new URLSearchParams();
-    p.set("product", quoteProductType(category, product));
-    p.set("item", product.name);
-    return `/quote?${p.toString()}`;
-  })();
+  const quoteHref = productQuoteHref(category, product);
 
   const portfolioHref = `/portfolio?product=${encodeURIComponent(category.slug)}`;
   const { assets } = presentation;
@@ -849,6 +844,7 @@ export function ProductDetailView({
               catalogHref={catalog?.href}
               portfolioHref={portfolioHref}
               subtitle={ctaCms.values.subtitle}
+              quoteHref={quoteHref}
             />
           </Reveal>
         </div>

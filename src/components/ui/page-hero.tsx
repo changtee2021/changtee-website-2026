@@ -31,7 +31,7 @@ export function PageHero({
   imageClassName?: string;
   align?: "center" | "bottom";
   priority?: boolean;
-  /** Portfolio and products: end the hero at the shorter frame (~70dvh). */
+  /** Short hero frame (~70dvh), same height as the install gallery. */
   compact?: boolean;
 }) {
   const minH = compact ? "min-h-[70dvh]" : "min-h-[100dvh]";

@@ -31,6 +31,7 @@ import type { MessageKey } from "@/lib/i18n/index";
 const mainNav = [
   { href: "/", labelKey: "nav.home", home: true },
   { href: "/products", labelKey: "nav.products", mega: true },
+  { href: "/custom", labelKey: "nav.custom" },
   { href: "/portfolio", labelKey: "nav.portfolio", portfolio: true },
   { href: "/blog", labelKey: "nav.blog", stories: true },
   { href: "/contact", labelKey: "nav.about", about: true },

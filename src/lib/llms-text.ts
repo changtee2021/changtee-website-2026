@@ -118,6 +118,8 @@ export async function buildLlmsText({ full }: { full: boolean }): Promise<string
   }
   lines.push(link(base, "/blog", "บทความ / Blog"));
   lines.push(link(base, "/quote", "ขอใบเสนอราคา / Get a quote", "วัดหน้างานฟรี"));
+  lines.push(link(base, "/custom", "Custom ออกแบบเอง / Design your own"));
+  lines.push(link(base, "/quote/noren", "ออกแบบม่านญี่ปุ่น / Design a noren", "ราคาประมาณการ ตร.ม.ละ 1,300 บาท"));
   lines.push(link(base, "/contact", "เกี่ยวกับเรา / About & contact"));
   lines.push(link(base, "/visit-factory", "เยี่ยมชมโรงงาน / Factory visit"));
   lines.push("");

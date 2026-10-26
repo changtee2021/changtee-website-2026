@@ -391,7 +391,7 @@ export async function updateLeadJobStatus(
   return { ok: true, job: mapJob(data) };
 }
 
-function mapDbLead(row: Record<string, unknown>): QuoteLead {
+export function mapDbLead(row: Record<string, unknown>): QuoteLead {
   const payload = (row.form_payload as QuoteLead | null) ?? null;
   if (payload?.contactName) {
     return {

@@ -54,6 +54,7 @@ export const CONTACT_TYPES = [
 export const PRODUCT_TYPES = [
   "ผ้าม่าน",
   "ม่านม้วน",
+  "ม่านญี่ปุ่น",
   "มู่ลี่ไม้",
   "มู่ลี่อลูมิเนียม",
   "ม่านปรับแสง",
@@ -69,6 +70,7 @@ export const PRODUCT_TYPES = [
 export const PRODUCT_TYPE_THUMBS: Record<(typeof PRODUCT_TYPES)[number], string> = {
   ผ้าม่าน: "/images/products/quote/curtain.webp",
   ม่านม้วน: "/images/products/quote/roller-blind.webp",
+  ม่านญี่ปุ่น: "/images/products/quote/noren.png",
   มู่ลี่ไม้: "/images/products/quote/wooden-venetian.png",
   มู่ลี่อลูมิเนียม: "/images/products/quote/aluminum-venetian.png",
   ม่านปรับแสง: "/images/products/quote/vertical-blind.webp",

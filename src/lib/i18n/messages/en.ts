@@ -4,6 +4,7 @@ export const en: { [K in keyof typeof th]: string } = {
   "skip.content": "Skip to content",
   "nav.home": "Home",
   "nav.products": "Products & Services",
+  "nav.custom": "Custom",
   "nav.portfolio": "Our Work",
   "nav.learn": "Learn",
   "nav.blog": "Blog",

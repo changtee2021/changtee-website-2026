@@ -67,6 +67,8 @@ export function BlogIndex() {
         title="บทความผ้าม่าน"
         description="ความรู้เรื่องม่าน ไอเดียแต่งบ้าน และเคล็ดลับดูแล"
         copyClassName="lg:self-end lg:pb-6"
+        align="bottom"
+        compact
         aside={
           starter.length > 0 ? (
             <aside>

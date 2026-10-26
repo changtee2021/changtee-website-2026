@@ -4,6 +4,7 @@ export const zhHant: { [K in keyof typeof th]: string } = {
   "skip.content": "跳至內容",
   "nav.home": "首頁",
   "nav.products": "產品與服務",
+  "nav.custom": "訂製",
   "nav.portfolio": "作品案例",
   "nav.learn": "學習中心",
   "nav.blog": "文章",

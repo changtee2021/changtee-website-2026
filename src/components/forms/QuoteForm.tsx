@@ -46,7 +46,9 @@ import {
 } from "@/lib/leads/site-media";
 import { toStorageRef } from "@/lib/security/lead-media";
 import { thankYouHref } from "@/lib/leads/quote-no";
+import { localizedHref } from "@/lib/i18n/locale";
 import { useI18n } from "@/lib/i18n/use-i18n";
+import { NOREN_QUOTE_PATH } from "@/lib/product-catalog";
 
 type SiteMediaItem = {
   id: string;
@@ -154,6 +156,7 @@ function resolveProductType(raw: string | null, item?: string | null): string {
   if (trimmed.includes("ภายนอก") || trimmed.includes("อุตสาหกรรม")) {
     return "ม่านภายนอก/อุตสาหกรรม";
   }
+  if (trimmed.includes("ญี่ปุ่น") || /noren/i.test(trimmed)) return "ม่านญี่ปุ่น";
   if (trimmed.includes("พิมพ์")) return "อื่นๆ";
   if (trimmed.includes("วอลเปเปอร์")) return "วอลเปเปอร์";
   if (trimmed.includes("ฟิล์ม")) return "ฟิล์มอาคาร";
@@ -194,6 +197,16 @@ export function QuoteForm() {
   const [sizeRows, setSizeRows] = useState<string[]>(() =>
     initialSizeRows(""),
   );
+
+  useEffect(() => {
+    const raw = searchParams.get("product");
+    const item = searchParams.get("item");
+    const product = resolveProductType(raw, item);
+    const blob = `${raw ?? ""} ${item ?? ""}`;
+    if (product === "ม่านญี่ปุ่น" || /ม่านญี่ปุ่น|noren/i.test(blob)) {
+      router.replace(localizedHref(locale, NOREN_QUOTE_PATH));
+    }
+  }, [locale, router, searchParams]);
 
   useEffect(() => {
     return () => {
@@ -673,7 +686,13 @@ export function QuoteForm() {
                   required
                   options={PRODUCT_TYPES}
                   value={preview.productType}
-                  onChange={(v) => update("productType", v)}
+                  onChange={(v) => {
+                    if (v === "ม่านญี่ปุ่น") {
+                      router.push(localizedHref(locale, NOREN_QUOTE_PATH));
+                      return;
+                    }
+                    update("productType", v);
+                  }}
                 />
               </div>
             </div>

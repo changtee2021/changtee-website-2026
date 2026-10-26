@@ -4,6 +4,7 @@ export const my: { [K in keyof typeof th]: string } = {
   "skip.content": "အကြောင်းအရာသို့ ကျော်သွားရန်",
   "nav.home": "ပင်မစာမျက်နှာ",
   "nav.products": "ကုန်ပစ္စည်းနှင့် ဝန်ဆောင်မှု",
+  "nav.custom": "Custom",
   "nav.portfolio": "လက်ရာများ",
   "nav.learn": "သင်ယူခန်း",
   "nav.blog": "ဆောင်းပါးများ",

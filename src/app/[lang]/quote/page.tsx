@@ -1,11 +1,24 @@
 import { Suspense } from "react";
 import type { Metadata } from "next";
+import { redirect } from "next/navigation";
 import { QuoteForm } from "@/components/forms/QuoteForm";
 import { QuoteShareButton } from "@/components/forms/QuoteShareButton";
 import { SectionLoader } from "@/components/ui/section-loader";
 import { Skeleton } from "@/components/ui/skeleton";
 import { pageMetadata } from "@/lib/seo/meta";
 import { langFromParams } from "@/lib/i18n/lang-param";
+import { localizedHref } from "@/lib/i18n/locale";
+import { NOREN_QUOTE_PATH } from "@/lib/product-catalog";
+
+export const dynamic = "force-dynamic";
+
+function first(value: string | string[] | undefined) {
+  return (Array.isArray(value) ? value[0] : value) || "";
+}
+
+function isNorenQuoteRequest(product?: string | string[], item?: string | string[]) {
+  return /ม่านญี่ปุ่น|noren/i.test(`${first(product)} ${first(item)}`);
+}
 
 export async function generateMetadata({
   params,
@@ -22,7 +35,23 @@ export async function generateMetadata({
   });
 }
 
-export default function QuotePage() {
+export default async function QuotePage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ lang: string }>;
+  searchParams: Promise<{ product?: string | string[]; item?: string | string[] }>;
+}) {
+  const locale = await langFromParams(params);
+  const query = await searchParams;
+  if (isNorenQuoteRequest(query.product, query.item)) {
+    redirect(localizedHref(locale, NOREN_QUOTE_PATH));
+  }
+
+  return <QuotePageView />;
+}
+
+function QuotePageView() {
   return (
     <div className="min-h-full bg-shell px-6 py-8 sm:px-10 sm:py-12 lg:px-16">
       <div className="mx-auto w-full max-w-5xl rounded-2xl border border-line bg-white p-4 sm:p-6 md:p-8">

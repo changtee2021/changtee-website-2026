@@ -2,6 +2,7 @@ export const th = {
   "skip.content": "ข้ามไปเนื้อหา",
   "nav.home": "หน้าแรก",
   "nav.products": "สินค้า/บริการ",
+  "nav.custom": "Custom",
   "nav.portfolio": "ผลงาน",
   "nav.learn": "ห้องเรียนรู้",
   "nav.blog": "บทความ",

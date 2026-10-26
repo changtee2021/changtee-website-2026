@@ -4,6 +4,7 @@ export const lo: { [K in keyof typeof th]: string } = {
   "skip.content": "ຂ້າມໄປເນື້ອຫາ",
   "nav.home": "ໜ້າຫຼັກ",
   "nav.products": "ສິນຄ້າ/ບໍລິການ",
+  "nav.custom": "Custom",
   "nav.portfolio": "ຜົນງານ",
   "nav.learn": "ຫ້ອງຮຽນຮູ້",
   "nav.blog": "ບົດຄວາມ",

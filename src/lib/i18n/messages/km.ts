@@ -4,6 +4,7 @@ export const km: { [K in keyof typeof th]: string } = {
   "skip.content": "រំលងទៅមាតិកា",
   "nav.home": "ទំព័រដើម",
   "nav.products": "ផលិតផល/សេវាកម្ម",
+  "nav.custom": "Custom",
   "nav.portfolio": "ស្នាដៃ",
   "nav.learn": "បន្ទប់សិក្សា",
   "nav.blog": "អត្ថបទ",

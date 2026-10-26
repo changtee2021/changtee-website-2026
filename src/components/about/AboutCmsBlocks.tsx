@@ -14,7 +14,7 @@ export function AboutHeroCms() {
 
   return (
     <section className="relative bg-navy text-white">
-      <div className="relative min-h-[100dvh] w-full overflow-hidden">
+      <div className="relative min-h-[70dvh] w-full overflow-hidden">
         <EditableSpot sectionId="hero" fieldKey="image" label="รูป">
           <div className="absolute inset-0">
             <Image
@@ -30,7 +30,7 @@ export function AboutHeroCms() {
 
         <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-navy/60 via-navy/20 to-navy/85 sm:bg-gradient-to-r sm:from-navy/80 sm:via-navy/35 sm:to-navy/10" />
 
-        <div className="relative z-[1] flex h-full min-h-[100dvh] flex-col justify-end px-6 pb-16 pt-28 sm:px-10 sm:pb-20 sm:pt-40 lg:px-16">
+        <div className="relative z-[1] flex h-full min-h-[70dvh] flex-col justify-end px-6 pb-16 pt-28 sm:px-10 sm:pb-16 sm:pt-40 lg:px-16">
           <div className="max-w-xl">
             <EditableSpot sectionId="hero" fieldKey="title">
               <h1 className="font-display text-3xl font-semibold leading-tight sm:text-4xl lg:text-[2.9rem]">
