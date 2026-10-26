@@ -154,7 +154,7 @@ export async function POST(request: Request) {
       if (
         event.type === "message" &&
         event.message?.type === "text" &&
-        event.message.text?.trim() === "ช่างตี๋" &&
+        event.message.text?.trim() === "ช่างตี๋เมนู" &&
         event.replyToken
       ) {
         await replyLineMessages(event.replyToken, [botMenuMessage()]);
