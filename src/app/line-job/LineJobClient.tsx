@@ -7,10 +7,39 @@ import { LIFF_SDK_URL } from "./liff-sdk";
 type Liff = {
   init(config: { liffId: string }): Promise<void>;
   isLoggedIn(): boolean;
-  login(): void;
+  isInClient(): boolean;
+  login(config?: { redirectUri?: string }): void;
+  logout(): void;
   getIDToken(): string | null;
+  getDecodedIDToken(): { exp?: number } | null;
   closeWindow(): void;
 };
+
+const RELOGIN_KEY = "line-job:relogin-at";
+
+/**
+ * Outside the LINE app the SDK reuses the ID token saved from the last visit, and it expires after
+ * about an hour, so the server rejects it. Logging in again issues a fresh token. Guarded to once a
+ * minute so a real auth failure can't loop the page through LINE login.
+ */
+function reloginOnce(sdk: Liff): boolean {
+  if (sdk.isInClient()) return false;
+  try {
+    const last = Number(sessionStorage.getItem(RELOGIN_KEY) || 0);
+    if (Date.now() - last < 60_000) return false;
+    sessionStorage.setItem(RELOGIN_KEY, String(Date.now()));
+  } catch {
+    return false;
+  }
+  sdk.logout();
+  sdk.login({ redirectUri: window.location.href });
+  return true;
+}
+
+function tokenExpired(sdk: Liff) {
+  const exp = sdk.getDecodedIDToken()?.exp;
+  return !sdk.getIDToken() || (typeof exp === "number" && exp * 1000 < Date.now() + 30_000);
+}
 
 type LeadRow = {
   id: string;
@@ -245,6 +274,7 @@ export default function LineJobClient({ liffId }: { liffId: string }) {
   const [confirming, setConfirming] = useState(false);
 
   const api = useCallback(async (sdk: Liff, path: string, init?: RequestInit) => {
+    if (tokenExpired(sdk) && reloginOnce(sdk)) return new Promise<never>(() => {});
     const res = await fetch(path, {
       ...init,
       headers: {
@@ -253,6 +283,7 @@ export default function LineJobClient({ liffId }: { liffId: string }) {
       },
     });
     const data = await res.json().catch(() => ({}));
+    if (res.status === 401 && reloginOnce(sdk)) return new Promise<never>(() => {});
     if (!res.ok) throw new Error(String(data.error ?? res.status));
     return data;
   }, []);
