@@ -45,6 +45,8 @@ function view(job: NonNullable<Awaited<ReturnType<typeof getLeadJob>>>, userId: 
     jobStatus: job.jobStatus,
     jobStatusAt: job.jobStatusAt,
     mine,
+    productType: job.lead.productType,
+    requestedSize: job.lead.requestedSize ?? null,
   };
   // Customer details only go to the salesperson who owns the job.
   if (!mine) return base;
@@ -52,8 +54,6 @@ function view(job: NonNullable<Awaited<ReturnType<typeof getLeadJob>>>, userId: 
     ...base,
     contactName: job.lead.contactName,
     phone: job.lead.phone,
-    productType: job.lead.productType,
-    requestedSize: job.lead.requestedSize ?? null,
     installAddress: job.lead.installAddress,
     callbackDate: job.lead.callbackDate ?? null,
   };
@@ -115,7 +115,7 @@ export async function GET(request: Request) {
   const leadId = url.searchParams.get("lead") ?? "";
   if (!UUID_RE.test(leadId)) return NextResponse.json({ error: "not_found" }, { status: 404 });
   const job = await getLeadJob(leadId);
-  if (!job || !job.claimedBy) return NextResponse.json({ error: "not_found" }, { status: 404 });
+  if (!job) return NextResponse.json({ error: "not_found" }, { status: 404 });
   return NextResponse.json(view(job, userId), { headers: { "Cache-Control": "no-store" } });
 }
 

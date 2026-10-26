@@ -584,7 +584,7 @@ function JobDetail({ job }: { job: JobView }) {
         ))}
       </ol>
 
-      {job.mine || job.contactName ? (
+      {shownFields.length > 0 && (
         <dl className="mt-6">
           {shownFields.map(([label, value]) => (
             <div key={label} className="grid grid-cols-4 gap-3 border-b border-[#E6E3DC] py-3 text-sm">
@@ -593,7 +593,8 @@ function JobDetail({ job }: { job: JobView }) {
             </div>
           ))}
         </dl>
-      ) : (
+      )}
+      {!job.mine && (
         <p className="mt-6 border-l-2 border-[#E6E3DC] pl-4 text-sm text-[#687082]">
           {job.claimedBy
             ? `ข้อมูลลูกค้าเห็นได้เฉพาะ ${job.claimedBy} ที่รับงานนี้`
