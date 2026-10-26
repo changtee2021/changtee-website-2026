@@ -1,7 +1,14 @@
 import { NextResponse } from "next/server";
 import { isVideoMediaName } from "@/lib/leads/site-media";
-import { getLeadJob, JOB_STATUSES, listLeadJobRows, updateLeadJobStatus, type JobStatus } from "@/lib/leads/store";
-import { jobProgressLineCard, pushLineCard } from "@/lib/outbound/line";
+import {
+  claimLeadFromLine,
+  getLeadJob,
+  JOB_STATUSES,
+  listLeadJobRows,
+  updateLeadJobStatus,
+  type JobStatus,
+} from "@/lib/leads/store";
+import { claimedLeadLineCard, jobProgressLineCard, LEAD_SALES_PICKERS, pushLineCard } from "@/lib/outbound/line";
 import { getCategory } from "@/lib/product-catalog";
 import { isStorageRef, leadImageRefs, storagePathFromRef } from "@/lib/security/lead-media";
 import { createSignedUploadUrl } from "@/lib/storage/upload";
@@ -142,6 +149,7 @@ async function view(job: NonNullable<Awaited<ReturnType<typeof getLeadJob>>>, us
     referralSource: lead.referralSource || null,
     note: lead.note ?? null,
     media: await leadMedia(lead),
+    salesPickers: job.claimedBy ? [] : LEAD_SALES_PICKERS,
   };
 }
 
@@ -202,13 +210,36 @@ export async function POST(request: Request) {
   if (auth instanceof NextResponse) return auth;
   const { userId } = auth;
 
-  let body: { lead?: string; status?: string };
+  let body: { lead?: string; status?: string; action?: string; by?: string };
   try {
     body = await request.json();
   } catch {
     return NextResponse.json({ error: "bad_request" }, { status: 400 });
   }
   const leadId = body.lead ?? "";
+
+  if (body.action === "claim") {
+    const claimedBy = body.by ?? "";
+    if (!UUID_RE.test(leadId) || !LEAD_SALES_PICKERS.includes(claimedBy)) {
+      return NextResponse.json({ error: "bad_request" }, { status: 400 });
+    }
+    const claim = await claimLeadFromLine(leadId, claimedBy, userId);
+    if (!claim) return NextResponse.json({ error: "not_found" }, { status: 404 });
+    if (!claim.isNewClaim) {
+      return NextResponse.json({ error: "already_claimed", claimedBy: claim.claimedBy }, { status: 409 });
+    }
+    const line = await pushLineCard(
+      claimedLeadLineCard({
+        claimedBy: claim.claimedBy,
+        claimedAt: claim.claimedAt,
+        lead: { ...claim.lead, id: leadId },
+      }),
+    );
+    const job = await getLeadJob(leadId);
+    if (!job) return NextResponse.json({ error: "not_found" }, { status: 404 });
+    return NextResponse.json({ ok: true, notified: line.ok, ...(await view(job, userId)) });
+  }
+
   const status = body.status as JobStatus;
   if (!UUID_RE.test(leadId) || !JOB_STATUSES.includes(status)) {
     return NextResponse.json({ error: "bad_request" }, { status: 400 });

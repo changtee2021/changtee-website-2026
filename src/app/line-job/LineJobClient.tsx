@@ -77,6 +77,7 @@ type JobView = {
   referralSource?: string | null;
   note?: string | null;
   media?: { url: string; video: boolean }[];
+  salesPickers?: string[];
 };
 
 type Field = [label: string, value: string | null | undefined, href?: string];
@@ -336,6 +337,7 @@ export default function LineJobClient({ liffId }: { liffId: string }) {
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
   const [confirming, setConfirming] = useState(false);
+  const [claimPick, setClaimPick] = useState("");
 
   const api = useCallback(async (sdk: Liff, path: string, init?: RequestInit) => {
     if (tokenExpired(sdk) && reloginOnce(sdk)) return new Promise<never>(() => {});
@@ -435,6 +437,7 @@ export default function LineJobClient({ liffId }: { liffId: string }) {
     setJob(null);
     setPreview(row);
     setConfirming(false);
+    setClaimPick("");
     setLeadId(row.id);
     window.scrollTo(0, 0);
     api(liff, `/api/line/job?lead=${row.id}`)
@@ -451,6 +454,32 @@ export default function LineJobClient({ liffId }: { liffId: string }) {
     setTab("jobs");
     window.scrollTo(0, 0);
     if (liff) loadList(liff).catch((err: Error) => setError(errorText(err.message, "โหลดรายการไม่สำเร็จ")));
+  }
+
+  async function claimJob() {
+    if (!liff || busy || !claimPick) return;
+    setBusy(true);
+    setError("");
+    try {
+      const data = await api(liff, "/api/line/job", {
+        method: "POST",
+        body: JSON.stringify({ lead: leadId, action: "claim", by: claimPick }),
+      });
+      setJob(data as JobView);
+      setClaimPick("");
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "";
+      if (msg === "already_claimed") {
+        setError("งานนี้มีคนรับไปแล้ว");
+        api(liff, `/api/line/job?lead=${leadId}`)
+          .then((data) => setJob(data as JobView))
+          .catch(() => {});
+      } else {
+        setError(errorText(msg, "รับงานไม่สำเร็จ ลองใหม่อีกครั้ง"));
+      }
+    } finally {
+      setBusy(false);
+    }
   }
 
   async function closeJob() {
@@ -515,7 +544,9 @@ export default function LineJobClient({ liffId }: { liffId: string }) {
 
   const inDetail = tab === "jobs" && Boolean(leadId);
   const canClose = Boolean(job?.mine && job.jobStatus !== "done");
-  const hasActionBar = inDetail && Boolean(job && (job.phone || canClose));
+  const claimOptions = job && !job.claimedBy && job.jobStatus !== "done" ? (job.salesPickers ?? []) : [];
+  const canClaim = claimOptions.length > 0;
+  const hasActionBar = inDetail && Boolean(job && (job.phone || canClose || canClaim));
 
   return (
     <main
@@ -593,7 +624,7 @@ export default function LineJobClient({ liffId }: { liffId: string }) {
         )}
       </header>
 
-      <div className={`px-5 pt-5 ${hasActionBar ? "pb-32" : "pb-10"}`}>
+      <div className={`px-5 pt-5 ${hasActionBar ? (canClaim ? "pb-48" : "pb-32") : "pb-10"}`}>
         {error && (
           <div role="alert" className="mb-5 border-l-2 border-[#C8102E] bg-[#FDF2F4] py-3 pl-4 pr-3 text-sm">
             <p className="font-semibold">{error}</p>
@@ -769,6 +800,47 @@ export default function LineJobClient({ liffId }: { liffId: string }) {
 
       {hasActionBar && job && (
         <div className="fixed inset-x-0 bottom-0 z-20 mx-auto max-w-md border-t border-[#E3E8EF] bg-[#FFFFFF] px-5 pb-[max(env(safe-area-inset-bottom),12px)] pt-3">
+          {canClaim && (
+            <div className="mb-2 grid grid-cols-[1fr_auto] gap-2">
+              <label className="relative block">
+                <span className="sr-only">เลือกเซลที่รับงาน</span>
+                <select
+                  value={claimPick}
+                  onChange={(event) => setClaimPick(event.target.value)}
+                  disabled={busy}
+                  className={`h-12 w-full appearance-none border bg-[#FFFFFF] pl-3 pr-9 text-sm outline-none focus:border-[#0B1F3A] ${
+                    claimPick ? "border-[#0B1F3A] font-semibold text-[#0B1F3A]" : "border-[#D7DEE8] text-[#5A6B82]"
+                  }`}
+                >
+                  <option value="">เลือกเซลที่รับงาน…</option>
+                  {claimOptions.map((name) => (
+                    <option key={name} value={name}>
+                      {name}
+                    </option>
+                  ))}
+                </select>
+                <svg
+                  aria-hidden
+                  viewBox="0 0 24 24"
+                  className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#8794A7]"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                >
+                  <path d="M6 9l6 6 6-6" />
+                </svg>
+              </label>
+              <button
+                type="button"
+                onClick={claimJob}
+                disabled={!claimPick || busy}
+                className="min-h-12 bg-[#C8102E] px-5 text-sm font-semibold text-white disabled:bg-[#E3E8EF] disabled:text-[#A7B2C1]"
+              >
+                {busy ? "กำลังบันทึก…" : claimPick ? `${claimPick} รับงาน` : "รับงาน"}
+              </button>
+            </div>
+          )}
           <div className={`grid gap-2 ${job.phone && canClose ? "grid-cols-2" : "grid-cols-1"}`}>
             {job.phone && (
               <a
@@ -884,7 +956,7 @@ function JobDetail({ job }: { job: JobView }) {
 
       {!job.claimedBy && (
         <p className="mt-4 border-l-2 border-[#C8102E] bg-[#FDF2F4] py-2 pl-3 text-sm text-[#3F4D63]">
-          ยังไม่มีคนรับงาน กดชื่อรับงานได้จากการ์ดในกลุ่ม LINE
+          ยังไม่มีคนรับงาน เลือกเซลที่รับงานได้ที่ปุ่มด้านล่าง หรือกดจากการ์ดในกลุ่ม LINE
         </p>
       )}
       {job.claimedBy && !job.mine && job.jobStatus !== "done" && (
