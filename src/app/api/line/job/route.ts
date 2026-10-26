@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getLeadJob, JOB_STATUSES, listLeadJobs, updateLeadJobStatus, type JobStatus } from "@/lib/leads/store";
+import { getLeadJob, JOB_STATUSES, listLeadJobRows, updateLeadJobStatus, type JobStatus } from "@/lib/leads/store";
 import { jobProgressLineCard, pushLineCard } from "@/lib/outbound/line";
 import { getCategory } from "@/lib/product-catalog";
 import {
@@ -17,11 +17,20 @@ export const runtime = "nodejs";
 const UUID_RE =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
+/** Verified tokens per warm instance, so list/detail/report calls skip the round trip to LINE. */
+const verifiedTokens = new Map<string, { sub: string; expiresAt: number }>();
+const VERIFIED_TOKEN_CACHE_MAX = 200;
+
 /** Verifies the LIFF ID token with LINE and returns the LINE userId (`sub`). */
 async function verifiedLineUser(request: Request): Promise<string | null> {
   const clientId = process.env.LINE_LOGIN_CHANNEL_ID;
   const idToken = request.headers.get("authorization")?.replace(/^Bearer\s+/i, "");
   if (!clientId || !idToken) return null;
+
+  const cached = verifiedTokens.get(idToken);
+  if (cached && cached.expiresAt > Date.now()) return cached.sub;
+  if (cached) verifiedTokens.delete(idToken);
+
   try {
     const res = await fetch("https://api.line.me/oauth2/v2.1/verify", {
       method: "POST",
@@ -29,8 +38,16 @@ async function verifiedLineUser(request: Request): Promise<string | null> {
       body: new URLSearchParams({ id_token: idToken, client_id: clientId }),
     });
     if (!res.ok) return null;
-    const body = (await res.json()) as { sub?: string };
-    return body.sub || null;
+    const body = (await res.json()) as { sub?: string; exp?: number };
+    if (!body.sub) return null;
+    if (body.exp) {
+      if (verifiedTokens.size >= VERIFIED_TOKEN_CACHE_MAX) {
+        const oldest = verifiedTokens.keys().next().value;
+        if (oldest) verifiedTokens.delete(oldest);
+      }
+      verifiedTokens.set(idToken, { sub: body.sub, expiresAt: body.exp * 1000 - 30_000 });
+    }
+    return body.sub;
   } catch {
     return null;
   }
@@ -59,6 +76,10 @@ function view(job: NonNullable<Awaited<ReturnType<typeof getLeadJob>>>, userId: 
   };
 }
 
+/** Report windows cover finished days only, so a short per-instance cache avoids re-running the heavy RPC. */
+const REPORT_CACHE_MS = 10 * 60_000;
+const reportCache = new Map<string, { expiresAt: number; body: unknown }>();
+
 /** Same numbers the weekly/monthly LINE report card shows, with product slugs resolved to names. */
 function reportStats(stats: WebReportStats) {
   return {
@@ -77,39 +98,26 @@ export async function GET(request: Request) {
   const url = new URL(request.url);
   const section = url.searchParams.get("section");
   if (section === "list") {
-    const jobs = await listLeadJobs();
-    return NextResponse.json(
-      {
-        leads: jobs.map((job) => ({
-          id: job.lead.id,
-          quoteNo: job.lead.quoteNo ?? null,
-          contactName: job.lead.contactName,
-          productType: job.lead.productType,
-          requestedSize: job.lead.requestedSize ?? null,
-          createdAt: job.lead.createdAt,
-          claimedBy: job.claimedBy,
-          jobStatus: job.jobStatus,
-        })),
-      },
-      { headers: { "Cache-Control": "no-store" } },
-    );
+    const leads = await listLeadJobRows();
+    return NextResponse.json({ leads }, { headers: { "Cache-Control": "no-store" } });
   }
   if (section === "web") {
     const period: ReportPeriod = url.searchParams.get("period") === "month" ? "month" : "week";
     const window = reportWindow(period, bangkokToday());
-    const [current, previous] = await Promise.all([
-      fetchWebReportStats(window.current),
-      fetchWebReportStats(window.previous),
-    ]);
-    return NextResponse.json(
-      {
-        period,
-        labels: reportLabels(window),
-        current: reportStats(current),
-        previous: reportStats(previous),
-      },
-      { headers: { "Cache-Control": "no-store" } },
-    );
+    const key = `${period}:${window.current.from}:${window.current.to}`;
+    let report = reportCache.get(key);
+    if (!report || report.expiresAt <= Date.now()) {
+      const [current, previous] = await Promise.all([
+        fetchWebReportStats(window.current),
+        fetchWebReportStats(window.previous),
+      ]);
+      report = {
+        expiresAt: Date.now() + REPORT_CACHE_MS,
+        body: { period, labels: reportLabels(window), current: reportStats(current), previous: reportStats(previous) },
+      };
+      reportCache.set(key, report);
+    }
+    return NextResponse.json(report.body, { headers: { "Cache-Control": "no-store" } });
   }
 
   const leadId = url.searchParams.get("lead") ?? "";

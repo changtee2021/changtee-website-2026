@@ -1,6 +1,8 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import Image from "next/image";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { LIFF_SDK_URL } from "./liff-sdk";
 
 type Liff = {
   init(config: { liffId: string }): Promise<void>;
@@ -52,7 +54,7 @@ type ReportStats = {
 };
 
 type WebReport = {
-  period: "week" | "month";
+  period: Period;
   labels: { title: string; range: string; versus: string; previousName: string };
   current: ReportStats;
   previous: ReportStats;
@@ -127,8 +129,8 @@ function diff(current: number, previous: number, unit: string, digits = 0): Chan
 
 const TONE_CLASS: Record<Tone, string> = {
   up: "text-[#1E8E5A]",
-  down: "text-[#C0392B]",
-  flat: "text-[#8A909C]",
+  down: "text-[#C8102E]",
+  flat: "text-[#8794A7]",
 };
 
 function leadRate(stats: ReportStats) {
@@ -136,19 +138,39 @@ function leadRate(stats: ReportStats) {
 }
 
 function rowStatus(row: { jobStatus: "done" | null; claimedBy: string | null }) {
-  if (row.jobStatus === "done") return { label: "ปิดแล้ว", dot: "bg-[#A3A9B3]", text: "text-[#8A909C]" };
+  if (row.jobStatus === "done") return { label: "ปิดแล้ว", dot: "bg-[#A7B2C1]", text: "text-[#8794A7]" };
   if (row.claimedBy) return { label: `${row.claimedBy} รับแล้ว`, dot: "bg-[#1E8E5A]", text: "text-[#0B1F3A]" };
-  return { label: "รอรับ", dot: "bg-[#C0392B]", text: "text-[#C0392B]" };
+  return { label: "รอรับ", dot: "bg-[#C8102E]", text: "text-[#C8102E]" };
 }
 
-const SDK_URL = "https://static.line-scdn.net/liff/edge/2/sdk.js";
+type Period = "week" | "month";
+
+const LIST_CACHE_KEY = "line-job:list";
+const REPORT_CACHE_KEY = "line-job:report:";
+
+function readCache<T>(key: string): T | null {
+  try {
+    const raw = sessionStorage.getItem(key);
+    return raw ? (JSON.parse(raw) as T) : null;
+  } catch {
+    return null;
+  }
+}
+
+function writeCache(key: string, value: unknown) {
+  try {
+    sessionStorage.setItem(key, JSON.stringify(value));
+  } catch {
+    // Storage full or blocked — the page still works without the instant cache.
+  }
+}
 
 function loadSdk(): Promise<Liff> {
   const w = window as unknown as { liff?: Liff };
   if (w.liff) return Promise.resolve(w.liff);
   return new Promise((resolve, reject) => {
     const script = document.createElement("script");
-    script.src = SDK_URL;
+    script.src = LIFF_SDK_URL;
     script.onload = () => (w.liff ? resolve(w.liff) : reject(new Error("LIFF SDK missing")));
     script.onerror = () => reject(new Error("LIFF SDK failed to load"));
     document.head.appendChild(script);
@@ -162,8 +184,10 @@ export default function LineJobClient({ liffId }: { liffId: string }) {
   const [leads, setLeads] = useState<LeadRow[] | null>(null);
   const [filter, setFilter] = useState<"all" | "open" | "done">("all");
   const [job, setJob] = useState<JobView | null>(null);
-  const [report, setReport] = useState<WebReport | null>(null);
-  const [period, setPeriod] = useState<"week" | "month">("week");
+  const [preview, setPreview] = useState<LeadRow | null>(null);
+  const [reports, setReports] = useState<Partial<Record<Period, WebReport>>>({});
+  const [period, setPeriod] = useState<Period>("week");
+  const report = reports[period] ?? null;
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
   const [confirming, setConfirming] = useState(false);
@@ -181,9 +205,48 @@ export default function LineJobClient({ liffId }: { liffId: string }) {
     return data;
   }, []);
 
+  const loadList = useCallback(
+    async (sdk: Liff) => {
+      const data = (await api(sdk, "/api/line/job?section=list")) as { leads: LeadRow[] };
+      setLeads(data.leads);
+      writeCache(LIST_CACHE_KEY, data.leads);
+    },
+    [api],
+  );
+
+  const reportsLoading = useRef(new Set<Period>());
+  const loadReport = useCallback(
+    async (sdk: Liff, which: Period) => {
+      if (reportsLoading.current.has(which)) return;
+      reportsLoading.current.add(which);
+      try {
+        const data = (await api(sdk, `/api/line/job?section=web&period=${which}`)) as WebReport;
+        setReports((prev) => ({ ...prev, [which]: data }));
+        writeCache(`${REPORT_CACHE_KEY}${which}`, data);
+      } finally {
+        reportsLoading.current.delete(which);
+      }
+    },
+    [api],
+  );
+
   useEffect(() => {
     let cancelled = false;
+    const params = new URLSearchParams(window.location.search);
+    const id = params.get("list") === "1" ? "" : (params.get("lead") ?? "");
+
     (async () => {
+      if (!id) {
+        const cachedList = readCache<LeadRow[]>(LIST_CACHE_KEY);
+        if (cachedList) setLeads(cachedList);
+      }
+      const cachedReports: Partial<Record<Period, WebReport>> = {};
+      for (const which of ["week", "month"] as const) {
+        const cached = readCache<WebReport>(`${REPORT_CACHE_KEY}${which}`);
+        if (cached) cachedReports[which] = cached;
+      }
+      setReports(cachedReports);
+
       try {
         if (!liffId) throw new Error("ยังไม่ได้ตั้งค่า LIFF ID");
         const sdk = await loadSdk();
@@ -192,19 +255,16 @@ export default function LineJobClient({ liffId }: { liffId: string }) {
           sdk.login();
           return;
         }
-        const params = new URLSearchParams(window.location.search);
-        const id = params.get("list") === "1" ? "" : (params.get("lead") ?? "");
-        if (id) {
-          const data = (await api(sdk, `/api/line/job?lead=${id}`)) as JobView;
-          if (cancelled) return;
-          setJob(data);
-          setLeadId(id);
-        } else {
-          const data = (await api(sdk, "/api/line/job?section=list")) as { leads: LeadRow[] };
-          if (cancelled) return;
-          setLeads(data.leads);
-        }
+        if (cancelled) return;
         setLiff(sdk);
+        if (id) {
+          setLeadId(id);
+          const data = (await api(sdk, `/api/line/job?lead=${id}`)) as JobView;
+          if (!cancelled) setJob(data);
+        } else {
+          await loadList(sdk);
+        }
+        if (!cancelled) loadReport(sdk, "week").catch(() => {});
       } catch (err) {
         if (!cancelled) {
           const msg = err instanceof Error ? err.message : "";
@@ -215,31 +275,22 @@ export default function LineJobClient({ liffId }: { liffId: string }) {
     return () => {
       cancelled = true;
     };
-  }, [liffId, api]);
+  }, [liffId, api, loadList, loadReport]);
 
   useEffect(() => {
-    if (!liff || tab !== "web" || report) return;
-    let cancelled = false;
-    api(liff, `/api/line/job?section=web&period=${period}`)
-      .then((data) => {
-        if (!cancelled) setReport(data as WebReport);
-      })
-      .catch(() => {
-        if (!cancelled) setError("โหลดสรุปเว็บไม่สำเร็จ");
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [liff, tab, period, report, api]);
+    if (!liff || tab !== "web" || reports[period]) return;
+    loadReport(liff, period).catch(() => setError("โหลดสรุปเว็บไม่สำเร็จ"));
+  }, [liff, tab, period, reports, loadReport]);
 
-  function openLead(id: string) {
+  function openLead(row: LeadRow) {
     if (!liff) return;
     setError("");
     setJob(null);
+    setPreview(row);
     setConfirming(false);
-    setLeadId(id);
+    setLeadId(row.id);
     window.scrollTo(0, 0);
-    api(liff, `/api/line/job?lead=${id}`)
+    api(liff, `/api/line/job?lead=${row.id}`)
       .then((data) => setJob(data as JobView))
       .catch((err: Error) => setError(err.message === "not_found" ? "ไม่พบงานนี้" : "เปิดรายละเอียดไม่สำเร็จ"));
   }
@@ -247,16 +298,12 @@ export default function LineJobClient({ liffId }: { liffId: string }) {
   function backToList() {
     setLeadId("");
     setJob(null);
+    setPreview(null);
     setError("");
     setConfirming(false);
     setTab("jobs");
-    setLeads(null);
     window.scrollTo(0, 0);
-    if (liff) {
-      api(liff, "/api/line/job?section=list")
-        .then((data) => setLeads((data as { leads: LeadRow[] }).leads))
-        .catch(() => setError("โหลดรายการไม่สำเร็จ"));
-    }
+    if (liff) loadList(liff).catch(() => setError("โหลดรายการไม่สำเร็จ"));
   }
 
   async function closeJob() {
@@ -308,11 +355,11 @@ export default function LineJobClient({ liffId }: { liffId: string }) {
 
   return (
     <main
-      className="mx-auto min-h-screen max-w-md bg-[#F7F6F2] font-sans text-[#0B1F3A]"
+      className="mx-auto min-h-screen max-w-md bg-[#FFFFFF] font-sans text-[#0B1F3A]"
       style={{ colorScheme: "light" }}
     >
-      <header className="sticky top-0 z-20 border-b border-[#E6E3DC] bg-[#F7F6F2]/95 backdrop-blur">
-        <div className="flex h-12 items-center justify-between px-5">
+      <header className="sticky top-0 z-20 bg-[#FFFFFF]">
+        <div className="flex h-14 items-center justify-between border-b-2 border-[#C8102E] bg-[#0B1F3A] px-5 text-white">
           {inDetail ? (
             <button
               type="button"
@@ -322,21 +369,32 @@ export default function LineJobClient({ liffId }: { liffId: string }) {
               <span aria-hidden className="text-lg leading-none">‹</span> รายการทั้งหมด
             </button>
           ) : (
-            <p className="text-sm font-semibold tracking-wide">
-              ช่างตี๋ <span className="font-normal text-[#8A909C]">/ ทีมต้อนรับ</span>
+            <p className="flex items-center gap-2.5">
+              <Image
+                src="/images/brand/logo-mark.png"
+                alt=""
+                width={28}
+                height={28}
+                priority
+                className="h-7 w-7 rounded-sm bg-[#FFFFFF] object-contain p-0.5"
+              />
+              <span className="leading-tight">
+                <span className="block font-display text-[15px] font-semibold">ช่างตี๋ ผ้าม่าน</span>
+                <span className="block text-[11px] text-white/60">ทีมต้อนรับลูกค้าเว็บ</span>
+              </span>
             </p>
           )}
           <button
             type="button"
             onClick={() => liff?.closeWindow()}
-            className="-mr-2 min-h-11 px-2 text-sm text-[#687082]"
+            className="-mr-2 min-h-11 px-2 text-sm text-white/70"
           >
             ปิด
           </button>
         </div>
 
         {!inDetail && (
-          <nav className="grid grid-cols-2 px-5" aria-label="หมวด">
+          <nav className="grid grid-cols-2 border-b border-[#E3E8EF] px-5" aria-label="หมวด">
             {(
               [
                 ["jobs", "อัปเดตสถานะงาน"],
@@ -352,16 +410,16 @@ export default function LineJobClient({ liffId }: { liffId: string }) {
                 }}
                 aria-current={tab === key ? "page" : undefined}
                 className={`relative flex min-h-11 items-center gap-2 text-sm ${
-                  tab === key ? "font-semibold text-[#0B1F3A]" : "text-[#8A909C]"
+                  tab === key ? "font-semibold text-[#0B1F3A]" : "text-[#8794A7]"
                 }`}
               >
                 {label}
                 {key === "jobs" && waiting > 0 && (
-                  <span className="font-modern rounded-sm bg-[#C0392B] px-1.5 text-[11px] font-semibold leading-5 text-white">
+                  <span className="font-modern rounded-sm bg-[#C8102E] px-1.5 text-[11px] font-semibold leading-5 text-white">
                     {waiting}
                   </span>
                 )}
-                {tab === key && <span className="absolute inset-x-0 -bottom-px h-0.5 bg-[#0B1F3A]" />}
+                {tab === key && <span className="absolute inset-x-0 -bottom-px h-0.5 bg-[#C8102E]" />}
               </button>
             ))}
           </nav>
@@ -370,10 +428,10 @@ export default function LineJobClient({ liffId }: { liffId: string }) {
 
       <div className={`px-5 pt-5 ${hasActionBar ? "pb-32" : "pb-10"}`}>
         {error && (
-          <div role="alert" className="mb-5 border-l-2 border-[#C0392B] bg-white py-3 pl-4 pr-3 text-sm">
+          <div role="alert" className="mb-5 border-l-2 border-[#C8102E] bg-[#FDF2F4] py-3 pl-4 pr-3 text-sm">
             <p className="font-semibold">{error}</p>
             {leadId && (
-              <button type="button" onClick={backToList} className="mt-1 min-h-9 text-sm text-[#687082] underline">
+              <button type="button" onClick={backToList} className="mt-1 min-h-9 text-sm text-[#5A6B82] underline">
                 กลับไปรายการทั้งหมด
               </button>
             )}
@@ -382,7 +440,7 @@ export default function LineJobClient({ liffId }: { liffId: string }) {
 
         {tab === "jobs" && !leadId && (
           <>
-            <div className="grid grid-cols-3 border border-[#E6E3DC] bg-white">
+            <div className="grid grid-cols-3 border border-[#E3E8EF] bg-[#FFFFFF]">
               {(
                 [
                   ["all", "ทั้งหมด"],
@@ -396,10 +454,10 @@ export default function LineJobClient({ liffId }: { liffId: string }) {
                   onClick={() => setFilter(key)}
                   aria-pressed={filter === key}
                   className={`flex min-h-14 flex-col items-start justify-center px-3 text-left ${
-                    i > 0 ? "border-l border-[#E6E3DC]" : ""
+                    i > 0 ? "border-l border-[#E3E8EF]" : ""
                   } ${filter === key ? "bg-[#0B1F3A] text-white" : "text-[#0B1F3A]"}`}
                 >
-                  <span className={`text-[11px] ${filter === key ? "text-white/70" : "text-[#8A909C]"}`}>
+                  <span className={`text-[11px] ${filter === key ? "text-white/70" : "text-[#8794A7]"}`}>
                     {label}
                   </span>
                   <span className="font-modern text-lg font-semibold leading-6 tabular-nums">
@@ -411,35 +469,35 @@ export default function LineJobClient({ liffId }: { liffId: string }) {
 
             {leads === null && !error && <ListSkeleton />}
             {leads !== null && visible.length === 0 && (
-              <p className="mt-10 text-center text-sm text-[#8A909C]">ไม่มีรายการในหมวดนี้</p>
+              <p className="mt-10 text-center text-sm text-[#8794A7]">ไม่มีรายการในหมวดนี้</p>
             )}
 
             {groups.map((group) => (
               <section key={group.key} className="mt-6">
                 <h2 className="flex items-baseline justify-between border-b border-[#0B1F3A] pb-1.5 text-xs font-semibold">
                   {groupLabel(group.key)}
-                  <span className="font-modern font-normal text-[#8A909C] tabular-nums">{group.rows.length}</span>
+                  <span className="font-modern font-normal text-[#8794A7] tabular-nums">{group.rows.length}</span>
                 </h2>
                 <ul>
                   {group.rows.map((row) => {
                     const status = rowStatus(row);
                     return (
-                      <li key={row.id} className="border-b border-[#E6E3DC]">
+                      <li key={row.id} className="border-b border-[#E3E8EF]">
                         <button
                           type="button"
-                          onClick={() => openLead(row.id)}
+                          onClick={() => openLead(row)}
                           className="grid min-h-[72px] w-full grid-cols-[3.25rem_1fr_auto] items-center gap-x-3 py-3 text-left active:bg-black/[0.03]"
                         >
-                          <span className="font-modern self-start pt-0.5 text-sm tabular-nums text-[#687082]">
+                          <span className="font-modern self-start pt-0.5 text-sm tabular-nums text-[#5A6B82]">
                             {clock(row.createdAt)}
                           </span>
                           <span className="min-w-0">
                             <span className="block truncate font-semibold">{row.contactName}</span>
-                            <span className="block truncate text-[13px] text-[#687082]">
+                            <span className="block truncate text-[13px] text-[#5A6B82]">
                               {row.productType}
                               {row.requestedSize ? ` · ${row.requestedSize}` : ""}
                             </span>
-                            <span className="font-modern block text-[11px] tracking-wide text-[#A3A9B3]">
+                            <span className="font-modern block text-[11px] tracking-wide text-[#A7B2C1]">
                               {row.quoteNo ?? "—"}
                             </span>
                           </span>
@@ -457,7 +515,7 @@ export default function LineJobClient({ liffId }: { liffId: string }) {
           </>
         )}
 
-        {inDetail && !job && !error && <DetailSkeleton />}
+        {inDetail && !job && !error && <DetailSkeleton preview={preview} />}
 
         {inDetail && job && (
           <JobDetail job={job} />
@@ -465,7 +523,7 @@ export default function LineJobClient({ liffId }: { liffId: string }) {
 
         {tab === "web" && (
           <>
-            <div className="grid grid-cols-2 border border-[#E6E3DC] bg-white">
+            <div className="grid grid-cols-2 border border-[#E3E8EF] bg-[#FFFFFF]">
               {(
                 [
                   ["week", "รายสัปดาห์"],
@@ -478,12 +536,11 @@ export default function LineJobClient({ liffId }: { liffId: string }) {
                   onClick={() => {
                     if (period === key) return;
                     setPeriod(key);
-                    setReport(null);
                     setError("");
                   }}
                   aria-pressed={period === key}
-                  className={`min-h-11 text-sm ${i > 0 ? "border-l border-[#E6E3DC]" : ""} ${
-                    period === key ? "bg-[#0B1F3A] font-semibold text-white" : "text-[#687082]"
+                  className={`min-h-11 text-sm ${i > 0 ? "border-l border-[#E3E8EF]" : ""} ${
+                    period === key ? "bg-[#0B1F3A] font-semibold text-white" : "text-[#5A6B82]"
                   }`}
                 >
                   {label}
@@ -497,12 +554,12 @@ export default function LineJobClient({ liffId }: { liffId: string }) {
       </div>
 
       {hasActionBar && job && (
-        <div className="fixed inset-x-0 bottom-0 z-20 mx-auto max-w-md border-t border-[#E6E3DC] bg-[#F7F6F2] px-5 pb-[max(env(safe-area-inset-bottom),12px)] pt-3">
+        <div className="fixed inset-x-0 bottom-0 z-20 mx-auto max-w-md border-t border-[#E3E8EF] bg-[#FFFFFF] px-5 pb-[max(env(safe-area-inset-bottom),12px)] pt-3">
           <div className={`grid gap-2 ${job.phone && canClose ? "grid-cols-2" : "grid-cols-1"}`}>
             {job.phone && (
               <a
                 href={`tel:${job.phone.replace(/[^\d+]/g, "")}`}
-                className="flex min-h-12 items-center justify-center border border-[#0B1F3A] bg-white text-sm font-semibold"
+                className="flex min-h-12 items-center justify-center border border-[#0B1F3A] bg-[#FFFFFF] text-sm font-semibold"
               >
                 โทรหาลูกค้า
               </a>
@@ -513,7 +570,7 @@ export default function LineJobClient({ liffId }: { liffId: string }) {
                   type="button"
                   disabled={busy}
                   onClick={closeJob}
-                  className="min-h-12 bg-[#C0392B] text-sm font-semibold text-white disabled:opacity-60"
+                  className="min-h-12 bg-[#C8102E] text-sm font-semibold text-white disabled:opacity-60"
                 >
                   {busy ? "กำลังบันทึก…" : "ยืนยันปิดงาน"}
                 </button>
@@ -531,7 +588,7 @@ export default function LineJobClient({ liffId }: { liffId: string }) {
             <button
               type="button"
               onClick={() => setConfirming(false)}
-              className="mt-1 min-h-9 w-full text-xs text-[#687082]"
+              className="mt-1 min-h-9 w-full text-xs text-[#5A6B82]"
             >
               ยกเลิก — ยังไม่ปิดงาน
             </button>
@@ -560,26 +617,26 @@ function JobDetail({ job }: { job: JobView }) {
 
   return (
     <article>
-      <p className="font-modern text-xs tracking-widest text-[#8A909C]">{job.quoteNo ?? "ไม่มีเลขใบเสนอราคา"}</p>
+      <p className="font-modern text-xs tracking-widest text-[#8794A7]">{job.quoteNo ?? "ไม่มีเลขใบเสนอราคา"}</p>
       <h1 className="mt-1 flex items-center gap-2 font-display text-2xl font-semibold">
         <span aria-hidden className={`h-2.5 w-2.5 rounded-full ${status.dot}`} />
         {job.jobStatus === "done" ? "ปิดงานแล้ว" : job.claimedBy ? `${job.claimedBy} กำลังดูแล` : "รอคนรับงาน"}
       </h1>
 
-      <ol className="mt-5 grid grid-cols-2 border-y border-[#E6E3DC]">
+      <ol className="mt-5 grid grid-cols-2 border-y border-[#E3E8EF]">
         {steps.map((step, i) => (
-          <li key={step.label} className={`py-3 ${i > 0 ? "border-l border-[#E6E3DC] pl-4" : "pr-4"}`}>
+          <li key={step.label} className={`py-3 ${i > 0 ? "border-l border-[#E3E8EF] pl-4" : "pr-4"}`}>
             <div className="flex items-center gap-2">
               <span
                 className={`font-modern flex h-5 w-5 items-center justify-center text-[11px] font-semibold ${
-                  step.done ? "bg-[#0B1F3A] text-white" : "border border-[#C9CDD4] text-[#A3A9B3]"
+                  step.done ? "bg-[#0B1F3A] text-white" : "border border-[#C9CDD4] text-[#A7B2C1]"
                 }`}
               >
                 {i + 1}
               </span>
-              <span className={`text-sm font-semibold ${step.done ? "" : "text-[#A3A9B3]"}`}>{step.label}</span>
+              <span className={`text-sm font-semibold ${step.done ? "" : "text-[#A7B2C1]"}`}>{step.label}</span>
             </div>
-            <p className="mt-1 text-xs text-[#687082]">{step.detail}</p>
+            <p className="mt-1 text-xs text-[#5A6B82]">{step.detail}</p>
           </li>
         ))}
       </ol>
@@ -587,15 +644,15 @@ function JobDetail({ job }: { job: JobView }) {
       {shownFields.length > 0 && (
         <dl className="mt-6">
           {shownFields.map(([label, value]) => (
-            <div key={label} className="grid grid-cols-4 gap-3 border-b border-[#E6E3DC] py-3 text-sm">
-              <dt className="text-[#8A909C]">{label}</dt>
+            <div key={label} className="grid grid-cols-4 gap-3 border-b border-[#E3E8EF] py-3 text-sm">
+              <dt className="text-[#8794A7]">{label}</dt>
               <dd className="col-span-3 font-medium">{value}</dd>
             </div>
           ))}
         </dl>
       )}
       {!job.mine && (
-        <p className="mt-6 border-l-2 border-[#E6E3DC] pl-4 text-sm text-[#687082]">
+        <p className="mt-6 border-l-2 border-[#E3E8EF] pl-4 text-sm text-[#5A6B82]">
           {job.claimedBy
             ? `ข้อมูลลูกค้าเห็นได้เฉพาะ ${job.claimedBy} ที่รับงานนี้`
             : "ยังไม่มีคนรับงาน กดรับได้จากการ์ดในกลุ่ม LINE"}
@@ -603,14 +660,14 @@ function JobDetail({ job }: { job: JobView }) {
       )}
 
       {job.jobStatus === "done" && (
-        <p className="mt-6 text-center text-sm text-[#687082]">งานนี้ปิดเรียบร้อยแล้ว</p>
+        <p className="mt-6 text-center text-sm text-[#5A6B82]">งานนี้ปิดเรียบร้อยแล้ว</p>
       )}
     </article>
   );
 }
 
 function Pulse({ className }: { className: string }) {
-  return <span className={`block animate-pulse bg-[#E6E3DC] ${className}`} />;
+  return <span className={`block animate-pulse bg-[#E3E8EF] ${className}`} />;
 }
 
 function ListSkeleton() {
@@ -618,7 +675,7 @@ function ListSkeleton() {
     <div className="mt-6" aria-label="กำลังโหลด">
       <Pulse className="h-3 w-16" />
       {[0, 1, 2, 3, 4].map((i) => (
-        <div key={i} className="grid grid-cols-[3.25rem_1fr] gap-3 border-b border-[#E6E3DC] py-4">
+        <div key={i} className="grid grid-cols-[3.25rem_1fr] gap-3 border-b border-[#E3E8EF] py-4">
           <Pulse className="h-3 w-10" />
           <div className="space-y-2">
             <Pulse className="h-3.5 w-2/3" />
@@ -630,14 +687,32 @@ function ListSkeleton() {
   );
 }
 
-function DetailSkeleton() {
+function DetailSkeleton({ preview }: { preview: LeadRow | null }) {
+  if (!preview) {
+    return (
+      <div className="space-y-3" aria-label="กำลังโหลด">
+        <Pulse className="h-3 w-24" />
+        <Pulse className="h-7 w-3/4" />
+        <Pulse className="mt-6 h-16 w-full" />
+        <Pulse className="h-4 w-full" />
+        <Pulse className="h-4 w-5/6" />
+      </div>
+    );
+  }
+  const status = rowStatus(preview);
   return (
-    <div className="space-y-3" aria-label="กำลังโหลด">
-      <Pulse className="h-3 w-24" />
-      <Pulse className="h-7 w-3/4" />
-      <Pulse className="mt-6 h-16 w-full" />
-      <Pulse className="h-4 w-full" />
-      <Pulse className="h-4 w-5/6" />
+    <div aria-busy="true">
+      <p className="font-modern text-xs tracking-widest text-[#8794A7]">{preview.quoteNo ?? "ไม่มีเลขใบเสนอราคา"}</p>
+      <h1 className="mt-1 flex items-center gap-2 font-display text-2xl font-semibold">
+        <span aria-hidden className={`h-2.5 w-2.5 rounded-full ${status.dot}`} />
+        {preview.jobStatus === "done" ? "ปิดงานแล้ว" : preview.claimedBy ? `${preview.claimedBy} กำลังดูแล` : "รอคนรับงาน"}
+      </h1>
+      <Pulse className="mt-5 h-16 w-full" />
+      <div className="mt-6 space-y-4">
+        <Pulse className="h-4 w-full" />
+        <Pulse className="h-4 w-5/6" />
+        <Pulse className="h-4 w-2/3" />
+      </div>
     </div>
   );
 }
@@ -661,7 +736,7 @@ function Section({ title, hint, children }: { title: string; hint?: string; chil
     <section className="mt-8">
       <h3 className="flex items-baseline justify-between border-b border-[#0B1F3A] pb-1.5 text-xs font-semibold">
         {title}
-        {hint && <span className="font-normal text-[#8A909C]">{hint}</span>}
+        {hint && <span className="font-normal text-[#8794A7]">{hint}</span>}
       </h3>
       <div className="pt-3">{children}</div>
     </section>
@@ -691,11 +766,11 @@ function Kpi({
         : "text-white/60"
     : TONE_CLASS[change.tone];
   return (
-    <div className={`flex min-h-[112px] flex-col p-4 ${inverted ? "bg-[#0B1F3A] text-white" : "bg-white"}`}>
-      <p className={`text-xs ${inverted ? "text-white/70" : "text-[#687082]"}`}>{label}</p>
+    <div className={`flex min-h-[112px] flex-col p-4 ${inverted ? "bg-[#0B1F3A] text-white" : "bg-[#FFFFFF]"}`}>
+      <p className={`text-xs ${inverted ? "text-white/70" : "text-[#5A6B82]"}`}>{label}</p>
       <p className="mt-auto flex items-baseline gap-1">
         <span className="font-modern text-[32px] font-semibold leading-none tabular-nums">{value}</span>
-        <span className={`text-xs ${inverted ? "text-white/70" : "text-[#8A909C]"}`}>{unit}</span>
+        <span className={`text-xs ${inverted ? "text-white/70" : "text-[#8794A7]"}`}>{unit}</span>
       </p>
       <p className={`font-modern mt-2 text-[11px] font-semibold ${changeClass}`}>
         {change.text}
@@ -709,9 +784,9 @@ function MeterRow({ label, value, max, change }: { label: string; value: number;
   const width = max > 0 ? Math.max(2, Math.round((value / max) * 100)) : 0;
   return (
     <li className="grid grid-cols-4 items-center gap-3 py-2 text-sm">
-      <span className="text-[#3D4656]">{label}</span>
+      <span className="text-[#3F4D63]">{label}</span>
       <span className="col-span-2 flex items-center gap-2">
-        <span className="h-1.5 flex-1 bg-[#ECEAE4]">
+        <span className="h-1.5 flex-1 bg-[#EEF2F6]">
           <span className="block h-1.5 bg-[#0B1F3A]" style={{ width: `${width}%` }} />
         </span>
         <span className="font-modern w-8 text-right font-semibold tabular-nums">{fmt(value)}</span>
@@ -745,14 +820,14 @@ function WebReportView({ report }: { report: WebReport }) {
 
   return (
     <article className="mt-6">
-      <p className="text-xs text-[#8A909C]">changtee-curtain.com</p>
+      <p className="text-xs text-[#8794A7]">changtee-curtain.com</p>
       <h2 className="mt-1 font-display text-2xl font-semibold leading-tight">{labels.title}</h2>
-      <p className="mt-1 text-sm text-[#687082]">
-        {labels.range} <span className="text-[#A3A9B3]">· {labels.versus}</span>
+      <p className="mt-1 text-sm text-[#5A6B82]">
+        {labels.range} <span className="text-[#A7B2C1]">· {labels.versus}</span>
       </p>
 
       <Section title="ภาพรวม">
-        <div className="grid grid-cols-2 gap-px border border-[#E6E3DC] bg-[#E6E3DC]">
+        <div className="grid grid-cols-2 gap-px border border-[#E3E8EF] bg-[#E3E8EF]">
           <Kpi label="คนเข้าเว็บ" value={fmt(current.visitors)} unit="คน" change={pct(current.visitors, previous.visitors)} from={fmt(previous.visitors)} />
           <Kpi label="ดูหน้าเว็บ" value={fmt(current.pageviews)} unit="ครั้ง" change={pct(current.pageviews, previous.pageviews)} from={fmt(previous.pageviews)} />
           <Kpi label="ขอใบเสนอราคา" value={fmt(current.leads)} unit="ราย" change={diff(current.leads, previous.leads, "ราย")} from={fmt(previous.leads)} />
@@ -768,7 +843,7 @@ function WebReportView({ report }: { report: WebReport }) {
       </Section>
 
       <Section title="ลูกค้ากดติดต่อ" hint="คน">
-        <ul className="divide-y divide-[#ECEAE4]">
+        <ul className="divide-y divide-[#EEF2F6]">
           {contacts.map(([label, value, prev]) => (
             <MeterRow key={label} label={label} value={value} max={contactMax} change={pct(value, prev)} />
           ))}
@@ -777,12 +852,12 @@ function WebReportView({ report }: { report: WebReport }) {
 
       <Section title="ช่วงเวลาที่คนเข้าเยอะ" hint="คนเข้าเว็บ">
         {hourMax <= 0 ? (
-          <p className="text-sm text-[#8A909C]">ยังไม่มีคนเข้าเว็บในช่วงนี้</p>
+          <p className="text-sm text-[#8794A7]">ยังไม่มีคนเข้าเว็บในช่วงนี้</p>
         ) : (
           <>
             <p className="text-sm">
               เยอะสุด{" "}
-              <span className="font-modern font-semibold text-[#C0392B] tabular-nums">
+              <span className="font-modern font-semibold text-[#C8102E] tabular-nums">
                 {pad(peakHour * 3)}:00–{pad(peakHour * 3 + 3)}:00
               </span>{" "}
               น.
@@ -792,7 +867,7 @@ function WebReportView({ report }: { report: WebReport }) {
                 <span
                   key={i}
                   title={`${fmt(value)} คน`}
-                  className={i === peakHour ? "bg-[#C0392B]" : "bg-[#C9CFD9]"}
+                  className={i === peakHour ? "bg-[#C8102E]" : "bg-[#C9CFD9]"}
                   style={{ height: `${Math.max(3, Math.round((value / hourMax) * 100))}%` }}
                 />
               ))}
@@ -801,14 +876,14 @@ function WebReportView({ report }: { report: WebReport }) {
               {current.hours.map((_, i) => (
                 <span
                   key={i}
-                  className={`font-modern text-[10px] tabular-nums ${i === peakHour ? "font-semibold text-[#C0392B]" : "text-[#A3A9B3]"}`}
+                  className={`font-modern text-[10px] tabular-nums ${i === peakHour ? "font-semibold text-[#C8102E]" : "text-[#A7B2C1]"}`}
                 >
                   {pad(i * 3)}
                 </span>
               ))}
             </div>
             {current.peakDay && (
-              <p className="mt-3 text-xs text-[#687082]">
+              <p className="mt-3 text-xs text-[#5A6B82]">
                 วันที่คนเข้าเยอะสุด{" "}
                 <span className="font-semibold text-[#0B1F3A]">{dayLabel(current.peakDay.day)}</span>{" "}
                 <span className="font-modern tabular-nums">({fmt(current.peakDay.people)} คน)</span>
@@ -820,16 +895,16 @@ function WebReportView({ report }: { report: WebReport }) {
 
       <Section title="คนมาจากไหน" hint="คน">
         {current.sourcesTracked === 0 || sourceTotal === 0 ? (
-          <p className="text-sm text-[#8A909C]">ยังไม่มีข้อมูลแหล่งที่มาในช่วงนี้ รายงานรอบถัดไปจะเริ่มเห็นตัวเลข</p>
+          <p className="text-sm text-[#8794A7]">ยังไม่มีข้อมูลแหล่งที่มาในช่วงนี้ รายงานรอบถัดไปจะเริ่มเห็นตัวเลข</p>
         ) : (
           <>
-            <div className="flex h-2 overflow-hidden bg-[#ECEAE4]">
+            <div className="flex h-2 overflow-hidden bg-[#EEF2F6]">
               {SOURCE_ROWS.map(([, key, color]) => {
                 const share = (current.sources[key] / sourceTotal) * 100;
                 return share > 0 ? <span key={key} style={{ width: `${share}%`, backgroundColor: color }} /> : null;
               })}
             </div>
-            <ul className="mt-2 divide-y divide-[#ECEAE4]">
+            <ul className="mt-2 divide-y divide-[#EEF2F6]">
               {SOURCE_ROWS.map(([label, key, color]) => {
                 const share = Math.round((current.sources[key] / sourceTotal) * 100);
                 const change: Change = sourcesComparable
@@ -837,12 +912,12 @@ function WebReportView({ report }: { report: WebReport }) {
                   : { text: "—", tone: "flat" };
                 return (
                   <li key={key} className="grid grid-cols-4 items-center gap-3 py-2 text-sm">
-                    <span className="col-span-2 flex items-center gap-2 text-[#3D4656]">
+                    <span className="col-span-2 flex items-center gap-2 text-[#3F4D63]">
                       <span aria-hidden className="h-2.5 w-2.5 shrink-0" style={{ backgroundColor: color }} />
                       {label}
                     </span>
                     <span className="font-modern flex items-baseline justify-end gap-2 tabular-nums">
-                      <span className="text-xs text-[#A3A9B3]">{share}%</span>
+                      <span className="text-xs text-[#A7B2C1]">{share}%</span>
                       <span className="font-semibold">{fmt(current.sources[key])}</span>
                     </span>
                     <span className={`font-modern text-right text-xs font-semibold ${TONE_CLASS[change.tone]}`}>
@@ -853,13 +928,13 @@ function WebReportView({ report }: { report: WebReport }) {
               })}
             </ul>
             {current.sourcesTracked < current.sessions * 0.95 && current.sourcesTrackedFrom && (
-              <p className="mt-2 text-xs text-[#8A909C]">นับเฉพาะตั้งแต่ {dayLabel(current.sourcesTrackedFrom, false)}</p>
+              <p className="mt-2 text-xs text-[#8794A7]">นับเฉพาะตั้งแต่ {dayLabel(current.sourcesTrackedFrom, false)}</p>
             )}
           </>
         )}
 
         <div className="mt-5">
-          <div className="flex justify-between text-xs text-[#687082]">
+          <div className="flex justify-between text-xs text-[#5A6B82]">
             <span>
               มือถือ <span className="font-modern font-semibold text-[#0B1F3A] tabular-nums">{mobile}%</span>
             </span>
@@ -876,15 +951,15 @@ function WebReportView({ report }: { report: WebReport }) {
 
       <Section title="สินค้าที่คนดูมาก" hint="ครั้ง">
         {current.topProducts.length === 0 ? (
-          <p className="text-sm text-[#8A909C]">ยังไม่มีคนเปิดหน้าสินค้าในช่วงนี้</p>
+          <p className="text-sm text-[#8794A7]">ยังไม่มีคนเปิดหน้าสินค้าในช่วงนี้</p>
         ) : (
-          <ol className="divide-y divide-[#ECEAE4]">
+          <ol className="divide-y divide-[#EEF2F6]">
             {current.topProducts.map((product, i) => (
               <li key={product.slug} className="grid grid-cols-[1.75rem_1fr_auto] items-center gap-x-3 py-2.5">
-                <span className="font-modern text-sm font-semibold tabular-nums text-[#A3A9B3]">{pad(i + 1)}</span>
+                <span className="font-modern text-sm font-semibold tabular-nums text-[#A7B2C1]">{pad(i + 1)}</span>
                 <span className="min-w-0">
                   <span className="block truncate text-sm">{product.name}</span>
-                  <span className="mt-1 block h-1 bg-[#ECEAE4]">
+                  <span className="mt-1 block h-1 bg-[#EEF2F6]">
                     <span
                       className="block h-1 bg-[#5B7DB1]"
                       style={{ width: `${productMax > 0 ? Math.round((product.views / productMax) * 100) : 0}%` }}
@@ -898,7 +973,7 @@ function WebReportView({ report }: { report: WebReport }) {
         )}
       </Section>
 
-      <p className="mt-10 border-t border-[#E6E3DC] pt-3 text-xs text-[#A3A9B3]">
+      <p className="mt-10 border-t border-[#E3E8EF] pt-3 text-xs text-[#A7B2C1]">
         ตัวเลขนับตามเวลาไทย · ▲▼ เทียบกับ{labels.previousName}
       </p>
     </article>

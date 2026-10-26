@@ -284,20 +284,55 @@ function mapJob(row: Record<string, unknown>): LeadJob {
 
 const JOB_LIST_LIMIT = 100;
 
-/** Recent leads for the LIFF home list, newest first. */
-export async function listLeadJobs(): Promise<LeadJob[]> {
+export type LeadJobRow = {
+  id: string;
+  quoteNo: string | null;
+  contactName: string;
+  productType: string;
+  requestedSize: string | null;
+  createdAt: string;
+  claimedBy: string | null;
+  jobStatus: JobStatus | null;
+};
+
+const LEAD_JOB_ROW_COLUMNS = [
+  "id",
+  "quote_no",
+  "created_at",
+  "full_name",
+  "product_type",
+  "product_interest",
+  "requested_size",
+  "line_claimed_by",
+  "job_status",
+  "payload_name:form_payload->>contactName",
+  "payload_product:form_payload->>productType",
+  "payload_size:form_payload->>requestedSize",
+].join(",");
+
+/** Slim rows for the LIFF list — skips the full form payload so the list stays small and fast. */
+export async function listLeadJobRows(): Promise<LeadJobRow[]> {
   const { createServiceSupabase } = await import("@/lib/supabase/server");
   const supabase = createServiceSupabase();
   const { data, error } = await supabase
     .from("leads")
-    .select("*")
+    .select(LEAD_JOB_ROW_COLUMNS)
     .order("created_at", { ascending: false })
     .limit(JOB_LIST_LIMIT);
   if (error) {
-    console.error("listLeadJobs", error.message, error.code);
+    console.error("listLeadJobRows", error.message, error.code);
     return [];
   }
-  return (data ?? []).map(mapJob);
+  return ((data ?? []) as unknown as Record<string, string | null>[]).map((row) => ({
+    id: String(row.id),
+    quoteNo: row.quote_no || null,
+    contactName: row.payload_name || row.full_name || "",
+    productType: row.payload_product || row.product_type || row.product_interest || "",
+    requestedSize: row.payload_size || row.requested_size || null,
+    createdAt: String(row.created_at),
+    claimedBy: row.line_claimed_by || null,
+    jobStatus: (row.job_status as JobStatus) || null,
+  }));
 }
 
 export async function getLeadJob(id: string): Promise<LeadJob | null> {
