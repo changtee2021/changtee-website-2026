@@ -14,12 +14,14 @@ import { isStorageRef, leadImageRefs, storagePathFromRef } from "@/lib/security/
 import { createSignedUploadUrl } from "@/lib/storage/upload";
 import {
   bangkokToday,
+  customRangeReport,
   fetchWebReportStats,
+  fetchWebReportStatsBetween,
+  isReportDay,
   reportLabels,
   reportWindow,
-  type ReportPeriod,
+  todayReport,
   type WebReportStats,
-
 } from "@/lib/reports/line-web-report";
 
 export const runtime = "nodejs";
@@ -153,9 +155,58 @@ async function view(job: NonNullable<Awaited<ReturnType<typeof getLeadJob>>>, us
   };
 }
 
-/** Report windows cover finished days only, so a short per-instance cache avoids re-running the heavy RPC. */
+/** Finished-day windows barely change, so a per-instance cache avoids re-running the heavy RPC. */
 const REPORT_CACHE_MS = 10 * 60_000;
+/** Windows that reach now keep moving; cache just long enough to absorb repeat taps. */
+const LIVE_REPORT_CACHE_MS = 60_000;
+const REPORT_CACHE_MAX = 100;
 const reportCache = new Map<string, { expiresAt: number; body: unknown }>();
+
+async function cachedReport(key: string, ttlMs: number, build: () => Promise<unknown>) {
+  const hit = reportCache.get(key);
+  if (hit && hit.expiresAt > Date.now()) return hit.body;
+  const body = await build();
+  if (reportCache.size >= REPORT_CACHE_MAX) reportCache.delete(reportCache.keys().next().value!);
+  reportCache.set(key, { expiresAt: Date.now() + ttlMs, body });
+  return body;
+}
+
+async function webReport(url: URL) {
+  const period = url.searchParams.get("period");
+  if (period === "week" || period === "month") {
+    const window = reportWindow(period, bangkokToday());
+    return cachedReport(`${period}:${window.current.from}:${window.current.to}`, REPORT_CACHE_MS, async () => {
+      const [current, previous] = await Promise.all([
+        fetchWebReportStats(window.current),
+        fetchWebReportStats(window.previous),
+      ]);
+      return { period, labels: reportLabels(window), current: reportStats(current), previous: reportStats(previous) };
+    });
+  }
+
+  const from = url.searchParams.get("from");
+  const to = url.searchParams.get("to");
+  const live =
+    period === "range"
+      ? isReportDay(from) && isReportDay(to)
+        ? customRangeReport(from, to)
+        : null
+      : todayReport();
+  if (!live) return null;
+  const key = period === "range" ? `range:${from}:${to}` : `today:${bangkokToday()}`;
+  return cachedReport(key, live.live ? LIVE_REPORT_CACHE_MS : REPORT_CACHE_MS, async () => {
+    const [current, previous] = await Promise.all([
+      fetchWebReportStatsBetween(live.current),
+      fetchWebReportStatsBetween(live.previous),
+    ]);
+    return {
+      period: period === "range" ? "range" : "today",
+      labels: live.labels,
+      current: reportStats(current),
+      previous: reportStats(previous),
+    };
+  });
+}
 
 /** Same numbers the weekly/monthly LINE report card shows, with product slugs resolved to names. */
 function reportStats(stats: WebReportStats) {
@@ -180,22 +231,9 @@ export async function GET(request: Request) {
     return NextResponse.json({ leads }, { headers: { "Cache-Control": "no-store" } });
   }
   if (section === "web") {
-    const period: ReportPeriod = url.searchParams.get("period") === "month" ? "month" : "week";
-    const window = reportWindow(period, bangkokToday());
-    const key = `${period}:${window.current.from}:${window.current.to}`;
-    let report = reportCache.get(key);
-    if (!report || report.expiresAt <= Date.now()) {
-      const [current, previous] = await Promise.all([
-        fetchWebReportStats(window.current),
-        fetchWebReportStats(window.previous),
-      ]);
-      report = {
-        expiresAt: Date.now() + REPORT_CACHE_MS,
-        body: { period, labels: reportLabels(window), current: reportStats(current), previous: reportStats(previous) },
-      };
-      reportCache.set(key, report);
-    }
-    return NextResponse.json(report.body, { headers: { "Cache-Control": "no-store" } });
+    const body = await webReport(url);
+    if (!body) return NextResponse.json({ error: "bad_range" }, { status: 400 });
+    return NextResponse.json(body, { headers: { "Cache-Control": "no-store" } });
   }
 
   const leadId = url.searchParams.get("lead") ?? "";

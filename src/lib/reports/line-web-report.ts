@@ -121,10 +121,20 @@ function num(value: unknown) {
 }
 
 export async function fetchWebReportStats(range: DayRange): Promise<WebReportStats> {
+  return fetchWebReportStatsBetween({
+    from: `${range.from}T00:00:00+07:00`,
+    to: `${range.to}T00:00:00+07:00`,
+  });
+}
+
+/** ISO timestamps; `to` is exclusive. */
+export type TimeRange = { from: string; to: string };
+
+export async function fetchWebReportStatsBetween(range: TimeRange): Promise<WebReportStats> {
   const supabase = createServiceSupabase();
   const { data, error } = await supabase.rpc("line_report_stats", {
-    p_from: `${range.from}T00:00:00+07:00`,
-    p_to: `${range.to}T00:00:00+07:00`,
+    p_from: range.from,
+    p_to: range.to,
   });
   if (error) throw new Error(error.message);
 
@@ -221,6 +231,74 @@ export function reportLabels(window: ReportWindow) {
     range: `1 – ${lastDay} ${MONTH_SHORT[month.getUTCMonth()]} ${beYear(month)}`,
     versus: `เทียบ ${MONTH_SHORT[prev.getUTCMonth()]} ${beYear(prev)}`,
     previousName: "เดือนก่อน",
+  };
+}
+
+export const MAX_CUSTOM_REPORT_DAYS = 93;
+
+export type LiveReport = {
+  current: TimeRange;
+  previous: TimeRange;
+  /** Whether the window reaches the current moment, so numbers still move. */
+  live: boolean;
+  labels: ReturnType<typeof reportLabels>;
+};
+
+function bangkokMidnight(day: string) {
+  return `${day}T00:00:00+07:00`;
+}
+
+function bangkokClock(ms: number) {
+  return new Date(ms + 7 * 60 * 60 * 1000).toISOString().slice(11, 16);
+}
+
+/** Today so far vs yesterday up to the same clock time — a fair comparison mid-day. */
+export function todayReport(nowMs = Date.now()): LiveReport {
+  const today = bangkokToday(new Date(nowMs));
+  const yesterday = addDays(today, -1);
+  const date = parseDay(today);
+  return {
+    current: { from: bangkokMidnight(today), to: new Date(nowMs).toISOString() },
+    previous: { from: bangkokMidnight(yesterday), to: new Date(nowMs - 86_400_000).toISOString() },
+    live: true,
+    labels: {
+      title: "สรุปเว็บวันนี้",
+      range: `${DAY_SHORT[date.getUTCDay()]} ${dayMonth(today)} ${beYear(date)} · ถึง ${bangkokClock(nowMs)} น.`,
+      versus: "เทียบเมื่อวานช่วงเวลาเดียวกัน",
+      previousName: "เมื่อวานช่วงเวลาเดียวกัน",
+    },
+  };
+}
+
+/**
+ * Picked days `from`–`to` (inclusive) vs the same number of days right before.
+ * A range ending today is cut at now, and the comparison is cut at the same offset.
+ */
+export function customRangeReport(from: string, to: string, nowMs = Date.now()): LiveReport | null {
+  const today = bangkokToday(new Date(nowMs));
+  if (from > to || to > today) return null;
+  const days = Math.round((parseDay(to).getTime() - parseDay(from).getTime()) / 86_400_000) + 1;
+  if (days > MAX_CUSTOM_REPORT_DAYS) return null;
+
+  const end = addDays(to, 1);
+  const prevFrom = addDays(from, -days);
+  const live = to === today;
+  const currentTo = live ? new Date(nowMs).toISOString() : bangkokMidnight(end);
+  const previousTo = live ? new Date(nowMs - days * 86_400_000).toISOString() : bangkokMidnight(from);
+  const single = days === 1;
+  const fromDate = parseDay(from);
+  return {
+    current: { from: bangkokMidnight(from), to: currentTo },
+    previous: { from: bangkokMidnight(prevFrom), to: previousTo },
+    live,
+    labels: {
+      title: single ? `สรุปเว็บวัน${DAY_FULL[fromDate.getUTCDay()]}` : `สรุปเว็บ ${days} วัน`,
+      range: single
+        ? `${DAY_SHORT[fromDate.getUTCDay()]} ${dayMonth(from)} ${beYear(fromDate)}${live ? ` · ถึง ${bangkokClock(nowMs)} น.` : ""}`
+        : `${weekRangeLabel({ from, to: end })}${live ? ` · ถึง ${bangkokClock(nowMs)} น.` : ""}`,
+      versus: single ? `เทียบ ${dayMonth(prevFrom)}` : `เทียบ ${shortRange({ from: prevFrom, to: from })}`,
+      previousName: single ? "วันก่อนหน้า" : `${days} วันก่อนหน้า`,
+    },
   };
 }
 

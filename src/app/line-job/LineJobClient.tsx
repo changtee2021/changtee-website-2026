@@ -96,6 +96,37 @@ function statusOf(row: { jobStatus: "done" | null; claimedBy: string | null }): 
   return row.claimedBy ? "active" : "waiting";
 }
 
+function DateField({
+  label,
+  value,
+  min,
+  max,
+  onChange,
+}: {
+  label: string;
+  value: string;
+  min?: string;
+  max?: string;
+  onChange: (value: string) => void;
+}) {
+  return (
+    <label className="block">
+      <span className="text-xs text-[#5A6B82]">{label}</span>
+      <input
+        type="date"
+        value={value}
+        min={min}
+        max={max}
+        required
+        onChange={(event) => {
+          if (event.target.value) onChange(event.target.value);
+        }}
+        className="font-modern mt-1 h-11 w-full border border-[#D7DEE8] bg-[#FFFFFF] px-2.5 text-sm text-[#0B1F3A] tabular-nums outline-none focus:border-[#0B1F3A]"
+      />
+    </label>
+  );
+}
+
 function FilterSelect({
   label,
   value,
@@ -178,6 +209,7 @@ function errorText(code: string, fallback: string) {
   if (code === "not_found") return "ไม่พบงานนี้";
   if (code === "not_member") return "บัญชี LINE นี้ไม่ได้อยู่ในกลุ่มเซลส์ช่างตี๋ จึงดูข้อมูลไม่ได้";
   if (code === "unauthorized") return "ยืนยันตัวตน LINE ไม่สำเร็จ ลองปิดแล้วเปิดใหม่";
+  if (code === "bad_range") return `เลือกช่วงวันที่ได้ไม่เกิน ${MAX_RANGE_DAYS} วัน และไม่เกินวันนี้`;
   return fallback;
 }
 
@@ -286,7 +318,33 @@ function rowStatus(row: { jobStatus: "done" | null; claimedBy: string | null }) 
   return { label: "รอรับ", dot: "bg-[#C8102E]", text: "text-[#C8102E]" };
 }
 
-type Period = "week" | "month";
+type Period = "today" | "week" | "month" | "range";
+
+const PERIODS: [Period, string][] = [
+  ["today", "วันนี้"],
+  ["week", "สัปดาห์ก่อน"],
+  ["month", "เดือนก่อน"],
+  ["range", "เลือกวัน"],
+];
+
+/** Same cap the API enforces (`MAX_CUSTOM_REPORT_DAYS`). */
+const MAX_RANGE_DAYS = 93;
+
+function shiftDay(day: string, days: number) {
+  const date = new Date(`${day}T00:00:00Z`);
+  date.setUTCDate(date.getUTCDate() + days);
+  return date.toISOString().slice(0, 10);
+}
+
+function rangeDays(from: string, to: string) {
+  return Math.round((Date.parse(`${to}T00:00:00Z`) - Date.parse(`${from}T00:00:00Z`)) / 86_400_000) + 1;
+}
+
+function reportPath(key: string) {
+  if (!key.startsWith("range:")) return `/api/line/job?section=web&period=${key}`;
+  const [, from, to] = key.split(":");
+  return `/api/line/job?section=web&period=range&from=${from}&to=${to}`;
+}
 
 const LIST_CACHE_KEY = "line-job:list";
 const REPORT_CACHE_KEY = "line-job:report:";
@@ -331,9 +389,14 @@ export default function LineJobClient({ liffId }: { liffId: string }) {
   const [product, setProduct] = useState("");
   const [job, setJob] = useState<JobView | null>(null);
   const [preview, setPreview] = useState<LeadRow | null>(null);
-  const [reports, setReports] = useState<Partial<Record<Period, WebReport>>>({});
-  const [period, setPeriod] = useState<Period>("week");
-  const report = reports[period] ?? null;
+  const [reports, setReports] = useState<Record<string, WebReport>>({});
+  const [period, setPeriod] = useState<Period>("today");
+  const [today] = useState(() => bangkokDay.format(Date.now()));
+  const [rangeTo, setRangeTo] = useState(today);
+  const [rangeFrom, setRangeFrom] = useState(() => shiftDay(today, -6));
+  const rangeValid = rangeFrom <= rangeTo && rangeDays(rangeFrom, rangeTo) <= MAX_RANGE_DAYS;
+  const reportKey = period === "range" ? `range:${rangeFrom}:${rangeTo}` : period;
+  const report = period === "range" && !rangeValid ? null : (reports[reportKey] ?? null);
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
   const [confirming, setConfirming] = useState(false);
@@ -363,17 +426,20 @@ export default function LineJobClient({ liffId }: { liffId: string }) {
     [api],
   );
 
-  const reportsLoading = useRef(new Set<Period>());
+  const reportsLoading = useRef(new Set<string>());
+  /** Keys fetched this visit — cached copies from earlier visits still get one refresh. */
+  const reportsFetched = useRef(new Set<string>());
   const loadReport = useCallback(
-    async (sdk: Liff, which: Period) => {
-      if (reportsLoading.current.has(which)) return;
-      reportsLoading.current.add(which);
+    async (sdk: Liff, key: string) => {
+      if (reportsLoading.current.has(key)) return;
+      reportsLoading.current.add(key);
       try {
-        const data = (await api(sdk, `/api/line/job?section=web&period=${which}`)) as WebReport;
-        setReports((prev) => ({ ...prev, [which]: data }));
-        writeCache(`${REPORT_CACHE_KEY}${which}`, data);
+        const data = (await api(sdk, reportPath(key))) as WebReport;
+        reportsFetched.current.add(key);
+        setReports((prev) => ({ ...prev, [key]: data }));
+        if (!key.startsWith("range:")) writeCache(`${REPORT_CACHE_KEY}${key}`, data);
       } finally {
-        reportsLoading.current.delete(which);
+        reportsLoading.current.delete(key);
       }
     },
     [api],
@@ -389,8 +455,8 @@ export default function LineJobClient({ liffId }: { liffId: string }) {
         const cachedList = readCache<LeadRow[]>(LIST_CACHE_KEY);
         if (cachedList) setLeads(cachedList);
       }
-      const cachedReports: Partial<Record<Period, WebReport>> = {};
-      for (const which of ["week", "month"] as const) {
+      const cachedReports: Record<string, WebReport> = {};
+      for (const which of ["today", "week", "month"] as const) {
         const cached = readCache<WebReport>(`${REPORT_CACHE_KEY}${which}`);
         if (cached) cachedReports[which] = cached;
       }
@@ -413,7 +479,7 @@ export default function LineJobClient({ liffId }: { liffId: string }) {
         } else {
           await loadList(sdk);
         }
-        if (!cancelled) loadReport(sdk, "week").catch(() => {});
+        if (!cancelled) loadReport(sdk, "today").catch(() => {});
       } catch (err) {
         if (!cancelled) {
           const msg = err instanceof Error ? err.message : "";
@@ -427,9 +493,10 @@ export default function LineJobClient({ liffId }: { liffId: string }) {
   }, [liffId, api, loadList, loadReport]);
 
   useEffect(() => {
-    if (!liff || tab !== "web" || reports[period]) return;
-    loadReport(liff, period).catch((err: Error) => setError(errorText(err.message, "โหลดสรุปเว็บไม่สำเร็จ")));
-  }, [liff, tab, period, reports, loadReport]);
+    if (!liff || tab !== "web" || (period === "range" && !rangeValid)) return;
+    if (reportsFetched.current.has(reportKey)) return;
+    loadReport(liff, reportKey).catch((err: Error) => setError(errorText(err.message, "โหลดสรุปเว็บไม่สำเร็จ")));
+  }, [liff, tab, period, rangeValid, reportKey, loadReport]);
 
   function openLead(row: LeadRow) {
     if (!liff) return;
@@ -768,13 +835,8 @@ export default function LineJobClient({ liffId }: { liffId: string }) {
 
         {tab === "web" && (
           <>
-            <div className="grid grid-cols-2 border border-[#E3E8EF] bg-[#FFFFFF]">
-              {(
-                [
-                  ["week", "รายสัปดาห์"],
-                  ["month", "รายเดือน"],
-                ] as const
-              ).map(([key, label], i) => (
+            <div className="grid grid-cols-4 border border-[#E3E8EF] bg-[#FFFFFF]">
+              {PERIODS.map(([key, label], i) => (
                 <button
                   key={key}
                   type="button"
@@ -792,7 +854,42 @@ export default function LineJobClient({ liffId }: { liffId: string }) {
                 </button>
               ))}
             </div>
-            {!report && !error && <ReportSkeleton />}
+            {period === "range" && (
+              <div className="mt-3">
+                <div className="grid grid-cols-[1fr_auto_1fr] items-end gap-2">
+                  <DateField
+                    label="ตั้งแต่วันที่"
+                    value={rangeFrom}
+                    max={rangeTo}
+                    onChange={(value) => {
+                      setRangeFrom(value);
+                      setError("");
+                    }}
+                  />
+                  <span aria-hidden className="pb-3 text-[#A7B2C1]">
+                    –
+                  </span>
+                  <DateField
+                    label="ถึงวันที่"
+                    value={rangeTo}
+                    min={rangeFrom}
+                    max={today}
+                    onChange={(value) => {
+                      setRangeTo(value);
+                      setError("");
+                    }}
+                  />
+                </div>
+                {!rangeValid && (
+                  <p className="mt-2 text-xs text-[#C8102E]">
+                    {rangeFrom > rangeTo
+                      ? "วันเริ่มต้องไม่เกินวันสิ้นสุด"
+                      : `เลือกได้ไม่เกิน ${MAX_RANGE_DAYS} วัน`}
+                  </p>
+                )}
+              </div>
+            )}
+            {!report && !error && (period !== "range" || rangeValid) && <ReportSkeleton />}
             {report && <WebReportView report={report} />}
           </>
         )}
@@ -1253,7 +1350,7 @@ function WebReportView({ report }: { report: WebReport }) {
                 </span>
               ))}
             </div>
-            {current.peakDay && (
+            {current.peakDay && report.period !== "today" && (
               <p className="mt-3 text-xs text-[#5A6B82]">
                 วันที่คนเข้าเยอะสุด{" "}
                 <span className="font-semibold text-[#0B1F3A]">{dayLabel(current.peakDay.day)}</span>{" "}
