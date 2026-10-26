@@ -259,6 +259,85 @@ export async function claimLeadFromLine(
   };
 }
 
+export const JOB_STATUSES = ["done"] as const;
+export type JobStatus = (typeof JOB_STATUSES)[number];
+
+export type LeadJob = {
+  lead: QuoteLead;
+  claimedBy: string | null;
+  claimedAt: string | null;
+  claimedUserId: string | null;
+  jobStatus: JobStatus | null;
+  jobStatusAt: string | null;
+};
+
+function mapJob(row: Record<string, unknown>): LeadJob {
+  return {
+    lead: mapDbLead(row),
+    claimedBy: (row.line_claimed_by as string) || null,
+    claimedAt: (row.line_claimed_at as string) || null,
+    claimedUserId: (row.line_claimed_user_id as string) || null,
+    jobStatus: (row.job_status as JobStatus) || null,
+    jobStatusAt: (row.job_status_at as string) || null,
+  };
+}
+
+export async function getLeadJob(id: string): Promise<LeadJob | null> {
+  const { createServiceSupabase } = await import("@/lib/supabase/server");
+  const supabase = createServiceSupabase();
+  const { data, error } = await supabase
+    .from("leads")
+    .select("*")
+    .eq("id", id)
+    .maybeSingle();
+  if (error) {
+    console.error("getLeadJob", error.message, error.code);
+    return null;
+  }
+  return data ? mapJob(data) : null;
+}
+
+/**
+ * Only the LINE user who claimed the lead may move it forward, and a closed
+ * job stays closed. The update re-checks both in SQL so races cannot skip it.
+ */
+export async function updateLeadJobStatus(
+  id: string,
+  status: JobStatus,
+  lineUserId: string,
+): Promise<{ ok: true; job: LeadJob } | { ok: false; reason: "not_found" | "forbidden" | "closed" | "error" }> {
+  const current = await getLeadJob(id);
+  if (!current) return { ok: false, reason: "not_found" };
+  if (!current.claimedUserId || current.claimedUserId !== lineUserId) {
+    return { ok: false, reason: "forbidden" };
+  }
+  if (current.jobStatus === "done") return { ok: false, reason: "closed" };
+
+  const { createServiceSupabase } = await import("@/lib/supabase/server");
+  const supabase = createServiceSupabase();
+  const now = new Date().toISOString();
+  let query = supabase
+    .from("leads")
+    .update({ job_status: status, job_status_at: now, updated_at: now })
+    .eq("id", id)
+    .eq("line_claimed_user_id", lineUserId);
+  query = current.jobStatus ? query.eq("job_status", current.jobStatus) : query.is("job_status", null);
+  const { data, error } = await query.select("*").maybeSingle();
+  if (error) {
+    console.error("updateLeadJobStatus", error.message, error.code);
+    return { ok: false, reason: "error" };
+  }
+  if (!data) return { ok: false, reason: "closed" };
+
+  await supabase.from("lead_events").insert({
+    lead_id: id,
+    from_status: data.status ?? null,
+    to_status: data.status,
+    note: `อัปเดตงานผ่าน LINE (${current.claimedBy}): ${status}`,
+  });
+  return { ok: true, job: mapJob(data) };
+}
+
 function mapDbLead(row: Record<string, unknown>): QuoteLead {
   const payload = (row.form_payload as QuoteLead | null) ?? null;
   if (payload?.contactName) {

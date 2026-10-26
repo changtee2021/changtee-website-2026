@@ -234,7 +234,7 @@ export async function middleware(request: NextRequest) {
 }
 
 /** Top-level app folders outside `app/[lang]` — never locale-rewritten. */
-const NON_LOCALE_ROOTS = new Set(["api", "_next", "admin", "dev"]);
+const NON_LOCALE_ROOTS = new Set(["api", "_next", "admin", "dev", "line-job"]);
 
 /** Live duplicates of a canonical public page. Extra segments are dropped. */
 const PUBLIC_ALIASES: Record<string, string> = {

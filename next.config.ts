@@ -18,6 +18,7 @@ const SCRIPT_HOSTS = [
   "https://www.google-analytics.com",
   "https://connect.facebook.net",
   "https://challenges.cloudflare.com",
+  "https://static.line-scdn.net",
 ].join(" ");
 
 /**
@@ -53,7 +54,7 @@ const securityHeaders = [
       "style-src 'self' 'unsafe-inline'",
       "img-src 'self' data: blob: https:",
       "font-src 'self' data:",
-      "connect-src 'self' https://*.supabase.co https://www.google-analytics.com https://*.google-analytics.com https://analytics.google.com https://www.google.com https://www.google.co.th https://www.googleadservices.com https://googleads.g.doubleclick.net https://ad.doubleclick.net https://www.googletagmanager.com https://connect.facebook.net https://www.facebook.com https://challenges.cloudflare.com",
+      "connect-src 'self' https://*.supabase.co https://www.google-analytics.com https://*.google-analytics.com https://analytics.google.com https://www.google.com https://www.google.co.th https://www.googleadservices.com https://googleads.g.doubleclick.net https://ad.doubleclick.net https://www.googletagmanager.com https://connect.facebook.net https://www.facebook.com https://challenges.cloudflare.com https://api.line.me https://access.line.me https://liff.line.me https://*.line-scdn.net",
       "frame-src 'self' https://www.google.com https://maps.google.com https://www.youtube.com https://www.youtube-nocookie.com https://www.googletagmanager.com https://challenges.cloudflare.com",
       "object-src 'none'",
       "base-uri 'self'",

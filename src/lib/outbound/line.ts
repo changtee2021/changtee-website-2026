@@ -6,6 +6,10 @@
  * so it works out of the box with a single existing LINE group.
  */
 
+import { isVideoMediaName } from "@/lib/leads/site-media";
+import { isStorageRef, leadImageRefs, storagePathFromRef } from "@/lib/security/lead-media";
+import { createSignedUploadUrl } from "@/lib/storage/upload";
+
 export function lineNotifyConfigured(): boolean {
   return Boolean(process.env.LINE_CHANNEL_ACCESS_TOKEN);
 }
@@ -30,6 +34,8 @@ export type LineCard = {
     options: { label: string; text: string; postback?: string }[];
   };
   tone?: "default" | "success";
+  /** Public https image URLs shown as thumbnails inside the card; tap opens full size. */
+  images?: string[];
 };
 
 const CARD_NAVY = "#0B1F3A";
@@ -116,6 +122,29 @@ export function lineCardMessage(card: LineCard) {
 
   const success = card.tone === "success";
 
+  const imageUrls = (card.images ?? [])
+    .filter((url) => url.startsWith("https://") && url.length <= 2000)
+    .slice(0, 3);
+  const thumbnailRow = imageUrls.length
+    ? [
+        {
+          type: "box",
+          layout: "horizontal",
+          spacing: "sm",
+          margin: "md",
+          contents: imageUrls.map((url) => ({
+            type: "image",
+            url,
+            flex: 1,
+            aspectRatio: "1:1",
+            aspectMode: "cover",
+            size: "full",
+            action: { type: "uri", label: "ดูรูป", uri: url },
+          })),
+        },
+      ]
+    : [];
+
   return {
     type: "flex" as const,
     altText: clip(card.title, 80),
@@ -151,7 +180,7 @@ export function lineCardMessage(card: LineCard) {
         layout: "vertical",
         spacing: "md",
         paddingAll: "16px",
-        contents: rows.map((field) => ({
+        contents: [...rows.map((field) => ({
           type: "box",
           layout: "baseline",
           spacing: "md",
@@ -174,7 +203,7 @@ export function lineCardMessage(card: LineCard) {
               weight: "bold",
             },
           ],
-        })),
+        })), ...thumbnailRow],
       },
       ...(footerContents.length
         ? {
@@ -309,7 +338,30 @@ function bangkokParts(iso: string) {
   };
 }
 
-export const LEAD_SALES_PICKERS = ["โจ้", "หนุ่ม", "ตุ่น", "โส", "เฟิร์น"];
+export const LEAD_SALES_PICKERS = ["โจ้", "หนุ่ม", "ตุ่น", "โส", "เฟิร์น", "ตี๋", "ฝัน", "แมว"];
+
+/** Signed https links (7 days) for a lead's photos so LINE can render thumbnails. Videos are skipped. */
+export async function leadLineImageUrls(lead: {
+  siteImageUrls?: string[] | null;
+  siteImageUrl?: string | null;
+}): Promise<string[]> {
+  try {
+    const refs = leadImageRefs(lead).filter((ref) => !isVideoMediaName(ref));
+    const urls = await Promise.all(
+      refs.slice(0, 3).map(async (ref) => {
+        if (isStorageRef(ref)) {
+          const path = storagePathFromRef(ref);
+          if (!/\.(jpe?g|png|webp)$/i.test(path)) return "";
+          return (await createSignedUploadUrl(path, 60 * 60 * 24 * 7)) || "";
+        }
+        return ref.startsWith("https://") ? ref : "";
+      }),
+    );
+    return urls.filter(Boolean);
+  } catch {
+    return [];
+  }
+}
 
 export const LEAD_CLAIM_ACTION = "claim";
 
@@ -329,6 +381,7 @@ export function leadLineCard(lead: {
   note?: string | null;
   createdAt?: string | null;
   badge?: string;
+  images?: string[];
 }): LineCard {
   const title = LEAD_SOURCE_LABELS[lead.source] || lead.source;
   const note = lead.note?.replace(/\s+/g, " ").trim();
@@ -356,6 +409,7 @@ export function leadLineCard(lead: {
     title: `มีคำขอ${title}ใหม่`,
     badge: lead.badge,
     fields,
+    images: lead.images,
     call: lead.phone,
     pickers: {
       prompt: "ใครรับงานนี้? กดชื่อเพื่อรับงาน",
@@ -392,6 +446,7 @@ export function claimedLeadLineCard(claim: {
   claimedBy: string;
   claimedAt: string;
   lead: {
+    id?: string;
     quoteNo?: string | null;
     contactName: string;
     phone: string;
@@ -432,6 +487,52 @@ export function claimedLeadLineCard(claim: {
     fields,
     call: lead.phone,
     callLabel: "โทรด่วน",
+    link: lead.id && !claim.badge ? jobTrackLink(lead.id) : undefined,
+  };
+}
+
+/** Opens the LIFF job page inside LINE. Hidden until NEXT_PUBLIC_LIFF_ID is set. */
+function jobTrackLink(leadId: string): LineCard["link"] {
+  const liffId = process.env.NEXT_PUBLIC_LIFF_ID;
+  if (!liffId) return undefined;
+  return {
+    label: "อัปเดตสถานะงาน",
+    url: `https://liff.line.me/${liffId}?lead=${encodeURIComponent(leadId)}`,
+  };
+}
+
+export const JOB_STATUS_LABELS = {
+  done: "ปิดงานเรียบร้อย",
+} as const;
+
+/** Group card posted by the bot each time the owner moves the job forward. */
+export function jobProgressLineCard(progress: {
+  status: keyof typeof JOB_STATUS_LABELS;
+  claimedBy: string;
+  at: string;
+  lead: {
+    id: string;
+    quoteNo?: string | null;
+    contactName: string;
+    installAddress?: string | null;
+  };
+}): LineCard {
+  const when = bangkokParts(progress.at);
+  const address = progress.lead.installAddress?.replace(/\s+/g, " ").trim();
+  const fields: LineCardField[] = [
+    { label: "เลขที่", value: progress.lead.quoteNo ?? "" },
+    { label: "ผู้รับงาน", value: progress.claimedBy },
+    { label: "สถานะ", value: JOB_STATUS_LABELS[progress.status] },
+    { label: "เวลา", value: `${when.dateText} · ${when.timeText} น.` },
+    { label: "ลูกค้า", value: progress.lead.contactName },
+  ];
+  if (address && address !== "-") fields.push({ label: "ที่ติดตั้ง", value: address, max: 200 });
+  const icon = "🏁";
+  return {
+    title: `${icon} ${progress.claimedBy}${JOB_STATUS_LABELS[progress.status]}`,
+    tone: "success",
+    fields,
+    link: progress.status === "done" ? undefined : jobTrackLink(progress.lead.id),
   };
 }
 

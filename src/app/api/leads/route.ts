@@ -20,7 +20,7 @@ import {
 } from "@/lib/storage/upload";
 import { formFlagTrue } from "@/lib/marketing/consent";
 import { subscribeIfOptedIn } from "@/lib/marketing/store";
-import { leadLineCard, pushLineCard } from "@/lib/outbound/line";
+import { leadLineCard, leadLineImageUrls, pushLineCard } from "@/lib/outbound/line";
 
 export const runtime = "nodejs";
 
@@ -220,7 +220,8 @@ export async function POST(request: Request) {
         ];
       }
 
-      const line = await pushLineCard(leadLineCard(lead));
+      const images = await leadLineImageUrls(lead);
+      const line = await pushLineCard(leadLineCard({ ...lead, images }));
       notify.push({ channel: "line", ...line });
 
       return NextResponse.json({ ok: true, id: lead.id, quoteNo: lead.quoteNo ?? null, notify });

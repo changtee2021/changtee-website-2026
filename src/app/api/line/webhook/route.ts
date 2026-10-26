@@ -88,7 +88,7 @@ async function handleClaim(event: LineWebhookEvent) {
   const card = claimedLeadLineCard({
     claimedBy: claim.claimedBy,
     claimedAt: claim.claimedAt,
-    lead: claim.lead,
+    lead: { ...claim.lead, id: leadId },
   });
   await replyLineMessages(replyToken, [lineCardMessage(card)]);
 }
