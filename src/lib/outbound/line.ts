@@ -487,7 +487,7 @@ export function claimedLeadLineCard(claim: {
     fields,
     call: lead.phone,
     callLabel: "โทรด่วน",
-    link: lead.id && !claim.badge ? jobTrackLink(lead.id) : undefined,
+    link: lead.id ? jobTrackLink(lead.id) : undefined,
   };
 }
 
