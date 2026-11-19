@@ -51,7 +51,7 @@ export function LearnSheetView({ sheet }: { sheet: LearnSheet }) {
             href="/quote"
             className="inline-flex rounded-full bg-brand-red px-5 py-2.5 text-sm font-semibold text-white hover:bg-brand-red-soft"
           >
-            ขอวัดหน้างานฟรี
+            นัดวัดหน้างานกับช่างมืออาชีพ
           </Link>
         </div>
       </div>

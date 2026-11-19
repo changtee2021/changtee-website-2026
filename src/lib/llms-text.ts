@@ -74,7 +74,7 @@ export async function buildLlmsText({ full }: { full: boolean }): Promise<string
   lines.push("");
   lines.push(`- Experience: ${brandFacts.experienceYears}+ years / ประสบการณ์กว่า ${brandFacts.experienceYears} ปี`);
   lines.push("- Own factory, own installation team / มีโรงงานผลิตและทีมช่างของเราเอง");
-  lines.push("- Free on-site measuring / วัดหน้างานฟรี");
+  lines.push("- On-site measuring by a specialist / วัดหน้างานโดยช่างมืออาชีพ");
   lines.push(`- Fastest installation: ${brandFacts.fastestInstall} / ติดตั้งเร็วสุด ${brandFacts.fastestInstall}`);
   lines.push(`- Installation warranty: ${brandFacts.installWarranty} / รับประกันงานติดตั้ง ${brandFacts.installWarranty}`);
   lines.push(`- Motor warranty (motorized blinds): ${brandFacts.motorWarranty}`);
@@ -117,7 +117,7 @@ export async function buildLlmsText({ full }: { full: boolean }): Promise<string
     lines.push(link(base, "/learn", "ห้องเรียนรู้ / Learn", "ความรู้จากช่าง"));
   }
   lines.push(link(base, "/blog", "บทความ / Blog"));
-  lines.push(link(base, "/quote", "ขอใบเสนอราคา / Get a quote", "วัดหน้างานฟรี"));
+  lines.push(link(base, "/quote", "ขอใบเสนอราคา / Get a quote", "วัดหน้างานโดยช่างมืออาชีพ"));
   lines.push(link(base, "/contact", "เกี่ยวกับเรา / About & contact"));
   lines.push(link(base, "/visit-factory", "เยี่ยมชมโรงงาน / Factory visit"));
   lines.push("");

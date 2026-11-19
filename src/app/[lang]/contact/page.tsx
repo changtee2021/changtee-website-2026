@@ -14,7 +14,7 @@ export async function generateMetadata({
   return pageMetadata({
     title: "เกี่ยวกับเรา",
     description:
-      "Crafted by Experience. Designed for Life. — ช่าง + งานฝีมือ + ประสบการณ์ Premium Window Covering Brand ออกแบบ ผลิต ติดตั้งครบวงจร มีโรงงานเอง วัดหน้างานฟรี รับประกัน 1 ปี",
+      "Crafted by Experience. Designed for Life. — ช่าง + งานฝีมือ + ประสบการณ์ Premium Window Covering Brand ออกแบบ ผลิต ติดตั้งครบวงจร มีโรงงานเอง วัดหน้างานโดยช่างมืออาชีพ รับประกัน 1 ปี",
     path: "/contact",
     locale,
   });

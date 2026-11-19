@@ -61,7 +61,7 @@ export const siteConfig = {
   positioning: "Premium Window Covering Brand",
   usp: "ช่าง + งานฝีมือ + ประสบการณ์",
   description:
-    "Premium Window Covering Brand — ผู้เชี่ยวชาญด้านผ้าม่านและม่านปรับแสงแบบครบวงจร ออกแบบ ผลิตเองที่โรงงาน ติดตั้งโดยช่างมืออาชีพ วัดหน้างานฟรี ทั่วประเทศไทย",
+    "Premium Window Covering Brand — ผู้เชี่ยวชาญด้านผ้าม่านและม่านปรับแสงแบบครบวงจร ออกแบบ ผลิตเองที่โรงงาน ติดตั้งโดยช่างมืออาชีพ วัดหน้างานโดยช่างมืออาชีพ ทั่วประเทศไทย",
   /** Default Open Graph / Twitter share image (1200-ish landscape preferred). */
   ogImage: "/images/generated/ct-hero-living.webp",
   /** Real showroom photo — use for all “ร้านเรา / โชว์รูม” placements. */

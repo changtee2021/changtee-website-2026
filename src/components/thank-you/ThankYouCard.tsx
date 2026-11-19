@@ -8,7 +8,7 @@ import { siteConfig } from "@/lib/site-config";
 const NEXT_STEPS = [
   { step: "1", title: "ตรวจข้อมูล", body: "ทีมงานตรวจคำขอและช่องทางติดต่อของคุณ" },
   { step: "2", title: "ติดต่อกลับ", body: "โทรหรือทัก LINE ภายใน 24 ชม. ในเวลาทำการ" },
-  { step: "3", title: "นัดวัดหน้างาน", body: "นัดหมายวัดและประเมินใบเสนอราคาฟรี" },
+  { step: "3", title: "นัดวัดหน้างาน", body: "นัดหมายวัดหน้างานกับช่างมืออาชีพ" },
 ] as const;
 
 export function ThankYouCard() {

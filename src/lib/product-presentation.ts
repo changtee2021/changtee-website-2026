@@ -246,7 +246,7 @@ export const CATEGORY_DEFAULTS: Record<string, CategoryDefaults> = {
       { label: "คุมแสง", value: "ปรับได้ตามชนิดผ้าและซับใน" },
       { label: "ขนาดงาน", value: "ตัดตามหน้างานจริง" },
       { label: "ผลิต", value: "โรงงานช่างตี๋" },
-      { label: "บริการ", value: "วัดหน้างานฟรี · ติดตั้งครบวงจร" },
+      { label: "บริการ", value: "วัดหน้างานโดยช่างมืออาชีพ · ติดตั้งครบวงจร" },
       { label: "รับประกัน", value: "งานติดตั้งตามเงื่อนไขมาตรฐาน" },
     ],
     benefitStats: [
@@ -297,7 +297,7 @@ export const CATEGORY_DEFAULTS: Record<string, CategoryDefaults> = {
         body: "บานใหญ่ในห้องนั่งเล่นอาจใช้ลอนหรือจีบให้มีมิติ บานแคบ/ทรงสูงอาจเหมาะม่านพับ — จัดลำดับความสำคัญทีละบาน",
       },
     ],
-    baseKeywords: ["ผ้าม่าน", "ติดตั้งผ้าม่าน", "วัดหน้างานฟรี", "ช่างตี๋"],
+    baseKeywords: ["ผ้าม่าน", "ติดตั้งผ้าม่าน", "ผ้าม่านใกล้ฉัน", "ม่านตาไก่", "สั่งตัดผ้าม่าน", "วัดหน้างานโดยช่างมืออาชีพ", "ช่างตี๋"],
   },
   "roller-blinds": {
     specs: [
@@ -306,7 +306,7 @@ export const CATEGORY_DEFAULTS: Record<string, CategoryDefaults> = {
       { label: "คุมแสง", value: "ตามชนิดผ้าและความทึบ" },
       { label: "ขนาดงาน", value: "ตัดตามบานหน้าต่างจริง" },
       { label: "พื้นที่ติดตั้ง", value: "ในวงกบ / นอกวงกบ" },
-      { label: "บริการ", value: "วัดหน้างานฟรี · ติดตั้งครบ" },
+      { label: "บริการ", value: "วัดหน้างานโดยช่างมืออาชีพ · ติดตั้งครบ" },
     ],
     benefitStats: [
       {
@@ -356,7 +356,7 @@ export const CATEGORY_DEFAULTS: Record<string, CategoryDefaults> = {
         body: "บานนั่งเล่นอาจใช้โทนพิเศษหรือพิมพ์ลาย บานรองใช้โทนกลางรวมชุด — จัดลำดับให้ห้องไม่ลายวุ่น",
       },
     ],
-    baseKeywords: ["ม่านม้วน", "roller blinds", "ม่านม้วนคอนโด", "ช่างตี๋"],
+    baseKeywords: ["ม่านม้วน", "ม่านม้วนกรองแสง", "ม่านสกรีน", "ม่านม้วนราคา", "roller blinds", "ช่างตี๋"],
   },
   "venetian-blinds": {
     specs: [
@@ -365,7 +365,7 @@ export const CATEGORY_DEFAULTS: Record<string, CategoryDefaults> = {
       { label: "คุมแสง", value: "ปรับองศาใบละเอียด" },
       { label: "ขนาดงาน", value: "ตัดตามบานจริง" },
       { label: "ควบคุม", value: "เชือก/ไม้หมุน หรือมอเตอร์" },
-      { label: "บริการ", value: "วัดหน้างานฟรี · ติดตั้งครบ" },
+      { label: "บริการ", value: "วัดหน้างานโดยช่างมืออาชีพ · ติดตั้งครบ" },
     ],
     benefitStats: [
       {
@@ -410,7 +410,7 @@ export const CATEGORY_DEFAULTS: Record<string, CategoryDefaults> = {
         body: "มู่ลี่จุดแข็งคือปรับองศาแล้วยังมองข้างนอกได้ — ถ้าห้องนอนต้องการมืดสนิท อาจคู่ผ้าทึบหรือเลือกใบทึบกว่า",
       },
     ],
-    baseKeywords: ["มู่ลี่", "มู่ลี่ไม้", "มู่ลี่อลูมิเนียม", "ช่างตี๋"],
+    baseKeywords: ["มู่ลี่", "มู่ลี่ไม้", "มู่ลี่หน้าต่าง", "สั่งทำมู่ลี่", "มู่ลี่อลูมิเนียม", "ช่างตี๋"],
   },
   "vertical-blinds": {
     specs: [
@@ -419,7 +419,7 @@ export const CATEGORY_DEFAULTS: Record<string, CategoryDefaults> = {
       { label: "ขนาดงาน", value: "เหมาะบานใหญ่ / กระจกสูง" },
       { label: "วัสดุใบ", value: "ตามแคตตาล็อกหน้างาน" },
       { label: "ทำความสะอาด", value: "เช็ดใบได้ง่าย" },
-      { label: "บริการ", value: "วัดหน้างานฟรี · ติดตั้งครบ" },
+      { label: "บริการ", value: "วัดหน้างานโดยช่างมืออาชีพ · ติดตั้งครบ" },
     ],
     benefitStats: [
       {
@@ -473,7 +473,7 @@ export const CATEGORY_DEFAULTS: Record<string, CategoryDefaults> = {
       { label: "หน้าที่หลัก", value: "แบ่งห้อง / กั้นแอร์" },
       { label: "ขนาดงาน", value: "วัดความกว้าง–สูงช่องติดตั้งจริง" },
       { label: "วัสดุ", value: "PVC / ตามรุ่น" },
-      { label: "บริการ", value: "วัดหน้างานฟรี · ติดตั้งครบ" },
+      { label: "บริการ", value: "วัดหน้างานโดยช่างมืออาชีพ · ติดตั้งครบ" },
     ],
     benefitStats: [
       {
@@ -893,7 +893,7 @@ export const PRODUCT_OVERRIDES: Partial<Record<string, PresentationOverride>> = 
       { label: "คุมแสง", value: "เลื่อนแถบให้ตรงกันเพื่อโปร่งหรือทึบ" },
       { label: "ควบคุม", value: "โซ่ด้านข้าง หรือมอเตอร์ตามชุด" },
       { label: "ขนาดงาน", value: "ตัดตามบานจริง ต้องระดับแม่นเพื่อแถบขนาน" },
-      { label: "บริการ", value: "วัดหน้างานฟรี · ติดตั้งครบ" },
+      { label: "บริการ", value: "วัดหน้างานโดยช่างมืออาชีพ · ติดตั้งครบ" },
     ],
     materials: [
       {
@@ -1125,7 +1125,7 @@ export const PRODUCT_OVERRIDES: Partial<Record<string, PresentationOverride>> = 
       { label: "วัสดุใบ", value: "ไม้" },
       { label: "คุมแสง", value: "หมุนองศาใบ — ไม่ใช่ผ้าพับ" },
       { label: "ห้องที่ควรระวัง", value: "ครัว/ห้องน้ำชื้นจัด ควรประเมินก่อนใช้ไม้" },
-      { label: "บริการ", value: "วัดหน้างานฟรี · ติดตั้งครบ" },
+      { label: "บริการ", value: "วัดหน้างานโดยช่างมืออาชีพ · ติดตั้งครบ" },
     ],
     roomStyleIds: ["warm-classic", "office-clean"],
   },
@@ -1135,7 +1135,7 @@ export const PRODUCT_OVERRIDES: Partial<Record<string, PresentationOverride>> = 
       { label: "วัสดุใบ", value: "อลูมิเนียม" },
       { label: "จุดเด่น", value: "เบา ทนชื้น เช็ดง่าย กว่ามู่ลี่ไม้" },
       { label: "คุมแสง", value: "หมุนองศาใบ ตัดแสงจอคอมได้ดี" },
-      { label: "บริการ", value: "วัดหน้างานฟรี · ติดตั้งครบ" },
+      { label: "บริการ", value: "วัดหน้างานโดยช่างมืออาชีพ · ติดตั้งครบ" },
     ],
     roomStyleIds: ["office-clean", "modern-minimal"],
   },
@@ -1145,7 +1145,7 @@ export const PRODUCT_OVERRIDES: Partial<Record<string, PresentationOverride>> = 
       { label: "วัสดุใบ", value: "ไม้ไผ่ / โทนธรรมชาติ" },
       { label: "คุมแสง", value: "กรองแสงนุ่ม โปร่งกว่าใบทึบ" },
       { label: "หมายเหตุ", value: "ลายและโทนธรรมชาติคลาดเคลื่อนได้เล็กน้อย" },
-      { label: "บริการ", value: "วัดหน้างานฟรี · ติดตั้งครบ" },
+      { label: "บริการ", value: "วัดหน้างานโดยช่างมืออาชีพ · ติดตั้งครบ" },
     ],
     roomStyleIds: ["resort-natural", "warm-classic"],
   },
@@ -1155,7 +1155,7 @@ export const PRODUCT_OVERRIDES: Partial<Record<string, PresentationOverride>> = 
       { label: "ไม่ใช่", value: "มู่ลี่ใบไม้ / มู่ลี่อลูมิเนียมที่หมุนองศา" },
       { label: "ชนิดผ้า", value: "โปร่ง · ทึบ ตามแสงห้อง" },
       { label: "ขนาดงาน", value: "เผื่อระยะเก็บตอนพับขึ้น ไม่ชนบัวหรือแอร์" },
-      { label: "บริการ", value: "วัดหน้างานฟรี · ติดตั้งครบ" },
+      { label: "บริการ", value: "วัดหน้างานโดยช่างมืออาชีพ · ติดตั้งครบ" },
     ],
     materials: [
       {
@@ -1187,7 +1187,7 @@ export const PRODUCT_OVERRIDES: Partial<Record<string, PresentationOverride>> = 
       { label: "รูปแบบ", value: "ช่องแสง/ลายญี่ปุ่น — ไม่ทึบเต็มใบ" },
       { label: "หน้าที่หลัก", value: "แบ่งโซนโดยยังส่งแสงต่อได้" },
       { label: "ขนาดงาน", value: "วัดความกว้าง–สูงช่องติดตั้งจริง" },
-      { label: "บริการ", value: "วัดหน้างานฟรี · ติดตั้งครบ" },
+      { label: "บริการ", value: "วัดหน้างานโดยช่างมืออาชีพ · ติดตั้งครบ" },
     ],
     roomStyleIds: ["resort-natural", "modern-minimal"],
     assets: {
@@ -1208,7 +1208,7 @@ export const PRODUCT_OVERRIDES: Partial<Record<string, PresentationOverride>> = 
       { label: "รูปแบบ", value: "ยูโร — แสงผ่านทั้งแผ่นมากกว่าฉากทึบ" },
       { label: "หน้าที่หลัก", value: "แบ่งห้องโดยยังโปร่งและมีมิติ" },
       { label: "ขนาดงาน", value: "วัดช่องติดตั้งและความสูงฝ้า" },
-      { label: "บริการ", value: "วัดหน้างานฟรี · ติดตั้งครบ" },
+      { label: "บริการ", value: "วัดหน้างานโดยช่างมืออาชีพ · ติดตั้งครบ" },
     ],
     roomStyleIds: ["modern-minimal", "cafe-retail"],
     styleImages: {
@@ -1236,7 +1236,7 @@ export const PRODUCT_OVERRIDES: Partial<Record<string, PresentationOverride>> = 
       { label: "รูปแบบ", value: "USA — จังหวะช่องแสง ไม่ทึบเต็ม ไม่โปร่งทั้งใบ" },
       { label: "หน้าที่หลัก", value: "แบ่งโซนและส่งแสงเป็นจังหวะ" },
       { label: "ขนาดงาน", value: "วัดช่องติดตั้งจริง" },
-      { label: "บริการ", value: "วัดหน้างานฟรี · ติดตั้งครบ" },
+      { label: "บริการ", value: "วัดหน้างานโดยช่างมืออาชีพ · ติดตั้งครบ" },
     ],
     roomStyleIds: ["modern-minimal", "office-clean"],
   },
@@ -1937,7 +1937,7 @@ function buildSeoDescription(
     ? ""
     : ` ${product.summary}`;
   return clampSeoDescription(
-    `${contentTagline}${summary} นัดวัดหน้างานฟรีกับช่างตี๋`,
+    `${contentTagline}${summary} นัดวัดหน้างานกับช่างมืออาชีพ`,
   );
 }
 
@@ -2055,7 +2055,12 @@ export function getProductPresentation(
   ];
 
   const seoTitle =
-    override?.seoTitle ?? `${product.name} ${category.name}`;
+    override?.seoTitle ??
+    (product.name === category.name
+      ? product.nameEn
+        ? `${product.name} ${product.nameEn}`
+        : product.name
+      : `${product.name} ${category.name}`);
 
   const seoDescription =
     override?.seoDescription ??

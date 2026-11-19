@@ -11,6 +11,7 @@ import { productIndexableLocales } from "@/lib/i18n/content/product-overlays";
 import { hreflangLanguages, indexableLocales } from "@/lib/seo/meta";
 import { blogIndexableLocales } from "@/lib/i18n/content/thai-text/sections.server";
 import { areaPath, serviceAreas } from "@/lib/service-areas";
+import { FOCUS_CATEGORY_SLUGS, FOCUS_GUIDE_SLUGS } from "@/lib/seo/focus-guides";
 import type { BlogPost } from "@/lib/cms/blog-demo";
 import type { PortfolioItem } from "@/lib/cms/portfolio-demo";
 
@@ -101,20 +102,23 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { path: "/terms", changeFrequency: "yearly", priority: 0.3, locales: uiLocales },
   ];
 
-  const productRoutes = productCatalog.flatMap((cat) => [
-    ...entry(base, `/products/${cat.slug}`, {
-      changeFrequency: "weekly",
-      priority: 0.8,
-      locales: productLocales,
-    }),
-    ...cat.children.flatMap((child) =>
-      entry(base, `/products/${cat.slug}/${child.slug}`, {
+  const productRoutes = productCatalog.flatMap((cat) => {
+    const focus = FOCUS_CATEGORY_SLUGS.has(cat.slug);
+    return [
+      ...entry(base, `/products/${cat.slug}`, {
         changeFrequency: "weekly",
-        priority: 0.8,
-        locales: productIndexableLocales(cat.slug, child.slug),
+        priority: focus ? 0.9 : 0.7,
+        locales: productLocales,
       }),
-    ),
-  ]);
+      ...cat.children.flatMap((child) =>
+        entry(base, `/products/${cat.slug}/${child.slug}`, {
+          changeFrequency: "weekly",
+          priority: focus ? 0.85 : 0.7,
+          locales: productIndexableLocales(cat.slug, child.slug),
+        }),
+      ),
+    ];
+  });
 
   const [remotePortfolio, remoteBlog] = await Promise.all([
     readCmsWithinTimeout<PortfolioItem>("portfolio"),
@@ -151,7 +155,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       entry(base, `/blog/${post.slug}`, {
         lastModified: post.updatedAt || post.publishedAt,
         changeFrequency: "weekly",
-        priority: 0.7,
+        priority: FOCUS_GUIDE_SLUGS.has(post.slug) ? 0.8 : 0.6,
         locales: blogIndexableLocales(post.slug),
       }),
     ),

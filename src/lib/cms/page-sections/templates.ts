@@ -169,7 +169,7 @@ export const ABOUT_SECTION_DEFAULTS: Record<string, Record<string, string>> = {
   oneStop: {
     subtitle: "CURTAIN & BLINDS",
     title: "ONE STOP SERVICE",
-    body: "วัดหน้างานฟรี · ออกแบบ · ผลิตที่โรงงานเรา · ติดตั้งโดยช่างมืออาชีพ · รับประกันงานติดตั้ง 1 ปีเต็ม",
+    body: "วัดหน้างานโดยช่างมืออาชีพ · ออกแบบ · ผลิตที่โรงงานเรา · ติดตั้งโดยช่างมืออาชีพ · รับประกันงานติดตั้ง 1 ปีเต็ม",
     image: "/images/about/installing.webp",
   },
 };
@@ -177,7 +177,7 @@ export const ABOUT_SECTION_DEFAULTS: Record<string, Record<string, string>> = {
 export const CONTACT_SECTION_DEFAULTS: Record<string, Record<string, string>> = {
   header: {
     title: "เกี่ยวกับเรา",
-    subtitle: "โชว์รูมจริง วัดหน้างานฟรี — คุยแบบ ดูผ้า ขอใบเสนอราคา จบในที่เดียว",
+    subtitle: "โชว์รูมจริง วัดหน้างานโดยช่างมืออาชีพ — คุยแบบ ดูผ้า ขอใบเสนอราคา จบในที่เดียว",
   },
 };
 
@@ -186,7 +186,7 @@ export const BLOG_POST_SECTION_DEFAULTS: Record<
   Record<string, string>
 > = {
   cta: {
-    body: "อยากให้ช่วยดูว่าบ้านคุณเหมาะกับแบบไหน ทักมาคุยได้เลย เราวัดหน้างานให้ฟรี",
+    body: "อยากให้ช่วยดูว่าบ้านคุณเหมาะกับแบบไหน ทักมาคุยได้เลย เราวัดหน้างานให้ด้วยช่างมืออาชีพ",
     quoteLabel: "ขอใบเสนอราคา",
     productsLabel: "ดูสินค้าทั้งหมด",
   },

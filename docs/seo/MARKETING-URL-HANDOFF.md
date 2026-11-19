@@ -33,9 +33,16 @@ A **Display Path** (the `ฉากกั้นห้องpvc / ฉากกั�
 | ฉากกั้นห้อง, ฉากกั้นแอร์, ฉากกั้น PVC | `https://changtee-curtain.com/products/pvc-partition` |
 | ม่านญี่ปุ่น, noren | `https://changtee-curtain.com/products/print-fabric/noren` |
 | ม่านพับ, ม่านโรมัน | `https://changtee-curtain.com/products/curtain/roman` |
-| ผ้าม่าน (ทั่วไป) | `https://changtee-curtain.com/products/curtain` |
-| ม่านม้วน, เมจิกสกรีน | `https://changtee-curtain.com/products/roller-blinds` |
-| มู่ลี่ | `https://changtee-curtain.com/products/venetian-blinds` |
+| ผ้าม่าน, ติดตั้งผ้าม่าน, ผ้าม่านใกล้ฉัน | `https://changtee-curtain.com/products/curtain` |
+| ม่านตาไก่, ผ้าม่านสั่งตัด | `https://changtee-curtain.com/products/curtain/eyelet` |
+| ม่านลอน | `https://changtee-curtain.com/products/curtain/s-wave` |
+| ม่านม้วน, ม่านม้วนกรองแสง, ม่านม้วนราคา, ร้านม่านม้วน | `https://changtee-curtain.com/products/roller-blinds` |
+| ม่านสกรีน (ผ้ากรองแสงผืนเรียบ) | `https://changtee-curtain.com/products/roller-blinds/standard` |
+| เมจิกสกรีน | `https://changtee-curtain.com/products/roller-blinds/zebra` |
+| ม่านม้วนไฟฟ้า, ม่านม้วนอัตโนมัติ | `https://changtee-curtain.com/products/roller-blinds/motorized` |
+| มู่ลี่, มู่ลี่หน้าต่าง | `https://changtee-curtain.com/products/venetian-blinds` |
+| มู่ลี่ไม้, สั่งทำมู่ลี่ | `https://changtee-curtain.com/products/venetian-blinds/wood` |
+| มู่ลี่อลูมิเนียม | `https://changtee-curtain.com/products/venetian-blinds/aluminium` |
 | ม่านปรับแสง | `https://changtee-curtain.com/products/vertical-blinds` |
 | ม่านไฟฟ้า, ผ้าม่านไฟฟ้า | `https://changtee-curtain.com/products/motorized` |
 | ม่านโรงงาน, ม่านริ้ว PVC | `https://changtee-curtain.com/products/outdoor-factory` |

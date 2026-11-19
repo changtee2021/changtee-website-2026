@@ -28,9 +28,9 @@ export const HOME_SECTION_DEFAULTS_EN: Record<string, Record<string, string>> = 
     step1Title: "Pick a style",
     step1Desc:
       "Curtains, blinds, rollers, and more. Tell us the room and the look. We’ll match a style that works day to day.",
-    step2Title: "Free measuring visit",
+    step2Title: "A specialist measures on site",
     step2Desc:
-      "We measure the real opening, then give a clear price before you decide. No charge for the visit.",
+      "A specialist measures the real opening, then gives a clear price before you decide.",
     step3Title: "We make it and install it",
     step3Desc:
       "Made in our factory, delivered on time, installed neatly — with a 1-year install warranty.",
@@ -49,8 +49,8 @@ export const HOME_SECTION_DEFAULTS_EN: Record<string, Record<string, string>> = 
   contactCta: {
     titleLine1: "Want a rough price first?",
     titleLine2: "Just ask.",
-    body: "Send a room photo or window size on LINE. We’ll give a first price. If it fits, we can book a free measuring visit.",
-    quoteLabel: "Get a free quote",
+    body: "Send a room photo or window size on LINE. We’ll give a first price. If it fits, a specialist can come to measure.",
+    quoteLabel: "Talk to a sales specialist",
     lineLabel: "Chat with us on LINE",
   },
 };
