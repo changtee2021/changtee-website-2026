@@ -204,10 +204,10 @@ export const THAI_TEXT_EN: Record<string, string> = {
     "Choose curtains & blinds",
   "มีทั้งม่านผ้า มู่ลี่ ม่านม้วน และอีกหลายแบบ บอกห้องกับสไตล์ที่ชอบ เราช่วยจับคู่ให้เหมาะกับการใช้งานจริง":
     "We offer fabric curtains, blinds, roller blinds and many more. Tell us your room and favourite style, and we'll match what works for real everyday use.",
-  "เข้าวัดหน้างานฟรี":
-    "Free on-site measuring",
-  "ทีมเข้าไปวัดพื้นที่จริงอย่างละเอียด สรุปราคาให้ชัดก่อนตัดสินใจ ไม่มีค่าใช้จ่าย":
-    "Our team measures your space in detail and gives you a clear price before you decide — free of charge.",
+  "เข้าวัดหน้างานด้วยช่างมืออาชีพ":
+    "A specialist measures on site",
+  "ช่างมืออาชีพเข้าไปวัดพื้นที่จริง แล้วสรุปราคาให้ชัดก่อนตัดสินใจ":
+    "A specialist measures the real space, then gives a clear price before you decide.",
   "ส่งและติดตั้งให้จบ":
     "Delivery and installation, done",
   "ผลิตที่โรงงานเราเอง ส่งตรงเวลา ช่างติดตั้งเก็บงานเรียบร้อย พร้อมรับประกัน 1 ปี":
@@ -260,10 +260,10 @@ export const THAI_TEXT_EN: Record<string, string> = {
     "Want a rough price first?",
   "ทักมาถามได้เลย":
     "Just ask us",
-  "ส่งรูปห้องหรือขนาดหน้าต่างมาทาง LINE เราตีราคาเบื้องต้นให้ก่อนได้ ถ้าสนใจค่อยนัดวัดหน้างานฟรี":
-    "Send a photo of your room or your window sizes on LINE and we'll give you an initial estimate. If you're interested, book a free on-site measuring.",
-  "ขอใบเสนอราคาฟรี":
-    "Request a free quote",
+  "ส่งรูปห้องหรือขนาดหน้าต่างมาทาง LINE เราตีราคาเบื้องต้นให้ก่อนได้ ถ้าสนใจค่อยนัดวัดหน้างานกับช่างมืออาชีพ":
+    "Send a photo of your room or your window sizes on LINE and we'll give you an initial estimate. If you're interested, book a measuring visit with a specialist.",
+  "ติดต่อเซลล์ Specialist":
+    "Talk to a sales specialist",
   "แอดไลน์คุยกับเรา":
     "Add us on LINE",
   "คำถามที่พบบ่อย":
@@ -276,10 +276,10 @@ export const THAI_TEXT_EN: Record<string, string> = {
     "Chang Tee Curtains (Changtee Phaman) is a Premium Window Covering Brand offering a complete curtain service — from on-site measuring and design to production in our own factory and installation by professional installers. Our identity is craftsman + craftsmanship + experience, with the concept “Crafted by Experience. Designed for Life.” built on more than 10 years of experience.",
   "ดูรายละเอียด →":
     "View details →",
-  "ช่างตี๋วัดหน้างานฟรีไหม?":
-    "Does Chang Tee measure on site for free?",
-  "วัดหน้างานฟรี ทั้งบ้าน คอนโด และโปรเจกต์องค์กร เลือกวันเวลาที่สะดวก ทีมงานไปวัดให้ถึงที่ แล้วส่งใบเสนอราคาตามขนาดและรุ่นที่เลือก":
-    "Yes — free on-site measuring for homes, condos and corporate projects. Pick a convenient date and time, our team comes to you, then we send a quote based on the sizes and models you choose.",
+  "ช่างตี๋วัดหน้างานให้ไหม?":
+    "Does Chang Tee send a specialist to measure?",
+  "วัดหน้างานโดยช่างมืออาชีพ ทั้งบ้าน คอนโด และโปรเจกต์องค์กร เลือกวันเวลาที่สะดวก ทีมงานไปวัดให้ถึงที่ แล้วส่งใบเสนอราคาตามขนาดและรุ่นที่เลือก":
+    "Yes — a specialist measures homes, condos and corporate projects. Pick a convenient date and time, our team comes to you, then we send a quote based on the sizes and models you choose.",
   "สั่งแล้วติดตั้งได้เร็วแค่ไหน?":
     "How soon can you install after ordering?",
   "เร็วสุด 1–2 วัน หลังยืนยันงาน เพราะมีโรงงานผลิตและทีมช่างของเราเอง ระยะเวลาจริงขึ้นกับรุ่นสินค้า จำนวนบาน และพื้นที่ติดตั้ง":
@@ -294,8 +294,8 @@ export const THAI_TEXT_EN: Record<string, string> = {
     "Seven service groups: indoor curtains · outdoor blinds · motorized curtains · industrial curtains · fabric printing · walls & glass · other services — including wave curtains, pinch-pleat curtains, roller blinds, wooden blinds, vertical blinds, PVC room partitions, smart-home motorized curtains, zip-track blinds, printed fabric, wallpaper and window film.",
   "ผ้าม่านราคาเท่าไร?":
     "How much do curtains cost?",
-  "ราคาขึ้นกับขนาดหน้าต่าง ชนิดผ้าหรือวัสดุ ระบบราง และมอเตอร์ (ถ้ามี) เราจึงวัดหน้างานฟรีก่อน แล้วส่งใบเสนอราคาที่ตรงกับงานจริง ไม่ต้องเดาราคา":
-    "Prices depend on window size, fabric or material, track system and motor (if any). That's why we measure on site for free first, then send a quote that matches the actual job — no guesswork.",
+  "ราคาขึ้นกับขนาดหน้าต่าง ชนิดผ้าหรือวัสดุ ระบบราง และมอเตอร์ (ถ้ามี) เราจึงให้ช่างมืออาชีพวัดหน้างานก่อน แล้วส่งใบเสนอราคาที่ตรงกับงานจริง ไม่ต้องเดาราคา":
+    "Prices depend on window size, fabric or material, track system and motor (if any). That's why a specialist measures on site first, then we send a quote that matches the actual job — no guesswork.",
   "ให้บริการพื้นที่ไหน มีโชว์รูมไหม?":
     "Which areas do you serve? Do you have a showroom?",
   "ติดตั้งทั่วประเทศไทย มีโชว์รูมให้ดูผ้าและแบบจริงที่ 310 ถนนไทยรามัญ แขวงสามวาตะวันตก เขตคลองสามวา กรุงเทพมหานคร 10510 เปิดบริการทุกวัน 08.00 น. – 20.00 น.":
@@ -456,7 +456,7 @@ export const THAI_TEXT_EN: Record<string, string> = {
     "Matter is a common language for smart homes, making it easier for motorized curtains to work with Google and Apple — if you choose a model that truly supports it.",
   "ม่านมอเตอร์โซลาร์ใช้ได้จริงในบ้านไทยไหม":
     "Do solar motorized curtains really work in Thai homes?",
-  "ใช้ได้ถ้าหน้าต่างโดนแดดจริง แผงโซลาร์เติมแบต ไม่ใช่ไฟฟรีทั้งปีทุกบาน เช็กทิศแดดก่อนซื้อ":
+  "ใช้ได้ถ้าหน้าต่างโดนแดดจริง แผงโซลาร์เติมแบต ไม่ใช่ไฟฟ้าใช้ได้ทั้งปีทุกบานโดยไม่มีค่าไฟ เช็กทิศแดดก่อนซื้อ":
     "Yes, if the window gets real sun. The solar panel tops up the battery — it isn't free power all year for every window. Check the sun direction before buying.",
   "ม่านมอเตอร์เชื่อม Google Home / Apple Home ได้ไหม":
     "Can motorized curtains connect to Google Home / Apple Home?",
@@ -704,8 +704,8 @@ export const THAI_TEXT_EN: Record<string, string> = {
     "Size 5",
   "กรอกแบบฟอร์มขอใบเสนอราคาจากช่างตี๋ ผ้าม่าน":
     "Fill in the quote request form from Chang Tee Curtains",
-  "ขอใบเสนอราคาผ้าม่าน ม่านม้วน มู่ลี่ และม่านไฟฟ้าจากช่างตี๋ วัดหน้างานฟรี ผลิตเองที่โรงงาน ติดตั้งทั่วประเทศไทย รับประกัน 1 ปี":
-    "Quote for curtains, blinds and motorized blinds from Chang Tee. Free measuring, made in our factory, installed across Thailand, 1-year warranty.",
+  "ขอใบเสนอราคาผ้าม่าน ม่านม้วน มู่ลี่ และม่านไฟฟ้าจากช่างตี๋ วัดหน้างานโดยช่างมืออาชีพ ผลิตเองที่โรงงาน ติดตั้งทั่วประเทศไทย รับประกัน 1 ปี":
+    "Quote for curtains, blinds and motorized blinds from Chang Tee. A specialist measures on site, we make them in our factory, install across Thailand, with a 1-year warranty.",
   "“ช่างตี๋ ผ้าม่าน” ตัวตนของเรา คือ ช่าง + งานฝีมือ + ประสบการณ์ — นำประสบการณ์ของช่างสู่มาตรฐานของงานออกแบบ ยกระดับจากร้านผ้าม่านไปเป็น Premium Window Covering Brand":
     "“Chang Tee Curtains” — our identity is craftsman + craftsmanship + experience — bringing installers' experience to design standards, elevating a curtain shop into a Premium Window Covering Brand",
   "เร็วทันใจ":
@@ -726,10 +726,10 @@ export const THAI_TEXT_EN: Record<string, string> = {
     "GLP labour standard certified",
   "ช่างตี๋ ได้มาตรฐาน GLP (Good Labour Practices) จากสำนักพัฒนามาตรฐานแรงงาน ทุกชิ้นงานผลิตโดยทีมที่ทำงานภายใต้การดูแลที่เป็นธรรมและปลอดภัย":
     "Chang Tee meets the GLP (Good Labour Practices) standard from the Bureau of Labour Standards Development. Every piece is made by a team working under fair and safe conditions.",
-  "วัดหน้างานฟรี · ออกแบบ · ผลิตที่โรงงานเรา · ติดตั้งโดยช่างมืออาชีพ · รับประกันงานติดตั้ง 1 ปีเต็ม":
-    "Free on-site measuring · Design · Made in our factory · Installed by professional installers · Full 1-year installation warranty",
-  "· วัดหน้างานฟรี ทั้งบ้านและโปรเจกต์องค์กร":
-    "· Free on-site measuring for homes and corporate projects",
+  "วัดหน้างานโดยช่างมืออาชีพ · ออกแบบ · ผลิตที่โรงงานเรา · ติดตั้งโดยช่างมืออาชีพ · รับประกันงานติดตั้ง 1 ปีเต็ม":
+    "Measured on site by a specialist · Design · Made in our factory · Installed by professional installers · Full 1-year installation warranty",
+  "· วัดหน้างานโดยช่างมืออาชีพ ทั้งบ้านและโปรเจกต์องค์กร":
+    "· On-site measuring by a specialist for homes and corporate projects",
   "· มีโรงงานผลิตเอง ส่งงานไว คุมคุณภาพได้":
     "· Our own factory for fast delivery and controlled quality",
   "· รับประกันงานติดตั้ง 1 ปีเต็ม":
@@ -826,8 +826,8 @@ export const THAI_TEXT_EN: Record<string, string> = {
     "Chang Tee Curtains showroom map",
   "บอกโปรเจกต์ จำนวนสาขา ช่วงเวลาที่ต้องการติดต่อกลับ ฯลฯ":
     "Tell us about the project, number of branches, preferred callback time, etc.",
-  "Crafted by Experience. Designed for Life. — ช่าง + งานฝีมือ + ประสบการณ์ Premium Window Covering Brand ออกแบบ ผลิต ติดตั้งครบวงจร มีโรงงานเอง วัดหน้างานฟรี รับประกัน 1 ปี":
-    "Crafted by Experience. Designed for Life. — craftsman + craftsmanship + experience. A Premium Window Covering Brand with end-to-end design, production and installation, our own factory, free on-site measuring and a 1-year warranty",
+  "Crafted by Experience. Designed for Life. — ช่าง + งานฝีมือ + ประสบการณ์ Premium Window Covering Brand ออกแบบ ผลิต ติดตั้งครบวงจร มีโรงงานเอง วัดหน้างานโดยช่างมืออาชีพ รับประกัน 1 ปี":
+    "Crafted by Experience. Designed for Life. — craftsman + craftsmanship + experience. A Premium Window Covering Brand with end-to-end design, production and installation, our own factory, on-site measuring by a specialist and a 1-year warranty",
   "นัดเยี่ยมชมโรงงานเรา":
     "Visit our factory",
   "ดูขั้นตอนการผลิตผ้าม่านจริง เลือกตัวอย่างเนื้อผ้า และพูดคุยกับทีมงานที่โรงงาน — เลือกรอบเช้าหรือรอบเย็นที่สะดวก":
@@ -1258,8 +1258,8 @@ export const THAI_TEXT_EN: Record<string, string> = {
     "Wave, pinch-pleat, Roman and eyelet curtains, plus full custom work",
   "10 รายการในหมวดนี้":
     "10 items in this category",
-  "วัดหน้างานฟรีในพื้นที่บริการ":
-    "Free on-site measuring within our service area",
+  "วัดหน้างานโดยช่างมืออาชีพในพื้นที่บริการ":
+    "Measured on site by a specialist within our service area",
   "ผลิตและติดตั้งครบวงจร":
     "End-to-end production and installation",
   "เลือกรุ่น / ประเภท":
@@ -2096,8 +2096,8 @@ export const THAI_TEXT_EN: Record<string, string> = {
     "We call or message on LINE within 24 hours during business hours",
   "นัดวัดหน้างาน":
     "On-site measuring",
-  "นัดหมายวัดและประเมินใบเสนอราคาฟรี":
-    "Book a free measuring and quote assessment",
+  "นัดหมายวัดหน้างานกับช่างมืออาชีพ":
+    "Book a measuring visit and quote assessment with a specialist",
   "กลับหน้าแรก":
     "Back to home",
   "ส่งผิดหรืออยากแก้ข้อมูล?":
@@ -2134,8 +2134,8 @@ export const THAI_TEXT_EN: Record<string, string> = {
     "Thank you for contacting us",
   "ออกแบบ-ติดตั้ง ผ้าม่าน ครบวงจร":
     "Curtain design & installation, end to end",
-  "Premium Window Covering Brand — ผู้เชี่ยวชาญด้านผ้าม่านและม่านปรับแสงแบบครบวงจร ออกแบบ ผลิตเองที่โรงงาน ติดตั้งโดยช่างมืออาชีพ วัดหน้างานฟรี ทั่วประเทศไทย":
-    "Chang Tee curtain and blind specialists: designed and made in our own factory, installed by our technicians, with free measuring across Thailand.",
+  "Premium Window Covering Brand — ผู้เชี่ยวชาญด้านผ้าม่านและม่านปรับแสงแบบครบวงจร ออกแบบ ผลิตเองที่โรงงาน ติดตั้งโดยช่างมืออาชีพ วัดหน้างานโดยช่างมืออาชีพ ทั่วประเทศไทย":
+    "Chang Tee curtain and blind specialists: designed and made in our own factory, installed by our technicians, measured on site across Thailand.",
   "กำลังโหลดผลงาน…":
     "Loading projects…",
   "กำลังโหลดบทความ…":
@@ -2146,4 +2146,76 @@ export const THAI_TEXT_EN: Record<string, string> = {
     "Loading",
   "ดูบน YouTube →":
     "Watch on YouTube →",
+  "ติดตั้งและสั่งตัด ม่านตาไก่ ม่านลอน ม่านจีบ ม่านพับ":
+    "Made-to-measure eyelet, wave, pinch-pleat and Roman curtains",
+  "กรองแสง ม่านสกรีน เมจิกสกรีน และม่านม้วนไฟฟ้า":
+    "Light-filtering, sunscreen, Magic Screen and motorized roller blinds",
+  "มู่ลี่ไม้สั่งทำตามหน้าต่าง อลูมิเนียม และไม้ไผ่":
+    "Made-to-measure wooden, aluminium and bamboo venetian blinds",
+  "ม่านสกรีน ผ้ากรองแสงและผ้าทึบ":
+    "Sunscreen and blackout roller fabric",
+  "ม่านม้วนอัตโนมัติ รีโมทและสมาร์ทโฮม":
+    "Automatic roller blind with remote and smart home",
+  "เมจิกสกรีน แถบโปร่งสลับทึบ":
+    "Magic Screen with alternating sheer and opaque bands",
+  "สั่งทำตามขนาดหน้าต่าง":
+    "Made to the window size",
+  "ทนชื้น เหมาะห้องที่ไม่ใช้พลาสติก":
+    "Moisture-resistant, for rooms that should not use plastic blinds",
+  "ติดตั้งผ้าม่าน และสั่งตัด":
+    "Curtain installation, made to measure",
+  "ม่านตาไก่และม่านลอน":
+    "Eyelet and wave curtains",
+  "วัดหน้างานโดยช่างมืออาชีพ กรุงเทพและปริมณฑล":
+    "Measured on site by a specialist in Bangkok and nearby provinces",
+  "รับติดตั้งทั่วไทย":
+    "Installation across Thailand",
+  "ม่านม้วนกรองแสง":
+    "Light-filtering roller blinds",
+  "ม่านสกรีนและผ้าทึบ":
+    "Sunscreen and blackout fabric",
+  "เมจิกสกรีนแยกจากม่านสกรีน":
+    "Magic Screen is a different product from flat sunscreen rollers",
+  "วัดหน้างานและติดตั้ง":
+    "Measure and install",
+  "มู่ลี่ไม้สั่งทำตามหน้าต่าง":
+    "Wooden blinds made to the window",
+  "มู่ลี่อลูมิเนียม ทนชื้น":
+    "Moisture-resistant aluminium blinds",
+  "วัดหน้างานโดยช่างมืออาชีพในกรุงเทพและปริมณฑล รับติดตั้งทั่วไทย":
+    "Measured on site by a specialist in Bangkok and nearby provinces, with installation across Thailand",
+  "บอกขนาดบานคร่าว ๆ ได้ ราคาขึ้นกับความกว้างและชนิดผ้า กรองแสงหรือทึบ":
+    "Share a rough window size. Price depends on width and fabric: sunscreen or blackout",
+  "สั่งทำตามขนาดหน้าต่าง วัดหน้างานก่อนผลิต":
+    "Made to the window size, measured before production",
+  "ม่านตาไก่ สั่งตัดตามขนาด ลอนธรรมชาติ งบคุมได้":
+    "Eyelet curtains, made to measure, with a natural wave and a controllable budget",
+  "สั่งตัดตามขนาด งบคุมได้":
+    "Made to measure, budget-friendly",
+  "ม่านม้วนกรองแสงและม่านสกรีน เลือกผ้าทึบได้ ประหยัดพื้นที่":
+    "Light-filtering and sunscreen rollers, with blackout fabric available, and they save space",
+  "ม่านม้วนรุ่นนี้ใช้ผ้ากรองแสงที่เรียกว่าม่านสกรีน หรือผ้าทึบเมื่อต้องการห้องมืดกว่า เหมาะบานกระจกใหญ่และห้องที่อยากได้เส้นสายสะอาดตา":
+    "This roller uses light-filtering fabric, also called sunscreen, or blackout fabric when the room needs to be darker. It suits large glass and rooms that want clean lines.",
+  "ม่านสกรีน (ผ้ากรองแสง) และผ้าทึบ":
+    "Sunscreen (light-filtering) and blackout fabric",
+  "ม่านม้วนไฟฟ้า อัตโนมัติ ควบคุมด้วยรีโมทหรือแอป":
+    "Automatic motorized roller blinds, controlled by remote or app",
+  "ม่านม้วนอัตโนมัติ ขึ้น-ลงเอง":
+    "Automatic roller blind that raises and lowers itself",
+  "เลือกผ้ากรองแสงหรือทึบได้":
+    "Sunscreen or blackout fabric",
+  "มู่ลี่ไม้สั่งทำตามขนาดหน้าต่าง ปรับองศาแสงได้":
+    "Wooden blinds made to the window, with adjustable slat angle",
+  "มู่ลี่อลูมิเนียม ทนชื้น ใช้ในห้องที่ไม่อยากได้พลาสติก":
+    "Moisture-resistant aluminium blinds for rooms that should not use plastic",
+  "มู่ลี่อลูมิเนียมทนชื้นและเช็ดง่าย เหมาะออฟฟิศ ห้องครัว และห้องที่ไม่อยากใช้มู่ลี่พลาสติก ปรับองศาใบลดแสงจ้าได้ดี":
+    "Aluminium blinds resist moisture and wipe clean. They suit offices, kitchens and rooms that should not use plastic blinds, and the slats cut glare.",
+  "ทนชื้น ใช้แทนมู่ลี่พลาสติก":
+    "Moisture-resistant, instead of plastic blinds",
+  "อ่านก่อนตัดสินใจ": "Read before you decide",
+  "บทความจากหน้างานจริง ใช้อ่านคู่กับสินค้านี้ก่อนนัดวัด":
+    "Field notes to read with this product before a measuring visit",
+  "ลิงก์ทางการสำหรับอ้างอิง": "Official links to cite",
+  "ถ้าจะพูดถึงช่างตี๋หรือใส่ลิงก์กลับมาที่เว็บ ใช้ที่อยู่ชุดนี้ ชื่อ ที่อยู่ และเบอร์จะตรงกันทุกช่องทาง":
+    "When you mention Chang Tee or link back to the site, use this set. The name, address and phone match on every channel.",
 };

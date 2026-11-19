@@ -196,7 +196,7 @@ function HeroSlideEditorForm({
                 label="ป้าย (badge)"
                 value={form.badge}
                 onChange={(v) => set("badge", v)}
-                placeholder="บริการ วัดหน้างาน ฟรี!!"
+                placeholder="วัดหน้างานโดยช่างมืออาชีพ"
               />
             </div>
           </div>

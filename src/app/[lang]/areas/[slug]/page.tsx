@@ -35,7 +35,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     .slice(0, 2)
     .map((item) => item.title)
     .join(", ");
-  const description = `ติดตั้งผ้าม่านใน${area.name} โดยช่างตี๋ ${area.items.length} งาน เช่น ${examples} วัดหน้างานฟรี`;
+  const description = `ติดตั้งผ้าม่านใน${area.name} โดยช่างตี๋ ${area.items.length} งาน เช่น ${examples} วัดหน้างานโดยช่างมืออาชีพ`;
   return pageMetadata({
     title: `ติดตั้งผ้าม่าน ${area.name}`,
     description: description.length <= 160 ? description : `${description.slice(0, 157).trimEnd()}…`,
@@ -98,7 +98,7 @@ export default async function AreaPage({ params }: Props) {
         </h1>
         <p className="mt-4 text-base leading-7 text-ink/80">
           ช่างตี๋มีผลงานติดตั้งที่เผยแพร่ใน{area.name} {area.items.length} งาน
-          วัดหน้างานฟรี ผลิตที่โรงงานของเรา แล้วติดตั้งโดยทีมช่างของเราเอง
+          วัดหน้างานโดยช่างมืออาชีพ ผลิตที่โรงงานของเรา แล้วติดตั้งโดยทีมช่างของเราเอง
         </p>
         <ul className="mt-8 space-y-4">
           {area.items.map((item) => (

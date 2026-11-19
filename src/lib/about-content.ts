@@ -70,7 +70,7 @@ export const aboutSmartMotor = {
 export const aboutOneStop = {
   title: "ONE STOP SERVICE",
   subtitle: "CURTAIN & BLINDS",
-  body: "วัดหน้างานฟรี · ออกแบบ · ผลิตที่โรงงานเรา · ติดตั้งโดยช่างมืออาชีพ · รับประกันงานติดตั้ง 1 ปีเต็ม",
+  body: "วัดหน้างานโดยช่างมืออาชีพ · ออกแบบ · ผลิตที่โรงงานเรา · ติดตั้งโดยช่างมืออาชีพ · รับประกันงานติดตั้ง 1 ปีเต็ม",
   image: "/images/about/installing.webp",
 };
 

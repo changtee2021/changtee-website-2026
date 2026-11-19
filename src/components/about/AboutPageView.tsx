@@ -27,6 +27,7 @@ import {
   aboutSegments,
   aboutValues,
 } from "@/lib/about-content";
+import { PRODUCTION_SITE_HOST } from "@/lib/admin-host";
 import { siteConfig } from "@/lib/site-config";
 
 const valueIcons = [Zap, ShieldCheck, Gauge] as const;
@@ -110,7 +111,7 @@ export function AboutPageView() {
       <HomePanel>
         <AboutOneStopCms>
           <ul className="mt-6 space-y-2 text-sm text-ink/90">
-            <li>· วัดหน้างานฟรี ทั้งบ้านและโปรเจกต์องค์กร</li>
+            <li>· วัดหน้างานโดยช่างมืออาชีพ ทั้งบ้านและโปรเจกต์องค์กร</li>
             <li>· มีโรงงานผลิตเอง ส่งงานไว คุมคุณภาพได้</li>
             <li>· รับประกันงานติดตั้ง 1 ปีเต็ม</li>
           </ul>
@@ -189,6 +190,54 @@ export function AboutPageView() {
           <ClientsLogos />
         </div>
       </section>
+
+      <HomePanel className="mt-4 sm:mt-6">
+        <div className="p-7 sm:p-9 md:p-12">
+          <PanelHeading title="ลิงก์ทางการสำหรับอ้างอิง" />
+          <p className="mt-3 max-w-2xl text-sm leading-relaxed text-muted">
+            ถ้าจะพูดถึงช่างตี๋หรือใส่ลิงก์กลับมาที่เว็บ ใช้ที่อยู่ชุดนี้
+            ชื่อ ที่อยู่ และเบอร์จะตรงกันทุกช่องทาง
+          </p>
+          <ul className="mt-6 grid gap-3 sm:grid-cols-2">
+            {[
+              { href: "/", label: "หน้าแรก" },
+              { href: "/products/curtain", label: "ผ้าม่าน" },
+              { href: "/products/roller-blinds", label: "ม่านม้วน" },
+              { href: "/products/venetian-blinds", label: "มู่ลี่" },
+            ].map((item) => (
+              <li key={item.href}>
+                <Link
+                  href={item.href}
+                  className="flex min-h-11 flex-col justify-center rounded-xl border border-line bg-white px-4 py-3 transition hover:border-navy/30"
+                >
+                  <span className="text-sm font-semibold text-navy">{item.label}</span>
+                  <span className="text-xs text-muted">
+                    {`https://${PRODUCTION_SITE_HOST}${item.href === "/" ? "" : item.href}`}
+                  </span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+          <p className="mt-4 text-sm text-navy">
+            {siteConfig.address.line1} {siteConfig.address.line2}{" "}
+            {siteConfig.address.city} · {siteConfig.phoneDisplay}
+          </p>
+          <ul className="mt-3 flex flex-wrap gap-x-4 gap-y-2">
+            {siteConfig.social.map((item) => (
+              <li key={item.label}>
+                <a
+                  href={item.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex min-h-11 items-center text-sm font-medium text-navy underline-offset-2 hover:underline"
+                >
+                  {item.label}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </HomePanel>
 
       <HomePanel className="mt-4 sm:mt-6">
         <div className="p-7 sm:p-9 md:p-12">

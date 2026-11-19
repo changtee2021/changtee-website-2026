@@ -66,6 +66,21 @@ export function getCategoryJsonLd(
         url: categoryUrl,
         inLanguage: LOCALE_META[locale].hreflang,
         isPartOf: { "@id": `${base}/#website` },
+        mainEntity: {
+          "@type": "ItemList",
+          numberOfItems: category.children.length,
+          itemListElement: category.children.map((child, index) => ({
+            "@type": "ListItem",
+            position: index + 1,
+            name: child.name,
+            description: child.summary,
+            url: pageUrl(
+              base,
+              locale,
+              `/products/${category.slug}/${child.slug}`,
+            ),
+          })),
+        },
       },
       {
         "@type": "BreadcrumbList",

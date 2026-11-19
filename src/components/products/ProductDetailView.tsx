@@ -6,6 +6,7 @@ import Image from "next/image";
 import { LocaleLink as Link } from "@/components/i18n/LocaleLink";
 import { CatalogCard } from "@/components/catalog/CatalogCard";
 import { ProductCtaCard } from "@/components/products/ProductCtaCard";
+import { ReadingLinks } from "@/components/seo/ReadingLinks";
 import {
   ProductCompareSection,
   ProductInstallVideosSection,
@@ -124,14 +125,14 @@ export function ProductDetailView({
         src,
         alt:
           i === 0
-            ? `${product.name} ${category.name} — ภาพสินค้าหลัก`
+            ? `${product.name === category.name ? product.name : `${product.name} ${category.name}`} — ภาพสินค้าหลัก`
             : `${product.name} ${category.name} — ภาพติดตั้ง ${i + 1}`,
       }));
     }
     const list: GalleryImage[] = [
       {
         src: assets.hero,
-        alt: `${product.name} ${category.name} — ภาพสินค้าหลัก`,
+        alt: `${product.name === category.name ? product.name : `${product.name} ${category.name}`} — ภาพสินค้าหลัก`,
       },
       {
         src: assets.texture,
@@ -250,7 +251,7 @@ export function ProductDetailView({
             <Reveal className="space-y-3">
               <ZoomImage
                 src={assets.hero}
-                alt={`${product.name} ${category.name} — ภาพสินค้าหลัก`}
+                alt={`${product.name === category.name ? product.name : `${product.name} ${category.name}`} — ภาพสินค้าหลัก`}
                 className="aspect-[4/3]"
                 sizes="(max-width: 1024px) 100vw, 640px"
                 priority
@@ -344,7 +345,7 @@ export function ProductDetailView({
                 </a>
               </div>
               <p className="mt-3 text-xs text-muted">
-                วัดหน้างานฟรี · โทร{" "}
+                วัดหน้างานโดยช่างมืออาชีพ · โทร{" "}
                 <a
                   href={`tel:${siteConfig.phoneTel}`}
                   className="font-medium text-navy"
@@ -814,6 +815,11 @@ export function ProductDetailView({
               table={compareTable}
             />
           ) : null}
+
+          <ReadingLinks
+            categorySlug={category.slug}
+            productSlug={product.slug}
+          />
 
           <Reveal className="mt-16 sm:mt-20" as="div">
             <section id="faq">

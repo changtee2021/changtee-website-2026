@@ -5,6 +5,7 @@ import type { Metadata } from "next";
 import { CatalogCard } from "@/components/catalog/CatalogCard";
 import { ProductCtaCard } from "@/components/products/ProductCtaCard";
 import { JsonLd } from "@/components/seo/JsonLd";
+import { ReadingLinks } from "@/components/seo/ReadingLinks";
 import { loadCatalogsForCategory } from "@/lib/catalogs-server";
 import { getCategoryJsonLd } from "@/lib/category-jsonld";
 import {
@@ -57,6 +58,14 @@ export default async function CategoryPage({ params }: Props) {
   const catalogs = await loadCatalogsForCategory(cat.slug);
   const pillar = getPillar(cat.pillar);
   const highlights = getCategoryHighlights(cat);
+  const focusSubtitle =
+    cat.slug === "curtain"
+      ? "วัดหน้างานโดยช่างมืออาชีพในกรุงเทพและปริมณฑล รับติดตั้งทั่วไทย"
+      : cat.slug === "roller-blinds"
+        ? "บอกขนาดบานคร่าว ๆ ได้ ราคาขึ้นกับความกว้างและชนิดผ้า กรองแสงหรือทึบ"
+        : cat.slug === "venetian-blinds"
+          ? "สั่งทำตามขนาดหน้าต่าง วัดหน้างานก่อนผลิต"
+          : undefined;
 
   return (
     <div className="mx-auto max-w-site px-6 sm:px-10 lg:px-16 py-10 sm:py-12">
@@ -110,6 +119,16 @@ export default async function CategoryPage({ params }: Props) {
           ))}
         </ul>
 
+        {focusSubtitle ? (
+          <ProductCtaCard
+            density="tight"
+            productLabel={quoteProductType(cat)}
+            productItem={cat.name}
+            portfolioHref={`/portfolio?product=${encodeURIComponent(cat.slug)}`}
+            subtitle={focusSubtitle}
+          />
+        ) : null}
+
         <h2 className="mt-10 font-display text-xl font-semibold text-navy">
           เลือกรุ่น / ประเภท
         </h2>
@@ -143,6 +162,8 @@ export default async function CategoryPage({ params }: Props) {
           ))}
         </div>
 
+        <ReadingLinks categorySlug={cat.slug} />
+
         {catalogs.length > 0 ? (
           <section className="mt-12">
             <h2 className="font-display text-2xl font-semibold text-navy">
@@ -164,6 +185,7 @@ export default async function CategoryPage({ params }: Props) {
           productLabel={quoteProductType(cat)}
           productItem={cat.name}
           portfolioHref={`/portfolio?product=${encodeURIComponent(cat.slug)}`}
+          subtitle={focusSubtitle}
         />
       </div>
     </div>

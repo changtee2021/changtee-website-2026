@@ -62,7 +62,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const title =
     locale === "th"
       ? (presentation?.seoTitle ??
-        `${found.product.name} | ${found.category.name}`)
+        (found.product.name === found.category.name
+          ? `${found.product.name} ${found.product.nameEn ?? ""}`.trim()
+          : `${found.product.name} | ${found.category.name}`))
       : localized.name;
   const thaiDescription =
     locale === "th"

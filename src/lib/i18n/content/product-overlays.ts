@@ -96,7 +96,7 @@ const en: OverlayPack = {
       "Cut glare, keep daylight",
       "Many openness levels",
       "Clean cassette look",
-      "Free on-site measuring",
+      "Measured on site by a specialist",
     ],
     suitableFor: [
       "Home",
